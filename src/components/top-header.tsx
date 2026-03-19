@@ -1,8 +1,17 @@
+"use client"
+
 import { Icon } from "@/components/icon"
+import { useSidebar } from "@/components/sidebar-provider"
 
 export function TopHeader() {
+  const { collapsed } = useSidebar()
+
   return (
-    <header className="fixed top-0 right-0 left-0 md:left-64 z-40 bg-white/80 backdrop-blur-xl shadow-[0_12px_32px_-4px_rgba(24,28,31,0.06)] h-16 flex justify-between items-center px-6">
+    <header
+      className={`fixed top-0 right-0 left-0 z-40 bg-white/80 backdrop-blur-xl shadow-[0_12px_32px_-4px_rgba(24,28,31,0.06)] h-16 flex justify-between items-center px-6 transition-all duration-300 ${
+        collapsed ? "md:left-16" : "md:left-64"
+      }`}
+    >
       <div className="flex items-center gap-4 flex-1">
         <div className="relative w-full max-w-md">
           <Icon

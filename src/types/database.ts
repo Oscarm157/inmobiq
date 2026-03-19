@@ -52,6 +52,60 @@ export interface CityMetrics {
   hottest_zones: ZoneMetrics[]; // highest activity
 }
 
+// Risk analysis per zone
+export interface ZoneRiskMetrics {
+  zone_slug: string;
+  zone_name: string;
+  risk_score: number; // 1-100, higher = riskier
+  volatility: number; // price volatility %
+  cap_rate: number; // capitalization rate %
+  vacancy_rate: number; // vacancy %
+  liquidity_score: number; // 1-100, higher = more liquid
+  market_maturity: "emergente" | "en_desarrollo" | "consolidado" | "maduro";
+  avg_rent_per_m2: number;
+  risk_label: "Bajo" | "Medio" | "Alto";
+}
+
+// Portfolio presets
+export type RiskLevel = "conservador" | "balanceado" | "agresivo";
+
+export interface PortfolioAllocation {
+  zone_slug: string;
+  zone_name: string;
+  allocation_pct: number;
+}
+
+export interface PortfolioPreset {
+  id: string;
+  name: string;
+  description: string;
+  risk_level: RiskLevel;
+  expected_return_pct: number;
+  risk_score: number;
+  allocations: PortfolioAllocation[];
+}
+
+// Pipeline projects
+export type ProjectStatus = "planificacion" | "preventa" | "construccion" | "entregado";
+
+export interface PipelineProject {
+  id: string;
+  zone_slug: string;
+  zone_name: string;
+  name: string;
+  status: ProjectStatus;
+  status_label: string;
+  badge_color: string;
+  description: string;
+  units_total: number;
+  units_sold: number;
+  price_range: string;
+  delivery_date: string;
+  img: string;
+  investors: number;
+  investor_label: string;
+}
+
 // Supabase Database type (will be auto-generated later, placeholder for now)
 export interface Database {
   public: {

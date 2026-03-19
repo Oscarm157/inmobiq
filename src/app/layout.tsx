@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
-import { Sidebar } from "@/components/sidebar"
-import { TopHeader } from "@/components/top-header"
-import { BottomNav } from "@/components/bottom-nav"
+import { SidebarProvider } from "@/components/sidebar-provider"
+import { SidebarShell } from "@/components/sidebar-shell"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -39,14 +38,9 @@ export default function RootLayout({
         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
         className="bg-slate-50 text-slate-900 min-h-screen antialiased"
       >
-        <Sidebar />
-        <TopHeader />
-        <main className="md:ml-64 min-h-screen pb-20">
-          <div className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-        <BottomNav />
+        <SidebarProvider>
+          <SidebarShell>{children}</SidebarShell>
+        </SidebarProvider>
       </body>
     </html>
   )

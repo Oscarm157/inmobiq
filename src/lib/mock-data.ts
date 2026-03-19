@@ -1,4 +1,4 @@
-import type { ZoneMetrics, CityMetrics } from "@/types/database";
+import type { ZoneMetrics, CityMetrics, ZoneRiskMetrics, PortfolioPreset, PipelineProject } from "@/types/database";
 
 // Mock data representing real Tijuana zones
 export const TIJUANA_ZONES: ZoneMetrics[] = [
@@ -116,4 +116,183 @@ export const PRICE_TREND_DATA = [
   { month: "Jul 25", avg_price_m2: 24600, listings: 1580 },
   { month: "Ago 25", avg_price_m2: 24700, listings: 1590 },
   { month: "Sep 25", avg_price_m2: 24875, listings: 1603 },
+];
+
+// ─── Risk Data ────────────────────────────────────────────────────────────────
+export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
+  {
+    zone_slug: "zona-rio", zone_name: "Zona Río",
+    risk_score: 35, volatility: 8.4, cap_rate: 7.2, vacancy_rate: 6.1,
+    liquidity_score: 88, market_maturity: "consolidado", avg_rent_per_m2: 245, risk_label: "Bajo",
+  },
+  {
+    zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana",
+    risk_score: 52, volatility: 12.1, cap_rate: 5.8, vacancy_rate: 8.4,
+    liquidity_score: 75, market_maturity: "en_desarrollo", avg_rent_per_m2: 310, risk_label: "Medio",
+  },
+  {
+    zone_slug: "otay", zone_name: "Otay",
+    risk_score: 28, volatility: 5.2, cap_rate: 8.5, vacancy_rate: 4.8,
+    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
+  },
+  {
+    zone_slug: "chapultepec", zone_name: "Chapultepec",
+    risk_score: 38, volatility: 7.8, cap_rate: 6.9, vacancy_rate: 7.2,
+    liquidity_score: 68, market_maturity: "maduro", avg_rent_per_m2: 220, risk_label: "Bajo",
+  },
+  {
+    zone_slug: "hipodromo", zone_name: "Hipódromo",
+    risk_score: 58, volatility: 10.5, cap_rate: 6.2, vacancy_rate: 11.3,
+    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 195, risk_label: "Medio",
+  },
+  {
+    zone_slug: "centro", zone_name: "Centro",
+    risk_score: 65, volatility: 9.8, cap_rate: 9.1, vacancy_rate: 14.6,
+    liquidity_score: 82, market_maturity: "maduro", avg_rent_per_m2: 120, risk_label: "Alto",
+  },
+  {
+    zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
+    risk_score: 45, volatility: 11.2, cap_rate: 7.8, vacancy_rate: 5.5,
+    liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 175, risk_label: "Medio",
+  },
+  {
+    zone_slug: "la-mesa", zone_name: "La Mesa",
+    risk_score: 32, volatility: 4.8, cap_rate: 8.2, vacancy_rate: 6.8,
+    liquidity_score: 65, market_maturity: "consolidado", avg_rent_per_m2: 130, risk_label: "Bajo",
+  },
+];
+
+// ─── Portfolio Presets ────────────────────────────────────────────────────────
+export const PORTFOLIO_PRESETS: PortfolioPreset[] = [
+  {
+    id: "conservador",
+    name: "Conservador",
+    description: "Enfoque en zonas consolidadas con alta liquidez y bajo riesgo. Ideal para preservación de capital.",
+    risk_level: "conservador",
+    expected_return_pct: 5.8,
+    risk_score: 30,
+    allocations: [
+      { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 35 },
+      { zone_slug: "otay", zone_name: "Otay", allocation_pct: 25 },
+      { zone_slug: "la-mesa", zone_name: "La Mesa", allocation_pct: 20 },
+      { zone_slug: "chapultepec", zone_name: "Chapultepec", allocation_pct: 20 },
+    ],
+  },
+  {
+    id: "balanceado",
+    name: "Balanceado",
+    description: "Mezcla de zonas consolidadas y emergentes. Balance entre retorno y estabilidad.",
+    risk_level: "balanceado",
+    expected_return_pct: 8.2,
+    risk_score: 45,
+    allocations: [
+      { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 25 },
+      { zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana", allocation_pct: 20 },
+      { zone_slug: "chapultepec", zone_name: "Chapultepec", allocation_pct: 20 },
+      { zone_slug: "residencial-del-bosque", zone_name: "Res. del Bosque", allocation_pct: 15 },
+      { zone_slug: "otay", zone_name: "Otay", allocation_pct: 10 },
+      { zone_slug: "la-mesa", zone_name: "La Mesa", allocation_pct: 10 },
+    ],
+  },
+  {
+    id: "agresivo",
+    name: "Agresivo",
+    description: "Concentración en zonas de alto crecimiento. Máximo retorno potencial con mayor volatilidad.",
+    risk_level: "agresivo",
+    expected_return_pct: 12.5,
+    risk_score: 62,
+    allocations: [
+      { zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana", allocation_pct: 30 },
+      { zone_slug: "residencial-del-bosque", zone_name: "Res. del Bosque", allocation_pct: 25 },
+      { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 20 },
+      { zone_slug: "centro", zone_name: "Centro", allocation_pct: 15 },
+      { zone_slug: "hipodromo", zone_name: "Hipódromo", allocation_pct: 10 },
+    ],
+  },
+];
+
+// ─── Pipeline Projects (Extended) ─────────────────────────────────────────────
+const IMG_BASE = "https://lh3.googleusercontent.com/aida-public";
+
+export const PIPELINE_PROJECTS_EXTENDED: PipelineProject[] = [
+  {
+    id: "p1", zone_slug: "zona-rio", zone_name: "Zona Río",
+    name: "Torre Sayan Rio", status: "construccion", status_label: "85% Vendido",
+    badge_color: "bg-green-100 text-green-700",
+    description: "Residencial de lujo · 24 pisos · Entrega Q3 2025",
+    units_total: 120, units_sold: 102, price_range: "$3.2M - $8.5M MXN",
+    delivery_date: "Sep 2025",
+    img: `${IMG_BASE}/AB6AXuDcMvkGK2-c11oeRRT27nAuPCjwm12rEej1HNK4UFnpRUTWmJrA6DIIowr_mlFnzxYynfC0CQPtOJSSAYLjf-7NLbxQGd74blgo-94zbKEiQehwynoP_CyxSmdcmBVfHUpdcpswRbvNOW4jNSg8ZaVWbBGUv6euGbVwOXb7kgWWSqydwdmWgnBzBGupKS29TKrbLOIE4Uv0K5Ov6gqzPh5q6WqLxaz5a2RACwGMfHmo3SO2PAjPWx2AHx2MluOJgJDQlisGZwjF2INP`,
+    investors: 12, investor_label: "12 Inversores activos",
+  },
+  {
+    id: "p2", zone_slug: "zona-rio", zone_name: "Zona Río",
+    name: "Paseo Global II", status: "preventa", status_label: "Pre-Venta",
+    badge_color: "bg-blue-100 text-blue-700",
+    description: "Corporativo Clase A · 12,000 m² GLA",
+    units_total: 85, units_sold: 28, price_range: "$2.8M - $6.2M MXN",
+    delivery_date: "Mar 2026",
+    img: `${IMG_BASE}/AB6AXuDVY0onfjFdi7i2rOIIq99lJStUlitHgNl5nnTcte3my2Kxh3PweiUrfuDuS9XMHab8SIAUYfchcw5yyRd74cKU4Km2ox9bIKrtPiWh_GbivLDOPk0LB81dG_c9VYpKSqDJ-IZV2XjfDy2e6wRFxZV2-bfFgj0mIuzU-gIVIwPEhw2qbwAPnmu4ZnyZYOenj8OqVSdHdC0BoKrauiUAuPRnoN8wMRfEDDPvZiTx295lOBfShy4cqsUtc0NJHJfcoq_uVO6uyJ8d4CD7`,
+    investors: 8, investor_label: "8 Inversores activos",
+  },
+  {
+    id: "p3", zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana",
+    name: "The Icon District", status: "planificacion", status_label: "Planificación",
+    badge_color: "bg-orange-100 text-orange-700",
+    description: "Uso Mixto · Regeneración Urbana · 45,000 m²",
+    units_total: 200, units_sold: 0, price_range: "$4.5M - $12M MXN",
+    delivery_date: "Dic 2027",
+    img: `${IMG_BASE}/AB6AXuAGavQbkoMgc-ZKnHyiazUbTRDiZh7xHoxjZpKstSdZylYchL1S6rkiJvByLlFuX-Ty_Kx-Z2ivNmF0XWms8FS3z6FSlQv335Ps2FhDyuZV2yijSjqpya5NaaqWrL5MCMhPBVnET19Ma1C0Y9livnsv4fuSHx4CWOGaH_O40MHZ1jiCqr0FFRti7qEcXANDArATvfmW1zYvPlHCI2W7ODoJ-GOOqKttwF4B7teWlPaLH9UN8OTn2yQgSCgk8j24ooKiKPQq8NR8Mmpq`,
+    investors: 3, investor_label: "Iniciativa Privada",
+  },
+  {
+    id: "p4", zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana",
+    name: "Oceana Residences", status: "construccion", status_label: "En Construcción",
+    badge_color: "bg-green-100 text-green-700",
+    description: "Residencial frente al mar · 18 pisos",
+    units_total: 96, units_sold: 71, price_range: "$5.8M - $15M MXN",
+    delivery_date: "Jun 2025",
+    img: `${IMG_BASE}/AB6AXuDcMvkGK2-c11oeRRT27nAuPCjwm12rEej1HNK4UFnpRUTWmJrA6DIIowr_mlFnzxYynfC0CQPtOJSSAYLjf-7NLbxQGd74blgo-94zbKEiQehwynoP_CyxSmdcmBVfHUpdcpswRbvNOW4jNSg8ZaVWbBGUv6euGbVwOXb7kgWWSqydwdmWgnBzBGupKS29TKrbLOIE4Uv0K5Ov6gqzPh5q6WqLxaz5a2RACwGMfHmo3SO2PAjPWx2AHx2MluOJgJDQlisGZwjF2INP`,
+    investors: 15, investor_label: "15 Inversores activos",
+  },
+  {
+    id: "p5", zone_slug: "chapultepec", zone_name: "Chapultepec",
+    name: "Parque Chapultepec Living", status: "preventa", status_label: "Pre-Venta Fase 2",
+    badge_color: "bg-blue-100 text-blue-700",
+    description: "Departamentos con amenidades premium · 8 pisos",
+    units_total: 64, units_sold: 18, price_range: "$2.5M - $5.1M MXN",
+    delivery_date: "Ago 2026",
+    img: `${IMG_BASE}/AB6AXuDVY0onfjFdi7i2rOIIq99lJStUlitHgNl5nnTcte3my2Kxh3PweiUrfuDuS9XMHab8SIAUYfchcw5yyRd74cKU4Km2ox9bIKrtPiWh_GbivLDOPk0LB81dG_c9VYpKSqDJ-IZV2XjfDy2e6wRFxZV2-bfFgj0mIuzU-gIVIwPEhw2qbwAPnmu4ZnyZYOenj8OqVSdHdC0BoKrauiUAuPRnoN8wMRfEDDPvZiTx295lOBfShy4cqsUtc0NJHJfcoq_uVO6uyJ8d4CD7`,
+    investors: 5, investor_label: "5 Inversores activos",
+  },
+  {
+    id: "p6", zone_slug: "otay", zone_name: "Otay",
+    name: "Otay Industrial Park III", status: "planificacion", status_label: "Planificación",
+    badge_color: "bg-orange-100 text-orange-700",
+    description: "Parque industrial · Naves y bodegas · 28,000 m²",
+    units_total: 45, units_sold: 0, price_range: "$8M - $25M MXN",
+    delivery_date: "2027",
+    img: `${IMG_BASE}/AB6AXuAGavQbkoMgc-ZKnHyiazUbTRDiZh7xHoxjZpKstSdZylYchL1S6rkiJvByLlFuX-Ty_Kx-Z2ivNmF0XWms8FS3z6FSlQv335Ps2FhDyuZV2yijSjqpya5NaaqWrL5MCMhPBVnET19Ma1C0Y9livnsv4fuSHx4CWOGaH_O40MHZ1jiCqr0FFRti7qEcXANDArATvfmW1zYvPlHCI2W7ODoJ-GOOqKttwF4B7teWlPaLH9UN8OTn2yQgSCgk8j24ooKiKPQq8NR8Mmpq`,
+    investors: 2, investor_label: "2 Fondos institucionales",
+  },
+  {
+    id: "p7", zone_slug: "centro", zone_name: "Centro",
+    name: "Centro Histórico Lofts", status: "preventa", status_label: "Pre-Venta",
+    badge_color: "bg-blue-100 text-blue-700",
+    description: "Reconversión de edificio histórico · Lofts urbanos",
+    units_total: 32, units_sold: 8, price_range: "$1.2M - $2.8M MXN",
+    delivery_date: "Nov 2026",
+    img: `${IMG_BASE}/AB6AXuDcMvkGK2-c11oeRRT27nAuPCjwm12rEej1HNK4UFnpRUTWmJrA6DIIowr_mlFnzxYynfC0CQPtOJSSAYLjf-7NLbxQGd74blgo-94zbKEiQehwynoP_CyxSmdcmBVfHUpdcpswRbvNOW4jNSg8ZaVWbBGUv6euGbVwOXb7kgWWSqydwdmWgnBzBGupKS29TKrbLOIE4Uv0K5Ov6gqzPh5q6WqLxaz5a2RACwGMfHmo3SO2PAjPWx2AHx2MluOJgJDQlisGZwjF2INP`,
+    investors: 4, investor_label: "4 Inversores activos",
+  },
+  {
+    id: "p8", zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
+    name: "Bosque Sereno Villas", status: "construccion", status_label: "60% Vendido",
+    badge_color: "bg-green-100 text-green-700",
+    description: "Casas residenciales · Fraccionamiento cerrado",
+    units_total: 48, units_sold: 29, price_range: "$3.5M - $5.8M MXN",
+    delivery_date: "Dic 2025",
+    img: `${IMG_BASE}/AB6AXuDVY0onfjFdi7i2rOIIq99lJStUlitHgNl5nnTcte3my2Kxh3PweiUrfuDuS9XMHab8SIAUYfchcw5yyRd74cKU4Km2ox9bIKrtPiWh_GbivLDOPk0LB81dG_c9VYpKSqDJ-IZV2XjfDy2e6wRFxZV2-bfFgj0mIuzU-gIVIwPEhw2qbwAPnmu4ZnyZYOenj8OqVSdHdC0BoKrauiUAuPRnoN8wMRfEDDPvZiTx295lOBfShy4cqsUtc0NJHJfcoq_uVO6uyJ8d4CD7`,
+    investors: 7, investor_label: "7 Inversores activos",
+  },
 ];
