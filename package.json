@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "scrape": "node node_modules/tsx/dist/cli.mjs scripts/scrape.ts",
+    "scrape:dry": "node node_modules/tsx/dist/cli.mjs scripts/scrape.ts --dry-run"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
@@ -31,10 +33,14 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "axios": "^1.13.6",
+    "cheerio": "^1.2.0",
+    "dotenv": "^16.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.0",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.0"
   }
 }
