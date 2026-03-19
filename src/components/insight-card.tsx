@@ -1,27 +1,28 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card"
+import { Sparkles } from "lucide-react"
 
 interface InsightCardProps {
-  title: string;
-  content: string;
+  title: string
+  content: string
 }
 
 export function InsightCard({ title, content }: InsightCardProps) {
   return (
-    <Card className="border-l-4 border-l-[var(--accent)] bg-blue-50/50 dark:bg-blue-950/20">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-lg bg-[var(--accent)] p-1.5 text-white shrink-0">
+    <Card className="relative overflow-hidden">
+      <div className="absolute inset-y-0 left-0 w-1 bg-primary" />
+      <CardContent className="pt-4">
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Sparkles className="h-4 w-4" />
           </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-1">{title}</h4>
-            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
+          <div className="space-y-1.5">
+            <h4 className="text-sm font-semibold">{title}</h4>
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {content}
             </p>
           </div>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
