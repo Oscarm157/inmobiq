@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
-import { Navbar } from "@/components/navbar"
+import { Sidebar } from "@/components/sidebar"
+import { TopHeader } from "@/components/top-header"
+import { BottomNav } from "@/components/bottom-nav"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -22,27 +24,29 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="dark antialiased">
-      <body className="min-h-screen bg-background font-sans">
-        <Navbar />
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-          {children}
-        </main>
-        <footer className="border-t border-border/50 mt-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              Inmobiq — Inteligencia inmobiliaria para profesionales
-            </p>
-            <a
-              href="https://narrativa360.vercel.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:text-primary/80 transition-colors"
-            >
-              Potenciado por Narrativa360
-            </a>
+    <html lang="es">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body
+        style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+        className="bg-slate-50 text-slate-900 min-h-screen antialiased"
+      >
+        <Sidebar />
+        <TopHeader />
+        <main className="md:ml-64 min-h-screen pb-20">
+          <div className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
+            {children}
           </div>
-        </footer>
+        </main>
+        <BottomNav />
       </body>
     </html>
   )
