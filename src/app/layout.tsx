@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
@@ -15,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={cn("font-sans", geist.variable)}>
       <body>
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
