@@ -14,8 +14,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { PRICE_TREND_DATA } from "@/lib/mock-data"
 import { formatCurrency } from "@/lib/utils"
+import type { PriceTrendPoint } from "@/lib/data/snapshots"
 
 const chartConfig = {
   avg_price_m2: {
@@ -24,7 +24,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PriceChart() {
+interface PriceChartProps {
+  data: PriceTrendPoint[]
+}
+
+export function PriceChart({ data }: PriceChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -37,7 +41,7 @@ export function PriceChart() {
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <AreaChart
             accessibilityLayer
-            data={PRICE_TREND_DATA}
+            data={data}
             margin={{ top: 4, right: 4, left: 4, bottom: 0 }}
           >
             <CartesianGrid vertical={false} />

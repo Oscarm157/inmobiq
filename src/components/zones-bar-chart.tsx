@@ -14,8 +14,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { TIJUANA_ZONES } from "@/lib/mock-data"
 import { formatCurrency } from "@/lib/utils"
+import type { ZoneMetrics } from "@/types/database"
 
 const chartConfig = {
   avg_price_per_m2: {
@@ -24,14 +24,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-const data = [...TIJUANA_ZONES]
-  .sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
-  .map((z) => ({
-    zone: z.zone_name,
-    avg_price_per_m2: z.avg_price_per_m2,
-  }))
+interface ZonesBarChartProps {
+  zones: ZoneMetrics[]
+}
 
-export function ZonesBarChart() {
+export function ZonesBarChart({ zones }: ZonesBarChartProps) {
+  const data = [...zones]
+    .sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+    .map((z) => ({
+      zone: z.zone_name,
+      avg_price_per_m2: z.avg_price_per_m2,
+    }))
+
   return (
     <Card>
       <CardHeader>

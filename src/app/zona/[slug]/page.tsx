@@ -7,9 +7,9 @@ import { KPIInventario } from "@/components/kpi-inventario"
 import { KPIPlusvalia } from "@/components/kpi-plusvalia"
 import { ComparisonTable } from "@/components/comparison-table"
 import { PipelineCard, PIPELINE_PROJECTS } from "@/components/pipeline-card"
-import { TIJUANA_ZONES, TIJUANA_CITY_METRICS } from "@/lib/mock-data"
+import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { formatCurrency, formatPercent } from "@/lib/utils"
-import type { PropertyType } from "@/types/database"
+import type { PropertyType, ZoneMetrics } from "@/types/database"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -24,12 +24,13 @@ interface ZonePageProps {
 }
 
 export async function generateStaticParams() {
-  return TIJUANA_ZONES.map((zone) => ({ slug: zone.zone_slug }))
+  const zones = await getZoneMetrics()
+  return zones.map((zone) => ({ slug: zone.zone_slug }))
 }
 
 export async function generateMetadata({ params }: ZonePageProps) {
   const { slug } = await params
-  const zone = TIJUANA_ZONES.find((z) => z.zone_slug === slug)
+  const zone = await getZoneBySlug(slug)
   if (!zone) return {}
   return {
     title: `${zone.zone_name} — Inmobiq`,
@@ -39,10 +40,10 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params }: ZonePageProps) {
   const { slug } = await params
-  const zone = TIJUANA_ZONES.find((z) => z.zone_slug === slug)
+  const [zone, city] = await Promise.all([getZoneBySlug(slug), getCityMetrics()])
   if (!zone) notFound()
 
-  const cityAvg = TIJUANA_CITY_METRICS.avg_price_per_m2
+  const cityAvg = city.avg_price_per_m2
   const diffFromCity = ((zone.avg_price_per_m2 - cityAvg) / cityAvg) * 100
 
   // Determine top property type
@@ -67,12 +68,12 @@ export default async function ZonePage({ params }: ZonePageProps) {
     {
       label: "Inventario",
       zona: `${zone.total_listings}`,
-      ciudad: `${TIJUANA_CITY_METRICS.total_listings}`,
+      ciudad: `${city.total_listings}`,
     },
     {
       label: "Tendencia",
       zona: formatPercent(zone.price_trend_pct),
-      ciudad: formatPercent(TIJUANA_CITY_METRICS.price_trend_pct),
+      ciudad: formatPercent(city.price_trend_pct),
     },
   ]
 
@@ -197,7 +198,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
 }
 
 function generateMainText(
-  zone: (typeof TIJUANA_ZONES)[0],
+  zone: ZoneMetrics,
   cityAvg: number,
   topLabel: string,
   topCount: number
@@ -212,7 +213,7 @@ function generateMainText(
   return `La ${zone.zone_name} mantiene un posicionamiento sólido dentro del mercado inmobiliario de Tijuana, con precios alineados al promedio general de la ciudad. La oferta se distribuye principalmente en ${topLabel} (${topCount} de ${zone.total_listings} propiedades), indicando un mercado maduro con demanda estable. La zona ofrece un balance atractivo entre riesgo y rendimiento para inversionistas con perfil moderado.`
 }
 
-function generateQuote(zone: (typeof TIJUANA_ZONES)[0]): string {
+function generateQuote(zone: ZoneMetrics): string {
   if (zone.price_trend_pct > 4) {
     return `El corredor de ${zone.zone_name} ya no es solo para uso tradicional; la demanda está empujando los límites de precio hacia niveles históricos.`
   }

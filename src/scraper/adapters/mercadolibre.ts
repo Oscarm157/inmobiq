@@ -57,14 +57,15 @@ function extractFromPreloaded(
 
     const priceObj = it.price as Record<string, unknown> | undefined;
     const price_mxn = priceObj
-      ? parsePrice(priceObj.amount)
+      ? parsePrice(priceObj.amount as string | number | null | undefined)
       : parsePrice(String(it.price ?? ""));
 
     const location = it.location as Record<string, unknown> | undefined;
     const lat = location?.latitude ? parseFloat(String(location.latitude)) : null;
     const lng = location?.longitude ? parseFloat(String(location.longitude)) : null;
+    const cityObj = location?.city as Record<string, unknown> | undefined;
     const address = location
-      ? [location.address_line, location.city?.name]
+      ? [location.address_line, cityObj?.name]
           .filter(Boolean)
           .join(", ")
       : null;

@@ -1,18 +1,20 @@
 import { Icon } from "@/components/icon"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
-import { ZONE_RISK_DATA } from "@/lib/mock-data"
+import { getZoneRiskMetrics } from "@/lib/data/risk"
+import { getZoneMetrics } from "@/lib/data/zones"
 
 export const metadata = {
   title: "Investment Risk — Inmobiq",
   description: "Análisis de riesgo de inversión inmobiliaria en Tijuana.",
 }
 
-export default function RiesgoPage() {
-  const sortedByRisk = [...ZONE_RISK_DATA].sort((a, b) => a.risk_score - b.risk_score)
-  const avgRisk = Math.round(ZONE_RISK_DATA.reduce((s, r) => s + r.risk_score, 0) / ZONE_RISK_DATA.length)
-  const avgCap = (ZONE_RISK_DATA.reduce((s, r) => s + r.cap_rate, 0) / ZONE_RISK_DATA.length).toFixed(1)
-  const avgVacancy = (ZONE_RISK_DATA.reduce((s, r) => s + r.vacancy_rate, 0) / ZONE_RISK_DATA.length).toFixed(1)
+export default async function RiesgoPage() {
+  const [riskData, zones] = await Promise.all([getZoneRiskMetrics(), getZoneMetrics()])
+  const sortedByRisk = [...riskData].sort((a, b) => a.risk_score - b.risk_score)
+  const avgRisk = Math.round(riskData.reduce((s, r) => s + r.risk_score, 0) / riskData.length)
+  const avgCap = (riskData.reduce((s, r) => s + r.cap_rate, 0) / riskData.length).toFixed(1)
+  const avgVacancy = (riskData.reduce((s, r) => s + r.vacancy_rate, 0) / riskData.length).toFixed(1)
 
   return (
     <div className="space-y-10">
@@ -24,7 +26,7 @@ export default function RiesgoPage() {
               Risk Analysis
             </span>
             <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              8 Zonas
+              {riskData.length} Zonas
             </span>
           </div>
           <h2 className="text-4xl font-extrabold tracking-tight">
@@ -90,7 +92,7 @@ export default function RiesgoPage() {
       </div>
 
       {/* Risk Matrix */}
-      <RiskMatrix />
+      <RiskMatrix riskData={riskData} zones={zones} />
 
       {/* Zone Risk Cards */}
       <section>

@@ -30,6 +30,29 @@ export interface Listing {
   created_at: string;
 }
 
+export interface Snapshot {
+  id: string;
+  zone_id: string;
+  week_start: string;
+  avg_price_per_m2: number;
+  avg_ticket: number;
+  total_listings: number;
+  listings_by_type: Record<PropertyType, number>;
+  avg_ticket_by_type: Record<PropertyType, number>;
+  avg_price_m2_by_type: Record<PropertyType, number>;
+  created_at: string;
+}
+
+export interface CitySnapshot {
+  id: string;
+  city: string;
+  week_start: string;
+  avg_price_per_m2: number;
+  total_listings: number;
+  total_zones: number;
+  created_at: string;
+}
+
 export interface ZoneMetrics {
   zone_id: string;
   zone_name: string;
@@ -106,7 +129,7 @@ export interface PipelineProject {
   investor_label: string;
 }
 
-// Supabase Database type (will be auto-generated later, placeholder for now)
+// Supabase Database type
 export interface Database {
   public: {
     Tables: {
@@ -119,6 +142,16 @@ export interface Database {
         Row: Listing;
         Insert: Omit<Listing, "id" | "created_at">;
         Update: Partial<Omit<Listing, "id" | "created_at">>;
+      };
+      snapshots: {
+        Row: Snapshot;
+        Insert: Omit<Snapshot, "id" | "created_at">;
+        Update: Partial<Omit<Snapshot, "id" | "created_at">>;
+      };
+      city_snapshots: {
+        Row: CitySnapshot;
+        Insert: Omit<CitySnapshot, "id" | "created_at">;
+        Update: Partial<Omit<CitySnapshot, "id" | "created_at">>;
       };
     };
     Views: Record<string, never>;

@@ -15,8 +15,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { ZONE_RISK_DATA } from "@/lib/mock-data"
-import { TIJUANA_ZONES } from "@/lib/mock-data"
+import type { ZoneRiskMetrics, ZoneMetrics } from "@/types/database"
 
 const chartConfig = {
   zone: {
@@ -25,23 +24,28 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-const data = ZONE_RISK_DATA.map((r) => {
-  const zone = TIJUANA_ZONES.find((z) => z.zone_slug === r.zone_slug)
-  return {
-    zone: r.zone_name,
-    risk_score: r.risk_score,
-    return_pct: zone?.price_trend_pct ?? 0,
-    risk_label: r.risk_label,
-  }
-})
-
 const riskColors: Record<string, string> = {
   Bajo: "#22c55e",
   Medio: "#f59e0b",
   Alto: "#ef4444",
 }
 
-export function RiskMatrix() {
+interface RiskMatrixProps {
+  riskData: ZoneRiskMetrics[]
+  zones: ZoneMetrics[]
+}
+
+export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
+  const data = riskData.map((r) => {
+    const zone = zones.find((z) => z.zone_slug === r.zone_slug)
+    return {
+      zone: r.zone_name,
+      risk_score: r.risk_score,
+      return_pct: zone?.price_trend_pct ?? 0,
+      risk_label: r.risk_label,
+    }
+  })
+
   return (
     <div className="bg-white rounded-xl p-6 card-shadow">
       <h3 className="text-xl font-bold mb-1">Matriz Riesgo vs Retorno</h3>

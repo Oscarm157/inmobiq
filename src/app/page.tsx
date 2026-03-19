@@ -5,11 +5,16 @@ import { ZonesBarChart } from "@/components/zones-bar-chart"
 import { KPIPrecio } from "@/components/kpi-precio"
 import { KPIInventario } from "@/components/kpi-inventario"
 import { KPIPlusvalia } from "@/components/kpi-plusvalia"
-import { TIJUANA_CITY_METRICS, TIJUANA_ZONES } from "@/lib/mock-data"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
+import { getPriceTrendData } from "@/lib/data/snapshots"
+import { formatNumber } from "@/lib/utils"
 
-export default function HomePage() {
-  const city = TIJUANA_CITY_METRICS
+export default async function HomePage() {
+  const [zones, city, priceTrend] = await Promise.all([
+    getZoneMetrics(),
+    getCityMetrics(),
+    getPriceTrendData(),
+  ])
 
   return (
     <div className="space-y-10">
@@ -62,8 +67,8 @@ export default function HomePage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PriceChart />
-        <ZonesBarChart />
+        <PriceChart data={priceTrend} />
+        <ZonesBarChart zones={zones} />
       </div>
 
       {/* Zones Grid */}
@@ -82,7 +87,7 @@ export default function HomePage() {
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {TIJUANA_ZONES.map((zone) => (
+          {zones.map((zone) => (
             <ZoneCard key={zone.zone_id} zone={zone} />
           ))}
         </div>
