@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import Image from "next/image"
 import { Icon } from "@/components/icon"
 import { useSidebar } from "@/components/sidebar-provider"
+import { useAuth } from "@/contexts/auth-context"
 
 const navItems = [
   { icon: "dashboard", label: "Market Overview", href: "/" },
@@ -15,7 +17,22 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { collapsed, toggle } = useSidebar()
+  const { user, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/login")
+  }
+
+  const userName =
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    user?.email?.split("@")[0] ??
+    null
+
+  const avatar = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/"
@@ -99,6 +116,59 @@ export function Sidebar() {
           <Icon name="help_outline" />
           {!collapsed && <span>Narrativa360</span>}
         </a>
+
+        {/* Auth section */}
+        <div className="pt-2 border-t border-slate-100 mt-2">
+          {user ? (
+            <>
+              <Link
+                href="/perfil"
+                title={collapsed ? (userName ?? "Perfil") : undefined}
+                className={`flex items-center gap-3 py-2 rounded-xl hover:bg-slate-100 transition-colors ${
+                  collapsed ? "justify-center" : "px-2"
+                }`}
+              >
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt={userName ?? "Perfil"}
+                    width={28}
+                    height={28}
+                    className="rounded-full flex-shrink-0"
+                  />
+                ) : (
+                  <Icon name="account_circle" className="text-slate-400 text-2xl flex-shrink-0" />
+                )}
+                {!collapsed && (
+                  <span className="text-sm text-slate-700 font-medium truncate">
+                    {userName ?? user.email}
+                  </span>
+                )}
+              </Link>
+              <button
+                onClick={handleSignOut}
+                title={collapsed ? "Cerrar sesión" : undefined}
+                className={`w-full flex items-center gap-3 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors ${
+                  collapsed ? "justify-center" : "px-2"
+                }`}
+              >
+                <Icon name="logout" className="text-base flex-shrink-0" />
+                {!collapsed && <span className="text-sm font-medium">Cerrar sesión</span>}
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              title={collapsed ? "Iniciar sesión" : undefined}
+              className={`flex items-center gap-3 py-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors ${
+                collapsed ? "justify-center" : "px-2"
+              }`}
+            >
+              <Icon name="login" className="text-base flex-shrink-0" />
+              {!collapsed && <span className="text-sm font-semibold">Iniciar sesión</span>}
+            </Link>
+          )}
+        </div>
       </div>
     </aside>
   )

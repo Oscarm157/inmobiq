@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
+import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -38,9 +39,11 @@ export default function RootLayout({
         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
         className="bg-slate-50 text-slate-900 min-h-screen antialiased"
       >
-        <SidebarProvider>
-          <SidebarShell>{children}</SidebarShell>
-        </SidebarProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <SidebarShell>{children}</SidebarShell>
+          </SidebarProvider>
+        </AuthProvider>
       </body>
     </html>
   )
