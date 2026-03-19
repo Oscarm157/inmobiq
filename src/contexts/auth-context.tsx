@@ -22,13 +22,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+const hasSupabaseConfig =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createSupabaseBrowserClient()
+  const [loading, setLoading] = useState(hasSupabaseConfig)
+  // Lazy-init: create client only when Supabase env vars are present
+  const [supabase] = useState(() =>
+    hasSupabaseConfig ? createSupabaseBrowserClient() : null
+  )
 
   useEffect(() => {
+    if (!supabase) return
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
@@ -43,9 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [supabase])
 
   const signInWithGoogle = async (redirectTo?: string) => {
+    if (!supabase) return
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -55,11 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signInWithEmail = async (email: string, password: string) => {
+    if (!supabase) return { error: "Supabase no configurado" }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     return { error: error?.message ?? null }
   }
 
   const signUpWithEmail = async (email: string, password: string) => {
+    if (!supabase) return { error: "Supabase no configurado" }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -71,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
   }
 
