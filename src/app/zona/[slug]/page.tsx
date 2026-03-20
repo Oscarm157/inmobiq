@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { Icon } from "@/components/icon"
+import { ExportButton } from "@/components/export-button"
 import { HeatmapCard } from "@/components/heatmap-card"
 import { EditorialCard } from "@/components/editorial-card"
 import { KPIPrecio } from "@/components/kpi-precio"
@@ -136,10 +137,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
             <Icon name="filter_list" className="text-sm" />
             Filtros Avanzados
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
-            <Icon name="ios_share" className="text-sm" />
-            Exportar Insights
-          </button>
+          <ExportButton zoneSlug={slug} />
         </div>
       </div>
 
