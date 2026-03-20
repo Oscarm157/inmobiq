@@ -21,13 +21,13 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 h-16 flex items-center justify-around z-50 px-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-[#0f0f1a]/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 h-16 flex items-center justify-around z-50 px-2">
       {mobileNav.map((item) => (
         <Link
           key={item.label}
           href={item.href}
           className={`flex flex-col items-center gap-0.5 px-2 ${
-            isActive(item.href) ? "text-blue-600" : "text-slate-400"
+            isActive(item.href) ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"
           }`}
         >
           <Icon name={item.icon} filled={isActive(item.href)} className="text-xl" />

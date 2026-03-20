@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -34,6 +37,40 @@
   --sidebar-accent: #eff6ff;
   --sidebar-accent-foreground: #1e40af;
   --sidebar-border: #e2e8f0;
+  --sidebar-ring: #3b82f6;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #e0e0e0;
+  --card: #1e1e2e;
+  --card-foreground: #e0e0e0;
+  --popover: #1e1e2e;
+  --popover-foreground: #e0e0e0;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a2e;
+  --secondary-foreground: #e0e0e0;
+  --muted: #1a1a2e;
+  --muted-foreground: #94a3b8;
+  --accent: #1e3a5f;
+  --accent-foreground: #93c5fd;
+  --destructive: #f87171;
+  --border: #2a2a3e;
+  --input: #2a2a3e;
+  --ring: #3b82f6;
+  --chart-1: #60a5fa;
+  --chart-2: #a78bfa;
+  --chart-3: #34d399;
+  --chart-4: #fbbf24;
+  --chart-5: #f87171;
+  --sidebar: #0f0f1a;
+  --sidebar-foreground: #e0e0e0;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e3a5f;
+  --sidebar-accent-foreground: #93c5fd;
+  --sidebar-border: #2a2a3e;
   --sidebar-ring: #3b82f6;
 }
 
@@ -94,4 +131,8 @@
 /* Card shadow from prototype */
 .card-shadow {
   box-shadow: 0 12px 32px -4px rgba(24, 28, 31, 0.06);
+}
+
+.dark .card-shadow {
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
 }
