@@ -1,30 +1,79 @@
 import { Suspense } from "react"
 import { ComparadorClient } from "./comparador-client"
 import { getZoneMetrics } from "@/lib/data/zones"
+import { getComparisonListings } from "@/lib/data/comparison-listings"
+import type { PropertyType, ListingType } from "@/types/database"
+import type { ListingFilters } from "@/lib/data/listings"
 
 export const metadata = {
   title: "Comparador de Zonas — Inmobiq",
-  description: "Compara métricas de 2 a 3 zonas de Tijuana lado a lado.",
+  description: "Compara métricas de hasta 4 zonas de Tijuana lado a lado.",
+}
+
+interface SearchParams {
+  zonas?: string
+  tipo?: string
+  operacion?: string
+  precio_min?: string
+  precio_max?: string
+  area_min?: string
+  area_max?: string
+  rec?: string
 }
 
 export default async function ComparadorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ zonas?: string }>
+  searchParams: Promise<SearchParams>
 }) {
-  const { zonas } = await searchParams
-  const allZones = await getZoneMetrics()
-  const selectedSlugs = zonas
-    ? zonas
+  const sp = await searchParams
+
+  const safeNum = (val?: string): number | undefined => {
+    if (!val) return undefined
+    const n = Number(val)
+    return !isNaN(n) && n >= 0 ? n : undefined
+  }
+
+  const VALID_TYPES = new Set(["casa", "departamento", "terreno", "local", "oficina"])
+  const VALID_OPS = new Set(["venta", "renta"])
+
+  const filters: ListingFilters = {
+    tipos: sp.tipo
+      ? (sp.tipo.split(",").filter((t) => VALID_TYPES.has(t)) as PropertyType[])
+      : undefined,
+    listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
+      ? (sp.operacion as ListingType)
+      : undefined,
+    precio_min: safeNum(sp.precio_min),
+    precio_max: safeNum(sp.precio_max),
+    area_min: safeNum(sp.area_min),
+    area_max: safeNum(sp.area_max),
+    recamaras: sp.rec
+      ? sp.rec.split(",").map(Number).filter((n) => !isNaN(n) && n >= 1 && n <= 4)
+      : undefined,
+  }
+
+  const selectedSlugs = sp.zonas
+    ? sp.zonas
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean)
-        .slice(0, 3)
+        .slice(0, 4)
     : []
+
+  const [allZones, listings] = await Promise.all([
+    getZoneMetrics(filters),
+    Promise.resolve(getComparisonListings(selectedSlugs, filters)),
+  ])
 
   return (
     <Suspense>
-      <ComparadorClient allZones={allZones} initialSlugs={selectedSlugs} />
+      <ComparadorClient
+        allZones={allZones}
+        initialSlugs={selectedSlugs}
+        initialListings={listings}
+        filters={filters}
+      />
     </Suspense>
   )
 }
