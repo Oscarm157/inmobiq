@@ -7,7 +7,6 @@ import {
   ZONE_GEOJSON,
   TIJUANA_CENTER,
   getPriceColor,
-  getZoneCentroid,
 } from "@/lib/geo-data"
 import { useCurrency } from "@/contexts/currency-context"
 
@@ -51,7 +50,7 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
 
       mapInstanceRef.current = map
 
-      // Build enriched GeoJSON with colors
+      // Enrich GeoJSON with colors
       const enriched = {
         ...ZONE_GEOJSON,
         features: ZONE_GEOJSON.features.map((f) => {
@@ -77,6 +76,7 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
         map.addSource("zones", {
           type: "geojson",
           data: enriched as GeoJSON.FeatureCollection,
+          generateId: true,
         })
 
         map.addLayer({
@@ -85,7 +85,13 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
           source: "zones",
           paint: {
             "fill-color": ["get", "color"],
-            "fill-opacity": 0.6,
+            "fill-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.8,
+              0.55,
+            ],
+            "fill-opacity-transition": { duration: 200 },
           },
         })
 
@@ -94,9 +100,19 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
           type: "line",
           source: "zones",
           paint: {
-            "line-color": "#1e40af",
-            "line-width": 1.5,
-            "line-opacity": 0.8,
+            "line-color": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              "#1e3a8a",
+              "#3b82f6",
+            ],
+            "line-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              2.5,
+              1.5,
+            ],
+            "line-opacity": 0.9,
           },
         })
 
@@ -111,34 +127,53 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
             "text-allow-overlap": false,
           },
           paint: {
-            "text-color": "#1e3a5f",
-            "text-halo-color": "#ffffff",
+            "text-color": "#0f172a",
+            "text-halo-color": "rgba(255,255,255,0.95)",
             "text-halo-width": 1.5,
           },
         })
 
-        // Re-enable pointer events for click/hover even though map is non-interactive
+        // Re-enable pointer events for hover/click
         const canvas = map.getCanvas()
         canvas.style.pointerEvents = "auto"
 
-        // Popup for hover
+        let hoveredId: number | null = null
+
         const popup = new mapboxgl.default.Popup({
           closeButton: false,
           closeOnClick: false,
           offset: 10,
+          className: "inmobiq-popup",
         })
 
         map.on("mousemove", "zones-fill", (e) => {
           if (!e.features?.length || !map) return
           canvas.style.cursor = "pointer"
-          const props = e.features[0].properties as {
+
+          const feature = e.features[0]
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "zones", id: hoveredId },
+              { hover: false }
+            )
+          }
+          hoveredId = feature.id as number
+          map.setFeatureState(
+            { source: "zones", id: hoveredId },
+            { hover: true }
+          )
+
+          const props = feature.properties as {
             name: string
             avgPrice: number
           }
           popup
             .setLngLat(e.lngLat)
             .setHTML(
-              `<div style="font-family:sans-serif"><strong>${props.name}</strong><br/>${formatPrice(props.avgPrice)}/m²</div>`
+              `<div style="font-family:system-ui,-apple-system,sans-serif;padding:2px">
+                <div style="font-weight:700;font-size:12px;color:#0f172a">${props.name}</div>
+                <div style="font-size:13px;font-weight:800;color:#1e40af">${formatPrice(props.avgPrice)}<span style="font-size:10px;font-weight:500;color:#64748b">/m²</span></div>
+              </div>`
             )
             .addTo(map)
         })
@@ -147,6 +182,13 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
           if (!map) return
           canvas.style.cursor = ""
           popup.remove()
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "zones", id: hoveredId },
+              { hover: false }
+            )
+            hoveredId = null
+          }
         })
 
         map.on("click", "zones-fill", (e) => {
@@ -183,35 +225,28 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
       style={{ height }}
     >
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
-      {/* Color legend */}
-      <div className="absolute top-3 left-3 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
-        <p className="text-[10px] font-bold text-slate-600 mb-1.5">
+      {/* Gradient legend */}
+      <div className="absolute top-3 left-3 z-[1000] bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-slate-200/80">
+        <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">
           Precio /m²
         </p>
-        <div className="flex flex-col gap-1">
-          {[
-            { color: "#1e40af", label: "$40k+" },
-            { color: "#3b82f6", label: "$32-40k" },
-            { color: "#60a5fa", label: "$26-32k" },
-            { color: "#93c5fd", label: "$20-26k" },
-            { color: "#bfdbfe", label: "<$20k" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-1.5">
-              <div
-                className="w-3 h-3 rounded-sm flex-shrink-0"
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="text-[10px] text-slate-500 font-medium">
-                {item.label}
-              </span>
-            </div>
-          ))}
+        <div
+          className="h-1.5 rounded-full mb-1"
+          style={{
+            background:
+              "linear-gradient(to right, #bfdbfe, #93c5fd, #60a5fa, #3b82f6, #1e40af)",
+            width: "80px",
+          }}
+        />
+        <div className="flex justify-between text-[8px] text-slate-400 font-semibold" style={{ width: "80px" }}>
+          <span>&lt;$20k</span>
+          <span>$40k+</span>
         </div>
       </div>
       <div className="absolute bottom-2 right-2 z-[1000]">
         <a
           href="/mapa"
-          className="px-3 py-1.5 bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow hover:bg-blue-800 transition-colors"
+          className="px-3 py-1.5 bg-blue-700 text-white text-[11px] font-bold rounded-full shadow-lg hover:bg-blue-800 transition-colors"
         >
           Ver mapa completo →
         </a>
