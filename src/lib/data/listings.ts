@@ -176,47 +176,126 @@ function pct(part: number, total: number): number {
 
 /* ---------- mock helpers ---------- */
 
-function mockListingsAnalytics(): ListingsAnalytics {
-  const totalListings = 1483
-  return {
-    pricePerM2ByZone: [
-      { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", median_price_m2: 38200, count: 287 },
-      { zone_name: "Zona Río", zone_slug: "zona-rio", median_price_m2: 32500, count: 342 },
-      { zone_name: "Chapultepec", zone_slug: "chapultepec", median_price_m2: 28900, count: 156 },
-      { zone_name: "Hipódromo", zone_slug: "hipodromo", median_price_m2: 25400, count: 124 },
-      { zone_name: "Otay", zone_slug: "otay", median_price_m2: 18500, count: 198 },
-      { zone_name: "Centro", zone_slug: "centro", median_price_m2: 15800, count: 178 },
-      { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", median_price_m2: 22100, count: 98 },
-      { zone_name: "La Mesa", zone_slug: "la-mesa", median_price_m2: 14200, count: 100 },
-    ],
-    priceDistribution: [
-      { range: "<1M", count: 148, pct: 9.98 },
-      { range: "1M-3M", count: 445, pct: 30.01 },
-      { range: "3M-5M", count: 371, pct: 25.02 },
-      { range: "5M-10M", count: 297, pct: 20.03 },
-      { range: "10M-20M", count: 163, pct: 10.99 },
-      { range: ">20M", count: 59, pct: 3.98 },
-    ],
-    compositionByType: [
-      { type: "departamento", count: 623, pct: 42.01 },
-      { type: "casa", count: 490, pct: 33.04 },
-      { type: "terreno", count: 148, pct: 9.98 },
-      { type: "local", count: 133, pct: 8.97 },
-      { type: "oficina", count: 89, pct: 6.0 },
-    ],
-    offerConcentration: [
-      { zone_name: "Zona Río", zone_slug: "zona-rio", count: 342, pct: 23.06 },
-      { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", count: 287, pct: 19.35 },
-      { zone_name: "Otay", zone_slug: "otay", count: 198, pct: 13.35 },
-      { zone_name: "Centro", zone_slug: "centro", count: 178, pct: 12.0 },
-      { zone_name: "Chapultepec", zone_slug: "chapultepec", count: 156, pct: 10.52 },
-      { zone_name: "Hipódromo", zone_slug: "hipodromo", count: 124, pct: 8.36 },
-      { zone_name: "La Mesa", zone_slug: "la-mesa", count: 100, pct: 6.74 },
-      { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", count: 98, pct: 6.61 },
-    ],
-    totalListings,
-    medianPrice: 3850000,
+function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics {
+  // Apply filters to mock listings first, then compute analytics from filtered set
+  const { listings: filtered } = applyMockFilters(filters)
+  const hasFilters = (filters.tipos?.length ?? 0) > 0 || !!filters.listing_type ||
+    (filters.zonas?.length ?? 0) > 0 || filters.precio_min != null ||
+    filters.precio_max != null || filters.area_min != null ||
+    filters.area_max != null || (filters.recamaras?.length ?? 0) > 0
+
+  // If no filters, return the pre-computed mock analytics for consistency
+  if (!hasFilters) {
+    const totalListings = 1483
+    return {
+      pricePerM2ByZone: [
+        { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", median_price_m2: 38200, count: 287 },
+        { zone_name: "Zona Río", zone_slug: "zona-rio", median_price_m2: 32500, count: 342 },
+        { zone_name: "Chapultepec", zone_slug: "chapultepec", median_price_m2: 28900, count: 156 },
+        { zone_name: "Hipódromo", zone_slug: "hipodromo", median_price_m2: 25400, count: 124 },
+        { zone_name: "Otay", zone_slug: "otay", median_price_m2: 18500, count: 198 },
+        { zone_name: "Centro", zone_slug: "centro", median_price_m2: 15800, count: 178 },
+        { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", median_price_m2: 22100, count: 98 },
+        { zone_name: "La Mesa", zone_slug: "la-mesa", median_price_m2: 14200, count: 100 },
+      ],
+      priceDistribution: [
+        { range: "<1M", count: 148, pct: 9.98 },
+        { range: "1M-3M", count: 445, pct: 30.01 },
+        { range: "3M-5M", count: 371, pct: 25.02 },
+        { range: "5M-10M", count: 297, pct: 20.03 },
+        { range: "10M-20M", count: 163, pct: 10.99 },
+        { range: ">20M", count: 59, pct: 3.98 },
+      ],
+      compositionByType: [
+        { type: "departamento", count: 623, pct: 42.01 },
+        { type: "casa", count: 490, pct: 33.04 },
+        { type: "terreno", count: 148, pct: 9.98 },
+        { type: "local", count: 133, pct: 8.97 },
+        { type: "oficina", count: 89, pct: 6.0 },
+      ],
+      offerConcentration: [
+        { zone_name: "Zona Río", zone_slug: "zona-rio", count: 342, pct: 23.06 },
+        { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", count: 287, pct: 19.35 },
+        { zone_name: "Otay", zone_slug: "otay", count: 198, pct: 13.35 },
+        { zone_name: "Centro", zone_slug: "centro", count: 178, pct: 12.0 },
+        { zone_name: "Chapultepec", zone_slug: "chapultepec", count: 156, pct: 10.52 },
+        { zone_name: "Hipódromo", zone_slug: "hipodromo", count: 124, pct: 8.36 },
+        { zone_name: "La Mesa", zone_slug: "la-mesa", count: 100, pct: 6.74 },
+        { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", count: 98, pct: 6.61 },
+      ],
+      totalListings,
+      medianPrice: 3850000,
+    }
   }
+
+  // Compute analytics from filtered mock listings
+  const MOCK_ZONE_NAMES: Record<string, { name: string; slug: string }> = {
+    "1": { name: "Zona Río", slug: "zona-rio" },
+    "2": { name: "Playas de Tijuana", slug: "playas-de-tijuana" },
+    "3": { name: "Otay", slug: "otay" },
+    "4": { name: "Chapultepec", slug: "chapultepec" },
+    "5": { name: "Hipódromo", slug: "hipodromo" },
+    "6": { name: "Centro", slug: "centro" },
+    "7": { name: "Residencial del Bosque", slug: "residencial-del-bosque" },
+    "8": { name: "La Mesa", slug: "la-mesa" },
+  }
+
+  const totalListings = filtered.length
+  const withPrice = filtered.filter((l) => l.price > 0)
+  const medianPrice = median(withPrice.map((l) => l.price))
+
+  // pricePerM2ByZone
+  const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
+  for (const l of filtered) {
+    if (l.price > 0 && l.area_m2 > 0) {
+      const zone = MOCK_ZONE_NAMES[l.zone_id]
+      if (zone) {
+        if (!zoneMap.has(zone.slug)) zoneMap.set(zone.slug, { ...zone, values: [] })
+        zoneMap.get(zone.slug)!.values.push(l.price / l.area_m2)
+      }
+    }
+  }
+  const pricePerM2ByZone = Array.from(zoneMap.values())
+    .map((z) => ({ zone_name: z.name, zone_slug: z.slug, median_price_m2: Math.round(median(z.values)), count: z.values.length }))
+    .sort((a, b) => b.median_price_m2 - a.median_price_m2)
+
+  // priceDistribution
+  const ranges: { label: string; min: number; max: number }[] = [
+    { label: "<1M", min: 0, max: 1_000_000 },
+    { label: "1M-3M", min: 1_000_000, max: 3_000_000 },
+    { label: "3M-5M", min: 3_000_000, max: 5_000_000 },
+    { label: "5M-10M", min: 5_000_000, max: 10_000_000 },
+    { label: "10M-20M", min: 10_000_000, max: 20_000_000 },
+    { label: ">20M", min: 20_000_000, max: Infinity },
+  ]
+  const priceDistribution = ranges.map((r) => {
+    const count = withPrice.filter((l) => l.price >= r.min && l.price < r.max).length
+    return { range: r.label, count, pct: pct(count, withPrice.length) }
+  })
+
+  // compositionByType
+  const typeCount = new Map<string, number>()
+  for (const l of filtered) {
+    typeCount.set(l.property_type, (typeCount.get(l.property_type) ?? 0) + 1)
+  }
+  const compositionByType = Array.from(typeCount.entries())
+    .map(([type, count]) => ({ type, count, pct: pct(count, totalListings) }))
+    .sort((a, b) => b.count - a.count)
+
+  // offerConcentration
+  const zoneCountMap = new Map<string, { name: string; slug: string; count: number }>()
+  for (const l of filtered) {
+    const zone = MOCK_ZONE_NAMES[l.zone_id]
+    if (zone) {
+      if (!zoneCountMap.has(zone.slug)) zoneCountMap.set(zone.slug, { ...zone, count: 0 })
+      zoneCountMap.get(zone.slug)!.count++
+    }
+  }
+  const offerConcentration = Array.from(zoneCountMap.values())
+    .map((z) => ({ zone_name: z.name, zone_slug: z.slug, count: z.count, pct: pct(z.count, totalListings) }))
+    .sort((a, b) => b.count - a.count)
+
+  return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice }
 }
 
 function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
@@ -246,19 +325,44 @@ function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
 
 /* ---------- getListingsAnalytics ---------- */
 
-export async function getListingsAnalytics(): Promise<ListingsAnalytics> {
-  if (useMock()) return mockListingsAnalytics()
+export async function getListingsAnalytics(filters: ListingFilters = {}): Promise<ListingsAnalytics> {
+  if (useMock()) return mockListingsAnalytics(filters)
 
   try {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
+    let query = supabase
       .from("listings")
-      .select("price_mxn, area_m2, property_type, zone_id, zones(name, slug)")
+      .select("price_mxn, area_m2, property_type, listing_type, bedrooms, zone_id, zones(name, slug)")
       .eq("is_active", true)
+
+    // Apply filters at query level
+    if (filters.tipos?.length) query = query.in("property_type", filters.tipos)
+    if (filters.listing_type) query = query.eq("listing_type", filters.listing_type)
+    if (filters.zonas?.length) {
+      const ids = await resolveZoneSlugs(filters.zonas)
+      if (ids.length) query = query.in("zone_id", ids)
+    }
+    if (filters.precio_min != null) query = query.gte("price_mxn", filters.precio_min)
+    if (filters.precio_max != null) query = query.lte("price_mxn", filters.precio_max)
+    if (filters.area_min != null) query = query.gte("area_m2", filters.area_min)
+    if (filters.area_max != null) query = query.lte("area_m2", filters.area_max)
+    if (filters.recamaras?.length) {
+      const has4plus = filters.recamaras.includes(4)
+      const exact = filters.recamaras.filter((r) => r < 4)
+      if (has4plus && exact.length) {
+        query = query.or(`bedrooms.gte.4,bedrooms.in.(${exact.join(",")})`)
+      } else if (has4plus) {
+        query = query.gte("bedrooms", 4)
+      } else {
+        query = query.in("bedrooms", exact)
+      }
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     const rows = data ?? []
-    if (rows.length === 0) return mockListingsAnalytics()
+    if (rows.length === 0) return mockListingsAnalytics(filters)
 
     type Row = {
       price_mxn: number | null
