@@ -4,6 +4,7 @@ import {
   TIJUANA_CITY_METRICS,
 } from "@/lib/mock-data"
 import type { Zone, Snapshot, CitySnapshot, ZoneMetrics, CityMetrics, PropertyType } from "@/types/database"
+import type { ListingFilters } from "@/lib/data/listings"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
@@ -26,8 +27,22 @@ interface RealSnapshot {
   avg_price_per_m2: number;
 }
 
-export async function getZoneMetrics(): Promise<ZoneMetrics[]> {
-  if (useMock()) return TIJUANA_ZONES
+export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetrics[]> {
+  if (useMock()) {
+    let zones = TIJUANA_ZONES
+    // Apply zone filter to mock data
+    if (filters?.zonas?.length) {
+      zones = zones.filter((z) => filters.zonas!.includes(z.zone_slug))
+    }
+    // Apply property type filter: recalculate total_listings from listings_by_type
+    if (filters?.tipos?.length) {
+      zones = zones.map((z) => {
+        const filteredTotal = filters.tipos!.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
+        return { ...z, total_listings: filteredTotal }
+      }).filter((z) => z.total_listings > 0)
+    }
+    return zones
+  }
 
   try {
     const supabase = await createSupabaseServerClient()
@@ -46,27 +61,71 @@ export async function getZoneMetrics(): Promise<ZoneMetrics[]> {
     const latestWeek = distinctWeeks[0]
     const prevWeek = distinctWeeks[1] ?? null
 
+    // Build filtered listings query
+    let listingsQuery = supabase
+      .from("listings")
+      .select("zone_id, price_mxn, area_m2")
+      .eq("is_active", true)
+      .gt("price_mxn", 0)
+      .gt("area_m2", 10)
+      .lt("area_m2", 50000)
+
+    // Build filtered snapshots query
+    let latestSnapsQuery = supabase
+      .from("snapshots")
+      .select("zone_id, week_start, property_type, listing_type, count_active, avg_price, avg_price_per_m2")
+      .eq("week_start", latestWeek)
+
+    // Apply filters
+    if (filters?.tipos?.length) {
+      listingsQuery = listingsQuery.in("property_type", filters.tipos)
+      latestSnapsQuery = latestSnapsQuery.in("property_type", filters.tipos)
+    }
+    if (filters?.listing_type) {
+      listingsQuery = listingsQuery.eq("listing_type", filters.listing_type)
+      latestSnapsQuery = latestSnapsQuery.eq("listing_type", filters.listing_type)
+    }
+    if (filters?.precio_min != null) listingsQuery = listingsQuery.gte("price_mxn", filters.precio_min)
+    if (filters?.precio_max != null) listingsQuery = listingsQuery.lte("price_mxn", filters.precio_max)
+    if (filters?.area_min != null) listingsQuery = listingsQuery.gte("area_m2", filters.area_min)
+    if (filters?.area_max != null) listingsQuery = listingsQuery.lte("area_m2", filters.area_max)
+    if (filters?.recamaras?.length) {
+      const has4plus = filters.recamaras.includes(4)
+      const exact = filters.recamaras.filter((r) => r < 4)
+      if (has4plus && exact.length) {
+        listingsQuery = listingsQuery.or(`bedrooms.gte.4,bedrooms.in.(${exact.join(",")})`)
+      } else if (has4plus) {
+        listingsQuery = listingsQuery.gte("bedrooms", 4)
+      } else {
+        listingsQuery = listingsQuery.in("bedrooms", exact)
+      }
+    }
+
+    // Resolve zone filter to IDs
+    let filterZoneIds: string[] | null = null
+    if (filters?.zonas?.length) {
+      const { data: zoneRows } = await supabase
+        .from("zones")
+        .select("id")
+        .in("slug", filters.zonas)
+      filterZoneIds = (zoneRows ?? []).map((z: { id: string }) => z.id)
+      if (filterZoneIds.length) {
+        listingsQuery = listingsQuery.in("zone_id", filterZoneIds)
+        latestSnapsQuery = latestSnapsQuery.in("zone_id", filterZoneIds)
+      }
+    }
+
     // Fetch zones, snapshots, and individual listings in parallel
     const [zonesRes, latestSnapsRes, prevSnapsRes, listingsRes] = await Promise.all([
       supabase.from("zones").select("*"),
-      supabase
-        .from("snapshots")
-        .select("zone_id, week_start, property_type, listing_type, count_active, avg_price, avg_price_per_m2")
-        .eq("week_start", latestWeek),
+      latestSnapsQuery,
       prevWeek
         ? supabase
             .from("snapshots")
             .select("zone_id, avg_price_per_m2, count_active")
             .eq("week_start", prevWeek)
         : Promise.resolve({ data: [] }),
-      // Fetch individual listings for median price/m² (consistent with analytics)
-      supabase
-        .from("listings")
-        .select("zone_id, price_mxn, area_m2")
-        .eq("is_active", true)
-        .gt("price_mxn", 0)
-        .gt("area_m2", 10)   // filter outlier areas (< 10 m²)
-        .lt("area_m2", 50000), // filter outlier areas (> 50,000 m²)
+      listingsQuery,
     ])
 
     const zones = zonesRes.data as Zone[] | null
@@ -158,7 +217,13 @@ export async function getZoneMetrics(): Promise<ZoneMetrics[]> {
       })
       .filter(Boolean) as ZoneMetrics[]
 
-    return result.length > 0 ? result : TIJUANA_ZONES
+    if (result.length === 0) return filters?.zonas?.length ? [] : TIJUANA_ZONES
+
+    // Filter output zones if zone filter active
+    if (filterZoneIds?.length) {
+      return result.filter((z) => filterZoneIds!.includes(z.zone_id))
+    }
+    return result
   } catch {
     return TIJUANA_ZONES
   }
@@ -169,11 +234,40 @@ export async function getZoneBySlug(slug: string): Promise<ZoneMetrics | null> {
   return zones.find((z) => z.zone_slug === slug) ?? null
 }
 
-export async function getCityMetrics(): Promise<CityMetrics> {
-  const zones = await getZoneMetrics()
+export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetrics> {
+  const zones = await getZoneMetrics(filters)
 
-  if (useMock() || zones === TIJUANA_ZONES) {
+  const hasFilters = filters && (
+    (filters.tipos?.length ?? 0) > 0 || !!filters.listing_type ||
+    (filters.zonas?.length ?? 0) > 0 || filters.precio_min != null ||
+    filters.precio_max != null || filters.area_min != null ||
+    filters.area_max != null || (filters.recamaras?.length ?? 0) > 0
+  )
+
+  if (!hasFilters && (useMock() || zones === TIJUANA_ZONES)) {
     return TIJUANA_CITY_METRICS
+  }
+
+  // When filters are active, compute city metrics from filtered zones
+  if (hasFilters) {
+    const totalListings = zones.reduce((s, z) => s + z.total_listings, 0)
+    const weightedPrice = zones.reduce((s, z) => s + z.avg_price_per_m2 * z.total_listings, 0)
+    const avgPricePerM2 = totalListings > 0 ? Math.round(weightedPrice / totalListings) : 0
+
+    const sortedByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+    const sortedByListings = [...zones].sort((a, b) => b.total_listings - a.total_listings)
+
+    return {
+      city: "Tijuana",
+      avg_price_per_m2: avgPricePerM2,
+      price_trend_pct: zones.length > 0
+        ? Number((zones.reduce((s, z) => s + z.price_trend_pct, 0) / zones.length).toFixed(1))
+        : 0,
+      total_listings: totalListings,
+      total_zones: zones.length,
+      top_zones: sortedByPrice.slice(0, 4),
+      hottest_zones: sortedByListings.slice(0, 4),
+    }
   }
 
   try {
