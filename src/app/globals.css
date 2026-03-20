@@ -129,6 +129,14 @@
   }
 }
 
+/* Hide icon text until Material Symbols font loads (prevents FOUT) */
+.material-symbols-outlined {
+  visibility: hidden;
+}
+.fonts-loaded .material-symbols-outlined {
+  visibility: visible;
+}
+
 /* Card shadow from prototype */
 .card-shadow {
   box-shadow: 0 12px 32px -4px rgba(24, 28, 31, 0.06);
