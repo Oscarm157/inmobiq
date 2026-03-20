@@ -4,7 +4,7 @@ import type { SourcePortal } from "@/types/database";
 import { assignZone } from "./zone-assigner";
 import { computeFingerprints } from "./dedup";
 
-function getSupabaseClient() {
+export function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
