@@ -9,27 +9,24 @@ import { MiniMapWrapper } from "@/components/map/mini-map-wrapper"
 import { NarrativeInsight } from "@/components/narrative-insight"
 import { InventoryTypeChart } from "@/components/inventory-type-chart"
 import { TopZonesHighlight } from "@/components/top-zones-highlight"
-import { PipelinePreviewCard } from "@/components/pipeline-preview-card"
-import { PortfolioTeaser } from "@/components/portfolio-teaser"
+import { PriceTable } from "@/components/price-table"
 import { PriceRangeChart } from "@/components/price-range-chart"
 import { TypeCompositionChart } from "@/components/type-composition-chart"
 import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
 import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
-import { getPipelineProjects } from "@/lib/data/pipeline"
-import { getPortfolioPresets } from "@/lib/data/portfolio"
 import { getListingsAnalytics } from "@/lib/data/listings"
+import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { formatNumber, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 
 export default async function HomePage() {
-  const [zones, city, priceTrend, pipeline, presets, analytics] = await Promise.all([
+  const [zones, city, priceTrend, analytics, riskData] = await Promise.all([
     getZoneMetrics(),
     getCityMetrics(),
     getPriceTrendData(),
-    Promise.resolve(getPipelineProjects()),
-    Promise.resolve(getPortfolioPresets()),
     getListingsAnalytics(),
+    getZoneRiskMetrics(),
   ])
 
   // Narrative helpers
@@ -37,9 +34,6 @@ export default async function HomePage() {
   const mostActive = zones.reduce((a, b) => a.total_listings > b.total_listings ? a : b)
   const topByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
   const topByActivity = [...zones].sort((a, b) => b.total_listings - a.total_listings)
-  const featuredProjects = pipeline.filter((p) => p.status === "construccion" || p.status === "preventa").slice(0, 3)
-  const totalUnits = pipeline.reduce((s, p) => s + p.units_total, 0)
-  const totalSold = pipeline.reduce((s, p) => s + p.units_sold, 0)
   const hasTrendHistory = priceTrend.length > 1
 
   return (
@@ -91,14 +85,17 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* ─── 3. Resumen Ejecutivo ─── */}
+      {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
+      <PriceTable zones={zones} riskData={riskData} />
+
+      {/* ─── 4. Resumen Ejecutivo ─── */}
       <NarrativeInsight
         title="Resumen del mercado"
-        body={`${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas. Datos de tendencia disponibles próximamente conforme se acumule historial semanal.`}
+        body={`${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas.`}
         highlight={`${city.total_zones} zonas monitoreadas · ${formatNumber(city.total_listings)} propiedades activas`}
       />
 
-      {/* ─── 4. Charts ─── */}
+      {/* ─── 5. Charts ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ZonesBarChart data={analytics.pricePerM2ByZone} />
         <PriceRangeChart data={analytics.priceDistribution} />
@@ -112,7 +109,7 @@ export default async function HomePage() {
       {hasTrendHistory && <PriceChart data={priceTrend} />}
       <InventoryTypeChart zones={zones} />
 
-      {/* ─── 5. Zonas Destacadas ─── */}
+      {/* ─── 6. Zonas Destacadas ─── */}
       <section>
         <div className="mb-6">
           <h3 className="text-2xl font-black tracking-tight">Zonas Destacadas</h3>
@@ -123,65 +120,7 @@ export default async function HomePage() {
         <TopZonesHighlight topByPrice={topByPrice} topByActivity={topByActivity} />
       </section>
 
-      {/* ─── 6. Risk / Volatility / Yield — Próximamente ─── */}
-      <section className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-8 border border-dashed border-slate-300 dark:border-slate-700">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
-            <Icon name="security" className="text-xl text-slate-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-600 dark:text-slate-300">Análisis de Riesgo, Volatilidad y Rendimiento</h3>
-            <p className="text-sm text-slate-400">Disponible cuando se acumulen 4+ semanas de datos históricos</p>
-          </div>
-        </div>
-        <p className="text-xs text-slate-400 mt-2">
-          Incluye: matriz de riesgo por zona, volatilidad de precios, cap rate estimado y perfil de liquidez.
-        </p>
-      </section>
-
-      {/* ─── 8. Pipeline Preview ─── */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-2xl font-black tracking-tight">Desarrollos en Curso</h3>
-              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-full uppercase">Datos ilustrativos</span>
-            </div>
-            <p className="text-sm text-slate-500 font-medium">
-              {pipeline.length} proyectos · {formatNumber(totalUnits)} unidades · {Math.round(totalSold / totalUnits * 100)}% vendido
-            </p>
-          </div>
-          <Link href="/pipeline" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver pipeline <Icon name="arrow_forward" className="text-sm" />
-          </Link>
-        </div>
-
-        <NarrativeInsight
-          title="Pipeline de desarrollo"
-          icon="construction"
-          body={`El pipeline activo suma ${formatNumber(totalUnits)} unidades en ${pipeline.length} proyectos. ${featuredProjects[0]?.name ?? "El proyecto principal"} lidera con un ${Math.round((featuredProjects[0]?.units_sold ?? 0) / (featuredProjects[0]?.units_total ?? 1) * 100)}% de absorción. Los precios de preventa van desde ${featuredProjects[featuredProjects.length - 1]?.price_range ?? "N/A"} hasta ${featuredProjects[0]?.price_range ?? "N/A"}.`}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-          {featuredProjects.map((project) => (
-            <PipelinePreviewCard key={project.id} project={project} />
-          ))}
-        </div>
-      </section>
-
-      {/* ─── 9. Portfolio Teaser ─── */}
-      <section>
-        <div className="mb-6">
-          <h3 className="text-2xl font-black tracking-tight">Estrategias de Inversión</h3>
-          <p className="text-sm text-slate-500 font-medium">
-            Tres portafolios predefinidos para diferentes perfiles de riesgo
-          </p>
-        </div>
-
-        <PortfolioTeaser presets={presets} />
-      </section>
-
-      {/* ─── 10. Zones Grid ─── */}
+      {/* ─── 7. Zones Grid + Map ─── */}
       <section>
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -213,28 +152,35 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── 11. CTA de cierre ─── */}
+      {/* ─── 8. CTA de cierre ─── */}
       <section className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl p-8 md:p-10 text-white">
         <div className="max-w-2xl">
-          <h3 className="text-2xl font-black mb-2">Mantente informado</h3>
+          <h3 className="text-2xl font-black mb-2">Explora el mercado</h3>
           <p className="text-blue-100 text-sm font-medium mb-6">
-            Datos actualizados semanalmente. Configura alertas personalizadas para recibir notificaciones
-            cuando los precios cambien en tus zonas de interés, o compara zonas para tomar mejores decisiones.
+            Datos actualizados semanalmente. Compara zonas, analiza riesgo, o busca
+            propiedades específicas para tomar mejores decisiones de inversión.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/alertas"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              <Icon name="notifications" className="text-sm" />
-              Configurar Alertas
-            </Link>
-            <Link
               href="/comparar"
-              className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <Icon name="compare_arrows" className="text-sm" />
               Comparar Zonas
+            </Link>
+            <Link
+              href="/riesgo"
+              className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
+            >
+              <Icon name="query_stats" className="text-sm" />
+              Análisis de Riesgo
+            </Link>
+            <Link
+              href="/buscar"
+              className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
+            >
+              <Icon name="search" className="text-sm" />
+              Buscar Propiedades
             </Link>
           </div>
         </div>

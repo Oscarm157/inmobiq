@@ -8,14 +8,12 @@ import { useSidebar } from "@/components/sidebar-provider"
 import { useAuth } from "@/contexts/auth-context"
 
 const navItems = [
-  { icon: "dashboard", label: "Market Overview", href: "/" },
-  { icon: "location_on", label: "Zone Analytics", href: "/zona" },
-  { icon: "map", label: "Mapa Interactivo", href: "/mapa" },
-  { icon: "query_stats", label: "Investment Risk", href: "/riesgo" },
-  // { icon: "business_center", label: "Portfolio Explorer", href: "/portafolio" }, // Oculto: no mostramos listings individuales
-  { icon: "architecture", label: "Development Pipeline", href: "/pipeline" },
-  { icon: "compare", label: "Comparador de Zonas", href: "/comparar" },
-  { icon: "notifications_active", label: "Mis Alertas", href: "/alertas" },
+  { icon: "monitoring", label: "Precios", href: "/" },
+  { icon: "location_on", label: "Zonas", href: "/zona" },
+  { icon: "map", label: "Mapa", href: "/mapa" },
+  { icon: "compare", label: "Comparar", href: "/comparar" },
+  { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
+  { icon: "search", label: "Buscar", href: "/buscar" },
 ]
 
 export function Sidebar() {

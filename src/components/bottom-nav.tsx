@@ -5,12 +5,11 @@ import Link from "next/link"
 import { Icon } from "@/components/icon"
 
 const mobileNav = [
-  { icon: "dashboard", label: "Overview", href: "/" },
+  { icon: "monitoring", label: "Precios", href: "/" },
   { icon: "location_on", label: "Zonas", href: "/zona/zona-rio" },
   { icon: "map", label: "Mapa", href: "/mapa" },
-  // { icon: "business_center", label: "Portfolio", href: "/portafolio" }, // Oculto: no mostramos listings individuales
+  { icon: "compare", label: "Comparar", href: "/comparar" },
   { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
-  { icon: "architecture", label: "Pipeline", href: "/pipeline" },
 ]
 
 export function BottomNav() {

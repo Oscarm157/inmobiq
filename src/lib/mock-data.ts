@@ -92,72 +92,80 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
 ];
 
+// Weighted average price per m² (weighted by inventory per zone)
+const _totalListings = TIJUANA_ZONES.reduce((s, z) => s + z.total_listings, 0);
+const _weightedPrice = TIJUANA_ZONES.reduce(
+  (s, z) => s + z.avg_price_per_m2 * z.total_listings, 0
+) / _totalListings;
+
 export const TIJUANA_CITY_METRICS: CityMetrics = {
   city: "Tijuana",
-  avg_price_per_m2: 24875,
+  avg_price_per_m2: Math.round(_weightedPrice),
   price_trend_pct: 3.1,
-  total_listings: 1603,
-  total_zones: 8,
+  total_listings: _totalListings,
+  total_zones: TIJUANA_ZONES.length,
   top_zones: TIJUANA_ZONES.slice(0, 4),
   hottest_zones: [...TIJUANA_ZONES].sort((a, b) => b.total_listings - a.total_listings).slice(0, 4),
 };
 
-// Monthly trend data for charts
+// Monthly trend data for charts (updated to current period)
 export const PRICE_TREND_DATA = [
-  { month: "Oct 24", avg_price_m2: 22800, listings: 1380 },
-  { month: "Nov 24", avg_price_m2: 23100, listings: 1420 },
-  { month: "Dic 24", avg_price_m2: 23050, listings: 1350 },
-  { month: "Ene 25", avg_price_m2: 23400, listings: 1480 },
-  { month: "Feb 25", avg_price_m2: 23900, listings: 1520 },
-  { month: "Mar 25", avg_price_m2: 24200, listings: 1550 },
   { month: "Abr 25", avg_price_m2: 24100, listings: 1490 },
-  { month: "May 25", avg_price_m2: 24500, listings: 1560 },
+  { month: "May 25", avg_price_m2: 24500, listings: 1520 },
   { month: "Jun 25", avg_price_m2: 24300, listings: 1530 },
-  { month: "Jul 25", avg_price_m2: 24600, listings: 1580 },
-  { month: "Ago 25", avg_price_m2: 24700, listings: 1590 },
-  { month: "Sep 25", avg_price_m2: 24875, listings: 1603 },
+  { month: "Jul 25", avg_price_m2: 24600, listings: 1555 },
+  { month: "Ago 25", avg_price_m2: 24700, listings: 1570 },
+  { month: "Sep 25", avg_price_m2: 24875, listings: 1580 },
+  { month: "Oct 25", avg_price_m2: 25050, listings: 1590 },
+  { month: "Nov 25", avg_price_m2: 25200, listings: 1595 },
+  { month: "Dic 25", avg_price_m2: 25100, listings: 1560 },
+  { month: "Ene 26", avg_price_m2: 25400, listings: 1580 },
+  { month: "Feb 26", avg_price_m2: 25650, listings: 1595 },
+  { month: "Mar 26", avg_price_m2: Math.round(_weightedPrice), listings: _totalListings },
 ];
 
 // ─── Risk Data ────────────────────────────────────────────────────────────────
+// Risk scores are manually curated but plausible given the volatility and market context.
+// When real data is available, risk.ts computes: riskScore = volatility*4 + vacancyProxy + 20
 export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
   {
     zone_slug: "zona-rio", zone_name: "Zona Río",
-    risk_score: 35, volatility: 8.4, cap_rate: 7.2, vacancy_rate: 6.1,
+    risk_score: 35, volatility: 3.2, cap_rate: 6.7, vacancy_rate: 6.1,
     liquidity_score: 88, market_maturity: "consolidado", avg_rent_per_m2: 245, risk_label: "Bajo",
   },
   {
     zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana",
-    risk_score: 52, volatility: 12.1, cap_rate: 5.8, vacancy_rate: 8.4,
+    risk_score: 52, volatility: 6.5, cap_rate: 5.8, vacancy_rate: 8.4,
     liquidity_score: 75, market_maturity: "en_desarrollo", avg_rent_per_m2: 310, risk_label: "Medio",
   },
   {
     zone_slug: "otay", zone_name: "Otay",
-    risk_score: 28, volatility: 5.2, cap_rate: 8.5, vacancy_rate: 4.8,
+    risk_score: 28, volatility: 2.8, cap_rate: 8.5, vacancy_rate: 4.8,
     liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
   },
   {
     zone_slug: "chapultepec", zone_name: "Chapultepec",
-    risk_score: 38, volatility: 7.8, cap_rate: 6.9, vacancy_rate: 7.2,
+    risk_score: 38, volatility: 4.1, cap_rate: 6.9, vacancy_rate: 7.2,
     liquidity_score: 68, market_maturity: "maduro", avg_rent_per_m2: 220, risk_label: "Bajo",
   },
   {
     zone_slug: "hipodromo", zone_name: "Hipódromo",
-    risk_score: 58, volatility: 10.5, cap_rate: 6.2, vacancy_rate: 11.3,
+    risk_score: 58, volatility: 7.2, cap_rate: 6.2, vacancy_rate: 11.3,
     liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 195, risk_label: "Medio",
   },
   {
     zone_slug: "centro", zone_name: "Centro",
-    risk_score: 65, volatility: 9.8, cap_rate: 9.1, vacancy_rate: 14.6,
+    risk_score: 65, volatility: 6.8, cap_rate: 9.1, vacancy_rate: 14.6,
     liquidity_score: 82, market_maturity: "maduro", avg_rent_per_m2: 120, risk_label: "Alto",
   },
   {
     zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
-    risk_score: 45, volatility: 11.2, cap_rate: 7.8, vacancy_rate: 5.5,
+    risk_score: 45, volatility: 5.5, cap_rate: 7.8, vacancy_rate: 5.5,
     liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 175, risk_label: "Medio",
   },
   {
     zone_slug: "la-mesa", zone_name: "La Mesa",
-    risk_score: 32, volatility: 4.8, cap_rate: 8.2, vacancy_rate: 6.8,
+    risk_score: 32, volatility: 2.5, cap_rate: 8.2, vacancy_rate: 6.8,
     liquidity_score: 65, market_maturity: "consolidado", avg_rent_per_m2: 130, risk_label: "Bajo",
   },
 ];

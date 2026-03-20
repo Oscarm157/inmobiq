@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
-import { MOCK_LISTINGS } from "@/lib/mock-data"
+import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
 
 export interface ListingFilters {
@@ -177,43 +177,49 @@ function pct(part: number, total: number): number {
 /* ---------- mock helpers ---------- */
 
 function mockListingsAnalytics(): ListingsAnalytics {
-  const totalListings = 1483
+  const totalListings = TIJUANA_ZONES.reduce((s, z) => s + z.total_listings, 0)
+
+  // Build offerConcentration from TIJUANA_ZONES (sorted by count desc)
+  const sorted = [...TIJUANA_ZONES].sort((a, b) => b.total_listings - a.total_listings)
+  const offerConcentration = sorted.map((z) => ({
+    zone_name: z.zone_name,
+    zone_slug: z.zone_slug,
+    count: z.total_listings,
+    pct: Math.round((z.total_listings / totalListings) * 10000) / 100,
+  }))
+
+  // Build pricePerM2ByZone from TIJUANA_ZONES (sorted by price desc)
+  const byPrice = [...TIJUANA_ZONES].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+  const pricePerM2ByZone = byPrice.map((z) => ({
+    zone_name: z.zone_name,
+    zone_slug: z.zone_slug,
+    median_price_m2: z.avg_price_per_m2,
+    count: z.total_listings,
+  }))
+
+  // Composition by type: sum across all zones
+  const typeMap: Record<string, number> = {}
+  for (const z of TIJUANA_ZONES) {
+    for (const [type, count] of Object.entries(z.listings_by_type)) {
+      typeMap[type] = (typeMap[type] ?? 0) + (count as number)
+    }
+  }
+  const compositionByType = Object.entries(typeMap)
+    .map(([type, count]) => ({ type, count, pct: Math.round((count / totalListings) * 10000) / 100 }))
+    .sort((a, b) => b.count - a.count)
+
   return {
-    pricePerM2ByZone: [
-      { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", median_price_m2: 38200, count: 287 },
-      { zone_name: "Zona Río", zone_slug: "zona-rio", median_price_m2: 32500, count: 342 },
-      { zone_name: "Chapultepec", zone_slug: "chapultepec", median_price_m2: 28900, count: 156 },
-      { zone_name: "Hipódromo", zone_slug: "hipodromo", median_price_m2: 25400, count: 124 },
-      { zone_name: "Otay", zone_slug: "otay", median_price_m2: 18500, count: 198 },
-      { zone_name: "Centro", zone_slug: "centro", median_price_m2: 15800, count: 178 },
-      { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", median_price_m2: 22100, count: 98 },
-      { zone_name: "La Mesa", zone_slug: "la-mesa", median_price_m2: 14200, count: 100 },
-    ],
+    pricePerM2ByZone,
     priceDistribution: [
-      { range: "<1M", count: 148, pct: 9.98 },
-      { range: "1M-3M", count: 445, pct: 30.01 },
-      { range: "3M-5M", count: 371, pct: 25.02 },
-      { range: "5M-10M", count: 297, pct: 20.03 },
-      { range: "10M-20M", count: 163, pct: 10.99 },
-      { range: ">20M", count: 59, pct: 3.98 },
+      { range: "<1M", count: 160, pct: Math.round((160 / totalListings) * 10000) / 100 },
+      { range: "1M-3M", count: 481, pct: Math.round((481 / totalListings) * 10000) / 100 },
+      { range: "3M-5M", count: 401, pct: Math.round((401 / totalListings) * 10000) / 100 },
+      { range: "5M-10M", count: 321, pct: Math.round((321 / totalListings) * 10000) / 100 },
+      { range: "10M-20M", count: 176, pct: Math.round((176 / totalListings) * 10000) / 100 },
+      { range: ">20M", count: totalListings - 160 - 481 - 401 - 321 - 176, pct: Math.round(((totalListings - 160 - 481 - 401 - 321 - 176) / totalListings) * 10000) / 100 },
     ],
-    compositionByType: [
-      { type: "departamento", count: 623, pct: 42.01 },
-      { type: "casa", count: 490, pct: 33.04 },
-      { type: "terreno", count: 148, pct: 9.98 },
-      { type: "local", count: 133, pct: 8.97 },
-      { type: "oficina", count: 89, pct: 6.0 },
-    ],
-    offerConcentration: [
-      { zone_name: "Zona Río", zone_slug: "zona-rio", count: 342, pct: 23.06 },
-      { zone_name: "Playas de Tijuana", zone_slug: "playas-de-tijuana", count: 287, pct: 19.35 },
-      { zone_name: "Otay", zone_slug: "otay", count: 198, pct: 13.35 },
-      { zone_name: "Centro", zone_slug: "centro", count: 178, pct: 12.0 },
-      { zone_name: "Chapultepec", zone_slug: "chapultepec", count: 156, pct: 10.52 },
-      { zone_name: "Hipódromo", zone_slug: "hipodromo", count: 124, pct: 8.36 },
-      { zone_name: "La Mesa", zone_slug: "la-mesa", count: 100, pct: 6.74 },
-      { zone_name: "Residencial del Bosque", zone_slug: "residencial-del-bosque", count: 98, pct: 6.61 },
-    ],
+    compositionByType,
+    offerConcentration,
     totalListings,
     medianPrice: 3850000,
   }
