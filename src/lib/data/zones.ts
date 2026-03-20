@@ -133,16 +133,31 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     const prevSnaps = prevSnapsRes.data as Array<{ zone_id: string; avg_price_per_m2: number; count_active: number }> | null
     const listingsData = listingsRes.data as Array<{ zone_id: string; price_mxn: number; area_m2: number }> | null
 
-    if (!zones?.length || !latestSnaps?.length) return TIJUANA_ZONES
+    if (!zones?.length || !latestSnaps?.length) {
+      // Apply basic filters to mock fallback
+      let fallback = TIJUANA_ZONES
+      if (filters?.zonas?.length) {
+        fallback = fallback.filter((z) => filters.zonas!.includes(z.zone_slug))
+      }
+      if (filters?.tipos?.length) {
+        fallback = fallback.map((z) => {
+          const filteredTotal = filters.tipos!.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
+          return { ...z, total_listings: filteredTotal }
+        }).filter((z) => z.total_listings > 0)
+      }
+      return fallback
+    }
 
     // Build median price/m² lookup from individual listings
     const medianPriceByZone = new Map<string, number>()
     if (listingsData?.length) {
       const grouped = new Map<string, number[]>()
       for (const l of listingsData) {
-        const arr = grouped.get(l.zone_id) ?? []
-        arr.push(l.price_mxn / l.area_m2)
-        grouped.set(l.zone_id, arr)
+        if (l.area_m2 > 0 && l.price_mxn > 0) {
+          const arr = grouped.get(l.zone_id) ?? []
+          arr.push(l.price_mxn / l.area_m2)
+          grouped.set(l.zone_id, arr)
+        }
       }
       for (const [zoneId, values] of grouped) {
         medianPriceByZone.set(zoneId, Math.round(median(values)))
@@ -287,7 +302,7 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     if (!latestCity?.length) return TIJUANA_CITY_METRICS
 
     const [latest, prev] = latestCity
-    const priceTrend = prev
+    const priceTrend = prev && Number(prev.avg_price_per_m2) > 0
       ? ((Number(latest.avg_price_per_m2) - Number(prev.avg_price_per_m2)) /
           Number(prev.avg_price_per_m2)) *
         100

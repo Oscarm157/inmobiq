@@ -4,93 +4,23 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { useCurrency } from "@/contexts/currency-context"
-import type { PropertyType, ListingType } from "@/types/database"
+import {
+  PROPERTY_TYPES,
+  ZONES,
+  BEDROOMS,
+  buildMarketParams,
+  parseMarketParams,
+  hasActiveFilters,
+  countActiveFilters,
+  type MarketFilterState,
+} from "@/lib/filter-utils"
+
+// Re-export for consumers that imported from this file
+export { buildMarketParams, parseMarketParams, type MarketFilterState } from "@/lib/filter-utils"
 
 /** Prevent scroll-wheel from changing number inputs */
 function preventScrollChange(e: React.WheelEvent<HTMLInputElement>) {
   (e.target as HTMLInputElement).blur()
-}
-
-const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
-  { value: "casa", label: "Casa", icon: "home" },
-  { value: "departamento", label: "Depto", icon: "apartment" },
-  { value: "terreno", label: "Terreno", icon: "landscape" },
-  { value: "local", label: "Local", icon: "store" },
-  { value: "oficina", label: "Oficina", icon: "business" },
-]
-
-const ZONES = [
-  { slug: "zona-rio", name: "Zona Río" },
-  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
-  { slug: "otay", name: "Otay" },
-  { slug: "chapultepec", name: "Chapultepec" },
-  { slug: "hipodromo", name: "Hipódromo" },
-  { slug: "centro", name: "Centro" },
-  { slug: "residencial-del-bosque", name: "Residencial del Bosque" },
-  { slug: "la-mesa", name: "La Mesa" },
-]
-
-const BEDROOMS = [1, 2, 3, 4] as const
-
-export interface MarketFilterState {
-  tipos: PropertyType[]
-  zonas: string[]
-  listing_type: ListingType | ""
-  precio_min: string
-  precio_max: string
-  area_min: string
-  area_max: string
-  recamaras: number[]
-}
-
-export function buildMarketParams(state: MarketFilterState): URLSearchParams {
-  const p = new URLSearchParams()
-  if (state.tipos.length) p.set("tipo", state.tipos.join(","))
-  if (state.zonas.length) p.set("zona", state.zonas.join(","))
-  if (state.listing_type) p.set("operacion", state.listing_type)
-  if (state.precio_min) p.set("precio_min", state.precio_min)
-  if (state.precio_max) p.set("precio_max", state.precio_max)
-  if (state.area_min) p.set("area_min", state.area_min)
-  if (state.area_max) p.set("area_max", state.area_max)
-  if (state.recamaras.length) p.set("rec", state.recamaras.join(","))
-  return p
-}
-
-export function parseMarketParams(sp: URLSearchParams): MarketFilterState {
-  return {
-    tipos: sp.get("tipo") ? (sp.get("tipo")!.split(",") as PropertyType[]) : [],
-    zonas: sp.get("zona") ? sp.get("zona")!.split(",") : [],
-    listing_type: (sp.get("operacion") as ListingType) || "",
-    precio_min: sp.get("precio_min") ?? "",
-    precio_max: sp.get("precio_max") ?? "",
-    area_min: sp.get("area_min") ?? "",
-    area_max: sp.get("area_max") ?? "",
-    recamaras: sp.get("rec") ? sp.get("rec")!.split(",").map(Number) : [],
-  }
-}
-
-function hasActiveFilters(state: MarketFilterState) {
-  return (
-    state.tipos.length > 0 ||
-    state.zonas.length > 0 ||
-    state.listing_type !== "" ||
-    state.precio_min !== "" ||
-    state.precio_max !== "" ||
-    state.area_min !== "" ||
-    state.area_max !== "" ||
-    state.recamaras.length > 0
-  )
-}
-
-function countActiveFilters(state: MarketFilterState) {
-  return (
-    state.tipos.length +
-    state.zonas.length +
-    (state.listing_type ? 1 : 0) +
-    (state.precio_min || state.precio_max ? 1 : 0) +
-    (state.area_min || state.area_max ? 1 : 0) +
-    state.recamaras.length
-  )
 }
 
 export function MarketFilters() {
@@ -277,9 +207,18 @@ export function MarketFilters() {
                 />
               </div>
               {(state.precio_min || state.precio_max) && (
-                <p className="text-[10px] text-slate-500 mt-1">
-                  {state.precio_min ? formatPrice(Number(state.precio_min)) : "Sin mínimo"} —{" "}
-                  {state.precio_max ? formatPrice(Number(state.precio_max)) : "Sin máximo"}
+                <p className={`text-[10px] mt-1 ${
+                  state.precio_min && state.precio_max && Number(state.precio_min) > Number(state.precio_max)
+                    ? "text-red-500 font-bold"
+                    : "text-slate-500"
+                }`}>
+                  {state.precio_min && state.precio_max && Number(state.precio_min) > Number(state.precio_max)
+                    ? "Rango inválido: mínimo mayor que máximo"
+                    : <>
+                        {state.precio_min ? formatPrice(Number(state.precio_min)) : "Sin mínimo"} —{" "}
+                        {state.precio_max ? formatPrice(Number(state.precio_max)) : "Sin máximo"}
+                      </>
+                  }
                 </p>
               )}
             </div>
@@ -307,6 +246,11 @@ export function MarketFilters() {
                   className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              {state.area_min && state.area_max && Number(state.area_min) > Number(state.area_max) && (
+                <p className="text-[10px] text-red-500 font-bold mt-1">
+                  Rango inválido: mínimo mayor que máximo
+                </p>
+              )}
             </div>
 
             {/* Zonas */}
