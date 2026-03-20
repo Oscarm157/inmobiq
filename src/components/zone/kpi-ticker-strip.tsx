@@ -1,5 +1,8 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils"
+import { formatPercent, formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics, CityMetrics } from "@/types/database"
 
 interface KPITickerStripProps {
@@ -19,6 +22,7 @@ interface KPICell {
 }
 
 export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProps) {
+  const { formatPrice } = useCurrency()
   const diffFromCity = ((zone.avg_price_per_m2 - city.avg_price_per_m2) / city.avg_price_per_m2) * 100
   const trendPositive = zone.price_trend_pct >= 0
 
@@ -28,7 +32,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-blue-50 dark:bg-blue-950",
       iconColor: "text-blue-700 dark:text-blue-400",
       label: "Precio / m²",
-      value: formatCurrency(zone.avg_price_per_m2),
+      value: formatPrice(zone.avg_price_per_m2),
       sub: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
       subColor: zone.price_trend_pct === 0 ? "text-slate-400" : trendPositive ? "text-emerald-600" : "text-red-600",
     },
@@ -37,7 +41,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-violet-50 dark:bg-violet-950",
       iconColor: "text-violet-700 dark:text-violet-400",
       label: "Ticket Promedio",
-      value: formatCurrency(zone.avg_ticket),
+      value: formatPrice(zone.avg_ticket),
     },
     {
       icon: "inventory_2",

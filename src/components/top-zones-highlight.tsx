@@ -1,5 +1,8 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics } from "@/types/database"
 import Link from "next/link"
 
@@ -9,6 +12,7 @@ interface TopZonesHighlightProps {
 }
 
 export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlightProps) {
+  const { formatPrice } = useCurrency()
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Más caras */}
@@ -39,7 +43,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
                 <p className="text-xs text-slate-400">{formatNumber(zone.total_listings)} propiedades</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold">{formatCurrency(zone.avg_price_per_m2)}/m²</p>
+                <p className="text-sm font-bold">{formatPrice(zone.avg_price_per_m2)}/m²</p>
                 <p className={`text-[10px] font-bold ${zone.price_trend_pct >= 0 ? "text-green-600" : "text-red-500"}`}>
                   {zone.price_trend_pct >= 0 ? "+" : ""}{zone.price_trend_pct.toFixed(1)}%
                 </p>
@@ -74,7 +78,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">{zone.zone_name}</p>
-                <p className="text-xs text-slate-400">{formatCurrency(zone.avg_price_per_m2)}/m²</p>
+                <p className="text-xs text-slate-400">{formatPrice(zone.avg_price_per_m2)}/m²</p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold">{formatNumber(zone.total_listings)}</p>

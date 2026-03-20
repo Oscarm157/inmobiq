@@ -14,7 +14,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { PriceTrendPoint } from "@/lib/data/snapshots"
 
 const chartConfig = {
@@ -29,6 +29,7 @@ interface PriceChartProps {
 }
 
 export function PriceChart({ data }: PriceChartProps) {
+  const { formatPrice } = useCurrency()
   return (
     <Card>
       <CardHeader>
@@ -62,7 +63,7 @@ export function PriceChart({ data }: PriceChartProps) {
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  formatter={(value) => formatCurrency(value as number)}
+                  formatter={(value) => formatPrice(value as number)}
                   indicator="line"
                 />
               }

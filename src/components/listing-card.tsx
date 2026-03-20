@@ -1,5 +1,8 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { Listing } from "@/types/database"
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
@@ -34,6 +37,7 @@ interface ListingCardProps {
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
+  const { formatPrice } = useCurrency()
   const isRenta = listing.listing_type === "renta"
   const typeLabel = PROPERTY_TYPE_LABELS[listing.property_type] ?? listing.property_type
   const typeIcon = PROPERTY_TYPE_ICONS[listing.property_type] ?? "home"
@@ -62,12 +66,12 @@ export function ListingCard({ listing }: ListingCardProps) {
       {/* Price */}
       <div>
         <p className="text-xl font-black text-blue-700">
-          {formatCurrency(listing.price)}
+          {formatPrice(listing.price)}
           {isRenta && <span className="text-sm font-medium text-slate-500">/mes</span>}
         </p>
         {!isRenta && (
           <p className="text-xs text-slate-500 font-medium">
-            {formatCurrency(listing.price_per_m2)}/m²
+            {formatPrice(listing.price_per_m2)}/m²
           </p>
         )}
       </div>

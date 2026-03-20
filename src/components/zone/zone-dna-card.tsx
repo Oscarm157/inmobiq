@@ -1,5 +1,7 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { PropertyType } from "@/types/database"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
@@ -39,6 +41,7 @@ export function ZoneDNACard({
   avgPricePerM2,
   totalListings,
 }: ZoneDNACardProps) {
+  const { formatPrice } = useCurrency()
   const metrics = [
     {
       icon: "straighten",
@@ -58,7 +61,7 @@ export function ZoneDNACard({
     {
       icon: "price_change",
       label: "Precio / m²",
-      value: formatCurrency(avgPricePerM2),
+      value: formatPrice(avgPricePerM2),
     },
   ]
 
@@ -92,7 +95,7 @@ export function ZoneDNACard({
         {/* Avg ticket */}
         <div className="mb-5 pb-5 border-b border-white/10">
           <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Precio promedio</p>
-          <p className="text-3xl font-black tracking-tight">{formatCurrency(avgTicket)}</p>
+          <p className="text-3xl font-black tracking-tight">{formatPrice(avgTicket)}</p>
         </div>
 
         {/* Metrics grid */}

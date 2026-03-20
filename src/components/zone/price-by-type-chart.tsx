@@ -5,6 +5,7 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { useCurrency } from "@/contexts/currency-context"
 
 const COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -31,7 +32,11 @@ interface PriceByTypeChartProps {
 }
 
 export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
+  const { formatPrice } = useCurrency()
   if (!data.length) return null
+
+  // Re-format labels client-side to respect currency preference
+  const chartData = data.map((d) => ({ ...d, label: formatPrice(d.avgTicket) }))
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
@@ -45,7 +50,7 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
       </div>
       <ChartContainer config={chartConfig} className="h-[220px] w-full">
         <BarChart
-          data={data}
+          data={chartData}
           layout="vertical"
           margin={{ top: 0, right: 100, left: 0, bottom: 0 }}
         >
@@ -59,7 +64,7 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
             className="text-xs font-semibold"
           />
           <Bar dataKey="avgTicket" radius={[0, 6, 6, 0]} barSize={20}>
-            {data.map((entry) => (
+            {chartData.map((entry) => (
               <Cell key={entry.typeKey} fill={COLORS[entry.typeKey] ?? "#6b7280"} />
             ))}
             <LabelList

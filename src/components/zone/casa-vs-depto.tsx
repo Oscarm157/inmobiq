@@ -1,6 +1,7 @@
 "use client"
 
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface CasaVsDeptoData {
   type: string
@@ -39,6 +40,7 @@ function buildExample(casa: CasaVsDeptoData | undefined, depto: CasaVsDeptoData 
 }
 
 export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
+  const { formatPrice } = useCurrency()
   if (!data.length) return null
 
   const casa = data.find((d) => d.type === "casa")
@@ -113,8 +115,8 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
       <div className="space-y-3">
         <ComparisonRow
           label="Precio mediano"
-          casaValue={formatCurrency(casa!.median_price)}
-          deptoValue={formatCurrency(depto!.median_price)}
+          casaValue={formatPrice(casa!.median_price)}
+          deptoValue={formatPrice(depto!.median_price)}
         />
         <ComparisonRow
           label="Área mediana"
@@ -123,8 +125,8 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
         />
         <ComparisonRow
           label="Precio por m²"
-          casaValue={`${formatCurrency(casa!.median_price_m2)}/m²`}
-          deptoValue={`${formatCurrency(depto!.median_price_m2)}/m²`}
+          casaValue={`${formatPrice(casa!.median_price_m2)}/m²`}
+          deptoValue={`${formatPrice(depto!.median_price_m2)}/m²`}
         />
         <ComparisonRow
           label="Listings"

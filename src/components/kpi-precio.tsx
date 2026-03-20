@@ -1,5 +1,8 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatPercent } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface KPIPrecioProps {
   pricePerM2: number
@@ -7,6 +10,7 @@ interface KPIPrecioProps {
 }
 
 export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
+  const { formatPrice } = useCurrency()
   // Generate sparkline bar heights based on price trend
   const bars = [4, 5, 4.5, 6, 5.5, 7, 6.5, 8, 7.5, 10]
 
@@ -21,7 +25,7 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
             Precio Promedio / m²
           </p>
           <h4 className="text-2xl font-black">
-            {formatCurrency(pricePerM2)}
+            {formatPrice(pricePerM2)}
           </h4>
         </div>
       </div>
