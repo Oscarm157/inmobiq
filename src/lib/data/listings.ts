@@ -2,6 +2,11 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
 
+/** Build zone name lookup from mock data (single source of truth) */
+const MOCK_ZONE_LOOKUP = new Map(
+  TIJUANA_ZONES.map((z) => [z.zone_id, { name: z.zone_name, slug: z.zone_slug }])
+)
+
 export interface ListingFilters {
   tipos?: PropertyType[]
   zonas?: string[]   // zone slugs
@@ -34,7 +39,7 @@ async function resolveZoneSlugs(slugs: string[]): Promise<string[]> {
   }
 }
 
-function applyMockFilters(filters: ListingFilters): ListingsResult {
+export function applyMockFilters(filters: ListingFilters): ListingsResult {
   let results = [...MOCK_LISTINGS]
 
   if (filters.tipos?.length) {
@@ -176,53 +181,121 @@ function pct(part: number, total: number): number {
 
 /* ---------- mock helpers ---------- */
 
-function mockListingsAnalytics(): ListingsAnalytics {
-  const totalListings = TIJUANA_ZONES.reduce((s, z) => s + z.total_listings, 0)
+function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics {
+  // Apply filters to mock listings first, then compute analytics from filtered set
+  const { listings: filtered } = applyMockFilters(filters)
+  const hasFilters = (filters.tipos?.length ?? 0) > 0 || !!filters.listing_type ||
+    (filters.zonas?.length ?? 0) > 0 || filters.precio_min != null ||
+    filters.precio_max != null || filters.area_min != null ||
+    filters.area_max != null || (filters.recamaras?.length ?? 0) > 0
 
-  // Build offerConcentration from TIJUANA_ZONES (sorted by count desc)
-  const sorted = [...TIJUANA_ZONES].sort((a, b) => b.total_listings - a.total_listings)
-  const offerConcentration = sorted.map((z) => ({
-    zone_name: z.zone_name,
-    zone_slug: z.zone_slug,
-    count: z.total_listings,
-    pct: Math.round((z.total_listings / totalListings) * 10000) / 100,
-  }))
+  // If no filters, derive from TIJUANA_ZONES as single source of truth
+  if (!hasFilters) {
+    const totalListings = TIJUANA_ZONES.reduce((s, z) => s + z.total_listings, 0)
 
-  // Build pricePerM2ByZone from TIJUANA_ZONES (sorted by price desc)
-  const byPrice = [...TIJUANA_ZONES].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
-  const pricePerM2ByZone = byPrice.map((z) => ({
-    zone_name: z.zone_name,
-    zone_slug: z.zone_slug,
-    median_price_m2: z.avg_price_per_m2,
-    count: z.total_listings,
-  }))
+    // Build offerConcentration from TIJUANA_ZONES (sorted by count desc)
+    const sorted = [...TIJUANA_ZONES].sort((a, b) => b.total_listings - a.total_listings)
+    const offerConcentration = sorted.map((z) => ({
+      zone_name: z.zone_name,
+      zone_slug: z.zone_slug,
+      count: z.total_listings,
+      pct: Math.round((z.total_listings / totalListings) * 10000) / 100,
+    }))
 
-  // Composition by type: sum across all zones
-  const typeMap: Record<string, number> = {}
-  for (const z of TIJUANA_ZONES) {
-    for (const [type, count] of Object.entries(z.listings_by_type)) {
-      typeMap[type] = (typeMap[type] ?? 0) + (count as number)
+    // Build pricePerM2ByZone from TIJUANA_ZONES (sorted by price desc)
+    const byPrice = [...TIJUANA_ZONES].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+    const pricePerM2ByZone = byPrice.map((z) => ({
+      zone_name: z.zone_name,
+      zone_slug: z.zone_slug,
+      median_price_m2: z.avg_price_per_m2,
+      count: z.total_listings,
+    }))
+
+    // Composition by type: sum across all zones
+    const typeMap: Record<string, number> = {}
+    for (const z of TIJUANA_ZONES) {
+      for (const [type, count] of Object.entries(z.listings_by_type)) {
+        typeMap[type] = (typeMap[type] ?? 0) + (count as number)
+      }
+    }
+    const compositionByType = Object.entries(typeMap)
+      .map(([type, count]) => ({ type, count, pct: Math.round((count / totalListings) * 10000) / 100 }))
+      .sort((a, b) => b.count - a.count)
+
+    return {
+      pricePerM2ByZone,
+      priceDistribution: [
+        { range: "<1M", count: 160, pct: Math.round((160 / totalListings) * 10000) / 100 },
+        { range: "1M-3M", count: 481, pct: Math.round((481 / totalListings) * 10000) / 100 },
+        { range: "3M-5M", count: 401, pct: Math.round((401 / totalListings) * 10000) / 100 },
+        { range: "5M-10M", count: 321, pct: Math.round((321 / totalListings) * 10000) / 100 },
+        { range: "10M-20M", count: 176, pct: Math.round((176 / totalListings) * 10000) / 100 },
+        { range: ">20M", count: totalListings - 160 - 481 - 401 - 321 - 176, pct: Math.round(((totalListings - 160 - 481 - 401 - 321 - 176) / totalListings) * 10000) / 100 },
+      ],
+      compositionByType,
+      offerConcentration,
+      totalListings,
+      medianPrice: 3850000,
     }
   }
-  const compositionByType = Object.entries(typeMap)
-    .map(([type, count]) => ({ type, count, pct: Math.round((count / totalListings) * 10000) / 100 }))
+
+  // Compute analytics from filtered mock listings
+  const totalListings = filtered.length
+  const withPrice = filtered.filter((l) => l.price > 0)
+  const medianPrice = median(withPrice.map((l) => l.price))
+
+  // pricePerM2ByZone
+  const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
+  for (const l of filtered) {
+    if (l.price > 0 && l.area_m2 > 0) {
+      const zone = MOCK_ZONE_LOOKUP.get(l.zone_id)
+      if (zone) {
+        if (!zoneMap.has(zone.slug)) zoneMap.set(zone.slug, { ...zone, values: [] })
+        zoneMap.get(zone.slug)!.values.push(l.price / l.area_m2)
+      }
+    }
+  }
+  const pricePerM2ByZone = Array.from(zoneMap.values())
+    .map((z) => ({ zone_name: z.name, zone_slug: z.slug, median_price_m2: Math.round(median(z.values)), count: z.values.length }))
+    .sort((a, b) => b.median_price_m2 - a.median_price_m2)
+
+  // priceDistribution
+  const ranges: { label: string; min: number; max: number }[] = [
+    { label: "<1M", min: 0, max: 1_000_000 },
+    { label: "1M-3M", min: 1_000_000, max: 3_000_000 },
+    { label: "3M-5M", min: 3_000_000, max: 5_000_000 },
+    { label: "5M-10M", min: 5_000_000, max: 10_000_000 },
+    { label: "10M-20M", min: 10_000_000, max: 20_000_000 },
+    { label: ">20M", min: 20_000_000, max: Infinity },
+  ]
+  const priceDistribution = ranges.map((r) => {
+    const count = withPrice.filter((l) => l.price >= r.min && l.price < r.max).length
+    return { range: r.label, count, pct: pct(count, withPrice.length) }
+  })
+
+  // compositionByType
+  const typeCount = new Map<string, number>()
+  for (const l of filtered) {
+    typeCount.set(l.property_type, (typeCount.get(l.property_type) ?? 0) + 1)
+  }
+  const compositionByType = Array.from(typeCount.entries())
+    .map(([type, count]) => ({ type, count, pct: pct(count, totalListings) }))
     .sort((a, b) => b.count - a.count)
 
-  return {
-    pricePerM2ByZone,
-    priceDistribution: [
-      { range: "<1M", count: 160, pct: Math.round((160 / totalListings) * 10000) / 100 },
-      { range: "1M-3M", count: 481, pct: Math.round((481 / totalListings) * 10000) / 100 },
-      { range: "3M-5M", count: 401, pct: Math.round((401 / totalListings) * 10000) / 100 },
-      { range: "5M-10M", count: 321, pct: Math.round((321 / totalListings) * 10000) / 100 },
-      { range: "10M-20M", count: 176, pct: Math.round((176 / totalListings) * 10000) / 100 },
-      { range: ">20M", count: totalListings - 160 - 481 - 401 - 321 - 176, pct: Math.round(((totalListings - 160 - 481 - 401 - 321 - 176) / totalListings) * 10000) / 100 },
-    ],
-    compositionByType,
-    offerConcentration,
-    totalListings,
-    medianPrice: 3850000,
+  // offerConcentration
+  const zoneCountMap = new Map<string, { name: string; slug: string; count: number }>()
+  for (const l of filtered) {
+    const zone = MOCK_ZONE_LOOKUP.get(l.zone_id)
+    if (zone) {
+      if (!zoneCountMap.has(zone.slug)) zoneCountMap.set(zone.slug, { ...zone, count: 0 })
+      zoneCountMap.get(zone.slug)!.count++
+    }
   }
+  const offerConcentration = Array.from(zoneCountMap.values())
+    .map((z) => ({ zone_name: z.name, zone_slug: z.slug, count: z.count, pct: pct(z.count, totalListings) }))
+    .sort((a, b) => b.count - a.count)
+
+  return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice }
 }
 
 function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
@@ -252,19 +325,48 @@ function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
 
 /* ---------- getListingsAnalytics ---------- */
 
-export async function getListingsAnalytics(): Promise<ListingsAnalytics> {
-  if (useMock()) return mockListingsAnalytics()
+export async function getListingsAnalytics(filters: ListingFilters = {}): Promise<ListingsAnalytics> {
+  if (useMock()) return mockListingsAnalytics(filters)
 
   try {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
+    let query = supabase
       .from("listings")
-      .select("price_mxn, area_m2, property_type, zone_id, zones(name, slug)")
+      .select("price_mxn, area_m2, property_type, listing_type, bedrooms, zone_id, zones(name, slug)")
       .eq("is_active", true)
+
+    // Apply filters at query level
+    if (filters.tipos?.length) query = query.in("property_type", filters.tipos)
+    if (filters.listing_type) query = query.eq("listing_type", filters.listing_type)
+    if (filters.zonas?.length) {
+      const ids = await resolveZoneSlugs(filters.zonas)
+      if (ids.length) query = query.in("zone_id", ids)
+    }
+    if (filters.precio_min != null) query = query.gte("price_mxn", filters.precio_min)
+    if (filters.precio_max != null) query = query.lte("price_mxn", filters.precio_max)
+    if (filters.area_min != null) query = query.gte("area_m2", filters.area_min)
+    if (filters.area_max != null) query = query.lte("area_m2", filters.area_max)
+    if (filters.recamaras?.length) {
+      // Sanitize: only allow valid bedroom values [1,2,3,4]
+      const safeRec = filters.recamaras.filter((r) => Number.isInteger(r) && r >= 1 && r <= 4)
+      if (safeRec.length) {
+        const has4plus = safeRec.includes(4)
+        const exact = safeRec.filter((r) => r < 4)
+        if (has4plus && exact.length) {
+          query = query.or(`bedrooms.gte.4,bedrooms.in.(${exact.join(",")})`)
+        } else if (has4plus) {
+          query = query.gte("bedrooms", 4)
+        } else {
+          query = query.in("bedrooms", exact)
+        }
+      }
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     const rows = data ?? []
-    if (rows.length === 0) return mockListingsAnalytics()
+    if (rows.length === 0) return mockListingsAnalytics(filters)
 
     type Row = {
       price_mxn: number | null

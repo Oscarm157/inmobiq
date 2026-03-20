@@ -144,12 +144,12 @@ export default async function ZonePage({ params }: ZonePageProps) {
   // --- Price distribution data ---
   const allListings = listings as Listing[]
   const priceRanges = [
-    { min: 0, max: 100_000, range: "<$100K" },
-    { min: 100_000, max: 250_000, range: "$100K–250K" },
-    { min: 250_000, max: 500_000, range: "$250K–500K" },
-    { min: 500_000, max: 1_000_000, range: "$500K–1M" },
-    { min: 1_000_000, max: 2_500_000, range: "$1M–2.5M" },
-    { min: 2_500_000, max: Infinity, range: "$2.5M+" },
+    { min: 0, max: 1_000_000, range: "<$1M" },
+    { min: 1_000_000, max: 3_000_000, range: "$1M–3M" },
+    { min: 3_000_000, max: 5_000_000, range: "$3M–5M" },
+    { min: 5_000_000, max: 10_000_000, range: "$5M–10M" },
+    { min: 10_000_000, max: 20_000_000, range: "$10M–20M" },
+    { min: 20_000_000, max: Infinity, range: ">$20M" },
   ]
   const priceDistData = priceRanges
     .map((r) => {
@@ -273,7 +273,6 @@ export default async function ZonePage({ params }: ZonePageProps) {
         </div>
         <ZoneMapWrapper
           zones={allZones}
-          listings={listings as Listing[]}
           focusZoneSlug={slug}
         />
       </section>

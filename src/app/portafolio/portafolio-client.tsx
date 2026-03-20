@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatPercent } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { RiskLevel, ZoneMetrics, ZoneRiskMetrics, PortfolioPreset } from "@/types/database"
 
 const riskLevelStyles: Record<RiskLevel, { bg: string; text: string; icon: string }> = {
@@ -18,6 +19,7 @@ interface PortafolioClientProps {
 }
 
 export function PortafolioClient({ presets, zones, riskData }: PortafolioClientProps) {
+  const { formatPrice } = useCurrency()
   const [selectedPreset, setSelectedPreset] = useState("balanceado")
   const preset = presets.find((p) => p.id === selectedPreset)!
 
@@ -97,7 +99,7 @@ export function PortafolioClient({ presets, zones, riskData }: PortafolioClientP
                       <p className="text-sm font-bold">{alloc.zone_name}</p>
                     </div>
                     <div className="col-span-2 text-right">
-                      <p className="text-sm font-semibold">{zone ? formatCurrency(zone.avg_price_per_m2) : "—"}</p>
+                      <p className="text-sm font-semibold">{zone ? formatPrice(zone.avg_price_per_m2) : "—"}</p>
                     </div>
                     <div className="col-span-2 text-right">
                       <span className={`text-sm font-bold ${(zone?.price_trend_pct ?? 0) > 0 ? "text-green-600" : "text-red-600"}`}>

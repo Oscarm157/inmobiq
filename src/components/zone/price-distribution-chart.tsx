@@ -5,6 +5,7 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { useCurrency } from "@/contexts/currency-context"
 
 const chartConfig = {
   count: { label: "Propiedades", color: "#2563eb" },
@@ -21,6 +22,7 @@ interface PriceDistributionChartProps {
 }
 
 export function PriceDistributionChart({ data }: PriceDistributionChartProps) {
+  const { currency } = useCurrency()
   if (!data.length) return null
 
   return (
@@ -30,7 +32,7 @@ export function PriceDistributionChart({ data }: PriceDistributionChartProps) {
           Distribución de Precios
         </h3>
         <p className="text-xs text-slate-500 mt-0.5">
-          Concentración de propiedades por rango de precio (USD)
+          Concentración de propiedades por rango de precio ({currency})
         </p>
       </div>
       <ChartContainer config={chartConfig} className="h-[240px] w-full">

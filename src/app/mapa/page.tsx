@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import { getZoneMetrics } from "@/lib/data/zones"
-import { getListings } from "@/lib/data/listings"
 import { MapPageClient } from "./map-page-client"
 import type { ZoneMetrics } from "@/types/database"
 
@@ -10,10 +9,7 @@ export const metadata = {
 }
 
 export default async function MapaPage() {
-  const [zones, { listings }] = await Promise.all([
-    getZoneMetrics(),
-    getListings({ }),
-  ])
+  const zones = await getZoneMetrics()
 
   return (
     <div className="space-y-6">
@@ -38,7 +34,7 @@ export default async function MapaPage() {
           </div>
         }
       >
-        <MapPageClient zones={zones as ZoneMetrics[]} listings={listings} />
+        <MapPageClient zones={zones as ZoneMetrics[]} />
       </Suspense>
     </div>
   )

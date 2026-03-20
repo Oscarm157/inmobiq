@@ -1,7 +1,8 @@
 "use client"
 
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
-import type { ZoneMetrics } from "@/types/database"
+import type { ZoneMetrics, Listing } from "@/types/database"
+import type { ListingFilters } from "@/lib/data/listings"
 
 export interface ZoneTrendPoint {
   month: string
@@ -13,9 +14,15 @@ export interface ZoneComparisonData {
   trendSeries: ZoneTrendPoint[]
 }
 
+export interface ComparisonListing extends Listing {
+  zone_slug: string
+  zone_name: string
+}
+
 export async function getZoneComparisonData(
   allZones: ZoneMetrics[],
-  slugs: string[]
+  slugs: string[],
+  _filters?: ListingFilters
 ): Promise<ZoneComparisonData> {
   const zones = slugs
     .map((slug) => allZones.find((z) => z.zone_slug === slug))

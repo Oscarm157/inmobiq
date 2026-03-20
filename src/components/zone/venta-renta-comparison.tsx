@@ -1,5 +1,7 @@
+"use client"
+
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface VentaRentaData {
   ventaCount: number
@@ -17,6 +19,7 @@ interface VentaRentaComparisonProps {
 }
 
 export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
+  const { formatPrice } = useCurrency()
   const hasVenta = data.ventaCount > 0
   const hasRenta = data.rentaCount > 0
   const total = data.ventaCount + data.rentaCount
@@ -65,13 +68,13 @@ export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
       <div className="space-y-3">
         <ComparisonRow
           label="Precio promedio"
-          venta={hasVenta ? formatCurrency(data.ventaAvgPrice) : "—"}
-          renta={hasRenta ? formatCurrency(data.rentaAvgPrice) : "—"}
+          venta={hasVenta ? formatPrice(data.ventaAvgPrice) : "—"}
+          renta={hasRenta ? formatPrice(data.rentaAvgPrice) : "—"}
         />
         <ComparisonRow
           label="Precio / m²"
-          venta={hasVenta ? formatCurrency(data.ventaAvgPriceM2) : "—"}
-          renta={hasRenta ? formatCurrency(data.rentaAvgPriceM2) : "—"}
+          venta={hasVenta ? formatPrice(data.ventaAvgPriceM2) : "—"}
+          renta={hasRenta ? formatPrice(data.rentaAvgPriceM2) : "—"}
         />
         <ComparisonRow
           label="m² promedio"

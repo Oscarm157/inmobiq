@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 import { getAlerts, createAlert, toggleAlert, deleteAlert } from "@/lib/data/alerts"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { PriceAlert, ConditionType, ZoneMetrics } from "@/types/database"
 
 const CONDITION_LABELS: Record<ConditionType, string> = {
@@ -42,6 +42,7 @@ interface AlertasClientProps {
 }
 
 export function AlertasClient({ zones }: AlertasClientProps) {
+  const { formatPrice } = useCurrency()
   const { user, loading } = useAuth()
   const router = useRouter()
 
@@ -144,7 +145,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
     if (alert.condition_type === "new_listing") return "Nuevo listing disponible"
     const unit = CONDITION_UNITS[alert.condition_type]
     if (alert.condition_type === "price_below") {
-      return `Precio por debajo de: ${formatCurrency(alert.threshold_value)}/m²`
+      return `Precio por debajo de: ${formatPrice(alert.threshold_value)}/m²`
     }
     return `${CONDITION_LABELS[alert.condition_type].replace(` (${unit})`, "")}: ${alert.threshold_value}${unit}`
   }

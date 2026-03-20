@@ -3,10 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import type { ZoneMetrics, Listing } from "@/types/database"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import type { ZoneMetrics } from "@/types/database"
+import { formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
-// Dynamic import to avoid SSR issues with Leaflet
+// Dynamic import to avoid SSR issues with Mapbox GL
 const InteractiveMap = dynamic(
   () => import("@/components/map/interactive-map").then((m) => m.InteractiveMap),
   { ssr: false, loading: () => <div className="h-[600px] bg-slate-100 rounded-xl flex items-center justify-center"><div className="text-slate-400 text-sm font-medium">Cargando mapa…</div></div> }
@@ -14,10 +15,10 @@ const InteractiveMap = dynamic(
 
 interface MapPageClientProps {
   zones: ZoneMetrics[]
-  listings: Listing[]
 }
 
-export function MapPageClient({ zones, listings }: MapPageClientProps) {
+export function MapPageClient({ zones }: MapPageClientProps) {
+  const { formatPrice } = useCurrency()
   const router = useRouter()
   const [selectedZone, setSelectedZone] = useState<ZoneMetrics | null>(null)
 
@@ -32,7 +33,6 @@ export function MapPageClient({ zones, listings }: MapPageClientProps) {
       <div className="lg:col-span-3">
         <InteractiveMap
           zones={zones}
-          listings={listings}
           height="600px"
           showLayerToggle
           onZoneClick={handleZoneClick}
@@ -48,7 +48,7 @@ export function MapPageClient({ zones, listings }: MapPageClientProps) {
             <div className="space-y-3">
               <div>
                 <p className="text-[10px] text-slate-500 font-semibold">Precio promedio/m²</p>
-                <p className="text-xl font-black text-blue-700">{formatCurrency(selectedZone.avg_price_per_m2)}</p>
+                <p className="text-xl font-black text-blue-700">{formatPrice(selectedZone.avg_price_per_m2)}</p>
               </div>
               <div>
                 <p className="text-[10px] text-slate-500 font-semibold">Propiedades activas</p>
@@ -62,7 +62,7 @@ export function MapPageClient({ zones, listings }: MapPageClientProps) {
               </div>
               <div>
                 <p className="text-[10px] text-slate-500 font-semibold">Ticket promedio</p>
-                <p className="text-base font-bold">{formatCurrency(selectedZone.avg_ticket)}</p>
+                <p className="text-base font-bold">{formatPrice(selectedZone.avg_ticket)}</p>
               </div>
             </div>
             <button
@@ -95,7 +95,7 @@ export function MapPageClient({ zones, listings }: MapPageClientProps) {
                 }`}
               >
                 <span className="text-xs font-semibold text-slate-700">{zone.zone_name}</span>
-                <span className="text-xs font-bold text-blue-700">{formatCurrency(zone.avg_price_per_m2)}</span>
+                <span className="text-xs font-bold text-blue-700">{formatPrice(zone.avg_price_per_m2)}</span>
               </button>
             ))}
           </div>

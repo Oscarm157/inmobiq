@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import type { ZoneMetrics, Listing } from "@/types/database"
+import type { ZoneMetrics } from "@/types/database"
 
 const InteractiveMap = dynamic(
   () => import("./interactive-map").then((m) => m.InteractiveMap),
@@ -17,14 +17,12 @@ const InteractiveMap = dynamic(
 
 interface PortfolioMapWrapperProps {
   zones: ZoneMetrics[]
-  listings: Listing[]
 }
 
-export function PortfolioMapWrapper({ zones, listings }: PortfolioMapWrapperProps) {
+export function PortfolioMapWrapper({ zones }: PortfolioMapWrapperProps) {
   return (
     <InteractiveMap
       zones={zones}
-      listings={listings}
       height="320px"
       showLayerToggle
     />

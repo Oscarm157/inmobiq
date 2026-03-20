@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { Icon } from "@/components/icon"
 import { ZoneCard } from "@/components/zone-card"
 import { PriceChart } from "@/components/price-chart"
@@ -13,25 +14,71 @@ import { PriceTable } from "@/components/price-table"
 import { PriceRangeChart } from "@/components/price-range-chart"
 import { TypeCompositionChart } from "@/components/type-composition-chart"
 import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
+import { MarketFilters } from "@/components/market-filters"
 import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
 import { getListingsAnalytics } from "@/lib/data/listings"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { formatNumber, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
+import type { PropertyType, ListingType } from "@/types/database"
 
-export default async function HomePage() {
+interface SearchParams {
+  tipo?: string
+  zona?: string
+  operacion?: string
+  precio_min?: string
+  precio_max?: string
+  area_min?: string
+  area_max?: string
+  rec?: string
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const sp = await searchParams
+
+  // Sanitize and parse filter params
+  const safeNum = (val?: string): number | undefined => {
+    if (!val) return undefined
+    const n = Number(val)
+    return !isNaN(n) && n >= 0 ? n : undefined
+  }
+
+  const VALID_TYPES = new Set(["casa", "departamento", "terreno", "local", "oficina"])
+  const VALID_OPS = new Set(["venta", "renta"])
+
+  const filters = {
+    tipos: sp.tipo
+      ? (sp.tipo.split(",").filter((t) => VALID_TYPES.has(t)) as PropertyType[])
+      : undefined,
+    zonas: sp.zona ? sp.zona.split(",") : undefined,
+    listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
+      ? (sp.operacion as ListingType)
+      : undefined,
+    precio_min: safeNum(sp.precio_min),
+    precio_max: safeNum(sp.precio_max),
+    area_min: safeNum(sp.area_min),
+    area_max: safeNum(sp.area_max),
+    recamaras: sp.rec
+      ? sp.rec.split(",").map(Number).filter((n) => !isNaN(n) && n >= 1 && n <= 4)
+      : undefined,
+  }
+
   const [zones, city, priceTrend, analytics, riskData] = await Promise.all([
-    getZoneMetrics(),
-    getCityMetrics(),
+    getZoneMetrics(filters),
+    getCityMetrics(filters),
     getPriceTrendData(),
-    getListingsAnalytics(),
+    getListingsAnalytics(filters),
     getZoneRiskMetrics(),
   ])
 
-  // Narrative helpers
-  const topZone = zones.reduce((a, b) => a.avg_price_per_m2 > b.avg_price_per_m2 ? a : b)
-  const mostActive = zones.reduce((a, b) => a.total_listings > b.total_listings ? a : b)
+  // Narrative helpers (guard empty zones from aggressive filtering)
+  const topZone = zones.length > 0 ? zones.reduce((a, b) => a.avg_price_per_m2 > b.avg_price_per_m2 ? a : b) : null
+  const mostActive = zones.length > 0 ? zones.reduce((a, b) => a.total_listings > b.total_listings ? a : b) : null
   const topByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
   const topByActivity = [...zones].sort((a, b) => b.total_listings - a.total_listings)
   const hasTrendHistory = priceTrend.length > 1
@@ -39,33 +86,39 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       {/* ─── 1. Header ─── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Market Overview
-            </span>
-            <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Live Data
-            </span>
+      <div className="relative">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
+                Market Overview
+              </span>
+              <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
+                Live Data
+              </span>
+            </div>
+            <h2 className="text-4xl font-extrabold tracking-tight">
+              Mercado Inmobiliario: Tijuana
+            </h2>
+            <p className="text-slate-500 max-w-xl font-medium">
+              Panorama general del mercado. Datos agregados de los principales
+              portales inmobiliarios para Tijuana, B.C.
+            </p>
           </div>
-          <h2 className="text-4xl font-extrabold tracking-tight">
-            Mercado Inmobiliario: Tijuana
-          </h2>
-          <p className="text-slate-500 max-w-xl font-medium">
-            Panorama general del mercado. Datos agregados de los principales
-            portales inmobiliarios para Tijuana, B.C.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
-            <Icon name="filter_list" className="text-sm" />
-            Filtros
-          </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
-            <Icon name="ios_share" className="text-sm" />
-            Exportar
-          </button>
+          <div className="flex gap-3 items-start">
+            <Suspense fallback={
+              <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-bold shadow-sm">
+                <Icon name="filter_list" className="text-sm" />
+                Filtros
+              </button>
+            }>
+              <MarketFilters />
+            </Suspense>
+            <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Icon name="ios_share" className="text-sm" />
+              Exportar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -91,7 +144,10 @@ export default async function HomePage() {
       {/* ─── 4. Resumen Ejecutivo ─── */}
       <NarrativeInsight
         title="Resumen del mercado"
-        body={`${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas.`}
+        body={topZone && mostActive
+          ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas.`
+          : `No se encontraron resultados con los filtros seleccionados. Intenta ajustar los filtros para ver datos del mercado.`
+        }
         highlight={`${city.total_zones} zonas monitoreadas · ${formatNumber(city.total_listings)} propiedades activas`}
       />
 
@@ -135,21 +191,20 @@ export default async function HomePage() {
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <MiniMapWrapper zones={zones} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
-            {zones.slice(0, 3).map((zone) => (
-              <ZoneCard key={`top-${zone.zone_id}`} zone={zone} />
-            ))}
-          </div>
+        <div className="mb-6">
+          <MiniMapWrapper zones={zones} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {zones.map((zone) => (
-            <ZoneCard key={zone.zone_id} zone={zone} />
-          ))}
-        </div>
+        {(() => {
+          const sorted = [...zones].sort((a, b) => b.total_listings - a.total_listings)
+          const maxListings = sorted[0]?.total_listings ?? 1
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {sorted.map((zone, i) => (
+                <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} />
+              ))}
+            </div>
+          )
+        })()}
       </section>
 
       {/* ─── 8. CTA de cierre ─── */}

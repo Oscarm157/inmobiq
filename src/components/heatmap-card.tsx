@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatPercent } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface HeatmapCardProps {
   zoneName: string
@@ -11,6 +12,7 @@ interface HeatmapCardProps {
 }
 
 export function HeatmapCard({ zoneName, pricePerM2, trendPct }: HeatmapCardProps) {
+  const { formatPrice, currency } = useCurrency()
   const [view, setView] = useState("VENTA")
 
   return (
@@ -55,10 +57,10 @@ export function HeatmapCard({ zoneName, pricePerM2, trendPct }: HeatmapCardProps
           </p>
           <div className="flex items-end gap-2">
             <span className="text-2xl font-black">
-              {formatCurrency(pricePerM2)}
+              {formatPrice(pricePerM2)}
             </span>
             <span className="text-xs font-bold text-slate-500 pb-1">
-              MXN/m²
+              {currency}/m²
             </span>
           </div>
           <div

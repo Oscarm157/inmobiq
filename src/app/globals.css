@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "leaflet/dist/leaflet.css";
+@import "mapbox-gl/dist/mapbox-gl.css";
 
 /* Enable class-based dark mode for Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -136,4 +136,44 @@
 
 .dark .card-shadow {
   box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Mapbox popup styling */
+.inmobiq-popup .mapboxgl-popup-content {
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.97);
+  animation: popup-fade-in 200ms ease-out;
+}
+
+.inmobiq-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.97);
+}
+
+.inmobiq-popup .mapboxgl-popup-close-button {
+  font-size: 16px;
+  color: #94a3b8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  right: 4px;
+  top: 4px;
+}
+
+.inmobiq-popup .mapboxgl-popup-close-button:hover {
+  color: #1e293b;
+  background: rgba(241, 245, 249, 0.8);
+}
+
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

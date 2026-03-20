@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { PropertyType, ListingType } from "@/types/database"
 
 const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
@@ -85,6 +85,7 @@ interface FilterPanelProps {
 }
 
 function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
+  const { formatPrice, currency } = useCurrency()
   const toggle = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]
 
@@ -159,7 +160,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
 
       {/* Rango de precios */}
       <div>
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Rango de Precio (MXN)</p>
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Rango de Precio ({currency})</p>
         <div className="flex gap-2">
           <input
             type="number"
@@ -178,8 +179,8 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
         </div>
         {(state.precio_min || state.precio_max) && (
           <p className="text-[10px] text-slate-500 mt-1">
-            {state.precio_min ? formatCurrency(Number(state.precio_min)) : "Sin mínimo"} —{" "}
-            {state.precio_max ? formatCurrency(Number(state.precio_max)) : "Sin máximo"}
+            {state.precio_min ? formatPrice(Number(state.precio_min)) : "Sin mínimo"} —{" "}
+            {state.precio_max ? formatPrice(Number(state.precio_max)) : "Sin máximo"}
           </p>
         )}
       </div>

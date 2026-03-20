@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import { Icon } from "@/components/icon"
+import { Price } from "@/components/price"
 import type { Listing, ZoneMetrics } from "@/types/database"
 
 export function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }): Metadata {
@@ -160,7 +161,7 @@ async function SearchContent({ q }: { q: string }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-800 leading-snug mb-1">{listing.title}</p>
                   <div className="flex flex-wrap gap-2 text-xs text-slate-400">
-                    <span className="font-semibold text-slate-700">{formatPrice(listing.price)} MXN</span>
+                    <Price value={listing.price} className="font-semibold text-slate-700" />
                     <span>·</span>
                     <span>{listing.area_m2}m²</span>
                     <span>·</span>

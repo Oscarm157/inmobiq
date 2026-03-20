@@ -5,7 +5,6 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatCurrency } from "@/lib/utils"
 
 const chartConfig = {
   casa_median: { label: "Casa", color: "#2563eb" },

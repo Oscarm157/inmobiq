@@ -1,289 +1,416 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import type { ZoneMetrics } from "@/types/database"
-import type { ListingFilters } from "@/lib/data/listings"
 import {
-  TIJUANA_ZONE_GEO,
+  ZONE_GEOJSON,
   TIJUANA_CENTER,
   TIJUANA_BOUNDS,
   getPriceColor,
   getPriceLabel,
+  getZoneCentroid,
 } from "@/lib/geo-data"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
-interface Listing {
-  id: string
-  title: string
-  price: number
-  area_m2: number
-  price_per_m2: number
-  property_type: string
-  listing_type: string
-  lat?: number
-  lng?: number
-  zone_slug?: string
-  photo_url?: string
-  bedrooms?: number | null
-}
-
-type LayerMode = "zones" | "listings" | "heatmap"
+type LayerMode = "zones" | "heatmap"
 
 interface InteractiveMapProps {
   zones: ZoneMetrics[]
-  listings?: Listing[]
-  activeFilters?: ListingFilters
-  focusZoneSlug?: string   // zoom into a specific zone on mount
+  focusZoneSlug?: string
   height?: string
   showLayerToggle?: boolean
   onZoneClick?: (slug: string) => void
 }
 
+/** Generate synthetic heatmap points from zone metrics */
+function generateHeatPoints(zones: ZoneMetrics[]): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = []
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed) * 10000
+    return x - Math.floor(x)
+  }
+
+  zones.forEach((z) => {
+    const centroid = getZoneCentroid(z.zone_slug)
+    if (!centroid) return
+
+    // Generate points proportional to listing count (cap at 40 per zone)
+    const count = Math.min(z.total_listings, 40)
+    for (let i = 0; i < count; i++) {
+      const seed1 = z.zone_slug.length * 1000 + i * 7 + 1
+      const seed2 = z.zone_slug.length * 2000 + i * 13 + 3
+      const lng = centroid[0] + (seededRandom(seed1) - 0.5) * 0.015
+      const lat = centroid[1] + (seededRandom(seed2) - 0.5) * 0.012
+      features.push({
+        type: "Feature",
+        properties: { price_per_m2: z.avg_price_per_m2 },
+        geometry: { type: "Point", coordinates: [lng, lat] },
+      })
+    }
+  })
+
+  return { type: "FeatureCollection", features }
+}
+
 export function InteractiveMap({
   zones,
-  listings = [],
-  activeFilters,
   focusZoneSlug,
   height = "500px",
   showLayerToggle = true,
   onZoneClick,
 }: InteractiveMapProps) {
+  const { formatPrice } = useCurrency()
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<unknown>(null)
-  const layersRef = useRef<{ zones: unknown[]; markers: unknown; heatmap: unknown }>({
-    zones: [],
-    markers: null,
-    heatmap: null,
-  })
+  const mapInstanceRef = useRef<mapboxgl.Map | null>(null)
+  const popupRef = useRef<mapboxgl.Popup | null>(null)
   const [activeLayer, setActiveLayer] = useState<LayerMode>("zones")
   const [mounted, setMounted] = useState(false)
+  const [mapLoaded, setMapLoaded] = useState(false)
+
+  const heatPoints = useMemo(() => generateHeatPoints(zones), [zones])
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Initialize map
   useEffect(() => {
     if (!mounted || !mapRef.current || mapInstanceRef.current) return
 
-    // Dynamically import leaflet on client only
-    import("leaflet").then((L) => {
+    import("mapbox-gl").then((mapboxgl) => {
       if (!mapRef.current || mapInstanceRef.current) return
 
-      // Fix default marker icons
-      delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      })
+      const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+      if (!token) return
 
-      const map = L.map(mapRef.current!, {
+      mapboxgl.default.accessToken = token
+
+      const map = new mapboxgl.default.Map({
+        container: mapRef.current!,
+        style: "mapbox://styles/mapbox/light-v11",
         center: TIJUANA_CENTER,
         zoom: 12,
         minZoom: 10,
         maxZoom: 18,
         maxBounds: TIJUANA_BOUNDS,
-        maxBoundsViscosity: 0.8,
-        zoomControl: false,
       })
 
-      L.control.zoom({ position: "topright" }).addTo(map)
-
-      // OpenStreetMap tiles (free, no API key)
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map)
+      map.addControl(
+        new mapboxgl.default.NavigationControl({ showCompass: false }),
+        "top-right"
+      )
 
       mapInstanceRef.current = map
 
-      // Draw zone polygons
-      renderZoneLayers(L, map, zones)
+      // Popup with clean styling
+      popupRef.current = new mapboxgl.default.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: "260px",
+        offset: 15,
+        className: "inmobiq-popup",
+      })
 
-      // If focusZoneSlug, zoom to that zone
-      if (focusZoneSlug) {
-        const geo = TIJUANA_ZONE_GEO.find((z) => z.slug === focusZoneSlug)
-        if (geo) {
-          map.setView([geo.lat, geo.lng], 14)
-        }
+      // Build enriched GeoJSON with zone metrics
+      const enriched = {
+        ...ZONE_GEOJSON,
+        features: ZONE_GEOJSON.features.map((f) => {
+          const props = f.properties as { slug: string; name: string }
+          const metrics = zones.find((z) => z.zone_slug === props.slug)
+          const color = metrics
+            ? getPriceColor(metrics.avg_price_per_m2)
+            : "#94a3b8"
+          const priceLabel = metrics
+            ? getPriceLabel(metrics.avg_price_per_m2)
+            : "Sin datos"
+          return {
+            ...f,
+            properties: {
+              ...props,
+              color,
+              priceLabel,
+              avgPrice: metrics?.avg_price_per_m2 ?? 0,
+              totalListings: metrics?.total_listings ?? 0,
+              priceTrend: metrics?.price_trend_pct ?? 0,
+            },
+          }
+        }),
       }
+
+      map.on("load", () => {
+        // ── Zone layers ──
+        map.addSource("zones", {
+          type: "geojson",
+          data: enriched as GeoJSON.FeatureCollection,
+          generateId: true,
+        })
+
+        // ── Glow layer (soft halo around zones) ──
+        map.addLayer({
+          id: "zones-glow",
+          type: "line",
+          source: "zones",
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              10,
+              6,
+            ],
+            "line-blur": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              14,
+              8,
+            ],
+            "line-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.45,
+              0.25,
+            ],
+            "line-width-transition": { duration: 300 },
+            "line-blur-transition": { duration: 300 },
+            "line-opacity-transition": { duration: 300 },
+          },
+        })
+
+        map.addLayer({
+          id: "zones-fill",
+          type: "fill",
+          source: "zones",
+          paint: {
+            "fill-color": ["get", "color"],
+            "fill-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.65,
+              0.5,
+            ],
+            "fill-opacity-transition": { duration: 300 },
+          },
+        })
+
+        map.addLayer({
+          id: "zones-line",
+          type: "line",
+          source: "zones",
+          paint: {
+            "line-color": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              "#1e3a8a",
+              "#3b82f6",
+            ],
+            "line-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              1.5,
+              1,
+            ],
+            "line-blur": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.5,
+              1.5,
+            ],
+            "line-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.9,
+              0.6,
+            ],
+            "line-width-transition": { duration: 300 },
+            "line-blur-transition": { duration: 300 },
+            "line-opacity-transition": { duration: 300 },
+          },
+        })
+
+        map.addLayer({
+          id: "zones-labels",
+          type: "symbol",
+          source: "zones",
+          layout: {
+            "text-field": ["get", "name"],
+            "text-size": 12,
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+            "text-allow-overlap": false,
+            "text-padding": 4,
+          },
+          paint: {
+            "text-color": "#0f172a",
+            "text-halo-color": "rgba(255,255,255,0.95)",
+            "text-halo-width": 2,
+          },
+        })
+
+        // ── Heatmap layer (synthetic from zone metrics) ──
+        map.addSource("heatmap", {
+          type: "geojson",
+          data: heatPoints,
+        })
+
+        map.addLayer({
+          id: "heatmap-heat",
+          type: "heatmap",
+          source: "heatmap",
+          layout: { visibility: "none" },
+          paint: {
+            "heatmap-weight": [
+              "interpolate",
+              ["linear"],
+              ["get", "price_per_m2"],
+              10000, 0.2,
+              30000, 0.6,
+              50000, 1,
+            ],
+            "heatmap-intensity": [
+              "interpolate", ["linear"], ["zoom"],
+              10, 0.5,
+              14, 1.5,
+            ],
+            "heatmap-radius": [
+              "interpolate", ["linear"], ["zoom"],
+              10, 15,
+              14, 35,
+            ],
+            "heatmap-opacity": 0.75,
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0, "rgba(236,240,252,0)",
+              0.1, "rgba(191,219,254,0.4)",
+              0.3, "rgba(147,197,253,0.6)",
+              0.5, "rgba(96,165,250,0.7)",
+              0.7, "rgba(59,130,246,0.8)",
+              0.9, "rgba(30,64,175,0.9)",
+              1, "rgba(30,58,138,1)",
+            ],
+          },
+        })
+
+        // ── Hover interaction ──
+        let hoveredId: number | null = null
+
+        map.on("mousemove", "zones-fill", (e) => {
+          if (!e.features?.length) return
+          map.getCanvas().style.cursor = "pointer"
+
+          const feature = e.features[0]
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "zones", id: hoveredId },
+              { hover: false }
+            )
+          }
+          hoveredId = feature.id as number
+          map.setFeatureState(
+            { source: "zones", id: hoveredId },
+            { hover: true }
+          )
+        })
+
+        map.on("mouseleave", "zones-fill", () => {
+          map.getCanvas().style.cursor = ""
+          if (hoveredId !== null) {
+            map.setFeatureState(
+              { source: "zones", id: hoveredId },
+              { hover: false }
+            )
+            hoveredId = null
+          }
+        })
+
+        // ── Click interaction ──
+        map.on("click", "zones-fill", (e) => {
+          if (!e.features?.length) return
+          const props = e.features[0].properties as {
+            slug: string
+            name: string
+            priceLabel: string
+            avgPrice: number
+            totalListings: number
+            priceTrend: number
+          }
+
+          if (onZoneClick) onZoneClick(props.slug)
+
+          const centroid = getZoneCentroid(props.slug)
+          if (centroid) {
+            map.flyTo({ center: centroid, zoom: 14, duration: 800 })
+          }
+
+          const trendColor = props.priceTrend >= 0 ? "#16a34a" : "#dc2626"
+          const trendIcon = props.priceTrend >= 0 ? "▲" : "▼"
+
+          popupRef.current
+            ?.setLngLat(e.lngLat)
+            .setHTML(
+              `<div style="font-family:system-ui,-apple-system,sans-serif;padding:4px 2px">
+                <div style="font-weight:800;font-size:15px;color:#0f172a;margin-bottom:2px">${props.name}</div>
+                <div style="display:inline-block;padding:2px 8px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:700;border-radius:10px;margin-bottom:8px">${props.priceLabel}</div>
+                <div style="font-size:18px;font-weight:800;color:#1e40af;margin-bottom:4px">${formatPrice(props.avgPrice)}<span style="font-size:12px;font-weight:500;color:#64748b">/m²</span></div>
+                <div style="display:flex;gap:12px;font-size:11px;color:#475569;margin-bottom:4px">
+                  <span>${props.totalListings} propiedades</span>
+                  <span style="color:${trendColor};font-weight:600">${trendIcon} ${Math.abs(props.priceTrend).toFixed(1)}%</span>
+                </div>
+                <a href="/zona/${props.slug}" style="display:inline-block;margin-top:6px;padding:6px 12px;background:#1e40af;color:white;font-size:11px;font-weight:700;border-radius:6px;text-decoration:none">Ver análisis →</a>
+              </div>`
+            )
+            .addTo(map)
+        })
+
+        // Focus on specific zone
+        if (focusZoneSlug) {
+          const centroid = getZoneCentroid(focusZoneSlug)
+          if (centroid) {
+            map.flyTo({ center: centroid, zoom: 14, duration: 800 })
+          }
+        }
+
+        setMapLoaded(true)
+      })
     })
 
     return () => {
+      if (popupRef.current) {
+        popupRef.current.remove()
+        popupRef.current = null
+      }
       if (mapInstanceRef.current) {
-        ;(mapInstanceRef.current as { remove: () => void }).remove()
+        mapInstanceRef.current.remove()
         mapInstanceRef.current = null
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted])
 
-  // Update listings markers when listings/layer changes
+  // Toggle layer visibility
   useEffect(() => {
-    if (!mapInstanceRef.current) return
-    import("leaflet").then((L) => {
-      const map = mapInstanceRef.current as ReturnType<typeof L.map>
-      updateListingMarkers(L, map, listings, activeLayer)
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listings, activeLayer])
+    const map = mapInstanceRef.current
+    if (!map || !mapLoaded) return
 
-  function renderZoneLayers(
-    L: typeof import("leaflet"),
-    map: ReturnType<typeof L.map>,
-    zonesData: ZoneMetrics[]
-  ) {
-    // Remove existing zone layers
-    layersRef.current.zones.forEach((layer) =>
-      map.removeLayer(layer as Parameters<typeof map.removeLayer>[0])
-    )
-    layersRef.current.zones = []
+    const zoneLayers = ["zones-glow", "zones-fill", "zones-line", "zones-labels"]
+    const heatLayers = ["heatmap-heat"]
 
-    TIJUANA_ZONE_GEO.forEach((geo) => {
-      const metrics = zonesData.find((z) => z.zone_slug === geo.slug)
-      const color = metrics ? getPriceColor(metrics.avg_price_per_m2) : "#94a3b8"
-      const priceLabel = metrics ? getPriceLabel(metrics.avg_price_per_m2) : "Sin datos"
-
-      const polygon = L.polygon(geo.polygon as [number, number][], {
-        color: "#1e40af",
-        weight: 2,
-        opacity: 0.8,
-        fillColor: color,
-        fillOpacity: 0.5,
-      })
-
-      const popupContent = metrics
-        ? `<div style="font-family:sans-serif;min-width:160px">
-            <div style="font-weight:700;font-size:14px;margin-bottom:4px">${geo.name}</div>
-            <div style="color:#64748b;font-size:11px;margin-bottom:6px">${priceLabel}</div>
-            <div style="font-size:12px"><strong>${formatCurrency(metrics.avg_price_per_m2)}/m²</strong></div>
-            <div style="font-size:11px;color:#475569">${metrics.total_listings} propiedades</div>
-            <div style="font-size:11px;color:${metrics.price_trend_pct >= 0 ? "#16a34a" : "#dc2626"}">
-              ${metrics.price_trend_pct >= 0 ? "▲" : "▼"} ${Math.abs(metrics.price_trend_pct).toFixed(1)}% vs semana anterior
-            </div>
-            <a href="/zona/${geo.slug}" style="display:inline-block;margin-top:8px;font-size:11px;color:#1d4ed8;font-weight:600">Ver análisis →</a>
-          </div>`
-        : `<div style="font-family:sans-serif"><strong>${geo.name}</strong><br/><span style="color:#94a3b8">Sin datos disponibles</span></div>`
-
-      polygon.bindPopup(popupContent)
-
-      polygon.on("click", () => {
-        if (onZoneClick) onZoneClick(geo.slug)
-        map.setView([geo.lat, geo.lng], 14)
-      })
-
-      polygon.on("mouseover", () => {
-        polygon.setStyle({ fillOpacity: 0.75, weight: 3 })
-      })
-      polygon.on("mouseout", () => {
-        polygon.setStyle({ fillOpacity: 0.5, weight: 2 })
-      })
-
-      polygon.addTo(map)
-      layersRef.current.zones.push(polygon)
-
-      // Zone label
-      const label = L.divIcon({
-        html: `<div style="font-size:10px;font-weight:700;color:#1e3a5f;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap">${geo.name}</div>`,
-        className: "",
-        iconAnchor: [40, 8],
-      })
-      const labelMarker = L.marker([geo.lat, geo.lng], { icon: label, interactive: false })
-      labelMarker.addTo(map)
-      layersRef.current.zones.push(labelMarker)
-    })
-  }
-
-  function updateListingMarkers(
-    L: typeof import("leaflet"),
-    map: ReturnType<typeof L.map>,
-    listingsData: Listing[],
-    layer: LayerMode
-  ) {
-    // Remove old markers
-    if (layersRef.current.markers) {
-      map.removeLayer(layersRef.current.markers as Parameters<typeof map.removeLayer>[0])
-      layersRef.current.markers = null
+    if (activeLayer === "zones") {
+      zoneLayers.forEach((l) =>
+        map.setLayoutProperty(l, "visibility", "visible")
+      )
+      heatLayers.forEach((l) =>
+        map.setLayoutProperty(l, "visibility", "none")
+      )
+    } else {
+      zoneLayers.forEach((l) =>
+        map.setLayoutProperty(l, "visibility", "none")
+      )
+      heatLayers.forEach((l) =>
+        map.setLayoutProperty(l, "visibility", "visible")
+      )
     }
-    if (layersRef.current.heatmap) {
-      map.removeLayer(layersRef.current.heatmap as Parameters<typeof map.removeLayer>[0])
-      layersRef.current.heatmap = null
-    }
-
-    if (layer === "listings" || layer === "heatmap") {
-      const geoListings = listingsData.filter((l) => l.lat && l.lng)
-      const fallbackListings = listingsData.filter((l) => !l.lat || !l.lng)
-
-      // For listings without coordinates, use zone centroid with slight random offset
-      const allWithCoords = [
-        ...geoListings,
-        ...fallbackListings.map((l) => {
-          const geo = TIJUANA_ZONE_GEO.find((z) => z.slug === l.zone_slug)
-          if (!geo) return null
-          return {
-            ...l,
-            lat: geo.lat + (Math.random() - 0.5) * 0.008,
-            lng: geo.lng + (Math.random() - 0.5) * 0.010,
-          }
-        }).filter(Boolean) as Listing[],
-      ]
-
-      if (layer === "listings") {
-        const markerGroup = L.featureGroup()
-
-        allWithCoords.forEach((listing) => {
-          if (!listing.lat || !listing.lng) return
-          const propTypeColors: Record<string, string> = {
-            casa: "#1d4ed8",
-            departamento: "#7c3aed",
-            terreno: "#b45309",
-            local: "#0f766e",
-            oficina: "#c2410c",
-          }
-          const color = propTypeColors[listing.property_type] || "#64748b"
-
-          const icon = L.divIcon({
-            html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>`,
-            className: "",
-            iconAnchor: [5, 5],
-          })
-
-          const marker = L.marker([listing.lat!, listing.lng!], { icon })
-          marker.bindPopup(
-            `<div style="font-family:sans-serif;min-width:160px">
-              <div style="font-weight:700;font-size:13px;margin-bottom:4px">${listing.title}</div>
-              <div style="font-size:12px;color:#1d4ed8;font-weight:600">${formatCurrency(listing.price)}</div>
-              <div style="font-size:11px;color:#64748b">${listing.area_m2} m² · ${formatCurrency(listing.price_per_m2)}/m²</div>
-              <div style="font-size:11px;margin-top:4px">
-                <span style="padding:2px 6px;background:#f1f5f9;border-radius:4px;text-transform:capitalize">${listing.property_type}</span>
-                <span style="padding:2px 6px;background:#f1f5f9;border-radius:4px;margin-left:4px;text-transform:capitalize">${listing.listing_type}</span>
-              </div>
-              ${listing.bedrooms ? `<div style="font-size:11px;color:#475569;margin-top:4px">${listing.bedrooms} rec.</div>` : ""}
-            </div>`
-          )
-          markerGroup.addLayer(marker)
-        })
-
-        markerGroup.addTo(map)
-        layersRef.current.markers = markerGroup
-      } else if (layer === "heatmap") {
-        // Simple visual heatmap using circle markers with opacity
-        const heatGroup = L.featureGroup()
-        allWithCoords.forEach((listing) => {
-          if (!listing.lat || !listing.lng) return
-          const circle = L.circleMarker([listing.lat!, listing.lng!], {
-            radius: 8,
-            color: "transparent",
-            fillColor: getPriceColor(listing.price_per_m2),
-            fillOpacity: 0.4,
-          })
-          heatGroup.addLayer(circle)
-        })
-        heatGroup.addTo(map)
-        layersRef.current.heatmap = heatGroup
-      }
-    }
-  }
+  }, [activeLayer, mapLoaded])
 
   if (!mounted) {
     return (
@@ -291,50 +418,51 @@ export function InteractiveMap({
         style={{ height }}
         className="bg-slate-100 rounded-xl flex items-center justify-center"
       >
-        <div className="text-slate-400 text-sm font-medium">Cargando mapa…</div>
+        <div className="text-slate-400 text-sm font-medium">
+          Cargando mapa…
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm" style={{ height }}>
-      {/* Map container */}
+    <div
+      className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm"
+      style={{ height }}
+    >
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
 
-      {/* Layer toggle */}
+      {/* Layer toggle — pill style */}
       {showLayerToggle && (
-        <div className="absolute top-3 left-3 z-[1000] flex gap-1 bg-white/95 rounded-lg shadow-md border border-slate-200 p-1">
-          {(["zones", "listings", "heatmap"] as LayerMode[]).map((layer) => (
+        <div className="absolute top-3 left-3 z-[1000] flex gap-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-slate-200/80 p-1">
+          {(["zones", "heatmap"] as LayerMode[]).map((layer) => (
             <button
               key={layer}
               onClick={() => setActiveLayer(layer)}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${
+              className={`px-4 py-1.5 text-[11px] font-bold rounded-full transition-all duration-200 ${
                 activeLayer === layer
-                  ? "bg-blue-700 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "bg-blue-700 text-white shadow-md"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
               }`}
             >
-              {layer === "zones" ? "Zonas" : layer === "listings" ? "Listings" : "Heatmap"}
+              {layer === "zones" ? "Zonas" : "Heatmap"}
             </button>
           ))}
         </div>
       )}
 
-      {/* Legend */}
-      <div className="absolute bottom-6 left-3 z-[1000] bg-white/95 rounded-lg shadow-md border border-slate-200 p-3">
-        <p className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wide">Precio/m²</p>
-        {[
-          { color: "#1e40af", label: "≥ $40k Premium" },
-          { color: "#3b82f6", label: "$32k–$40k Alto" },
-          { color: "#60a5fa", label: "$26k–$32k Med-Alto" },
-          { color: "#93c5fd", label: "$20k–$26k Medio" },
-          { color: "#bfdbfe", label: "< $20k Accesible" },
-        ].map(({ color, label }) => (
-          <div key={color} className="flex items-center gap-2 mb-1">
-            <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
-            <span className="text-[10px] text-slate-600">{label}</span>
-          </div>
-        ))}
+      {/* Legend — gradient bar style */}
+      <div className="absolute bottom-4 left-3 z-[1000] bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/80 p-3 min-w-[140px]">
+        <p className="text-[9px] font-bold text-slate-400 mb-2 uppercase tracking-widest">
+          Precio/m²
+        </p>
+        <div className="h-2 rounded-full mb-2" style={{
+          background: "linear-gradient(to right, #bfdbfe, #93c5fd, #60a5fa, #3b82f6, #1e40af)"
+        }} />
+        <div className="flex justify-between text-[9px] text-slate-500 font-semibold">
+          <span>&lt;$20k</span>
+          <span>$40k+</span>
+        </div>
       </div>
     </div>
   )

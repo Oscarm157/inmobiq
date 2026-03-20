@@ -9,7 +9,7 @@ import {
   LabelList,
   ResponsiveContainer,
 } from "recharts"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface ZonesBarChartProps {
   data: {
@@ -20,13 +20,14 @@ interface ZonesBarChartProps {
   }[]
 }
 
-function formatCompact(value: number): string {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}k`
-  return `$${value}`
+function formatCompact(value: number, prefix: string): string {
+  if (value >= 1_000_000) return `${prefix}${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 1_000) return `${prefix}${(value / 1_000).toFixed(1)}k`
+  return `${prefix}${value}`
 }
 
 export function ZonesBarChart({ data }: ZonesBarChartProps) {
+  const { formatPrice, convert, currency } = useCurrency()
   const [showAll, setShowAll] = useState(false)
 
   const sorted = useMemo(
@@ -42,7 +43,7 @@ export function ZonesBarChart({ data }: ZonesBarChartProps) {
 
   const description =
     first && last
-      ? `¿Dónde es más caro el metro cuadrado? Ej: ${first.zone_name} ${formatCurrency(first.median_price_m2)}/m² vs ${last.zone_name} ${formatCurrency(last.median_price_m2)}/m²`
+      ? `¿Dónde es más caro el metro cuadrado? Ej: ${first.zone_name} ${formatPrice(first.median_price_m2)}/m² vs ${last.zone_name} ${formatPrice(last.median_price_m2)}/m²`
       : "¿Dónde es más caro el metro cuadrado?"
 
   const chartHeight = displayed.length * 38 + 16
@@ -80,7 +81,7 @@ export function ZonesBarChart({ data }: ZonesBarChartProps) {
             <LabelList
               dataKey="median_price_m2"
               position="right"
-              formatter={(v: number) => formatCompact(v)}
+              formatter={(v: number) => formatCompact(convert(v), currency === "USD" ? "US$" : "$")}
               style={{ fontSize: 11, fill: "#334155", fontWeight: 500 }}
             />
           </Bar>

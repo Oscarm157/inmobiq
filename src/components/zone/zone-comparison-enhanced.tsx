@@ -1,4 +1,7 @@
-import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils"
+"use client"
+
+import { formatPercent, formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics, CityMetrics } from "@/types/database"
 
 interface ZoneComparisonEnhancedProps {
@@ -15,18 +18,19 @@ interface CompRow {
 }
 
 export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedProps) {
+  const { formatPrice } = useCurrency()
   const rows: CompRow[] = [
     {
       label: "Precio / m²",
-      zoneValue: formatCurrency(zone.avg_price_per_m2),
-      cityValue: formatCurrency(city.avg_price_per_m2),
+      zoneValue: formatPrice(zone.avg_price_per_m2),
+      cityValue: formatPrice(city.avg_price_per_m2),
       zoneRaw: zone.avg_price_per_m2,
       cityRaw: city.avg_price_per_m2,
     },
     {
       label: "Ticket Promedio",
-      zoneValue: formatCurrency(zone.avg_ticket),
-      cityValue: formatCurrency(city.avg_price_per_m2 * 80), // rough city avg ticket
+      zoneValue: formatPrice(zone.avg_ticket),
+      cityValue: formatPrice(city.avg_price_per_m2 * 80), // rough city avg ticket
       zoneRaw: zone.avg_ticket,
       cityRaw: city.avg_price_per_m2 * 80,
     },
