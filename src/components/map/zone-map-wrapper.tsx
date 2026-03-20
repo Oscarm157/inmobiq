@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import type { ZoneMetrics, Listing } from "@/types/database"
+import type { ZoneMetrics } from "@/types/database"
 
 const InteractiveMap = dynamic(
   () => import("./interactive-map").then((m) => m.InteractiveMap),
@@ -17,15 +17,13 @@ const InteractiveMap = dynamic(
 
 interface ZoneMapWrapperProps {
   zones: ZoneMetrics[]
-  listings: Listing[]
   focusZoneSlug: string
 }
 
-export function ZoneMapWrapper({ zones, listings, focusZoneSlug }: ZoneMapWrapperProps) {
+export function ZoneMapWrapper({ zones, focusZoneSlug }: ZoneMapWrapperProps) {
   return (
     <InteractiveMap
       zones={zones}
-      listings={listings}
       focusZoneSlug={focusZoneSlug}
       height="380px"
       showLayerToggle

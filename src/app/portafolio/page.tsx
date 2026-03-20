@@ -84,7 +84,7 @@ export default async function PortafolioPage({
 
         {/* Map view of filtered listings */}
         <div className="mb-6">
-          <PortfolioMapWrapper zones={zones} listings={listings as Listing[]} />
+          <PortfolioMapWrapper zones={zones} />
         </div>
 
         <div className="flex gap-6 items-start">
