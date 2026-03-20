@@ -1,4 +1,4 @@
-import type { ZoneMetrics, CityMetrics, ZoneRiskMetrics, PortfolioPreset, PipelineProject } from "@/types/database";
+import type { ZoneMetrics, CityMetrics, ZoneRiskMetrics, PortfolioPreset, PipelineProject, Listing } from "@/types/database";
 
 // Mock data representing real Tijuana zones
 export const TIJUANA_ZONES: ZoneMetrics[] = [
@@ -295,4 +295,47 @@ export const PIPELINE_PROJECTS_EXTENDED: PipelineProject[] = [
     img: `${IMG_BASE}/AB6AXuDVY0onfjFdi7i2rOIIq99lJStUlitHgNl5nnTcte3my2Kxh3PweiUrfuDuS9XMHab8SIAUYfchcw5yyRd74cKU4Km2ox9bIKrtPiWh_GbivLDOPk0LB81dG_c9VYpKSqDJ-IZV2XjfDy2e6wRFxZV2-bfFgj0mIuzU-gIVIwPEhw2qbwAPnmu4ZnyZYOenj8OqVSdHdC0BoKrauiUAuPRnoN8wMRfEDDPvZiTx295lOBfShy4cqsUtc0NJHJfcoq_uVO6uyJ8d4CD7`,
     investors: 7, investor_label: "7 Inversores activos",
   },
+];
+
+// Mock individual listings for development/fallback
+export const MOCK_LISTINGS: Listing[] = [
+  // Zona Río
+  { id: "l1", zone_id: "1", title: "Departamento moderno en Torre Río", property_type: "departamento", listing_type: "venta", price: 3800000, area_m2: 85, price_per_m2: 44706, bedrooms: 2, bathrooms: 2, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l2", zone_id: "1", title: "Oficina corporativa en Zona Río", property_type: "oficina", listing_type: "renta", price: 35000, area_m2: 120, price_per_m2: 292, bedrooms: null, bathrooms: 2, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l3", zone_id: "1", title: "Casa residencial Zona Río", property_type: "casa", listing_type: "venta", price: 6500000, area_m2: 200, price_per_m2: 32500, bedrooms: 4, bathrooms: 3, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l4", zone_id: "1", title: "Local comercial frente avenida", property_type: "local", listing_type: "renta", price: 28000, area_m2: 60, price_per_m2: 467, bedrooms: null, bathrooms: 1, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l5", zone_id: "1", title: "Depto 3 recámaras vista al río", property_type: "departamento", listing_type: "venta", price: 5200000, area_m2: 140, price_per_m2: 37143, bedrooms: 3, bathrooms: 2, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Playas de Tijuana
+  { id: "l6", zone_id: "2", title: "Casa frente al mar Playas", property_type: "casa", listing_type: "venta", price: 9500000, area_m2: 250, price_per_m2: 38000, bedrooms: 4, bathrooms: 3, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l7", zone_id: "2", title: "Departamento vista oceano", property_type: "departamento", listing_type: "venta", price: 4800000, area_m2: 110, price_per_m2: 43636, bedrooms: 2, bathrooms: 2, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l8", zone_id: "2", title: "Terreno Playas primera sección", property_type: "terreno", listing_type: "venta", price: 7200000, area_m2: 300, price_per_m2: 24000, bedrooms: null, bathrooms: null, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l9", zone_id: "2", title: "Depto 1 rec en renta Playas", property_type: "departamento", listing_type: "renta", price: 18000, area_m2: 55, price_per_m2: 327, bedrooms: 1, bathrooms: 1, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Otay
+  { id: "l10", zone_id: "3", title: "Casa de interés social Otay", property_type: "casa", listing_type: "venta", price: 1800000, area_m2: 80, price_per_m2: 22500, bedrooms: 3, bathrooms: 2, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l11", zone_id: "3", title: "Bodega industrial Otay", property_type: "local", listing_type: "renta", price: 45000, area_m2: 500, price_per_m2: 90, bedrooms: null, bathrooms: 2, source: "mercadolibre", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l12", zone_id: "3", title: "Terreno uso mixto Otay", property_type: "terreno", listing_type: "venta", price: 3200000, area_m2: 400, price_per_m2: 8000, bedrooms: null, bathrooms: null, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Chapultepec
+  { id: "l13", zone_id: "4", title: "Departamento lujo Chapultepec", property_type: "departamento", listing_type: "venta", price: 4200000, area_m2: 130, price_per_m2: 32308, bedrooms: 3, bathrooms: 2, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l14", zone_id: "4", title: "Casa familiar Chapultepec", property_type: "casa", listing_type: "venta", price: 5800000, area_m2: 190, price_per_m2: 30526, bedrooms: 4, bathrooms: 3, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l15", zone_id: "4", title: "Depto 2 rec en renta Chapultepec", property_type: "departamento", listing_type: "renta", price: 22000, area_m2: 75, price_per_m2: 293, bedrooms: 2, bathrooms: 1, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Hipódromo
+  { id: "l16", zone_id: "5", title: "Departamento Hipódromo", property_type: "departamento", listing_type: "renta", price: 15000, area_m2: 65, price_per_m2: 231, bedrooms: 1, bathrooms: 1, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l17", zone_id: "5", title: "Casa Hipódromo 4 rec", property_type: "casa", listing_type: "venta", price: 4500000, area_m2: 180, price_per_m2: 25000, bedrooms: 4, bathrooms: 3, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Centro
+  { id: "l18", zone_id: "6", title: "Local comercial Centro", property_type: "local", listing_type: "renta", price: 12000, area_m2: 45, price_per_m2: 267, bedrooms: null, bathrooms: 1, source: "mercadolibre", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l19", zone_id: "6", title: "Depto estudio Centro Histórico", property_type: "departamento", listing_type: "renta", price: 9500, area_m2: 40, price_per_m2: 238, bedrooms: 1, bathrooms: 1, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l20", zone_id: "6", title: "Edificio de oficinas Centro", property_type: "oficina", listing_type: "venta", price: 8500000, area_m2: 600, price_per_m2: 14167, bedrooms: null, bathrooms: 4, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Residencial del Bosque
+  { id: "l21", zone_id: "7", title: "Villa Residencial del Bosque", property_type: "casa", listing_type: "venta", price: 5500000, area_m2: 280, price_per_m2: 19643, bedrooms: 4, bathrooms: 4, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l22", zone_id: "7", title: "Casa 3 rec Bosque con jardín", property_type: "casa", listing_type: "venta", price: 3800000, area_m2: 180, price_per_m2: 21111, bedrooms: 3, bathrooms: 2, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // La Mesa
+  { id: "l23", zone_id: "8", title: "Casa La Mesa 3 rec", property_type: "casa", listing_type: "venta", price: 2400000, area_m2: 120, price_per_m2: 20000, bedrooms: 3, bathrooms: 2, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l24", zone_id: "8", title: "Depto La Mesa seminuevo", property_type: "departamento", listing_type: "venta", price: 1650000, area_m2: 70, price_per_m2: 23571, bedrooms: 2, bathrooms: 1, source: "mercadolibre", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l25", zone_id: "8", title: "Terreno La Mesa esquina", property_type: "terreno", listing_type: "venta", price: 950000, area_m2: 200, price_per_m2: 4750, bedrooms: null, bathrooms: null, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l26", zone_id: "8", title: "Casa La Mesa con alberca", property_type: "casa", listing_type: "renta", price: 25000, area_m2: 200, price_per_m2: 125, bedrooms: 4, bathrooms: 3, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  // Extra listings for variety
+  { id: "l27", zone_id: "2", title: "Casa 5 rec Playas vista panorámica", property_type: "casa", listing_type: "venta", price: 12000000, area_m2: 400, price_per_m2: 30000, bedrooms: 5, bathrooms: 4, source: "lamudi", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l28", zone_id: "1", title: "Departamento estudio Zona Río", property_type: "departamento", listing_type: "renta", price: 12000, area_m2: 42, price_per_m2: 286, bedrooms: 1, bathrooms: 1, source: "vivanuncios", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l29", zone_id: "3", title: "Depto 2 rec Otay seminuevo", property_type: "departamento", listing_type: "venta", price: 1950000, area_m2: 72, price_per_m2: 27083, bedrooms: 2, bathrooms: 1, source: "inmuebles24", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
+  { id: "l30", zone_id: "4", title: "Oficina boutique Chapultepec", property_type: "oficina", listing_type: "renta", price: 18000, area_m2: 50, price_per_m2: 360, bedrooms: null, bathrooms: 1, source: "mercadolibre", source_url: "#", scraped_at: new Date().toISOString(), created_at: new Date().toISOString() },
 ];
