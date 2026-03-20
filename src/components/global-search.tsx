@@ -24,7 +24,7 @@ interface GlobalSearchProps {
 export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps) {
   const router = useRouter()
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<SearchResults>({ zonas: [], propiedades: [] })
+  const [results, setResults] = useState<SearchResults>({ zonas: [] })
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -34,13 +34,12 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
 
   const allSuggestions: SearchSuggestion[] = [
     ...results.zonas,
-    ...results.propiedades,
   ]
 
   // Fetch suggestions
   useEffect(() => {
     if (debouncedQuery.length < 3) {
-      setResults({ zonas: [], propiedades: [] })
+      setResults({ zonas: [] })
       setOpen(false)
       return
     }
@@ -54,10 +53,10 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
         if (cancelled) return
         setResults(data)
         setActiveIndex(-1)
-        setOpen(data.zonas.length > 0 || data.propiedades.length > 0)
+        setOpen(data.zonas.length > 0)
       })
       .catch(() => {
-        if (!cancelled) setResults({ zonas: [], propiedades: [] })
+        if (!cancelled) setResults({ zonas: [] })
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -126,7 +125,7 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
     }
   }, [mobileMode])
 
-  const hasResults = results.zonas.length > 0 || results.propiedades.length > 0
+  const hasResults = results.zonas.length > 0
 
   return (
     <div ref={containerRef} className={mobileMode ? "w-full" : "relative w-full max-w-md"}>
@@ -197,37 +196,7 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
             </div>
           )}
 
-          {/* Propiedades group */}
-          {results.propiedades.length > 0 && (
-            <div>
-              <div className={`px-4 pt-3 pb-1 ${results.zonas.length > 0 ? "border-t border-slate-50" : ""}`}>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Propiedades</span>
-              </div>
-              {results.propiedades.map((item, idx) => {
-                const globalIdx = results.zonas.length + idx
-                return (
-                  <SuggestionRow
-                    key={item.id}
-                    item={item}
-                    active={activeIndex === globalIdx}
-                    onMouseEnter={() => setActiveIndex(globalIdx)}
-                    onSelect={() => navigateTo(item.href)}
-                  />
-                )
-              })}
-            </div>
-          )}
-
-          {/* Footer: ver todos */}
-          {query.length >= 3 && (
-            <button
-              className="w-full flex items-center gap-2 px-4 py-3 text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors border-t border-slate-50"
-              onClick={() => navigateTo(`/buscar?q=${encodeURIComponent(query)}`)}
-            >
-              <Icon name="search" className="text-sm" />
-              Ver todos los resultados para &ldquo;{query}&rdquo;
-            </button>
-          )}
+          {/* Propiedades group — oculto: no mostramos listings individuales */}
         </div>
       )}
 
@@ -249,7 +218,7 @@ interface SuggestionRowProps {
 }
 
 function SuggestionRow({ item, active, onMouseEnter, onSelect }: SuggestionRowProps) {
-  const icon = item.type === "zona" ? "location_on" : "home"
+  const icon = "location_on"
   return (
     <button
       role="option"
