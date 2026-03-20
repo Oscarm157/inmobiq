@@ -99,6 +99,18 @@ export default async function HomePage() {
         />
       </div>
 
+      {/* ─── 2b. Mapa de Zonas ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MiniMapWrapper zones={zones} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
+          {zones.slice(0, 3).map((zone) => (
+            <ZoneCard key={`top-${zone.zone_id}`} zone={zone} />
+          ))}
+        </div>
+      </div>
+
       {/* ─── 3. Resumen Ejecutivo ─── */}
       <NarrativeInsight
         title="Resumen del mercado"
@@ -205,7 +217,7 @@ export default async function HomePage() {
         <PortfolioTeaser presets={presets} />
       </section>
 
-      {/* ─── 10. Zones Grid (existing) ─── */}
+      {/* ─── 10. Zones Grid ─── */}
       <section>
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -219,16 +231,6 @@ export default async function HomePage() {
           <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <MiniMapWrapper zones={zones} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
-            {zones.slice(0, 3).map((zone) => (
-              <ZoneCard key={zone.zone_id} zone={zone} />
-            ))}
-          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {zones.map((zone) => (
