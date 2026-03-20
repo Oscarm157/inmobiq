@@ -27,16 +27,21 @@ export function MarketFilters() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   const [state, setState] = useState<MarketFilterState>(() => parseMarketParams(searchParams))
   const [open, setOpen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const isLocalUpdate = useRef(false)
   const { formatPrice, currency } = useCurrency()
 
-  // Sync from URL on navigation
+  // Sync from URL on external navigation only (not our own pushes)
   useEffect(() => {
+    if (isLocalUpdate.current) {
+      isLocalUpdate.current = false
+      return
+    }
     setState(parseMarketParams(searchParams))
   }, [searchParams])
 
@@ -67,22 +72,28 @@ export function MarketFilters() {
   }, [open])
 
   const pushFilters = useCallback(
-    (next: MarketFilterState) => {
+    (next: MarketFilterState, delay = 400) => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
+        isLocalUpdate.current = true
         const params = buildMarketParams(next)
         const qs = params.toString()
         startTransition(() => {
-          router.push(qs ? `${pathname}?${qs}` : pathname)
+          router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
         })
-      }, 300)
+      }, delay)
     },
-    [router, pathname]
+    [router, pathname, startTransition]
   )
 
   const handleChange = (next: MarketFilterState) => {
     setState(next)
     pushFilters(next)
+  }
+
+  const handleInputChange = (next: MarketFilterState) => {
+    setState(next)
+    pushFilters(next, 600) // Longer debounce for text inputs
   }
 
   const handleClear = () => {
@@ -93,7 +104,9 @@ export function MarketFilters() {
       recamaras: [],
     }
     setState(empty)
-    startTransition(() => router.push(pathname))
+    isLocalUpdate.current = true
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    startTransition(() => router.replace(pathname, { scroll: false }))
   }
 
   const toggle = <T,>(arr: T[], val: T): T[] =>
@@ -125,7 +138,7 @@ export function MarketFilters() {
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
         <div className="absolute left-0 right-0 z-30 px-4 md:px-8 mt-3">
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl transition-opacity duration-150 ${isPending ? "opacity-90" : "opacity-100"}`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Operación */}
               <div>
@@ -229,7 +242,7 @@ export function MarketFilters() {
                     min="0"
                     placeholder="Mínimo"
                     value={state.precio_min}
-                    onChange={(e) => handleChange({ ...state, precio_min: e.target.value })}
+                    onChange={(e) => handleInputChange({ ...state, precio_min: e.target.value })}
                     onWheel={preventScrollChange}
                     className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -239,7 +252,7 @@ export function MarketFilters() {
                     min="0"
                     placeholder="Máximo"
                     value={state.precio_max}
-                    onChange={(e) => handleChange({ ...state, precio_max: e.target.value })}
+                    onChange={(e) => handleInputChange({ ...state, precio_max: e.target.value })}
                     onWheel={preventScrollChange}
                     className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -270,7 +283,7 @@ export function MarketFilters() {
                     min="0"
                     placeholder="Mín m²"
                     value={state.area_min}
-                    onChange={(e) => handleChange({ ...state, area_min: e.target.value })}
+                    onChange={(e) => handleInputChange({ ...state, area_min: e.target.value })}
                     onWheel={preventScrollChange}
                     className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -280,7 +293,7 @@ export function MarketFilters() {
                     min="0"
                     placeholder="Máx m²"
                     value={state.area_max}
-                    onChange={(e) => handleChange({ ...state, area_max: e.target.value })}
+                    onChange={(e) => handleInputChange({ ...state, area_max: e.target.value })}
                     onWheel={preventScrollChange}
                     className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
