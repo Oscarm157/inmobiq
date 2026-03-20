@@ -8,7 +8,7 @@ import "./globals.css"
 
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(s!=='light'&&d))document.documentElement.classList.add('dark')}catch(e){}})()`
 
-const fontLoadScript = `(function(){if(document.fonts){document.fonts.load('1em Material Symbols Outlined').then(function(){document.documentElement.classList.add('fonts-loaded')}).catch(function(){document.documentElement.classList.add('fonts-loaded')})}else{document.documentElement.classList.add('fonts-loaded')}})()`
+const fontLoadScript = `(function(){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')})}else{document.documentElement.classList.add('fonts-loaded')}})()`
 
 export const metadata: Metadata = {
   title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
@@ -46,7 +46,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
-        <script dangerouslySetInnerHTML={{ __html: fontLoadScript }} />
       </head>
       <body
         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
@@ -61,6 +60,7 @@ export default function RootLayout({
             </AuthProvider>
           </CurrencyProvider>
         </ThemeProvider>
+        <script dangerouslySetInnerHTML={{ __html: fontLoadScript }} />
       </body>
     </html>
   )
