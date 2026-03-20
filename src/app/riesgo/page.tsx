@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon"
+import { ExportButton } from "@/components/export-button"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -41,10 +42,7 @@ export default async function RiesgoPage() {
             <Icon name="tune" className="text-sm" />
             Parámetros
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
-            <Icon name="ios_share" className="text-sm" />
-            Exportar
-          </button>
+          <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
         </div>
       </div>
 
