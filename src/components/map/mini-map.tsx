@@ -114,6 +114,24 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
       style={{ height }}
     >
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
+      {/* Color legend */}
+      <div className="absolute top-3 left-3 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
+        <p className="text-[10px] font-bold text-slate-600 mb-1.5">Precio /m²</p>
+        <div className="flex flex-col gap-1">
+          {[
+            { color: "#1e40af", label: "$40k+" },
+            { color: "#3b82f6", label: "$32-40k" },
+            { color: "#60a5fa", label: "$26-32k" },
+            { color: "#93c5fd", label: "$20-26k" },
+            { color: "#bfdbfe", label: "<$20k" },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
+              <span className="text-[10px] text-slate-500 font-medium">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="absolute bottom-2 right-2 z-[1000]">
         <a
           href="/mapa"

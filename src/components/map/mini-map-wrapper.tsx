@@ -20,5 +20,5 @@ interface MiniMapWrapperProps {
 }
 
 export function MiniMapWrapper({ zones }: MiniMapWrapperProps) {
-  return <MiniMap zones={zones} height="280px" />
+  return <MiniMap zones={zones} height="360px" />
 }

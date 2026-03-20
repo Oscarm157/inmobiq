@@ -252,21 +252,20 @@ export default async function HomePage({
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <MiniMapWrapper zones={zones} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
-            {zones.slice(0, 3).map((zone) => (
-              <ZoneCard key={`top-${zone.zone_id}`} zone={zone} />
-            ))}
-          </div>
+        <div className="mb-6">
+          <MiniMapWrapper zones={zones} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {zones.map((zone) => (
-            <ZoneCard key={zone.zone_id} zone={zone} />
-          ))}
-        </div>
+        {(() => {
+          const sorted = [...zones].sort((a, b) => b.total_listings - a.total_listings)
+          const maxListings = sorted[0]?.total_listings ?? 1
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {sorted.map((zone, i) => (
+                <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} />
+              ))}
+            </div>
+          )
+        })()}
       </section>
 
       {/* ─── 11. CTA de cierre ─── */}
