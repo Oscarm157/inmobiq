@@ -1,6 +1,11 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
-import { MOCK_LISTINGS } from "@/lib/mock-data"
+import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
+
+/** Build zone name lookup from mock data (single source of truth) */
+const MOCK_ZONE_LOOKUP = new Map(
+  TIJUANA_ZONES.map((z) => [z.zone_id, { name: z.zone_name, slug: z.zone_slug }])
+)
 
 export interface ListingFilters {
   tipos?: PropertyType[]
@@ -34,7 +39,7 @@ async function resolveZoneSlugs(slugs: string[]): Promise<string[]> {
   }
 }
 
-function applyMockFilters(filters: ListingFilters): ListingsResult {
+export function applyMockFilters(filters: ListingFilters): ListingsResult {
   let results = [...MOCK_LISTINGS]
 
   if (filters.tipos?.length) {
@@ -229,17 +234,6 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
   }
 
   // Compute analytics from filtered mock listings
-  const MOCK_ZONE_NAMES: Record<string, { name: string; slug: string }> = {
-    "1": { name: "Zona Río", slug: "zona-rio" },
-    "2": { name: "Playas de Tijuana", slug: "playas-de-tijuana" },
-    "3": { name: "Otay", slug: "otay" },
-    "4": { name: "Chapultepec", slug: "chapultepec" },
-    "5": { name: "Hipódromo", slug: "hipodromo" },
-    "6": { name: "Centro", slug: "centro" },
-    "7": { name: "Residencial del Bosque", slug: "residencial-del-bosque" },
-    "8": { name: "La Mesa", slug: "la-mesa" },
-  }
-
   const totalListings = filtered.length
   const withPrice = filtered.filter((l) => l.price > 0)
   const medianPrice = median(withPrice.map((l) => l.price))
@@ -248,7 +242,7 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
   const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
   for (const l of filtered) {
     if (l.price > 0 && l.area_m2 > 0) {
-      const zone = MOCK_ZONE_NAMES[l.zone_id]
+      const zone = MOCK_ZONE_LOOKUP.get(l.zone_id)
       if (zone) {
         if (!zoneMap.has(zone.slug)) zoneMap.set(zone.slug, { ...zone, values: [] })
         zoneMap.get(zone.slug)!.values.push(l.price / l.area_m2)
@@ -285,7 +279,7 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
   // offerConcentration
   const zoneCountMap = new Map<string, { name: string; slug: string; count: number }>()
   for (const l of filtered) {
-    const zone = MOCK_ZONE_NAMES[l.zone_id]
+    const zone = MOCK_ZONE_LOOKUP.get(l.zone_id)
     if (zone) {
       if (!zoneCountMap.has(zone.slug)) zoneCountMap.set(zone.slug, { ...zone, count: 0 })
       zoneCountMap.get(zone.slug)!.count++
@@ -347,14 +341,18 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
     if (filters.area_min != null) query = query.gte("area_m2", filters.area_min)
     if (filters.area_max != null) query = query.lte("area_m2", filters.area_max)
     if (filters.recamaras?.length) {
-      const has4plus = filters.recamaras.includes(4)
-      const exact = filters.recamaras.filter((r) => r < 4)
-      if (has4plus && exact.length) {
-        query = query.or(`bedrooms.gte.4,bedrooms.in.(${exact.join(",")})`)
-      } else if (has4plus) {
-        query = query.gte("bedrooms", 4)
-      } else {
-        query = query.in("bedrooms", exact)
+      // Sanitize: only allow valid bedroom values [1,2,3,4]
+      const safeRec = filters.recamaras.filter((r) => Number.isInteger(r) && r >= 1 && r <= 4)
+      if (safeRec.length) {
+        const has4plus = safeRec.includes(4)
+        const exact = safeRec.filter((r) => r < 4)
+        if (has4plus && exact.length) {
+          query = query.or(`bedrooms.gte.4,bedrooms.in.(${exact.join(",")})`)
+        } else if (has4plus) {
+          query = query.gte("bedrooms", 4)
+        } else {
+          query = query.in("bedrooms", exact)
+        }
       }
     }
 

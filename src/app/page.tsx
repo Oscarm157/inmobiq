@@ -43,15 +43,31 @@ export default async function HomePage({
 }) {
   const sp = await searchParams
 
+  // Sanitize and parse filter params
+  const safeNum = (val?: string): number | undefined => {
+    if (!val) return undefined
+    const n = Number(val)
+    return !isNaN(n) && n >= 0 ? n : undefined
+  }
+
+  const VALID_TYPES = new Set(["casa", "departamento", "terreno", "local", "oficina"])
+  const VALID_OPS = new Set(["venta", "renta"])
+
   const filters = {
-    tipos: sp.tipo ? (sp.tipo.split(",") as PropertyType[]) : undefined,
+    tipos: sp.tipo
+      ? (sp.tipo.split(",").filter((t) => VALID_TYPES.has(t)) as PropertyType[])
+      : undefined,
     zonas: sp.zona ? sp.zona.split(",") : undefined,
-    listing_type: (sp.operacion as ListingType) || undefined,
-    precio_min: sp.precio_min ? Number(sp.precio_min) : undefined,
-    precio_max: sp.precio_max ? Number(sp.precio_max) : undefined,
-    area_min: sp.area_min ? Number(sp.area_min) : undefined,
-    area_max: sp.area_max ? Number(sp.area_max) : undefined,
-    recamaras: sp.rec ? sp.rec.split(",").map(Number) : undefined,
+    listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
+      ? (sp.operacion as ListingType)
+      : undefined,
+    precio_min: safeNum(sp.precio_min),
+    precio_max: safeNum(sp.precio_max),
+    area_min: safeNum(sp.area_min),
+    area_max: safeNum(sp.area_max),
+    recamaras: sp.rec
+      ? sp.rec.split(",").map(Number).filter((n) => !isNaN(n) && n >= 1 && n <= 4)
+      : undefined,
   }
 
   const [zones, city, priceTrend, pipeline, presets, analytics] = await Promise.all([
