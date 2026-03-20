@@ -146,8 +146,8 @@ function mapToRawListing(item: ApifyI24Listing): RawListing {
     external_url: item.url.startsWith("http")
       ? item.url
       : `https://www.inmuebles24.com${item.url}`,
-    title: item.title ?? null,
-    description: item.description_normalized ?? null,
+    title: item.title ? item.title.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
+    description: item.description_normalized ? item.description_normalized.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
     property_type: mapPropertyType(item.real_estate_type?.name),
     listing_type: mapListingType(op?.operation_type?.name),
     price_mxn: priceMxn,

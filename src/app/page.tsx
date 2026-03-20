@@ -9,30 +9,24 @@ import { MiniMapWrapper } from "@/components/map/mini-map-wrapper"
 import { NarrativeInsight } from "@/components/narrative-insight"
 import { InventoryTypeChart } from "@/components/inventory-type-chart"
 import { TopZonesHighlight } from "@/components/top-zones-highlight"
-import { RiskSummaryKPIs } from "@/components/risk-summary-kpis"
-import { RiskMatrix } from "@/components/risk-matrix"
-import { VolatilityChart } from "@/components/volatility-chart"
 import { PipelinePreviewCard } from "@/components/pipeline-preview-card"
-import { YieldChart } from "@/components/yield-chart"
 import { PortfolioTeaser } from "@/components/portfolio-teaser"
 import { PriceRangeChart } from "@/components/price-range-chart"
 import { TypeCompositionChart } from "@/components/type-composition-chart"
 import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
 import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
-import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getPipelineProjects } from "@/lib/data/pipeline"
 import { getPortfolioPresets } from "@/lib/data/portfolio"
 import { getListingsAnalytics } from "@/lib/data/listings"
-import { formatNumber, formatCurrency, formatPercent } from "@/lib/utils"
+import { formatNumber, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 
 export default async function HomePage() {
-  const [zones, city, priceTrend, riskData, pipeline, presets, analytics] = await Promise.all([
+  const [zones, city, priceTrend, pipeline, presets, analytics] = await Promise.all([
     getZoneMetrics(),
     getCityMetrics(),
     getPriceTrendData(),
-    getZoneRiskMetrics(),
     Promise.resolve(getPipelineProjects()),
     Promise.resolve(getPortfolioPresets()),
     getListingsAnalytics(),
@@ -40,15 +34,13 @@ export default async function HomePage() {
 
   // Narrative helpers
   const topZone = zones.reduce((a, b) => a.avg_price_per_m2 > b.avg_price_per_m2 ? a : b)
-  const fastestGrowing = zones.reduce((a, b) => a.price_trend_pct > b.price_trend_pct ? a : b)
   const mostActive = zones.reduce((a, b) => a.total_listings > b.total_listings ? a : b)
-  const lowestRisk = [...riskData].sort((a, b) => a.risk_score - b.risk_score)[0]
-  const highestYield = [...riskData].sort((a, b) => b.cap_rate - a.cap_rate)[0]
   const topByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
   const topByActivity = [...zones].sort((a, b) => b.total_listings - a.total_listings)
   const featuredProjects = pipeline.filter((p) => p.status === "construccion" || p.status === "preventa").slice(0, 3)
   const totalUnits = pipeline.reduce((s, p) => s + p.units_total, 0)
   const totalSold = pipeline.reduce((s, p) => s + p.units_sold, 0)
+  const hasTrendHistory = priceTrend.length > 1
 
   return (
     <div className="space-y-10">
@@ -99,23 +91,11 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* ─── 2b. Mapa de Zonas ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <MiniMapWrapper zones={zones} />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
-          {zones.slice(0, 3).map((zone) => (
-            <ZoneCard key={`top-${zone.zone_id}`} zone={zone} />
-          ))}
-        </div>
-      </div>
-
       {/* ─── 3. Resumen Ejecutivo ─── */}
       <NarrativeInsight
         title="Resumen del mercado"
-        body={`${topZone.zone_name} lidera el mercado con ${formatCurrency(topZone.avg_price_per_m2)}/m², ${formatPercent(topZone.price_trend_pct)} respecto al periodo anterior. ${fastestGrowing.zone_name} registra el mayor crecimiento con ${formatPercent(fastestGrowing.price_trend_pct)}, mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas.`}
-        highlight={`Tendencia general: ${city.price_trend_pct > 0 ? "mercado al alza" : "mercado estable"} con ${formatPercent(city.price_trend_pct)} de variación promedio`}
+        body={`${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas. Datos de tendencia disponibles próximamente conforme se acumule historial semanal.`}
+        highlight={`${city.total_zones} zonas monitoreadas · ${formatNumber(city.total_listings)} propiedades activas`}
       />
 
       {/* ─── 4. Charts ─── */}
@@ -129,7 +109,7 @@ export default async function HomePage() {
         <OfferConcentrationChart data={analytics.offerConcentration} />
       </div>
 
-      <PriceChart data={priceTrend} />
+      {hasTrendHistory && <PriceChart data={priceTrend} />}
       <InventoryTypeChart zones={zones} />
 
       {/* ─── 5. Zonas Destacadas ─── */}
@@ -143,46 +123,30 @@ export default async function HomePage() {
         <TopZonesHighlight topByPrice={topByPrice} topByActivity={topByActivity} />
       </section>
 
-      {/* ─── 6. Risk Overview ─── */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-2xl font-black tracking-tight">Análisis de Riesgo</h3>
-            <p className="text-sm text-slate-500 font-medium">
-              Indicadores clave de riesgo y retorno por zona
-            </p>
+      {/* ─── 6. Risk / Volatility / Yield — Próximamente ─── */}
+      <section className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-8 border border-dashed border-slate-300 dark:border-slate-700">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+            <Icon name="security" className="text-xl text-slate-400" />
           </div>
-          <Link href="/riesgo" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver completo <Icon name="arrow_forward" className="text-sm" />
-          </Link>
+          <div>
+            <h3 className="text-lg font-bold text-slate-600 dark:text-slate-300">Análisis de Riesgo, Volatilidad y Rendimiento</h3>
+            <p className="text-sm text-slate-400">Disponible cuando se acumulen 4+ semanas de datos históricos</p>
+          </div>
         </div>
-
-        <RiskSummaryKPIs riskData={riskData} />
-
-        <div className="mt-6">
-          <NarrativeInsight
-            title="Perspectiva de riesgo"
-            icon="security"
-            body={`${lowestRisk.zone_name} presenta el perfil de menor riesgo con un score de ${lowestRisk.risk_score}/100 y una volatilidad de ${lowestRisk.volatility}%. ${highestYield.zone_name} ofrece el mejor rendimiento estimado con un cap rate de ${highestYield.cap_rate}% anual. La madurez del mercado varía desde zonas emergentes hasta consolidadas, ofreciendo opciones para diferentes perfiles de inversión.`}
-          />
-        </div>
-
-        <div className="mt-6">
-          <RiskMatrix riskData={riskData} zones={zones} />
-        </div>
+        <p className="text-xs text-slate-400 mt-2">
+          Incluye: matriz de riesgo por zona, volatilidad de precios, cap rate estimado y perfil de liquidez.
+        </p>
       </section>
-
-      {/* ─── 7. Volatilidad + Yield ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <VolatilityChart riskData={riskData} />
-        <YieldChart riskData={riskData} zones={zones} />
-      </div>
 
       {/* ─── 8. Pipeline Preview ─── */}
       <section>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-black tracking-tight">Desarrollos en Curso</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-2xl font-black tracking-tight">Desarrollos en Curso</h3>
+              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-full uppercase">Datos ilustrativos</span>
+            </div>
             <p className="text-sm text-slate-500 font-medium">
               {pipeline.length} proyectos · {formatNumber(totalUnits)} unidades · {Math.round(totalSold / totalUnits * 100)}% vendido
             </p>
@@ -231,6 +195,16 @@ export default async function HomePage() {
           <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <MiniMapWrapper zones={zones} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
+            {zones.slice(0, 3).map((zone) => (
+              <ZoneCard key={`top-${zone.zone_id}`} zone={zone} />
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {zones.map((zone) => (

@@ -46,7 +46,9 @@ export function PortfolioTeaser({ presets }: PortfolioTeaserProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase">Retorno</p>
-                <p className={`text-lg font-black ${colors.text}`}>+{preset.expected_return_pct}%</p>
+                <p className={`text-lg font-black ${preset.expected_return_pct === 0 ? "text-slate-400" : colors.text}`}>
+                  {preset.expected_return_pct === 0 ? "—" : `+${preset.expected_return_pct}%`}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-[10px] text-slate-400 font-bold uppercase">Riesgo</p>

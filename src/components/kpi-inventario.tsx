@@ -26,14 +26,15 @@ export function KPIInventario({ totalListings, absorptionPct }: KPIInventarioPro
       <div className="relative pt-4">
         <div className="flex justify-between text-[10px] font-bold mb-1">
           <span>Absorción de Mercado</span>
-          <span>{absorptionPct}%</span>
+          <span className="text-slate-400">—</span>
         </div>
         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-600 rounded-full shadow-[0_0_8px_rgba(29,78,216,0.4)] transition-all duration-700"
-            style={{ width: `${absorptionPct}%` }}
+            className="h-full bg-slate-200 rounded-full"
+            style={{ width: "0%" }}
           />
         </div>
+        <p className="text-[9px] text-slate-400 mt-1">Datos disponibles próximamente</p>
       </div>
     </div>
   )

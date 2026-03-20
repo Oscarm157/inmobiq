@@ -17,7 +17,7 @@ export function KPIPlusvalia({ trendPct, riskNote }: KPIPlusvaliaProps) {
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
             Plusvalía Anual
           </p>
-          <h4 className="text-2xl font-black">{formatPercent(trendPct)}</h4>
+          <h4 className="text-2xl font-black">{trendPct === 0 ? "Sin datos" : formatPercent(trendPct)}</h4>
         </div>
       </div>
       <div className="bg-red-50 border border-red-100 p-3 rounded-lg">

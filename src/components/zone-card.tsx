@@ -34,9 +34,13 @@ export function ZoneCard({ zone }: ZoneCardProps) {
         </div>
 
         <div className="flex items-center justify-between text-[10px] font-bold">
-          <span className={isPositive ? "text-green-600" : "text-red-600"}>
-            {formatPercent(zone.price_trend_pct)}
-          </span>
+          {zone.price_trend_pct === 0 ? (
+            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">Nuevo</span>
+          ) : (
+            <span className={isPositive ? "text-green-600" : "text-red-600"}>
+              {formatPercent(zone.price_trend_pct)}
+            </span>
+          )}
           <span className="text-slate-400">
             {formatNumber(zone.total_listings)} props
           </span>

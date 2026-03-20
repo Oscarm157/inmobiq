@@ -16,10 +16,9 @@ import { MarketQualityCard } from "@/components/zone/market-quality-card"
 import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
 import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
-import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
-import { formatCurrency, formatPercent } from "@/lib/utils"
-import type { PropertyType, ZoneMetrics, ZoneRiskMetrics, Listing } from "@/types/database"
+import { formatCurrency } from "@/lib/utils"
+import type { PropertyType, ZoneMetrics, Listing } from "@/types/database"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -50,21 +49,16 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params }: ZonePageProps) {
   const { slug } = await params
-  const [zone, city, allZones, { listings }, riskDataAll, zoneAnalytics] = await Promise.all([
+  const [zone, city, allZones, { listings }, zoneAnalytics] = await Promise.all([
     getZoneBySlug(slug),
     getCityMetrics(),
     getZoneMetrics(),
     getListings({ zonas: [slug] }),
-    getZoneRiskMetrics(),
     getZoneListingsAnalytics(slug),
   ])
   if (!zone) notFound()
 
   const cityAvg = city.avg_price_per_m2
-  const diffFromCity = ((zone.avg_price_per_m2 - cityAvg) / cityAvg) * 100
-
-  // Risk data for this zone
-  const zoneRisk = riskDataAll.find((r) => r.zone_slug === slug) ?? null
 
   // Determine top property type
   const sortedTypes = Object.entries(zone.listings_by_type).sort(
@@ -227,14 +221,6 @@ export default async function ZonePage({ params }: ZonePageProps) {
     totalListings: allListings.length,
   }
 
-  // Risk note
-  const riskNote =
-    zone.price_trend_pct > 4
-      ? "Alta demanda está acelerando los precios por encima del promedio regional."
-      : zone.price_trend_pct < 0
-        ? "Corrección de precios activa. Posible oportunidad a mediano plazo."
-        : "Mercado estable con crecimiento moderado."
-
   return (
     <div className="space-y-8">
       {/* [A] Page Header */}
@@ -266,6 +252,31 @@ export default async function ZonePage({ params }: ZonePageProps) {
 
       {/* [B] KPI Ticker Strip */}
       <KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} />
+
+      {/* [B2] Low listings warning */}
+      {zone.total_listings < 3 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+          <Icon name="info" className="text-amber-600 text-lg" />
+          <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+            Datos limitados ({zone.total_listings} {zone.total_listings === 1 ? "propiedad" : "propiedades"}). Las métricas pueden no ser representativas de la zona.
+          </p>
+        </div>
+      )}
+
+      {/* [B3] Zone Map — right after KPIs for immediate spatial context */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
+          <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+            Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
+          </a>
+        </div>
+        <ZoneMapWrapper
+          zones={allZones}
+          listings={listings as Listing[]}
+          focusZoneSlug={slug}
+        />
+      </section>
 
       {/* [C] Main Content Grid */}
       <div className="grid grid-cols-12 gap-6">
@@ -300,8 +311,10 @@ export default async function ZonePage({ params }: ZonePageProps) {
           {/* Casa vs Departamento */}
           <CasaVsDepto data={zoneAnalytics.casaVsDepto} zoneName={zone.zone_name} />
 
-          {/* Venta vs Renta */}
-          <VentaRentaComparison data={ventaRentaData} />
+          {/* Venta vs Renta — only show when renta listings exist */}
+          {ventaRentaData.rentaCount > 0 && (
+            <VentaRentaComparison data={ventaRentaData} />
+          )}
 
           {/* Zone vs City Comparison */}
           <ZoneComparisonEnhanced zone={zone} city={city} />
@@ -309,41 +322,17 @@ export default async function ZonePage({ params }: ZonePageProps) {
           {/* Market Quality */}
           <MarketQualityCard data={marketQualityData} />
 
-          {/* Risk Profile Mini */}
-          {zoneRisk && (
-            <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-              <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
-                Perfil de Riesgo
-              </h4>
-              <div className="space-y-3">
-                <RiskMetric label="Riesgo General" value={`${zoneRisk.risk_score}/100`} badge={zoneRisk.risk_label} />
-                <RiskMetric label="Volatilidad" value={`${zoneRisk.volatility}%`} />
-                <RiskMetric label="Cap Rate" value={`${zoneRisk.cap_rate}%`} />
-                <RiskMetric label="Liquidez" value={`${zoneRisk.liquidity_score}/100`} />
-                <RiskMetric label="Madurez" value={zoneRisk.market_maturity} />
-              </div>
-              <p className="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                {riskNote}
-              </p>
-            </div>
-          )}
+          {/* Risk Profile — Próximamente (requires 4+ weeks of data) */}
+          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">
+            <h4 className="text-sm font-black uppercase tracking-wider text-slate-400 mb-2">
+              Perfil de Riesgo
+            </h4>
+            <p className="text-xs text-slate-400">
+              Disponible cuando se acumulen 4+ semanas de datos históricos. Incluye: score de riesgo, volatilidad, cap rate y liquidez.
+            </p>
+          </div>
         </div>
       </div>
-
-      {/* [D] Zone Map */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
-          <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
-          </a>
-        </div>
-        <ZoneMapWrapper
-          zones={allZones}
-          listings={listings as Listing[]}
-          focusZoneSlug={slug}
-        />
-      </section>
 
       {/* [E] Pipeline */}
       <section className="mb-20">
@@ -361,33 +350,6 @@ export default async function ZonePage({ params }: ZonePageProps) {
           ))}
         </div>
       </section>
-    </div>
-  )
-}
-
-// --- Helper Components ---
-
-function RiskMetric({ label, value, badge }: { label: string; value: string; badge?: string }) {
-  const badgeColor =
-    badge === "Bajo"
-      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-      : badge === "Medio"
-        ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
-        : badge === "Alto"
-          ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400"
-          : ""
-
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-slate-500">{label}</span>
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{value}</span>
-        {badge && (
-          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
-            {badge}
-          </span>
-        )}
-      </div>
     </div>
   )
 }

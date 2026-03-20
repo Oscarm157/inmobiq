@@ -29,8 +29,8 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconColor: "text-blue-700 dark:text-blue-400",
       label: "Precio / m²",
       value: formatCurrency(zone.avg_price_per_m2),
-      sub: formatPercent(zone.price_trend_pct),
-      subColor: trendPositive ? "text-emerald-600" : "text-red-600",
+      sub: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
+      subColor: zone.price_trend_pct === 0 ? "text-slate-400" : trendPositive ? "text-emerald-600" : "text-red-600",
     },
     {
       icon: "sell",
@@ -45,7 +45,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconColor: "text-indigo-600 dark:text-indigo-400",
       label: "Inventario Activo",
       value: formatNumber(zone.total_listings),
-      sub: `${absorptionPct}% absorción`,
+      sub: "—",
       subColor: "text-slate-500",
     },
     {
@@ -53,8 +53,8 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: trendPositive ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950",
       iconColor: trendPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
       label: "Tendencia",
-      value: formatPercent(zone.price_trend_pct),
-      sub: "vs periodo anterior",
+      value: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
+      sub: zone.price_trend_pct === 0 ? "" : "vs periodo anterior",
       subColor: "text-slate-400",
     },
     {

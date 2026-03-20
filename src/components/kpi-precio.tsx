@@ -38,9 +38,13 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
         ))}
       </div>
       <div className="mt-4 flex items-center justify-between text-[10px] font-bold">
-        <span className={trendPct > 0 ? "text-green-600" : "text-red-600"}>
-          {formatPercent(trendPct)} vs periodo anterior
-        </span>
+        {trendPct === 0 ? (
+          <span className="text-slate-400">Sin histórico</span>
+        ) : (
+          <span className={trendPct > 0 ? "text-green-600" : "text-red-600"}>
+            {formatPercent(trendPct)} vs periodo anterior
+          </span>
+        )}
         <span className="text-slate-400">Actualizado: Hoy</span>
       </div>
     </div>
