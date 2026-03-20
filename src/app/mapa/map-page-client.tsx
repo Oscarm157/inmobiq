@@ -3,11 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import type { ZoneMetrics, Listing } from "@/types/database"
+import type { ZoneMetrics } from "@/types/database"
 import { formatNumber } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 
-// Dynamic import to avoid SSR issues with Leaflet
+// Dynamic import to avoid SSR issues with Mapbox GL
 const InteractiveMap = dynamic(
   () => import("@/components/map/interactive-map").then((m) => m.InteractiveMap),
   { ssr: false, loading: () => <div className="h-[600px] bg-slate-100 rounded-xl flex items-center justify-center"><div className="text-slate-400 text-sm font-medium">Cargando mapa…</div></div> }
@@ -15,10 +15,9 @@ const InteractiveMap = dynamic(
 
 interface MapPageClientProps {
   zones: ZoneMetrics[]
-  listings: Listing[]
 }
 
-export function MapPageClient({ zones, listings }: MapPageClientProps) {
+export function MapPageClient({ zones }: MapPageClientProps) {
   const { formatPrice } = useCurrency()
   const router = useRouter()
   const [selectedZone, setSelectedZone] = useState<ZoneMetrics | null>(null)
@@ -34,7 +33,6 @@ export function MapPageClient({ zones, listings }: MapPageClientProps) {
       <div className="lg:col-span-3">
         <InteractiveMap
           zones={zones}
-          listings={listings}
           height="600px"
           showLayerToggle
           onZoneClick={handleZoneClick}

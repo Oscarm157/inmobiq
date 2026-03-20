@@ -273,7 +273,6 @@ export default async function ZonePage({ params }: ZonePageProps) {
         </div>
         <ZoneMapWrapper
           zones={allZones}
-          listings={listings as Listing[]}
           focusZoneSlug={slug}
         />
       </section>
