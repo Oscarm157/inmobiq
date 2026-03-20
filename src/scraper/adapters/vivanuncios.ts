@@ -1,9 +1,28 @@
-import * as cheerio from "cheerio";
-import { createHttpClient, jitteredSleep, withRetry } from "../http";
+import { newPage } from "../browser";
+import { jitteredSleep } from "../http";
 import type { RawListing, ScraperAdapter, ScraperConfig } from "../types";
 import type { PropertyType, ListingType } from "@/types/database";
 
 const PORTAL = "vivanuncios" as const;
+
+const PROPERTY_TYPE_SLUGS: Record<PropertyType, string> = {
+  casa: "casas",
+  departamento: "departamentos",
+  terreno: "terrenos",
+  local: "locales-comerciales",
+  oficina: "oficinas",
+};
+
+const LISTING_TYPE_SLUGS: Record<ListingType, string> = {
+  venta: "venta",
+  renta: "renta",
+};
+
+function buildUrl(propertyType: PropertyType, listingType: ListingType, page: number): string {
+  const ptSlug = PROPERTY_TYPE_SLUGS[propertyType] ?? "casas";
+  const ltSlug = LISTING_TYPE_SLUGS[listingType] ?? "venta";
+  return `https://www.vivanuncios.com.mx/s-${ptSlug}/tijuana/${ltSlug}/v1c1076l10502p${page}`;
+}
 
 function parsePrice(raw: string): number | null {
   if (!raw) return null;
@@ -18,96 +37,126 @@ function parseNumber(raw: string | undefined | null): number | null {
   return isNaN(n) ? null : n;
 }
 
+interface ExtractedCard {
+  extId: string | null;
+  href: string;
+  title: string | null;
+  rawPrice: string;
+  rawArea: string;
+  rawBeds: string;
+  rawBaths: string;
+  address: string | null;
+  images: string[];
+}
+
 async function scrapePage(
-  httpClient: ReturnType<typeof createHttpClient>,
   url: string,
   listingType: ListingType,
-  propertyType: PropertyType
+  propertyType: PropertyType,
 ): Promise<RawListing[]> {
-  const html = await withRetry(async () => {
-    const res = await httpClient.get<string>(url, {
-      responseType: "text",
-      headers: { Referer: "https://www.vivanuncios.com.mx/" },
+  const page = await newPage({ referer: "https://www.vivanuncios.com.mx/" });
+
+  try {
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+
+    // Wait for listing cards to appear; use a broad selector
+    await page.waitForSelector(
+      "li[data-eid], [data-id], article.re-Listing, .ads-list-item",
+      { timeout: 15_000 },
+    ).catch(() => {
+      // If no cards found, page may be empty — we'll just return []
     });
-    if (res.status !== 200) throw new Error(`HTTP ${res.status} for ${url}`);
-    return res.data;
-  });
 
-  const $ = cheerio.load(html);
-  const results: RawListing[] = [];
+    const cards: ExtractedCard[] = await page.evaluate(() => {
+      const results: ExtractedCard[] = [];
 
-  // Vivanuncios card selectors (OLX-based platform)
-  $("li[data-eid], [data-id], article.re-Listing").each((_i, el) => {
-    try {
-      const $el = $(el);
+      const items = document.querySelectorAll(
+        "li[data-eid], [data-id], article.re-Listing, .ads-list-item",
+      );
 
-      const extId =
-        $el.attr("data-eid") ||
-        $el.attr("data-id") ||
-        $el.find("a").first().attr("href")?.match(/iid-(\d+)/)?.[1] ||
-        null;
-      if (!extId) return;
+      items.forEach((el) => {
+        const extId =
+          el.getAttribute("data-eid") ||
+          el.getAttribute("data-id") ||
+          el.querySelector("a")?.href?.match(/iid-(\d+)/)?.[1] ||
+          null;
 
-      const href =
-        $el.find("a[href*='/bienes-raices/']").first().attr("href") ||
-        $el.find("a").first().attr("href") ||
-        "";
-      const externalUrl = href.startsWith("http")
-        ? href
-        : `https://www.vivanuncios.com.mx${href}`;
+        const anchor =
+          el.querySelector<HTMLAnchorElement>("a[href*='/bienes-raices/']") ||
+          el.querySelector<HTMLAnchorElement>("a");
+        const href = anchor?.href ?? "";
 
-      const title =
-        $el.find("h2, h3, [class*='title']").first().text().trim() || null;
+        const titleEl = el.querySelector("h2, h3, [class*='title']");
+        const title = titleEl?.textContent?.trim() || null;
 
-      const rawPrice =
-        $el.find("[class*='price'], [class*='Price']").first().text().trim();
-      const price_mxn = parsePrice(rawPrice);
+        const priceEl = el.querySelector("[class*='price'], [class*='Price']");
+        const rawPrice = priceEl?.textContent?.trim() ?? "";
 
-      const rawArea = $el.find("[class*='area'], [class*='m2']").first().text();
-      const area_m2 = parseNumber(rawArea);
+        const areaEl = el.querySelector("[class*='area'], [class*='m2']");
+        const rawArea = areaEl?.textContent?.trim() ?? "";
 
-      const rawBeds = $el.find("[class*='room'], [class*='bed'], [class*='recamara']").first().text();
-      const bedrooms = parseNumber(rawBeds);
+        const bedsEl = el.querySelector(
+          "[class*='room'], [class*='bed'], [class*='recamara']",
+        );
+        const rawBeds = bedsEl?.textContent?.trim() ?? "";
 
-      const rawBaths = $el.find("[class*='bath'], [class*='bano']").first().text();
-      const bathrooms = parseNumber(rawBaths);
+        const bathsEl = el.querySelector("[class*='bath'], [class*='bano']");
+        const rawBaths = bathsEl?.textContent?.trim() ?? "";
 
-      const address =
-        $el.find("[class*='location'], [class*='Location'], [class*='address']").first().text().trim() ||
-        null;
+        const addrEl = el.querySelector(
+          "[class*='location'], [class*='Location'], [class*='address']",
+        );
+        const address = addrEl?.textContent?.trim() || null;
 
-      const images: string[] = [];
-      $el.find("img").each((_j, img) => {
-        const src = $(img).attr("src") || $(img).attr("data-src");
-        if (src && !src.includes("placeholder") && src.includes("http")) images.push(src);
+        const images: string[] = [];
+        el.querySelectorAll("img").forEach((img) => {
+          const src = img.src || img.getAttribute("data-src") || "";
+          if (src && !src.includes("placeholder") && src.startsWith("http")) {
+            images.push(src);
+          }
+        });
+
+        results.push({ extId, href, title, rawPrice, rawArea, rawBeds, rawBaths, address, images });
       });
 
-      results.push({
+      return results;
+    });
+
+    const listings: RawListing[] = [];
+
+    for (const card of cards) {
+      if (!card.extId) continue;
+
+      const externalUrl = card.href.startsWith("http")
+        ? card.href
+        : `https://www.vivanuncios.com.mx${card.href}`;
+
+      listings.push({
         source_portal: PORTAL,
-        external_id: String(extId),
+        external_id: String(card.extId),
         external_url: externalUrl,
-        title,
+        title: card.title,
         description: null,
         property_type: propertyType,
         listing_type: listingType,
-        price_mxn,
+        price_mxn: parsePrice(card.rawPrice),
         price_usd: null,
-        area_m2,
-        bedrooms,
-        bathrooms,
+        area_m2: parseNumber(card.rawArea),
+        bedrooms: parseNumber(card.rawBeds),
+        bathrooms: parseNumber(card.rawBaths),
         parking: null,
         lat: null,
         lng: null,
-        address,
-        images,
-        raw_data: { raw_price: rawPrice },
+        address: card.address,
+        images: card.images,
+        raw_data: { raw_price: card.rawPrice },
       });
-    } catch {
-      // skip
     }
-  });
 
-  return results;
+    return listings;
+  } finally {
+    await page.context().close();
+  }
 }
 
 export const vivanunciosAdapter: ScraperAdapter = {
@@ -122,38 +171,25 @@ export const vivanunciosAdapter: ScraperAdapter = {
       ? [config.property_type]
       : ["casa", "departamento"];
 
-    const httpClient = createHttpClient();
     const allListings: RawListing[] = [];
 
     for (const lt of listingTypes) {
       for (const pt of propertyTypes) {
-        const ptSlug =
-          pt === "casa"
-            ? "casas"
-            : pt === "departamento"
-            ? "departamentos-y-pisos"
-            : pt === "terreno"
-            ? "terrenos"
-            : "propiedades";
-        const ltSlug = lt === "venta" ? "venta" : "renta";
-
-        for (let page = 1; page <= pages; page++) {
-          const url =
-            page === 1
-              ? `https://www.vivanuncios.com.mx/s-${ptSlug}/tijuana/${ltSlug}/v1c1076l10502p1`
-              : `https://www.vivanuncios.com.mx/s-${ptSlug}/tijuana/${ltSlug}/v1c1076l10502p${page}`;
-
+        for (let pg = 1; pg <= pages; pg++) {
+          const url = buildUrl(pt, lt, pg);
           console.log(`[vivanuncios] scraping ${url}`);
 
           try {
-            const listings = await scrapePage(httpClient, url, lt, pt);
+            const listings = await scrapePage(url, lt, pt);
             allListings.push(...listings);
-            console.log(`[vivanuncios] page ${page}/${pages}: ${listings.length} listings`);
+            console.log(
+              `[vivanuncios] page ${pg}/${pages}: ${listings.length} listings`,
+            );
           } catch (err) {
-            console.error(`[vivanuncios] failed page ${page}: ${err}`);
+            console.error(`[vivanuncios] failed page ${pg}: ${err}`);
           }
 
-          if (page < pages) await jitteredSleep(1_500, 2_500);
+          if (pg < pages) await jitteredSleep(1_500, 2_500);
         }
       }
     }

@@ -1,12 +1,30 @@
-import * as cheerio from "cheerio";
-import { createHttpClient, jitteredSleep, withRetry, randomUserAgent } from "../http";
+import { newPage } from "../browser";
+import { jitteredSleep } from "../http";
 import type { RawListing, ScraperAdapter, ScraperConfig } from "../types";
 import type { PropertyType, ListingType } from "@/types/database";
 
 const PORTAL = "mercadolibre" as const;
 
-// MercadoLibre has strong anti-bot; uses a combination of HTML + JSON in __PRELOADED_STATE__
 const ML_BASE = "https://inmuebles.mercadolibre.com.mx";
+
+const LISTING_TYPE_SLUG: Record<ListingType, string> = {
+  venta: "venta",
+  renta: "renta",
+};
+
+const PROPERTY_TYPE_SLUG: Record<PropertyType, string> = {
+  casa: "casas",
+  departamento: "departamentos",
+  terreno: "terrenos",
+  local: "locales",
+  oficina: "oficinas",
+};
+
+const PER_PAGE = 48;
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
 
 function parsePrice(raw: string | number | undefined | null): number | null {
   if (raw == null) return null;
@@ -22,32 +40,25 @@ function parseNumber(raw: string | undefined | null): number | null {
   return isNaN(n) ? null : n;
 }
 
-/** Try to extract __PRELOADED_STATE__ JSON from ML HTML */
-function extractPreloadedState(html: string): Record<string, unknown> | null {
-  const match = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[1]);
-  } catch {
-    return null;
-  }
-}
+/* ------------------------------------------------------------------ */
+/*  Extract listings from __PRELOADED_STATE__                         */
+/* ------------------------------------------------------------------ */
 
-/** Extract listings from ML's JSON API response */
 function extractFromPreloaded(
   state: Record<string, unknown>,
   listingType: ListingType,
-  propertyType: PropertyType
+  propertyType: PropertyType,
 ): RawListing[] {
   const results: RawListing[] = [];
 
-  // Structure: state.initialState.results or state.results
-  const results_ =
-    ((state as Record<string, Record<string, unknown>>).initialState?.results as unknown[]) ??
+  // The results live under state.initialState.results or state.results
+  const items =
+    ((state as Record<string, Record<string, unknown>>).initialState
+      ?.results as unknown[]) ??
     (state.results as unknown[]) ??
     [];
 
-  for (const item of results_) {
+  for (const item of items) {
     const it = item as Record<string, unknown>;
     const id = String(it.id ?? it.item_id ?? "");
     if (!id) continue;
@@ -55,39 +66,61 @@ function extractFromPreloaded(
     const permalink = String(it.permalink ?? "");
     const externalUrl = permalink || `${ML_BASE}/MLM-${id}`;
 
+    // Price
     const priceObj = it.price as Record<string, unknown> | undefined;
     const price_mxn = priceObj
       ? parsePrice(priceObj.amount as string | number | null | undefined)
       : parsePrice(String(it.price ?? ""));
 
+    // Location
     const location = it.location as Record<string, unknown> | undefined;
-    const lat = location?.latitude ? parseFloat(String(location.latitude)) : null;
-    const lng = location?.longitude ? parseFloat(String(location.longitude)) : null;
+    const lat = location?.latitude
+      ? parseFloat(String(location.latitude))
+      : null;
+    const lng = location?.longitude
+      ? parseFloat(String(location.longitude))
+      : null;
     const cityObj = location?.city as Record<string, unknown> | undefined;
     const address = location
-      ? [location.address_line, cityObj?.name]
-          .filter(Boolean)
-          .join(", ")
+      ? [location.address_line, cityObj?.name].filter(Boolean).join(", ")
       : null;
 
-    const attributes = (it.attributes as Record<string, unknown>[] | undefined) ?? [];
+    // Attributes
+    const attributes =
+      (it.attributes as Record<string, unknown>[] | undefined) ?? [];
     let area_m2: number | null = null;
     let bedrooms: number | null = null;
     let bathrooms: number | null = null;
     let parking: number | null = null;
 
     for (const attr of attributes) {
-      const id_ = String(attr.id ?? "").toLowerCase();
+      const attrId = String(attr.id ?? "").toLowerCase();
       const val = String(attr.value_name ?? attr.value ?? "");
-      if (id_.includes("m2") || id_.includes("surface")) area_m2 = parseNumber(val);
-      else if (id_.includes("bedroom") || id_.includes("room")) bedrooms = parseNumber(val);
-      else if (id_.includes("bathroom") || id_.includes("bath")) bathrooms = parseNumber(val);
-      else if (id_.includes("parking") || id_.includes("garage")) parking = parseNumber(val);
+      if (attrId.includes("m2") || attrId.includes("surface"))
+        area_m2 = parseNumber(val);
+      else if (attrId.includes("bedroom") || attrId.includes("room"))
+        bedrooms = parseNumber(val);
+      else if (attrId.includes("bathroom") || attrId.includes("bath"))
+        bathrooms = parseNumber(val);
+      else if (attrId.includes("parking") || attrId.includes("garage"))
+        parking = parseNumber(val);
     }
 
-    const pictures = (it.thumbnail_id
-      ? [`https://http2.mlstatic.com/D_NQ_NP_${it.thumbnail_id}-V.jpg`]
-      : []) as string[];
+    // Images — pictures array or thumbnail fallback
+    const pictures: string[] = [];
+    const picsArray = it.pictures as Record<string, unknown>[] | undefined;
+    if (Array.isArray(picsArray) && picsArray.length > 0) {
+      for (const pic of picsArray) {
+        const url = String(pic.url ?? pic.secure_url ?? "");
+        if (url) pictures.push(url);
+      }
+    } else if (it.thumbnail_id) {
+      pictures.push(
+        `https://http2.mlstatic.com/D_NQ_NP_${it.thumbnail_id}-V.jpg`,
+      );
+    } else if (it.thumbnail) {
+      pictures.push(String(it.thumbnail));
+    }
 
     results.push({
       source_portal: PORTAL,
@@ -114,78 +147,115 @@ function extractFromPreloaded(
   return results;
 }
 
+/* ------------------------------------------------------------------ */
+/*  Scrape a single search-results page using Playwright              */
+/* ------------------------------------------------------------------ */
+
 async function scrapePage(
-  httpClient: ReturnType<typeof createHttpClient>,
   url: string,
   listingType: ListingType,
-  propertyType: PropertyType
+  propertyType: PropertyType,
 ): Promise<RawListing[]> {
-  const html = await withRetry(async () => {
-    const res = await httpClient.get<string>(url, {
-      responseType: "text",
-      headers: {
-        "User-Agent": randomUserAgent(),
-        Referer: "https://www.google.com.mx/",
-        "Sec-Fetch-Site": "cross-site",
-      },
-    });
-    if (res.status !== 200) throw new Error(`HTTP ${res.status} for ${url}`);
-    return res.data;
-  });
+  const page = await newPage({ referer: "https://www.google.com.mx/" });
 
-  // Try preloaded state first
-  const state = extractPreloadedState(html);
-  if (state) {
-    const fromState = extractFromPreloaded(state, listingType, propertyType);
-    if (fromState.length > 0) return fromState;
+  try {
+    // Strategy 1: intercept the __PRELOADED_STATE__ or API JSON via
+    // response listener. We collect any matching payload before navigating.
+    let interceptedState: Record<string, unknown> | null = null;
+
+    page.on("response", async (response) => {
+      try {
+        const resUrl = response.url();
+        const ct = response.headers()["content-type"] ?? "";
+
+        // ML sometimes loads results through an API endpoint
+        if (
+          ct.includes("application/json") &&
+          (resUrl.includes("/api/") || resUrl.includes("/search"))
+        ) {
+          const json = (await response.json()) as Record<string, unknown>;
+          if (json && (json.results || json.initialState)) {
+            interceptedState = json;
+          }
+        }
+      } catch {
+        // ignore non-JSON responses
+      }
+    });
+
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+
+    // Give the page a moment to finish XHR requests
+    await page.waitForTimeout(2_000);
+
+    // Strategy 2 (primary): read window.__PRELOADED_STATE__ directly
+    const stateFromWindow = await page.evaluate(() => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (window as any).__PRELOADED_STATE__ ?? null;
+      } catch {
+        return null;
+      }
+    });
+
+    const state =
+      (stateFromWindow as Record<string, unknown> | null) ?? interceptedState;
+
+    if (state) {
+      const listings = extractFromPreloaded(state, listingType, propertyType);
+      if (listings.length > 0) return listings;
+    }
+
+    // Strategy 3 (fallback): extract __PRELOADED_STATE__ from raw HTML via regex
+    const html = await page.content();
+    const match = html.match(
+      /window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/,
+    );
+    if (match) {
+      try {
+        const parsed = JSON.parse(match[1]) as Record<string, unknown>;
+        const listings = extractFromPreloaded(parsed, listingType, propertyType);
+        if (listings.length > 0) return listings;
+      } catch {
+        // JSON parse failed — fall through
+      }
+    }
+
+    console.warn(`[mercadolibre] no listings extracted from ${url}`);
+    return [];
+  } catch (err) {
+    console.error(`[mercadolibre] error scraping ${url}: ${err}`);
+    return [];
+  } finally {
+    // Close context (which also closes the page)
+    const ctx = page.context();
+    await ctx.close();
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Build page URL                                                    */
+/* ------------------------------------------------------------------ */
+
+function buildUrl(
+  listingType: ListingType,
+  propertyType: PropertyType,
+  pageNum: number,
+): string {
+  const ltSlug = LISTING_TYPE_SLUG[listingType];
+  const ptSlug = PROPERTY_TYPE_SLUG[propertyType];
+
+  if (pageNum === 1) {
+    return `${ML_BASE}/${ltSlug}/${ptSlug}/tijuana/`;
   }
 
-  // Fallback: HTML scraping
-  const $ = cheerio.load(html);
-  const results: RawListing[] = [];
-
-  $(".ui-search-result, .results-item, [class*='search-result']").each((_i, el) => {
-    try {
-      const $el = $(el);
-      const href =
-        $el.find("a.ui-search-link, a[href*='inmuebles.mercadolibre']").first().attr("href") ?? "";
-      const extId = href.match(/MLM-(\d+)/)?.[1] ?? null;
-      if (!extId) return;
-
-      const externalUrl = href;
-      const title = $el.find("h2.ui-search-item__title, h2, h3").first().text().trim() || null;
-      const rawPrice = $el.find(".price-tag-fraction, [class*='price']").first().text().trim();
-      const price_mxn = parsePrice(rawPrice);
-      const address =
-        $el.find(".ui-search-item__location, [class*='location']").first().text().trim() || null;
-
-      results.push({
-        source_portal: PORTAL,
-        external_id: String(extId),
-        external_url: externalUrl,
-        title,
-        description: null,
-        property_type: propertyType,
-        listing_type: listingType,
-        price_mxn,
-        price_usd: null,
-        area_m2: null,
-        bedrooms: null,
-        bathrooms: null,
-        parking: null,
-        lat: null,
-        lng: null,
-        address,
-        images: [],
-        raw_data: { source: "html", raw_price: rawPrice },
-      });
-    } catch {
-      // skip
-    }
-  });
-
-  return results;
+  const offset = (pageNum - 1) * PER_PAGE + 1;
+  return `${ML_BASE}/${ltSlug}/${ptSlug}/tijuana/_Desde_${offset}_NoIndex_True`;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Adapter                                                           */
+/* ------------------------------------------------------------------ */
 
 export const mercadolibreAdapter: ScraperAdapter = {
   portal: PORTAL,
@@ -199,38 +269,25 @@ export const mercadolibreAdapter: ScraperAdapter = {
       ? [config.property_type]
       : ["casa", "departamento"];
 
-    const httpClient = createHttpClient();
     const allListings: RawListing[] = [];
 
     for (const lt of listingTypes) {
       for (const pt of propertyTypes) {
-        const ptSlug =
-          pt === "casa"
-            ? "casas"
-            : pt === "departamento"
-            ? "departamentos"
-            : pt === "terreno"
-            ? "terrenos"
-            : "propiedades";
-        // ML uses offset pagination: _Desde_1, _Desde_49, _Desde_97...
-        const perPage = 48;
-
         for (let page = 1; page <= pages; page++) {
-          const offset = (page - 1) * perPage + 1;
-          const suffix = page === 1 ? "" : `_Desde_${offset}_NoIndex_True`;
-          const url = `${ML_BASE}/${lt === "venta" ? "venta" : "renta"}/${ptSlug}/tijuana${suffix}`;
-
+          const url = buildUrl(lt, pt, page);
           console.log(`[mercadolibre] scraping ${url}`);
 
           try {
-            const listings = await scrapePage(httpClient, url, lt, pt);
+            const listings = await scrapePage(url, lt, pt);
             allListings.push(...listings);
-            console.log(`[mercadolibre] page ${page}/${pages}: ${listings.length} listings`);
+            console.log(
+              `[mercadolibre] page ${page}/${pages}: ${listings.length} listings`,
+            );
           } catch (err) {
             console.error(`[mercadolibre] failed page ${page}: ${err}`);
           }
 
-          // ML has strong anti-bot; use longer delays
+          // ML has strong anti-bot; use longer jittered delays
           if (page < pages) await jitteredSleep(3_500, 5_500);
         }
       }

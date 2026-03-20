@@ -50,11 +50,10 @@ export async function calculateWeeklySnapshots(): Promise<{
 
   console.log(`[snapshots] calculating week ${weekStart}`);
 
-  // Fetch all active listings
+  // Fetch all active deduplicated listings (canonical or unclustered)
   const { data: listings, error } = await sb
-    .from("listings")
+    .from("v_deduplicated_listings")
     .select("zone_id, property_type, listing_type, price_mxn, area_m2, first_seen_at")
-    .eq("is_active", true)
     .not("zone_id", "is", null);
 
   if (error) throw new Error(`Failed to fetch listings for snapshots: ${error.message}`);

@@ -35,6 +35,8 @@ import {
   deactivateStaleListings,
 } from "../src/scraper/db";
 import { calculateWeeklySnapshots } from "../src/scraper/snapshots";
+import { runDedup } from "../src/scraper/dedup";
+import { closeBrowser } from "../src/scraper/browser";
 
 // ─── CLI Args ────────────────────────────────────────────────────────────────
 
@@ -226,6 +228,20 @@ Snapshots: ${!noSnapshots}
     }
   }
 
+  // Post-scrape: deduplicate listings
+  if (!dryRun) {
+    try {
+      console.log("\n[dedup] Running deduplication…");
+      const { clustered, newClusters } = await runDedup();
+      console.log(
+        `[dedup] ${clustered} listings clustered into ${newClusters} property groups`
+      );
+    } catch (err) {
+      console.error(`[dedup] Failed: ${err}`);
+      hasErrors = true;
+    }
+  }
+
   // Post-scrape: calculate snapshots
   if (!dryRun && !noSnapshots) {
     try {
@@ -240,11 +256,14 @@ Snapshots: ${!noSnapshots}
     }
   }
 
+  // Close browser
+  await closeBrowser();
   console.log("\n✅ Scraper run complete");
   process.exit(hasErrors ? 1 : 0);
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("[scraper] Fatal error:", err);
+  await closeBrowser();
   process.exit(1);
 });

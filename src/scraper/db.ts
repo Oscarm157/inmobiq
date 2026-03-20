@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { RawListing, ScraperError, Zone } from "./types";
 import type { SourcePortal } from "@/types/database";
 import { assignZone } from "./zone-assigner";
+import { computeFingerprints } from "./dedup";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -122,6 +123,19 @@ export async function upsertListings(
     if (isNew) new_++;
     else updated++;
 
+    const fp = computeFingerprints({
+      zone_id: assignment.zoneId,
+      property_type: l.property_type,
+      listing_type: l.listing_type,
+      area_m2: l.area_m2,
+      price_mxn: l.price_mxn,
+      price_usd: l.price_usd,
+      bedrooms: l.bedrooms,
+      bathrooms: l.bathrooms,
+      lat: l.lat,
+      lng: l.lng,
+    });
+
     return {
       zone_id: assignment.zoneId,
       source_portal: l.source_portal,
@@ -142,6 +156,8 @@ export async function upsertListings(
       address: l.address,
       images: l.images,
       raw_data: l.raw_data,
+      fingerprint_struct: fp.struct,
+      fingerprint_geo: fp.geo,
       scraped_at: now,
       last_seen_at: now,
       is_active: true,
