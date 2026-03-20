@@ -5,6 +5,7 @@ import { ZonesBarChart } from "@/components/zones-bar-chart"
 import { KPIPrecio } from "@/components/kpi-precio"
 import { KPIInventario } from "@/components/kpi-inventario"
 import { KPIPlusvalia } from "@/components/kpi-plusvalia"
+import { MiniMapWrapper } from "@/components/map/mini-map-wrapper"
 import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
 import { formatNumber } from "@/lib/utils"
@@ -82,9 +83,19 @@ export default async function HomePage() {
               {formatNumber(city.total_zones)} zonas · {formatNumber(city.total_listings)} propiedades activas
             </p>
           </div>
-          <span className="text-blue-700 text-sm font-bold flex items-center gap-1">
+            <a href="/mapa" className="text-blue-700 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
-          </span>
+          </a>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <MiniMapWrapper zones={zones} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 content-start">
+            {zones.slice(0, 3).map((zone) => (
+              <ZoneCard key={zone.zone_id} zone={zone} />
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {zones.map((zone) => (

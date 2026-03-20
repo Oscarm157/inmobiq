@@ -8,9 +8,11 @@ import { KPIInventario } from "@/components/kpi-inventario"
 import { KPIPlusvalia } from "@/components/kpi-plusvalia"
 import { ComparisonTable } from "@/components/comparison-table"
 import { PipelineCard, PIPELINE_PROJECTS } from "@/components/pipeline-card"
+import { ZoneMapWrapper } from "@/components/map/zone-map-wrapper"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
+import { getListings } from "@/lib/data/listings"
 import { formatCurrency, formatPercent } from "@/lib/utils"
-import type { PropertyType, ZoneMetrics } from "@/types/database"
+import type { PropertyType, ZoneMetrics, Listing } from "@/types/database"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -41,7 +43,12 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params }: ZonePageProps) {
   const { slug } = await params
-  const [zone, city] = await Promise.all([getZoneBySlug(slug), getCityMetrics()])
+  const [zone, city, allZones, { listings }] = await Promise.all([
+    getZoneBySlug(slug),
+    getCityMetrics(),
+    getZoneMetrics(),
+    getListings({ zonas: [slug] }),
+  ])
   if (!zone) notFound()
 
   const cityAvg = city.avg_price_per_m2
@@ -174,6 +181,21 @@ export default async function ZonePage({ params }: ZonePageProps) {
           />
         </div>
       </div>
+
+      {/* Zone Map */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
+          <a href="/mapa" className="text-blue-700 text-sm font-bold flex items-center gap-1 hover:underline">
+            Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
+          </a>
+        </div>
+        <ZoneMapWrapper
+          zones={allZones}
+          listings={listings as Listing[]}
+          focusZoneSlug={slug}
+        />
+      </section>
 
       {/* Pipeline Section */}
       <section className="mb-20">

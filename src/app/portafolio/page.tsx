@@ -7,7 +7,8 @@ import { PortafolioClient } from "./portafolio-client"
 import { ExportButton } from "@/components/export-button"
 import { ListingCard } from "@/components/listing-card"
 import { ListingsFilters } from "@/components/listings-filters"
-import type { PropertyType, ListingType } from "@/types/database"
+import { PortfolioMapWrapper } from "@/components/map/portfolio-map-wrapper"
+import type { PropertyType, ListingType, Listing } from "@/types/database"
 
 export const metadata = {
   title: "Portfolio Explorer — Inmobiq",
@@ -79,6 +80,11 @@ export default async function PortafolioPage({
           <p className="text-sm text-slate-500 font-medium">
             Filtra el inventario activo por tipo, zona, precio y más
           </p>
+        </div>
+
+        {/* Map view of filtered listings */}
+        <div className="mb-6">
+          <PortfolioMapWrapper zones={zones} listings={listings as Listing[]} />
         </div>
 
         <div className="flex gap-6 items-start">

@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/auth-context"
 const navItems = [
   { icon: "dashboard", label: "Market Overview", href: "/" },
   { icon: "location_on", label: "Zone Analytics", href: "/zona" },
+  { icon: "map", label: "Mapa Interactivo", href: "/mapa" },
   { icon: "query_stats", label: "Investment Risk", href: "/riesgo" },
   { icon: "business_center", label: "Portfolio Explorer", href: "/portafolio" },
   { icon: "architecture", label: "Development Pipeline", href: "/pipeline" },

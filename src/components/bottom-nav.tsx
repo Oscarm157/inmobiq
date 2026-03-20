@@ -7,7 +7,7 @@ import { Icon } from "@/components/icon"
 const mobileNav = [
   { icon: "dashboard", label: "Overview", href: "/" },
   { icon: "location_on", label: "Zonas", href: "/zona/zona-rio" },
-  { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
+  { icon: "map", label: "Mapa", href: "/mapa" },
   { icon: "business_center", label: "Portfolio", href: "/portafolio" },
   { icon: "architecture", label: "Pipeline", href: "/pipeline" },
 ]
