@@ -2,7 +2,10 @@ import type { Metadata } from "next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
 import { AuthProvider } from "@/contexts/auth-context"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
+
+const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(s!=='light'&&d))document.documentElement.classList.add('dark')}catch(e){}})()`
 
 export const metadata: Metadata = {
   title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
@@ -24,8 +27,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
@@ -37,13 +41,15 @@ export default function RootLayout({
       </head>
       <body
         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-        className="bg-slate-50 text-slate-900 min-h-screen antialiased"
+        className="bg-background text-foreground min-h-screen antialiased"
       >
-        <AuthProvider>
-          <SidebarProvider>
-            <SidebarShell>{children}</SidebarShell>
-          </SidebarProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <SidebarProvider>
+              <SidebarShell>{children}</SidebarShell>
+            </SidebarProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
