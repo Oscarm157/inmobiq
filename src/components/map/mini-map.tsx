@@ -79,6 +79,37 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
           generateId: true,
         })
 
+        // ── Glow layer (soft halo) ──
+        map.addLayer({
+          id: "zones-glow",
+          type: "line",
+          source: "zones",
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              8,
+              5,
+            ],
+            "line-blur": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              12,
+              7,
+            ],
+            "line-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.4,
+              0.2,
+            ],
+            "line-width-transition": { duration: 300 },
+            "line-blur-transition": { duration: 300 },
+            "line-opacity-transition": { duration: 300 },
+          },
+        })
+
         map.addLayer({
           id: "zones-fill",
           type: "fill",
@@ -88,10 +119,10 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
             "fill-opacity": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
-              0.8,
-              0.55,
+              0.65,
+              0.5,
             ],
-            "fill-opacity-transition": { duration: 200 },
+            "fill-opacity-transition": { duration: 300 },
           },
         })
 
@@ -109,10 +140,24 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
             "line-width": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
-              2.5,
+              1.5,
+              1,
+            ],
+            "line-blur": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.5,
               1.5,
             ],
-            "line-opacity": 0.9,
+            "line-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.9,
+              0.6,
+            ],
+            "line-width-transition": { duration: 300 },
+            "line-blur-transition": { duration: 300 },
+            "line-opacity-transition": { duration: 300 },
           },
         })
 
