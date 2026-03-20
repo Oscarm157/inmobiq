@@ -28,6 +28,7 @@ export interface Listing {
   source_url: string;
   scraped_at: string;
   created_at: string;
+  raw_data?: Record<string, unknown>;
 }
 
 export interface Snapshot {

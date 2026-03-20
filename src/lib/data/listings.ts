@@ -83,7 +83,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
     const supabase = await createSupabaseServerClient()
     let query = supabase
       .from("listings")
-      .select("id, zone_id, title, property_type, listing_type, price_mxn, price_usd, area_m2, bedrooms, bathrooms, source_portal, external_url, scraped_at, created_at")
+      .select("id, zone_id, title, property_type, listing_type, price_mxn, price_usd, area_m2, bedrooms, bathrooms, source_portal, external_url, scraped_at, created_at, raw_data")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(100)
@@ -131,6 +131,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       source_url: (row.external_url as string) ?? "",
       scraped_at: (row.scraped_at as string) ?? "",
       created_at: (row.created_at as string) ?? "",
+      raw_data: (row.raw_data as Record<string, unknown>) ?? undefined,
     }))
 
     return listings.length > 0

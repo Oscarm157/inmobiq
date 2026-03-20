@@ -9,6 +9,10 @@ import { PropertyCompositionChart } from "@/components/zone/property-composition
 import { PriceByTypeChart } from "@/components/zone/price-by-type-chart"
 import { ZoneDNACard } from "@/components/zone/zone-dna-card"
 import { ZoneComparisonEnhanced } from "@/components/zone/zone-comparison-enhanced"
+import { PriceDistributionChart } from "@/components/zone/price-distribution-chart"
+import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
+import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
+import { MarketQualityCard } from "@/components/zone/market-quality-card"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getListings } from "@/lib/data/listings"
@@ -140,6 +144,86 @@ export default async function ZonePage({ params }: ZonePageProps) {
       ? withBathrooms.reduce((s, l) => s + l.bathrooms!, 0) / withBathrooms.length
       : null
 
+  // --- Price distribution data ---
+  const allListings = listings as Listing[]
+  const priceRanges = [
+    { min: 0, max: 100_000, range: "<$100K" },
+    { min: 100_000, max: 250_000, range: "$100K–250K" },
+    { min: 250_000, max: 500_000, range: "$250K–500K" },
+    { min: 500_000, max: 1_000_000, range: "$500K–1M" },
+    { min: 1_000_000, max: 2_500_000, range: "$1M–2.5M" },
+    { min: 2_500_000, max: Infinity, range: "$2.5M+" },
+  ]
+  const priceDistData = priceRanges
+    .map((r) => {
+      const count = allListings.filter((l) => l.price >= r.min && l.price < r.max).length
+      return { range: r.range, count, label: count > 0 ? `${count}` : "" }
+    })
+    .filter((d) => d.count > 0)
+
+  // --- Scatter data (m² vs price) ---
+  const scatterData = allListings
+    .filter((l) => l.area_m2 > 0 && l.price > 0)
+    .map((l) => ({
+      area: Math.round(l.area_m2),
+      price: Math.round(l.price),
+      type: l.property_type,
+      title: l.title,
+    }))
+  const scatterTypes = [...new Set(scatterData.map((d) => d.type))]
+
+  // --- Venta vs Renta data ---
+  const ventaListings = allListings.filter((l) => l.listing_type === "venta")
+  const rentaListings = allListings.filter((l) => l.listing_type === "renta")
+  const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+  const ventaRentaData = {
+    ventaCount: ventaListings.length,
+    rentaCount: rentaListings.length,
+    ventaAvgPrice: avg(ventaListings.map((l) => l.price)),
+    rentaAvgPrice: avg(rentaListings.map((l) => l.price)),
+    ventaAvgPriceM2: avg(ventaListings.filter((l) => l.price_per_m2 > 0).map((l) => l.price_per_m2)),
+    rentaAvgPriceM2: avg(rentaListings.filter((l) => l.price_per_m2 > 0).map((l) => l.price_per_m2)),
+    ventaAvgArea: avg(ventaListings.filter((l) => l.area_m2 > 0).map((l) => l.area_m2)),
+    rentaAvgArea: avg(rentaListings.filter((l) => l.area_m2 > 0).map((l) => l.area_m2)),
+  }
+
+  // --- Market quality data (extracted from raw_data) ---
+  const rawListings = allListings.filter((l) => l.raw_data)
+  const photoCounts = rawListings.map((l) => {
+    const rd = l.raw_data!
+    const pics = (rd.visible_pictures as { pictures?: unknown[]; additional_pictures_count?: number } | undefined)
+    const listed = (pics?.pictures as unknown[])?.length ?? 0
+    const additional = pics?.additional_pictures_count ?? 0
+    return listed + additional
+  })
+  const withGPS = allListings.filter((l) => {
+    // Check if listing has lat/lng via raw_data geolocation
+    const geo = (l.raw_data?.posting_location as { posting_geolocation?: { geolocation?: { latitude: number } } } | undefined)
+    return geo?.posting_geolocation?.geolocation?.latitude != null
+  }).length
+  const premiumCount = rawListings.filter((l) => l.raw_data!.premier === true).length
+  const ages = rawListings
+    .map((l) => {
+      const features = l.raw_data!.main_features as Record<string, { label: string; value: string }> | undefined
+      if (!features) return null
+      for (const feat of Object.values(features)) {
+        if (feat.label?.toLowerCase().includes("antigüedad") || feat.label?.toLowerCase().includes("antiguedad")) {
+          const n = parseFloat(feat.value)
+          return isNaN(n) ? null : n
+        }
+      }
+      return null
+    })
+    .filter((a): a is number => a !== null)
+
+  const marketQualityData = {
+    avgPhotos: photoCounts.length > 0 ? photoCounts.reduce((a, b) => a + b, 0) / photoCounts.length : 0,
+    pctWithGPS: allListings.length > 0 ? Math.round((withGPS / allListings.length) * 100) : 0,
+    pctPremium: rawListings.length > 0 ? Math.round((premiumCount / rawListings.length) * 100) : 0,
+    avgPropertyAge: ages.length > 0 ? ages.reduce((a, b) => a + b, 0) / ages.length : null,
+    totalListings: allListings.length,
+  }
+
   // Risk note
   const riskNote =
     zone.price_trend_pct > 4
@@ -184,6 +268,8 @@ export default async function ZonePage({ params }: ZonePageProps) {
       <div className="grid grid-cols-12 gap-6">
         {/* Left Column — Charts + Editorial */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
+          <PriceDistributionChart data={priceDistData} />
+          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} />
           <PropertyCompositionChart data={compositionData} />
           <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
           <EditorialCard
@@ -207,8 +293,14 @@ export default async function ZonePage({ params }: ZonePageProps) {
             totalListings={zone.total_listings}
           />
 
+          {/* Venta vs Renta */}
+          <VentaRentaComparison data={ventaRentaData} />
+
           {/* Zone vs City Comparison */}
           <ZoneComparisonEnhanced zone={zone} city={city} />
+
+          {/* Market Quality */}
+          <MarketQualityCard data={marketQualityData} />
 
           {/* Risk Profile Mini */}
           {zoneRisk && (
