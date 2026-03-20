@@ -10,7 +10,7 @@ import {
   getPriceColor,
   getPriceLabel,
 } from "@/lib/geo-data"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface Listing {
   id: string
@@ -48,6 +48,7 @@ export function InteractiveMap({
   showLayerToggle = true,
   onZoneClick,
 }: InteractiveMapProps) {
+  const { formatPrice } = useCurrency()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<unknown>(null)
   const layersRef = useRef<{ zones: unknown[]; markers: unknown; heatmap: unknown }>({
@@ -156,7 +157,7 @@ export function InteractiveMap({
         ? `<div style="font-family:sans-serif;min-width:160px">
             <div style="font-weight:700;font-size:14px;margin-bottom:4px">${geo.name}</div>
             <div style="color:#64748b;font-size:11px;margin-bottom:6px">${priceLabel}</div>
-            <div style="font-size:12px"><strong>${formatCurrency(metrics.avg_price_per_m2)}/m²</strong></div>
+            <div style="font-size:12px"><strong>${formatPrice(metrics.avg_price_per_m2)}/m²</strong></div>
             <div style="font-size:11px;color:#475569">${metrics.total_listings} propiedades</div>
             <div style="font-size:11px;color:${metrics.price_trend_pct >= 0 ? "#16a34a" : "#dc2626"}">
               ${metrics.price_trend_pct >= 0 ? "▲" : "▼"} ${Math.abs(metrics.price_trend_pct).toFixed(1)}% vs semana anterior
@@ -252,8 +253,8 @@ export function InteractiveMap({
           marker.bindPopup(
             `<div style="font-family:sans-serif;min-width:160px">
               <div style="font-weight:700;font-size:13px;margin-bottom:4px">${listing.title}</div>
-              <div style="font-size:12px;color:#1d4ed8;font-weight:600">${formatCurrency(listing.price)}</div>
-              <div style="font-size:11px;color:#64748b">${listing.area_m2} m² · ${formatCurrency(listing.price_per_m2)}/m²</div>
+              <div style="font-size:12px;color:#1d4ed8;font-weight:600">${formatPrice(listing.price)}</div>
+              <div style="font-size:11px;color:#64748b">${listing.area_m2} m² · ${formatPrice(listing.price_per_m2)}/m²</div>
               <div style="font-size:11px;margin-top:4px">
                 <span style="padding:2px 6px;background:#f1f5f9;border-radius:4px;text-transform:capitalize">${listing.property_type}</span>
                 <span style="padding:2px 6px;background:#f1f5f9;border-radius:4px;margin-left:4px;text-transform:capitalize">${listing.listing_type}</span>

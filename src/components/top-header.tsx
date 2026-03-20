@@ -8,6 +8,7 @@ import { GlobalSearch } from "@/components/global-search"
 import { useTheme } from "@/components/theme-provider"
 import { useAuth } from "@/contexts/auth-context"
 import { getActiveAlertCount } from "@/lib/data/alerts"
+import { CurrencySwitcher } from "@/components/currency-switcher"
 
 export function TopHeader() {
   const { collapsed } = useSidebar()
@@ -53,6 +54,9 @@ export function TopHeader() {
           >
             <Icon name="search" />
           </button>
+
+          {/* Currency switcher */}
+          <CurrencySwitcher />
 
           {/* Dark mode toggle */}
           <button

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { ZoneMetrics } from "@/types/database"
 import { TIJUANA_ZONE_GEO, TIJUANA_CENTER, getPriceColor } from "@/lib/geo-data"
-import { formatCurrency } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 
 interface MiniMapProps {
   zones: ZoneMetrics[]
@@ -12,6 +12,7 @@ interface MiniMapProps {
 }
 
 export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
+  const { formatPrice } = useCurrency()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<unknown>(null)
   const [mounted, setMounted] = useState(false)
@@ -63,7 +64,7 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
 
         if (metrics) {
           polygon.bindTooltip(
-            `<strong>${geo.name}</strong><br/>${formatCurrency(metrics.avg_price_per_m2)}/m²`,
+            `<strong>${geo.name}</strong><br/>${formatPrice(metrics.avg_price_per_m2)}/m²`,
             { direction: "top", sticky: true }
           )
         }

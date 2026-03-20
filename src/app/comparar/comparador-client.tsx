@@ -14,7 +14,8 @@ import {
 } from "recharts"
 import { Icon } from "@/components/icon"
 import { getZoneComparisonData } from "@/lib/data/comparator"
-import { formatCurrency, formatPercent } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics } from "@/types/database"
 import type { ZoneComparisonData } from "@/lib/data/comparator"
 
@@ -26,6 +27,7 @@ interface ComparadorClientProps {
 }
 
 export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientProps) {
+  const { formatPrice } = useCurrency()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -179,7 +181,7 @@ export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientPro
                 <div className="space-y-3">
                   <MetricRow
                     label="Precio/m²"
-                    value={formatCurrency(zone.avg_price_per_m2)}
+                    value={formatPrice(zone.avg_price_per_m2)}
                     sub={`Tendencia ${formatPercent(zone.price_trend_pct)}`}
                     trendPositive={zone.price_trend_pct >= 0}
                   />
@@ -190,7 +192,7 @@ export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientPro
                   />
                   <MetricRow
                     label="Ticket promedio"
-                    value={formatCurrency(zone.avg_ticket)}
+                    value={formatPrice(zone.avg_ticket)}
                     sub="por propiedad"
                   />
                 </div>
@@ -250,7 +252,7 @@ export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientPro
                     tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
-                    formatter={(value: number) => [formatCurrency(value), "$/m²"]}
+                    formatter={(value: number) => [formatPrice(value), "$/m²"]}
                     contentStyle={{
                       backgroundColor: "var(--color-bg, white)",
                       border: "1px solid rgba(100,116,139,0.2)",
@@ -307,7 +309,7 @@ export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientPro
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   <TableRow
                     label="Precio/m²"
-                    values={selectedZones.map((z) => formatCurrency(z.avg_price_per_m2))}
+                    values={selectedZones.map((z) => formatPrice(z.avg_price_per_m2))}
                     highlight={selectedZones.map((z) => z.avg_price_per_m2)}
                   />
                   <TableRow
@@ -324,7 +326,7 @@ export function ComparadorClient({ allZones, initialSlugs }: ComparadorClientPro
                   />
                   <TableRow
                     label="Ticket promedio"
-                    values={selectedZones.map((z) => formatCurrency(z.avg_ticket))}
+                    values={selectedZones.map((z) => formatPrice(z.avg_ticket))}
                     highlight={selectedZones.map((z) => z.avg_ticket)}
                   />
                 </tbody>

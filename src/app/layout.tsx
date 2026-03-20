@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
 import { AuthProvider } from "@/contexts/auth-context"
+import { CurrencyProvider } from "@/contexts/currency-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
@@ -44,11 +45,13 @@ export default function RootLayout({
         className="bg-background text-foreground min-h-screen antialiased"
       >
         <ThemeProvider>
-          <AuthProvider>
-            <SidebarProvider>
-              <SidebarShell>{children}</SidebarShell>
-            </SidebarProvider>
-          </AuthProvider>
+          <CurrencyProvider>
+            <AuthProvider>
+              <SidebarProvider>
+                <SidebarShell>{children}</SidebarShell>
+              </SidebarProvider>
+            </AuthProvider>
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

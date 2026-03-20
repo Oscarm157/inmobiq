@@ -1,0 +1,94 @@
+"use client"
+
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
+
+export type CurrencyCode = "MXN" | "USD"
+
+const DEFAULT_EXCHANGE_RATE = 17.5
+
+interface CurrencyContextType {
+  currency: CurrencyCode
+  exchangeRate: number
+  setCurrency: (c: CurrencyCode) => void
+  setExchangeRate: (rate: number) => void
+  /** Convert a value stored in MXN to the selected display currency */
+  convert: (valueMxn: number) => number
+  /** Format a MXN value into the selected currency string */
+  formatPrice: (valueMxn: number) => string
+  /** Format as price/m² */
+  formatPricePerM2: (valueMxn: number) => string
+}
+
+const CurrencyContext = createContext<CurrencyContextType>({
+  currency: "MXN",
+  exchangeRate: DEFAULT_EXCHANGE_RATE,
+  setCurrency: () => {},
+  setExchangeRate: () => {},
+  convert: (v) => v,
+  formatPrice: (v) => `$${v.toLocaleString("es-MX")}`,
+  formatPricePerM2: (v) => `$${v.toLocaleString("es-MX")}/m²`,
+})
+
+export function useCurrency() {
+  return useContext(CurrencyContext)
+}
+
+function formatValue(value: number, currency: CurrencyCode): string {
+  return new Intl.NumberFormat(currency === "MXN" ? "es-MX" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+export function CurrencyProvider({ children }: { children: ReactNode }) {
+  const [currency, setCurrencyState] = useState<CurrencyCode>("MXN")
+  const [exchangeRate, setExchangeRateState] = useState(DEFAULT_EXCHANGE_RATE)
+
+  // Hydrate from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("inmobiq_currency") as CurrencyCode | null
+    if (stored === "MXN" || stored === "USD") setCurrencyState(stored)
+
+    const storedRate = localStorage.getItem("inmobiq_exchange_rate")
+    if (storedRate) {
+      const parsed = parseFloat(storedRate)
+      if (!isNaN(parsed) && parsed > 0) setExchangeRateState(parsed)
+    }
+  }, [])
+
+  const setCurrency = (c: CurrencyCode) => {
+    setCurrencyState(c)
+    localStorage.setItem("inmobiq_currency", c)
+  }
+
+  const setExchangeRate = (rate: number) => {
+    if (rate > 0) {
+      setExchangeRateState(rate)
+      localStorage.setItem("inmobiq_exchange_rate", String(rate))
+    }
+  }
+
+  const convert = useCallback(
+    (valueMxn: number) => (currency === "USD" ? valueMxn / exchangeRate : valueMxn),
+    [currency, exchangeRate],
+  )
+
+  const formatPrice = useCallback(
+    (valueMxn: number) => formatValue(convert(valueMxn), currency),
+    [convert, currency],
+  )
+
+  const formatPricePerM2 = useCallback(
+    (valueMxn: number) => `${formatValue(convert(valueMxn), currency)}/m²`,
+    [convert, currency],
+  )
+
+  return (
+    <CurrencyContext.Provider
+      value={{ currency, exchangeRate, setCurrency, setExchangeRate, convert, formatPrice, formatPricePerM2 }}
+    >
+      {children}
+    </CurrencyContext.Provider>
+  )
+}

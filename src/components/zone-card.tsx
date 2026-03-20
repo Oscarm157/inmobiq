@@ -1,6 +1,9 @@
+"use client"
+
 import Link from "next/link"
 import { Icon } from "@/components/icon"
-import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils"
+import { formatPercent, formatNumber } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics } from "@/types/database"
 
 interface ZoneCardProps {
@@ -8,6 +11,7 @@ interface ZoneCardProps {
 }
 
 export function ZoneCard({ zone }: ZoneCardProps) {
+  const { formatPrice } = useCurrency()
   const isPositive = zone.price_trend_pct > 0
 
   return (
@@ -28,7 +32,7 @@ export function ZoneCard({ zone }: ZoneCardProps) {
 
         <div className="mb-3">
           <p className="text-xl font-black">
-            {formatCurrency(zone.avg_price_per_m2)}
+            {formatPrice(zone.avg_price_per_m2)}
             <span className="text-xs font-medium text-slate-500"> /m²</span>
           </p>
         </div>
