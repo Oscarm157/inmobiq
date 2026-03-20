@@ -13,6 +13,8 @@ const navItems = [
   { icon: "query_stats", label: "Investment Risk", href: "/riesgo" },
   { icon: "business_center", label: "Portfolio Explorer", href: "/portafolio" },
   { icon: "architecture", label: "Development Pipeline", href: "/pipeline" },
+  { icon: "compare", label: "Comparador de Zonas", href: "/comparar" },
+  { icon: "notifications_active", label: "Mis Alertas", href: "/alertas" },
 ]
 
 export function Sidebar() {

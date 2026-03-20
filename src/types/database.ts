@@ -108,6 +108,22 @@ export interface PortfolioPreset {
   allocations: PortfolioAllocation[];
 }
 
+// Price alerts
+export type ConditionType = "price_drop" | "price_below" | "new_listing" | "inventory_change";
+
+export interface PriceAlert {
+  id: string;
+  user_id: string;
+  zone_id: string | null;
+  property_type: string | null;
+  listing_type: string | null;
+  condition_type: ConditionType;
+  threshold_value: number;
+  is_active: boolean;
+  last_triggered_at: string | null;
+  created_at: string;
+}
+
 // Pipeline projects
 export type ProjectStatus = "planificacion" | "preventa" | "construccion" | "entregado";
 
@@ -152,6 +168,11 @@ export interface Database {
         Row: CitySnapshot;
         Insert: Omit<CitySnapshot, "id" | "created_at">;
         Update: Partial<Omit<CitySnapshot, "id" | "created_at">>;
+      };
+      price_alerts: {
+        Row: PriceAlert;
+        Insert: Omit<PriceAlert, "id" | "created_at" | "last_triggered_at">;
+        Update: Partial<Pick<PriceAlert, "is_active" | "threshold_value" | "condition_type">>;
       };
     };
     Views: Record<string, never>;
