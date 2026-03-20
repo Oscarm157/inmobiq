@@ -13,9 +13,11 @@ import { PriceDistributionChart } from "@/components/zone/price-distribution-cha
 import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
 import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
 import { MarketQualityCard } from "@/components/zone/market-quality-card"
+import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
+import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
-import { getListings } from "@/lib/data/listings"
+import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import { formatCurrency, formatPercent } from "@/lib/utils"
 import type { PropertyType, ZoneMetrics, ZoneRiskMetrics, Listing } from "@/types/database"
 
@@ -48,12 +50,13 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params }: ZonePageProps) {
   const { slug } = await params
-  const [zone, city, allZones, { listings }, riskDataAll] = await Promise.all([
+  const [zone, city, allZones, { listings }, riskDataAll, zoneAnalytics] = await Promise.all([
     getZoneBySlug(slug),
     getCityMetrics(),
     getZoneMetrics(),
     getListings({ zonas: [slug] }),
     getZoneRiskMetrics(),
+    getZoneListingsAnalytics(slug),
   ])
   if (!zone) notFound()
 
@@ -272,6 +275,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
           <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} />
           <PropertyCompositionChart data={compositionData} />
           <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
+          <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
           <EditorialCard
             zoneName={zone.zone_name}
             mainText={mainText}
@@ -292,6 +296,9 @@ export default async function ZonePage({ params }: ZonePageProps) {
             avgPricePerM2={zone.avg_price_per_m2}
             totalListings={zone.total_listings}
           />
+
+          {/* Casa vs Departamento */}
+          <CasaVsDepto data={zoneAnalytics.casaVsDepto} zoneName={zone.zone_name} />
 
           {/* Venta vs Renta */}
           <VentaRentaComparison data={ventaRentaData} />

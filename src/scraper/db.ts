@@ -114,8 +114,21 @@ export async function upsertListings(
   let updated = 0;
   let zoneAssigned = 0;
 
+  // Deduplicate listings by external_id (pages may overlap)
+  const seen = new Set<string>();
+  const uniqueListings = listings.filter((l) => {
+    if (seen.has(l.external_id)) return false;
+    seen.add(l.external_id);
+    return true;
+  });
+  if (uniqueListings.length < listings.length) {
+    console.log(
+      `[db] Deduplicated batch: ${listings.length} → ${uniqueListings.length} (${listings.length - uniqueListings.length} duplicates removed)`,
+    );
+  }
+
   // Build upsert records
-  const records = listings.map((l) => {
+  const records = uniqueListings.map((l) => {
     const assignment = assignZone(l.lat, l.lng, l.address, l.title, zones);
     if (assignment.zoneId) zoneAssigned++;
 
@@ -161,7 +174,7 @@ export async function upsertListings(
       scraped_at: now,
       last_seen_at: now,
       is_active: true,
-      ...(isNew ? { first_seen_at: now } : {}),
+      first_seen_at: now,
     };
   });
 
@@ -178,7 +191,7 @@ export async function upsertListings(
     if (error) throw new Error(`Upsert failed: ${error.message}`);
   }
 
-  return { found: listings.length, new_, updated, zoneAssigned };
+  return { found: uniqueListings.length, new_, updated, zoneAssigned };
 }
 
 /**

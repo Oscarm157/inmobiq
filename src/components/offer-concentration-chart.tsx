@@ -9,41 +9,43 @@ import {
   LabelList,
   ResponsiveContainer,
 } from "recharts"
-import { formatCurrency } from "@/lib/utils"
 
-interface ZonesBarChartProps {
+interface OfferConcentrationChartProps {
   data: {
     zone_name: string
     zone_slug: string
-    median_price_m2: number
     count: number
+    pct: number
   }[]
 }
 
-function formatCompact(value: number): string {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}k`
-  return `$${value}`
-}
-
-export function ZonesBarChart({ data }: ZonesBarChartProps) {
+export function OfferConcentrationChart({
+  data,
+}: OfferConcentrationChartProps) {
   const [showAll, setShowAll] = useState(false)
 
   const sorted = useMemo(
-    () => [...data].sort((a, b) => b.median_price_m2 - a.median_price_m2),
+    () => [...data].sort((a, b) => b.pct - a.pct),
     [data]
   )
 
   const displayed = showAll ? sorted : sorted.slice(0, 8)
   const totalZones = sorted.length
 
-  const first = sorted[0]
-  const last = sorted[sorted.length - 1]
+  const top = sorted[0]
 
-  const description =
-    first && last
-      ? `¿Dónde es más caro el metro cuadrado? Ej: ${first.zone_name} ${formatCurrency(first.median_price_m2)}/m² vs ${last.zone_name} ${formatCurrency(last.median_price_m2)}/m²`
-      : "¿Dónde es más caro el metro cuadrado?"
+  const description = top
+    ? `${top.zone_name} concentra el ${top.pct}% de la oferta con ${top.count} propiedades`
+    : "Distribución de propiedades por zona"
+
+  const chartData = useMemo(
+    () =>
+      displayed.map((d) => ({
+        ...d,
+        label: `${d.count} (${d.pct}%)`,
+      })),
+    [displayed]
+  )
 
   const chartHeight = displayed.length * 38 + 16
 
@@ -51,16 +53,16 @@ export function ZonesBarChart({ data }: ZonesBarChartProps) {
     <div className="bg-white rounded-xl p-5 card-shadow">
       <div className="mb-3">
         <h3 className="text-sm font-bold text-slate-800">
-          Precio por m² en cada zona
+          Concentración de oferta
         </h3>
         <p className="text-xs text-slate-500 mt-1">{description}</p>
       </div>
 
       <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
-          data={displayed}
+          data={chartData}
           layout="vertical"
-          margin={{ top: 0, right: 60, left: 4, bottom: 0 }}
+          margin={{ top: 0, right: 80, left: 4, bottom: 0 }}
         >
           <XAxis type="number" hide />
           <YAxis
@@ -72,15 +74,14 @@ export function ZonesBarChart({ data }: ZonesBarChartProps) {
             tick={{ fontSize: 11, fill: "#64748b" }}
           />
           <Bar
-            dataKey="median_price_m2"
+            dataKey="pct"
             fill="#2563eb"
             radius={[0, 4, 4, 0]}
             barSize={20}
           >
             <LabelList
-              dataKey="median_price_m2"
+              dataKey="label"
               position="right"
-              formatter={(v: number) => formatCompact(v)}
               style={{ fontSize: 11, fill: "#334155", fontWeight: 500 }}
             />
           </Bar>

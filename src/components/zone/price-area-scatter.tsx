@@ -73,13 +73,9 @@ export function PriceAreaScatter({ data, availableTypes }: PriceAreaScatterProps
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
-      <div className="mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Superficie vs Precio
-        </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Relación tamaño-precio por propiedad — detecta valor y sobreprecios
-        </p>
+      <div className="mb-3">
+        <h3 className="text-sm font-bold text-slate-800">Precio vs Área</h3>
+        <p className="text-xs text-slate-500 mt-1">¿Pagas más por más metros? Cada punto = 1 propiedad · Abajo-derecha = más m² por menos precio (mejor valor)</p>
       </div>
 
       {/* Type Filters */}
@@ -148,9 +144,6 @@ export function PriceAreaScatter({ data, availableTypes }: PriceAreaScatterProps
         </ScatterChart>
       </ChartContainer>
 
-      <p className="text-[10px] text-slate-400 mt-2">
-        Cada punto = 1 propiedad · Abajo-derecha = más m² por menos precio (mejor valor)
-      </p>
     </div>
   )
 }

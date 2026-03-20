@@ -23,7 +23,7 @@ export async function runApifyActor<T = Record<string, unknown>>(
   options?: { timeoutSecs?: number; memoryMbytes?: number },
 ): Promise<T[]> {
   const apify = getClient();
-  const timeoutSecs = options?.timeoutSecs ?? 300;
+  const timeoutSecs = options?.timeoutSecs ?? 600;
   const memoryMbytes = options?.memoryMbytes ?? 4096;
 
   console.log(`[apify] Starting actor ${actorId}…`);

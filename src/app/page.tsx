@@ -15,22 +15,27 @@ import { VolatilityChart } from "@/components/volatility-chart"
 import { PipelinePreviewCard } from "@/components/pipeline-preview-card"
 import { YieldChart } from "@/components/yield-chart"
 import { PortfolioTeaser } from "@/components/portfolio-teaser"
+import { PriceRangeChart } from "@/components/price-range-chart"
+import { TypeCompositionChart } from "@/components/type-composition-chart"
+import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
 import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getPipelineProjects } from "@/lib/data/pipeline"
 import { getPortfolioPresets } from "@/lib/data/portfolio"
+import { getListingsAnalytics } from "@/lib/data/listings"
 import { formatNumber, formatCurrency, formatPercent } from "@/lib/utils"
 import Link from "next/link"
 
 export default async function HomePage() {
-  const [zones, city, priceTrend, riskData, pipeline, presets] = await Promise.all([
+  const [zones, city, priceTrend, riskData, pipeline, presets, analytics] = await Promise.all([
     getZoneMetrics(),
     getCityMetrics(),
     getPriceTrendData(),
     getZoneRiskMetrics(),
     Promise.resolve(getPipelineProjects()),
     Promise.resolve(getPortfolioPresets()),
+    getListingsAnalytics(),
   ])
 
   // Narrative helpers
@@ -103,10 +108,16 @@ export default async function HomePage() {
 
       {/* ─── 4. Charts ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PriceChart data={priceTrend} />
-        <ZonesBarChart zones={zones} />
+        <ZonesBarChart data={analytics.pricePerM2ByZone} />
+        <PriceRangeChart data={analytics.priceDistribution} />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
+        <OfferConcentrationChart data={analytics.offerConcentration} />
+      </div>
+
+      <PriceChart data={priceTrend} />
       <InventoryTypeChart zones={zones} />
 
       {/* ─── 5. Zonas Destacadas ─── */}

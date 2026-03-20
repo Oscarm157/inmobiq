@@ -13,6 +13,10 @@ const ZONE_BBOXES: Record<string, BoundingBox> = {
   centro: [32.525, 32.545, -117.045, -117.025],
   "residencial-del-bosque": [32.488, 32.508, -117.015, -116.990],
   "la-mesa": [32.515, 32.535, -116.975, -116.950],
+  "santa-fe": [32.425, 32.455, -117.075, -117.040],
+  "san-antonio-del-mar": [32.425, 32.460, -117.100, -117.080],
+  "el-florido": [32.370, 32.470, -116.920, -116.810],
+  "terrazas-de-la-presa": [32.415, 32.455, -116.930, -116.840],
 };
 
 // Common colonia names in Tijuana that help match to zones
@@ -25,6 +29,10 @@ const COLONIA_KEYWORDS: Record<string, string[]> = {
   centro: ["centro", "zona centro", "calle segunda", "calle primera"],
   "residencial-del-bosque": ["bosque", "colinas del bosque", "loma dorada"],
   "la-mesa": ["la mesa", "mesa redonda", "villa del campo", "otay vista"],
+  "santa-fe": ["santa fe", "quinta del cedro", "urbi quinta", "valparaiso residencial", "valparaíso residencial", "porticos de san antonio", "la escondida", "tossa residencial"],
+  "san-antonio-del-mar": ["san antonio del mar", "real del mar", "punta bandera", "sueños del mar", "baja malibu", "baja malibú"],
+  "el-florido": ["florido", "el florido", "natura", "el refugio", "villa fontana", "francisco villa"],
+  "terrazas-de-la-presa": ["terrazas de la presa", "lomas de la presa", "el carrizo", "valle bonito"],
 };
 
 /** Point-in-bounding-box check */

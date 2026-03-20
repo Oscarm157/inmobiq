@@ -111,6 +111,54 @@ export const TIJUANA_ZONE_GEO: ZoneGeoJSON[] = [
       [32.512, -116.976],
     ],
   },
+  {
+    slug: "santa-fe",
+    name: "Santa Fe",
+    lat: 32.4366,
+    lng: -117.0594,
+    polygon: [
+      [32.455, -117.075],
+      [32.455, -117.040],
+      [32.425, -117.040],
+      [32.425, -117.075],
+    ],
+  },
+  {
+    slug: "san-antonio-del-mar",
+    name: "San Antonio del Mar",
+    lat: 32.4438,
+    lng: -117.0928,
+    polygon: [
+      [32.460, -117.100],
+      [32.460, -117.080],
+      [32.425, -117.080],
+      [32.425, -117.100],
+    ],
+  },
+  {
+    slug: "el-florido",
+    name: "El Florido",
+    lat: 32.4317,
+    lng: -116.8714,
+    polygon: [
+      [32.470, -116.920],
+      [32.470, -116.810],
+      [32.370, -116.810],
+      [32.370, -116.920],
+    ],
+  },
+  {
+    slug: "terrazas-de-la-presa",
+    name: "Terrazas de la Presa",
+    lat: 32.4364,
+    lng: -116.8934,
+    polygon: [
+      [32.455, -116.930],
+      [32.455, -116.840],
+      [32.415, -116.840],
+      [32.415, -116.930],
+    ],
+  },
 ]
 
 // Choropleth color scale based on price per m2
@@ -133,6 +181,6 @@ export function getPriceLabel(pricePerM2: number): string {
 
 export const TIJUANA_CENTER: [number, number] = [32.515, -117.022]
 export const TIJUANA_BOUNDS: [[number, number], [number, number]] = [
-  [32.450, -117.180],
-  [32.580, -116.900],
+  [32.360, -117.180],
+  [32.580, -116.800],
 ]

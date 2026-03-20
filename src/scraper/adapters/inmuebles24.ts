@@ -53,20 +53,30 @@ function buildSearchUrls(config: ScraperConfig): string[] {
   const listingTypes: ListingType[] = config.listing_type
     ? [config.listing_type]
     : ["venta"];
-  const propertyTypes: PropertyType[] = config.property_type
-    ? [config.property_type]
-    : ["casa", "departamento"];
+  const pages = config.pages ?? 5;
 
+  // Build paginated URLs — one per page so the actor doesn't need to handle pagination
+  // Inmuebles24 uses: base-url.html (page 1), base-url-pagina-2.html, etc.
   const urls: string[] = [];
+
   for (const lt of listingTypes) {
-    for (const pt of propertyTypes) {
-      const ptSlug = PROPERTY_TYPE_SLUG[pt] ?? "casas";
-      const ltSlug = LISTING_TYPE_SLUG[lt] ?? "venta";
-      urls.push(
-        `https://www.inmuebles24.com/${ptSlug}-en-${ltSlug}-en-tijuana.html`,
-      );
+    const ltSlug = LISTING_TYPE_SLUG[lt] ?? "venta";
+
+    let baseUrl: string;
+    if (config.property_type) {
+      const ptSlug = PROPERTY_TYPE_SLUG[config.property_type] ?? "casas";
+      baseUrl = `https://www.inmuebles24.com/${ptSlug}-en-${ltSlug}-en-tijuana`;
+    } else {
+      baseUrl = `https://www.inmuebles24.com/inmuebles-en-${ltSlug}-en-tijuana`;
+    }
+
+    // Page 1 = base.html, Page N = base-pagina-N.html
+    urls.push(`${baseUrl}.html`);
+    for (let p = 2; p <= pages; p++) {
+      urls.push(`${baseUrl}-pagina-${p}.html`);
     }
   }
+
   return urls;
 }
 
@@ -161,16 +171,15 @@ export const inmuebles24Adapter: ScraperAdapter = {
 
   async scrape(config: ScraperConfig): Promise<RawListing[]> {
     const urls = buildSearchUrls(config);
-    const maxItems = (config.pages ?? 5) * 20;
 
     console.log(
-      `[inmuebles24] Calling Apify actor with ${urls.length} URLs, max ${maxItems} items per URL`,
+      `[inmuebles24] Calling Apify actor with ${urls.length} page URLs`,
     );
 
     const items = await runApifyActor<ApifyI24Listing>(ACTOR_ID, {
       urls,
-      max_items_per_url: maxItems,
-      max_retries_per_url: 2,
+      max_items_per_url: 50,  // Each URL is one page (~30 items), 50 as safety margin
+      max_retries_per_url: 5,
       ignore_url_failures: true,
       proxy: {
         useApifyProxy: true,
