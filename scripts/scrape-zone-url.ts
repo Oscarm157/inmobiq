@@ -29,6 +29,7 @@ import {
   upsertListings,
 } from "../src/scraper/db";
 import { runDedup } from "../src/scraper/dedup";
+import { calculateWeeklySnapshots } from "../src/scraper/snapshots";
 import { slugify } from "../src/scraper/zone-assigner";
 import type { RawListing } from "../src/scraper/types";
 import type { PropertyType, ListingType } from "../src/types/database";
@@ -287,6 +288,11 @@ DryRun: ${dryRun}
   console.log(`\n[dedup] Running deduplication…`);
   const { clustered, newClusters } = await runDedup();
   console.log(`[dedup] ${clustered} listings clustered into ${newClusters} property groups`);
+
+  // 7. Calculate snapshots so the zone page renders
+  console.log(`\n[snapshots] Calculating weekly snapshots…`);
+  const { zoneSnapshots, citySnapshots } = await calculateWeeklySnapshots();
+  console.log(`[snapshots] ${zoneSnapshots} zone, ${citySnapshots} city snapshots`);
 
   console.log(`\n✅ Done — zone "${zone}" scraped and imported`);
 }
