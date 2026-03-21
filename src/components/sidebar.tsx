@@ -42,7 +42,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`h-screen fixed left-0 top-0 z-50 bg-slate-50/90 dark:bg-[#0f0f1a]/90 backdrop-blur-2xl hidden md:flex flex-col p-4 space-y-2 transition-all duration-300 border-r border-transparent dark:border-slate-800 ${
+      className={`h-screen fixed left-0 top-0 z-50 bg-slate-50/90 dark:bg-[#0f0f1a]/90 backdrop-blur-2xl hidden md:flex flex-col p-4 space-y-2 border-r border-transparent dark:border-slate-800 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
