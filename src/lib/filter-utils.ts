@@ -50,6 +50,8 @@ export const ZONES = [
   // Periférico
   { slug: "el-florido", name: "El Florido" },
   { slug: "terrazas-de-la-presa", name: "Terrazas de la Presa" },
+  // Catch-all
+  { slug: "otros", name: "Otros" },
 ]
 
 export const BEDROOMS = [1, 2, 3, 4] as const

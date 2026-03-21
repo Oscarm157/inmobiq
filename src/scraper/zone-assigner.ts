@@ -151,22 +151,58 @@ function matchByBbox(lat: number, lng: number, zones: Zone[]): Zone | null {
   return null;
 }
 
+// ─── Nearest zone by distance ───────────────────────────────────────────────
+
+/** Haversine distance in km between two lat/lng points */
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/**
+ * Find the nearest zone by haversine distance.
+ * Returns the zone if within maxDistKm, otherwise null.
+ */
+export function findNearestZone(
+  lat: number,
+  lng: number,
+  zones: Zone[],
+  maxDistKm = 3,
+): Zone | null {
+  let best: Zone | null = null;
+  let bestDist = Infinity;
+
+  for (const zone of zones) {
+    const dist = haversineKm(lat, lng, zone.lat, zone.lng);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = zone;
+    }
+  }
+
+  return bestDist <= maxDistKm ? best : null;
+}
+
 // ─── Main assignment logic ──────────────────────────────────────────────────
 
 export interface AssignmentResult {
   zoneId: string | null;
-  method: "colonia" | "bbox" | "none";
-  /** If no zone matched, this is the extracted colonia name for auto-creation */
-  newColoniaName: string | null;
+  method: "colonia" | "bbox" | "nearest" | "none";
 }
 
 /**
  * Assigns a listing to a zone using:
  * 1. Extract colonia from address → match to existing zone (normalized + fuzzy)
  * 2. Bounding-box check with coords (only for well-known zones)
- * 3. If no match → return colonia name for potential auto-creation
- *
- * NEVER forces to "nearest zone" — if it doesn't match, it's a new zone.
+ * 3. Nearest zone by distance (within 3km radius)
+ * 4. If no match → returns null (listing goes to "Otros" zone)
  */
 export function assignZone(
   lat: number | null,
@@ -180,7 +216,7 @@ export function assignZone(
   if (colonia) {
     const matched = matchColoniaToZone(colonia, zones);
     if (matched) {
-      return { zoneId: matched.id, method: "colonia", newColoniaName: null };
+      return { zoneId: matched.id, method: "colonia" };
     }
   }
 
@@ -188,14 +224,16 @@ export function assignZone(
   if (lat !== null && lng !== null) {
     const bboxMatch = matchByBbox(lat, lng, zones);
     if (bboxMatch) {
-      return { zoneId: bboxMatch.id, method: "bbox", newColoniaName: null };
+      return { zoneId: bboxMatch.id, method: "bbox" };
+    }
+
+    // 3. Nearest zone by distance (within 3km)
+    const nearest = findNearestZone(lat, lng, zones);
+    if (nearest) {
+      return { zoneId: nearest.id, method: "nearest" };
     }
   }
 
-  // 3. No match — return colonia name for auto-creation
-  return {
-    zoneId: null,
-    method: "none",
-    newColoniaName: colonia,
-  };
+  // 4. No match — will be assigned to "Otros" by caller
+  return { zoneId: null, method: "none" };
 }

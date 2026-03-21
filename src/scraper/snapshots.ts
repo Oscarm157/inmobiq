@@ -101,14 +101,20 @@ export async function calculateWeeklySnapshots(): Promise<{
       ListingType
     ];
 
-    const prices = group.map(effectivePrice).filter((p): p is number => p !== null);
-    const areas = group.map((l) => l.area_m2).filter((a): a is number => a !== null);
-    const pricesPerM2 = group
+    // Filter listings with valid area for price calculations (match getZoneMetrics filters)
+    const validListings = group.filter((l) => {
+      const a = l.area_m2;
+      return a !== null && a > 10 && a < 50000;
+    });
+
+    const prices = validListings.map(effectivePrice).filter((p): p is number => p !== null && p > 0);
+    const areas = validListings.map((l) => l.area_m2).filter((a): a is number => a !== null);
+    const pricesPerM2 = validListings
       .map((l) => {
         const p = effectivePrice(l);
         return p && l.area_m2 ? p / l.area_m2 : null;
       })
-      .filter((v): v is number => v !== null);
+      .filter((v): v is number => v !== null && v > 0);
 
     const newCount = (newThisWeek ?? []).filter(
       (l) =>
@@ -130,13 +136,11 @@ export async function calculateWeeklySnapshots(): Promise<{
       property_type,
       listing_type,
       count_active: group.length,
-      avg_price: prices.length ? prices.reduce((a, b) => a + b, 0) / prices.length : 0,
+      avg_price: prices.length ? median(prices) : 0,
       median_price: prices.length ? median(prices) : 0,
       min_price: prices.length ? Math.min(...prices) : 0,
       max_price: prices.length ? Math.max(...prices) : 0,
-      avg_price_per_m2: pricesPerM2.length
-        ? pricesPerM2.reduce((a, b) => a + b, 0) / pricesPerM2.length
-        : 0,
+      avg_price_per_m2: pricesPerM2.length ? median(pricesPerM2) : 0,
       total_area_m2: areas.length ? areas.reduce((a, b) => a + b, 0) : 0,
       new_listings: newCount,
       removed_listings: removedCount,
@@ -157,20 +161,19 @@ export async function calculateWeeklySnapshots(): Promise<{
   // City-level snapshot (single aggregate row matching existing schema)
   const allListings = listings as ListingRow[];
   const allPricesPerM2 = allListings
+    .filter((l) => l.area_m2 !== null && l.area_m2 > 10 && l.area_m2 < 50000)
     .map((l) => {
       const p = effectivePrice(l);
       return p && l.area_m2 ? p / l.area_m2 : null;
     })
-    .filter((v): v is number => v !== null);
+    .filter((v): v is number => v !== null && v > 0);
 
   const uniqueZones = new Set(allListings.map((l) => l.zone_id));
 
   const citySnapshotRecord = {
     city: "Tijuana",
     week_start: weekStart,
-    avg_price_per_m2: allPricesPerM2.length
-      ? allPricesPerM2.reduce((a, b) => a + b, 0) / allPricesPerM2.length
-      : 0,
+    avg_price_per_m2: allPricesPerM2.length ? median(allPricesPerM2) : 0,
     count_active: allListings.length,
     total_zones: uniqueZones.size,
   };

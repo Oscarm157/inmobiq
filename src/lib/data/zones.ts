@@ -266,8 +266,15 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
   // When filters are active, compute city metrics from filtered zones
   if (hasFilters) {
     const totalListings = zones.reduce((s, z) => s + z.total_listings, 0)
-    const weightedPrice = zones.reduce((s, z) => s + z.avg_price_per_m2 * z.total_listings, 0)
-    const avgPricePerM2 = totalListings > 0 ? Math.round(weightedPrice / totalListings) : 0
+    // Use median of zone prices (weighted by listing count) for robustness against outliers
+    const zonePrices = zones
+      .filter((z) => z.avg_price_per_m2 > 0 && z.total_listings > 0)
+      .flatMap((z) => Array(Math.min(z.total_listings, 100)).fill(z.avg_price_per_m2) as number[])
+      .sort((a, b) => a - b)
+    const mid = Math.floor(zonePrices.length / 2)
+    const avgPricePerM2 = zonePrices.length > 0
+      ? Math.round(zonePrices.length % 2 !== 0 ? zonePrices[mid] : (zonePrices[mid - 1] + zonePrices[mid]) / 2)
+      : 0
 
     const sortedByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
     const sortedByListings = [...zones].sort((a, b) => b.total_listings - a.total_listings)
