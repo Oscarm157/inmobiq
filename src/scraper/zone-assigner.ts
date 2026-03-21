@@ -134,6 +134,8 @@ const ZONE_BBOXES: Record<string, BoundingBox> = {
   // Periférico
   "el-florido": [32.450, 32.480, -116.890, -116.850],
   "terrazas-de-la-presa": [32.430, 32.455, -116.920, -116.890],
+  // Zonas target
+  "buena-vista": [32.510, 32.528, -117.038, -117.018],
 };
 
 function isInBoundingBox(lat: number, lng: number, bbox: BoundingBox): boolean {
