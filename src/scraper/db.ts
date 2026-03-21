@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { RawListing, ScraperError, Zone } from "./types";
 import type { SourcePortal } from "@/types/database";
-import { assignZone, slugify } from "./zone-assigner";
+import { assignZone } from "./zone-assigner";
 import { computeFingerprints } from "./dedup";
 
 export function getSupabaseClient() {
@@ -84,70 +84,32 @@ export interface UpsertStats {
   new_: number;
   updated: number;
   zoneAssigned: number;
-  zonesCreated: number;
-}
-
-/**
- * Auto-create a zone in the DB for a colonia that doesn't have one yet.
- * Returns the new zone or null if creation failed (e.g. slug conflict).
- */
-async function autoCreateZone(
-  name: string,
-  lat: number | null,
-  lng: number | null,
-): Promise<Zone | null> {
-  const sb = getSupabaseClient();
-  const slug = slugify(name);
-  if (!slug || slug.length < 2) return null;
-
-  const { data, error } = await sb
-    .from("zones")
-    .upsert(
-      {
-        name,
-        slug,
-        city: "Tijuana",
-        state: "Baja California",
-        lat: lat ?? 32.5,
-        lng: lng ?? -117.0,
-      },
-      { onConflict: "slug", ignoreDuplicates: true },
-    )
-    .select("id, name, slug, lat, lng")
-    .single();
-
-  if (error) {
-    // If it already exists (race condition), fetch it
-    const { data: existing } = await sb
-      .from("zones")
-      .select("id, name, slug, lat, lng")
-      .eq("slug", slug)
-      .single();
-    return existing as Zone | null;
-  }
-
-  console.log(`[db] Auto-created zone: ${name} (${slug})`);
-  return data as Zone;
 }
 
 /**
  * Upsert listings into Supabase with zone assignment.
- * Auto-creates zones for new colonias.
- * Returns stats for the run.
+ * Unmatched listings are assigned to the "Otros" catch-all zone.
  */
 export async function upsertListings(
   listings: RawListing[],
   zones: Zone[],
 ): Promise<UpsertStats> {
   if (!listings.length)
-    return { found: 0, new_: 0, updated: 0, zoneAssigned: 0, zonesCreated: 0 };
+    return { found: 0, new_: 0, updated: 0, zoneAssigned: 0 };
 
   const sb = getSupabaseClient();
   const now = new Date().toISOString();
 
-  // Mutable zone cache — grows as we auto-create zones
-  const zoneCache = [...zones];
-  let zonesCreated = 0;
+  // Find or create "Otros" catch-all zone
+  let otrosZone = zones.find((z) => z.slug === "otros");
+  if (!otrosZone) {
+    const { data } = await sb
+      .from("zones")
+      .select("id, name, slug, lat, lng")
+      .eq("slug", "otros")
+      .single();
+    otrosZone = data as Zone | null ?? undefined;
+  }
 
   // First, fetch existing external_ids for this batch to detect new vs updated
   const portal = listings[0].source_portal;
@@ -182,30 +144,18 @@ export async function upsertListings(
   // Build upsert records
   const records = [];
   for (const l of uniqueListings) {
-    let assignment = assignZone(l.lat, l.lng, l.address, l.title, zoneCache);
+    const assignment = assignZone(l.lat, l.lng, l.address, l.title, zones);
 
-    // Auto-create zone if we have a colonia name but no match
-    if (!assignment.zoneId && assignment.newColoniaName) {
-      const newZone = await autoCreateZone(
-        assignment.newColoniaName,
-        l.lat,
-        l.lng,
-      );
-      if (newZone) {
-        zoneCache.push(newZone);
-        zonesCreated++;
-        assignment = { zoneId: newZone.id, method: "colonia", newColoniaName: null };
-      }
-    }
-
-    if (assignment.zoneId) zoneAssigned++;
+    // Use matched zone, or fall back to "Otros"
+    const zoneId = assignment.zoneId ?? otrosZone?.id ?? null;
+    if (zoneId) zoneAssigned++;
 
     const isNew = !existingSet.has(l.external_id);
     if (isNew) new_++;
     else updated++;
 
     const fp = computeFingerprints({
-      zone_id: assignment.zoneId,
+      zone_id: zoneId,
       property_type: l.property_type,
       listing_type: l.listing_type,
       area_m2: l.area_m2,
@@ -218,7 +168,7 @@ export async function upsertListings(
     });
 
     records.push({
-      zone_id: assignment.zoneId,
+      zone_id: zoneId,
       source_portal: l.source_portal,
       external_id: l.external_id,
       external_url: l.external_url,
@@ -259,11 +209,7 @@ export async function upsertListings(
     if (error) throw new Error(`Upsert failed: ${error.message}`);
   }
 
-  if (zonesCreated > 0) {
-    console.log(`[db] Created ${zonesCreated} new zones`);
-  }
-
-  return { found: uniqueListings.length, new_, updated, zoneAssigned, zonesCreated };
+  return { found: uniqueListings.length, new_, updated, zoneAssigned };
 }
 
 /**
