@@ -126,6 +126,7 @@ async function main() {
     console.log(`Created "Otros" zone: ${otrosZone.id}`);
   } else if (!otrosZone) {
     console.log('Would create "Otros" zone');
+    otrosZone = { id: "otros-placeholder", name: "Otros", slug: "otros", lat: 32.5, lng: -117.0 } as Zone;
   }
 
   // 3. Build reassignment map
