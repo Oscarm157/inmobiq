@@ -26,7 +26,7 @@ export default async function RiesgoPage() {
             <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
               Risk Analysis
             </span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
+            <span className="px-3 py-1 bg-slate-100 text-slate-800 text-[10px] font-bold rounded-full tracking-widest uppercase">
               {riskData.length} Zonas
             </span>
           </div>
@@ -50,8 +50,8 @@ export default async function RiesgoPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl p-5 card-shadow">
           <div className="flex justify-between items-start mb-2">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <Icon name="shield" className="text-blue-700" />
+            <div className="p-2 bg-slate-50 rounded-lg">
+              <Icon name="shield" className="text-slate-800" />
             </div>
             <div className="text-right">
               <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
@@ -106,7 +106,7 @@ export default async function RiesgoPage() {
 
       {/* Risk Note */}
       <div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
-        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 mb-6">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 mb-6">
           Nota Metodológica
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -121,8 +121,8 @@ export default async function RiesgoPage() {
               &ldquo;En mercados fronterizos como Tijuana, la diversificación geográfica dentro de la misma ciudad puede reducir el riesgo de portafolio hasta un 30% sin sacrificar retorno.&rdquo;
             </p>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-                <Icon name="analytics" className="text-blue-700" />
+              <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <Icon name="analytics" className="text-slate-800" />
               </div>
               <div>
                 <p className="text-xs font-bold">Modelo de Riesgo Inmobiq</p>

@@ -22,7 +22,7 @@ export const PIPELINE_PROJECTS: Project[] = [
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVY0onfjFdi7i2rOIIq99lJStUlitHgNl5nnTcte3my2Kxh3PweiUrfuDuS9XMHab8SIAUYfchcw5yyRd74cKU4Km2ox9bIKrtPiWh_GbivLDOPk0LB81dG_c9VYpKSqDJ-IZV2XjfDy2e6wRFxZV2-bfFgj0mIuzU-gIVIwPEhw2qbwAPnmu4ZnyZYOenj8OqVSdHdC0BoKrauiUAuPRnoN8wMRfEDDPvZiTx295lOBfShy4cqsUtc0NJHJfcoq_uVO6uyJ8d4CD7",
     name: "Paseo Global II",
     badge: "PRE-VENTA",
-    badgeColor: "bg-blue-100 text-blue-700",
+    badgeColor: "bg-slate-100 text-slate-800",
     sub: "Corporativo Clase A · 12,000 m² GLA",
     investors: 2,
     investorLabel: "8 Inversores activos",
@@ -76,7 +76,7 @@ export function PipelineCard({ project }: PipelineCardProps) {
               />
             ))}
           </div>
-          <span className="text-[10px] font-bold text-blue-700">
+          <span className="text-[10px] font-bold text-slate-800">
             {project.investorLabel}
           </span>
         </div>

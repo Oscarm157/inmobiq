@@ -8,7 +8,7 @@ import type { RiskLevel, ZoneMetrics, ZoneRiskMetrics, PortfolioPreset } from "@
 
 const riskLevelStyles: Record<RiskLevel, { bg: string; text: string; icon: string }> = {
   conservador: { bg: "bg-green-100", text: "text-green-700", icon: "shield" },
-  balanceado: { bg: "bg-blue-100", text: "text-blue-700", icon: "balance" },
+  balanceado: { bg: "bg-slate-100", text: "text-slate-800", icon: "balance" },
   agresivo: { bg: "bg-red-100", text: "text-red-700", icon: "bolt" },
 }
 
@@ -109,7 +109,7 @@ export function PortafolioClient({ presets, zones, riskData }: PortafolioClientP
                     <div className="col-span-5 flex items-center gap-3">
                       <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                          className="h-full bg-slate-700 rounded-full transition-all duration-500"
                           style={{ width: `${alloc.allocation_pct}%` }}
                         />
                       </div>
@@ -164,7 +164,7 @@ export function PortafolioClient({ presets, zones, riskData }: PortafolioClientP
                   {preset.allocations.map((a) => (
                     <div
                       key={a.zone_slug}
-                      className="h-6 bg-blue-600 rounded-sm transition-all duration-500"
+                      className="h-6 bg-slate-700 rounded-sm transition-all duration-500"
                       style={{
                         width: `${a.allocation_pct}%`,
                         opacity: 0.4 + (a.allocation_pct / 100) * 0.6,
@@ -178,10 +178,10 @@ export function PortafolioClient({ presets, zones, riskData }: PortafolioClientP
           </div>
 
           {/* Recommendation */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <div className="bg-slate-50 border border-blue-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-2">
-              <Icon name="lightbulb" className="text-blue-700 text-sm" />
-              <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest">
+              <Icon name="lightbulb" className="text-slate-800 text-sm" />
+              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">
                 Recomendación
               </p>
             </div>

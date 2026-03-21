@@ -70,12 +70,12 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
 
               {/* Zone bar */}
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 w-7">
+                <span className="text-[10px] font-bold text-slate-700 dark:text-blue-400 w-7">
                   Zona
                 </span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                    className="h-full bg-slate-700 rounded-full transition-all duration-500"
                     style={{ width: `${zonePct}%` }}
                   />
                 </div>

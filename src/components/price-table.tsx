@@ -25,8 +25,8 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-            <Icon name="monitoring" className="text-xl text-blue-600 dark:text-blue-400" />
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-blue-900/50 flex items-center justify-center">
+            <Icon name="monitoring" className="text-xl text-slate-700 dark:text-blue-400" />
           </div>
           <div>
             <h3 className="text-lg font-black tracking-tight">Precio por m² — Tijuana</h3>
@@ -70,7 +70,7 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
               return (
                 <tr key={zone.zone_slug} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-3">
-                    <Link href={`/zona/${zone.zone_slug}`} className="font-bold text-blue-700 dark:text-blue-400 hover:underline">
+                    <Link href={`/zona/${zone.zone_slug}`} className="font-bold text-slate-800 dark:text-blue-400 hover:underline">
                       {zone.zone_name}
                     </Link>
                   </td>

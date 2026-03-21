@@ -92,7 +92,7 @@ export function ZonesBarChart({ data }: ZonesBarChartProps) {
         <button
           type="button"
           onClick={() => setShowAll((prev) => !prev)}
-          className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+          className="mt-3 text-xs font-medium text-slate-700 hover:text-blue-800 transition-colors cursor-pointer"
         >
           {showAll ? "Ver top 8" : `Ver las ${totalZones} zonas`}
         </button>

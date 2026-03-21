@@ -35,7 +35,7 @@ export function PipelinePreviewCard({ project }: PipelinePreviewCardProps) {
         </div>
         <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-600 rounded-full transition-all"
+            className="h-full bg-slate-700 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>

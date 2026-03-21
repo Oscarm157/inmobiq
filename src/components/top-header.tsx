@@ -75,7 +75,7 @@ export function TopHeader() {
           >
             <Icon name="notifications" />
             {alertCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none">
+              <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-slate-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none">
                 {alertCount > 9 ? "9+" : alertCount}
               </span>
             )}
@@ -83,8 +83,8 @@ export function TopHeader() {
           <button className="hidden md:flex p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] items-center justify-center">
             <Icon name="settings" />
           </button>
-          <div className="h-8 w-8 rounded-full overflow-hidden border-2 border-blue-100 dark:border-blue-900 bg-blue-200 dark:bg-blue-900 flex items-center justify-center">
-            <Icon name="person" className="text-blue-700 dark:text-blue-300 text-sm" />
+          <div className="h-8 w-8 rounded-full overflow-hidden border-2 border-slate-200 dark:border-blue-900 bg-blue-200 dark:bg-blue-900 flex items-center justify-center">
+            <Icon name="person" className="text-slate-800 dark:text-blue-300 text-sm" />
           </div>
         </div>
       </header>

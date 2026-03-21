@@ -83,14 +83,14 @@ function VRCard({ data }: { data: ZoneVRData }) {
       <div>
         <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           {data.ventaCount > 0 && (
-            <div className="bg-blue-600 transition-all duration-500" style={{ width: `${ventaPct}%` }} />
+            <div className="bg-slate-700 transition-all duration-500" style={{ width: `${ventaPct}%` }} />
           )}
           {data.rentaCount > 0 && (
             <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${rentaPct}%` }} />
           )}
         </div>
         <div className="flex justify-between mt-1">
-          <span className="text-[10px] font-bold text-blue-600">Venta {ventaPct}% ({data.ventaCount})</span>
+          <span className="text-[10px] font-bold text-slate-700">Venta {ventaPct}% ({data.ventaCount})</span>
           <span className="text-[10px] font-bold text-emerald-500">Renta {rentaPct}% ({data.rentaCount})</span>
         </div>
       </div>
@@ -100,7 +100,7 @@ function VRCard({ data }: { data: ZoneVRData }) {
         <div>
           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Precio prom.</p>
           <div className="flex items-center justify-between mt-0.5">
-            <span className="text-xs font-bold text-blue-600">{data.ventaCount > 0 ? formatPrice(data.ventaAvgPrice) : "—"}</span>
+            <span className="text-xs font-bold text-slate-700">{data.ventaCount > 0 ? formatPrice(data.ventaAvgPrice) : "—"}</span>
             <span className="text-[10px] text-slate-300">vs</span>
             <span className="text-xs font-bold text-emerald-600">{data.rentaCount > 0 ? formatPrice(data.rentaAvgPrice) : "—"}</span>
           </div>

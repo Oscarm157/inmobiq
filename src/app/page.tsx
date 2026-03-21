@@ -90,7 +90,7 @@ export default async function HomePage({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
+              <span className="px-3 py-1 bg-slate-100 text-slate-800 text-[10px] font-bold rounded-full tracking-widest uppercase">
                 Market Overview
               </span>
               <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
@@ -114,7 +114,7 @@ export default async function HomePage({
             }>
               <MarketFilters />
             </Suspense>
-            <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
               <Icon name="ios_share" className="text-sm" />
               Exportar
             </button>
@@ -187,7 +187,7 @@ export default async function HomePage({
               {formatNumber(city.total_zones)} zonas · {formatNumber(city.total_listings)} propiedades activas
             </p>
           </div>
-          <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+          <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>
@@ -211,14 +211,14 @@ export default async function HomePage({
       <section className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl p-8 md:p-10 text-white">
         <div className="max-w-2xl">
           <h3 className="text-2xl font-black mb-2">Explora el mercado</h3>
-          <p className="text-blue-100 text-sm font-medium mb-6">
+          <p className="text-slate-200 text-sm font-medium mb-6">
             Datos actualizados semanalmente. Compara zonas, analiza riesgo, o busca
             propiedades específicas para tomar mejores decisiones de inversión.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/comparar"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-white text-slate-800 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <Icon name="compare_arrows" className="text-sm" />
               Comparar Zonas

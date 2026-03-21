@@ -224,7 +224,7 @@ function SuggestionRow({ item, active, onMouseEnter, onSelect }: SuggestionRowPr
       role="option"
       aria-selected={active}
       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-        active ? "bg-blue-50" : "hover:bg-slate-50"
+        active ? "bg-slate-50" : "hover:bg-slate-50"
       }`}
       onMouseEnter={onMouseEnter}
       onClick={onSelect}
@@ -232,7 +232,7 @@ function SuggestionRow({ item, active, onMouseEnter, onSelect }: SuggestionRowPr
       <span
         className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
           item.type === "zona"
-            ? "bg-blue-100 text-blue-600"
+            ? "bg-slate-100 text-slate-700"
             : "bg-slate-100 text-slate-500"
         }`}
       >

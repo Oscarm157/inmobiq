@@ -17,8 +17,8 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
   return (
     <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300">
       <div className="flex justify-between items-start mb-4">
-        <div className="p-2 bg-blue-50 rounded-lg">
-          <Icon name="payments" className="text-blue-700" />
+        <div className="p-2 bg-slate-50 rounded-lg">
+          <Icon name="payments" className="text-slate-800" />
         </div>
         <div className="text-right">
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">

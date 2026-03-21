@@ -78,8 +78,8 @@ export function Sidebar() {
                 collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
               } ${
                 active
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                  ? "bg-slate-700 text-white shadow-lg shadow-slate-500/20"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-700 dark:hover:text-blue-300 hover:bg-slate-50 dark:hover:bg-blue-950/50"
               }`}
             >
               <Icon name={item.icon} />
@@ -95,13 +95,13 @@ export function Sidebar() {
       <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-1">
         {collapsed ? (
           <button
-            className="w-full flex justify-center py-3 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors"
+            className="w-full flex justify-center py-3 text-slate-800 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors"
             title="Download Report"
           >
             <Icon name="download" />
           </button>
         ) : (
-          <button className="w-full bg-blue-700 text-white py-3 px-4 rounded-full text-xs font-bold shadow-md hover:opacity-90 transition-all mb-4">
+          <button className="w-full bg-slate-800 text-white py-3 px-4 rounded-full text-xs font-bold shadow-md hover:opacity-90 transition-all mb-4">
             Download Report
           </button>
         )}
@@ -110,7 +110,7 @@ export function Sidebar() {
           target="_blank"
           rel="noopener noreferrer"
           title={collapsed ? "Narrativa360" : undefined}
-          className={`flex items-center gap-3 py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${
+          className={`flex items-center gap-3 py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-blue-400 transition-colors ${
             collapsed ? "justify-center" : "px-4"
           }`}
         >
@@ -161,7 +161,7 @@ export function Sidebar() {
             <Link
               href="/login"
               title={collapsed ? "Iniciar sesión" : undefined}
-              className={`flex items-center gap-3 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors ${
+              className={`flex items-center gap-3 py-2 text-slate-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors ${
                 collapsed ? "justify-center" : "px-2"
               }`}
             >

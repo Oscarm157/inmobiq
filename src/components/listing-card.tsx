@@ -48,8 +48,8 @@ export function ListingCard({ listing }: ListingCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-50 rounded-lg">
-            <Icon name={typeIcon} className="text-blue-700 text-sm" />
+          <div className="p-1.5 bg-slate-50 rounded-lg">
+            <Icon name={typeIcon} className="text-slate-800 text-sm" />
           </div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{typeLabel}</span>
         </div>
@@ -65,7 +65,7 @@ export function ListingCard({ listing }: ListingCardProps) {
 
       {/* Price */}
       <div>
-        <p className="text-xl font-black text-blue-700">
+        <p className="text-xl font-black text-slate-800">
           {formatPrice(listing.price)}
           {isRenta && <span className="text-sm font-medium text-slate-500">/mes</span>}
         </p>

@@ -56,7 +56,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
       {/* Mayor actividad */}
       <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-blue-900/30 text-slate-700 flex items-center justify-center">
             <Icon name="trending_up" className="text-lg" />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
-                i === 0 ? "bg-blue-100 text-blue-700" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                i === 0 ? "bg-slate-100 text-slate-800" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
               }`}>
                 {i + 1}
               </span>

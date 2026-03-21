@@ -48,11 +48,11 @@ export function HeatmapCard({ zoneName, pricePerM2, trendPct }: HeatmapCardProps
           alt="City heatmap"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-blue-600/10 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-slate-700/10 mix-blend-multiply" />
 
         {/* Tooltip */}
         <div className="absolute top-1/4 right-1/3 bg-white/95 backdrop-blur p-4 rounded-xl shadow-2xl border border-blue-200 pointer-events-none">
-          <p className="text-[10px] font-bold text-blue-700 uppercase tracking-tighter mb-1">
+          <p className="text-[10px] font-bold text-slate-800 uppercase tracking-tighter mb-1">
             Punto Caliente: {zoneName}
           </p>
           <div className="flex items-end gap-2">

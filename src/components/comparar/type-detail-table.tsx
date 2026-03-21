@@ -46,7 +46,7 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
         {typesWithTotal.length > 3 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
+            className="text-xs font-semibold text-slate-700 dark:text-blue-400 flex items-center gap-1 hover:underline"
           >
             {expanded ? "Ver menos" : `Ver todos (${typesWithTotal.length})`}
             <Icon name={expanded ? "expand_less" : "expand_more"} className="text-sm" />
@@ -107,7 +107,7 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
                       <Fragment key={z.zone_slug}>
                         <td className={`text-right px-3 py-3 font-semibold ${
                           inv === bestInv && inv > 0
-                            ? "text-blue-600 dark:text-blue-400"
+                            ? "text-slate-700 dark:text-blue-400"
                             : "text-slate-700 dark:text-slate-300"
                         }`}>
                           {inv > 0 ? inv : "—"}
@@ -115,7 +115,7 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
                         </td>
                         <td className={`text-right px-3 py-3 font-semibold ${
                           ticket === bestTicket && ticket > 0
-                            ? "text-blue-600 dark:text-blue-400"
+                            ? "text-slate-700 dark:text-blue-400"
                             : "text-slate-700 dark:text-slate-300"
                         }`}>
                           {ticket > 0 ? formatPrice(ticket) : "—"}

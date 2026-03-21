@@ -9,7 +9,7 @@ interface EditorialCardProps {
 export function EditorialCard({ zoneName, mainText, quote }: EditorialCardProps) {
   return (
     <div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
-      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 mb-6">
+      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 mb-6">
         Perspectiva del Inversor
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -39,8 +39,8 @@ export function EditorialCard({ zoneName, mainText, quote }: EditorialCardProps)
             &ldquo;{quote}&rdquo;
           </p>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-              <Icon name="analytics" className="text-blue-700" />
+            <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center">
+              <Icon name="analytics" className="text-slate-800" />
             </div>
             <div>
               <p className="text-xs font-bold">Análisis de Mercado AI</p>

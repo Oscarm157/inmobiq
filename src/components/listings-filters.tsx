@@ -91,7 +91,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
               onClick={() => onChange({ ...state, listing_type: op })}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
                 state.listing_type === op
-                  ? "bg-blue-700 text-white"
+                  ? "bg-slate-800 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -113,7 +113,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
                 onClick={() => onChange({ ...state, tipos: toggle(state.tipos, value) })}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
                   active
-                    ? "bg-blue-700 text-white"
+                    ? "bg-slate-800 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
@@ -139,7 +139,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
                   onChange={() => onChange({ ...state, zonas: toggle(state.zonas, slug) })}
                   className="w-4 h-4 rounded accent-blue-700"
                 />
-                <span className={`text-xs font-medium transition-colors ${active ? "text-blue-700 font-bold" : "text-slate-600 group-hover:text-slate-900"}`}>
+                <span className={`text-xs font-medium transition-colors ${active ? "text-slate-800 font-bold" : "text-slate-600 group-hover:text-slate-900"}`}>
                   {name}
                 </span>
               </label>
@@ -207,7 +207,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
                 key={r}
                 onClick={() => onChange({ ...state, recamaras: toggle(state.recamaras, r) })}
                 className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
-                  active ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  active ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 {r === 4 ? "4+" : r}
@@ -220,7 +220,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
       {/* Results count + clear */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
         <p className="text-xs font-bold text-slate-600">
-          <span className="text-blue-700 font-black">{total}</span> propiedades
+          <span className="text-slate-800 font-black">{total}</span> propiedades
         </p>
         {hasActiveFilters(state) && (
           <button
@@ -303,7 +303,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-black">Filtros</h3>
                 {activeCount > 0 && (
-                  <span className="px-2 py-0.5 bg-blue-700 text-white text-[10px] font-black rounded-full">
+                  <span className="px-2 py-0.5 bg-slate-800 text-white text-[10px] font-black rounded-full">
                     {activeCount}
                   </span>
                 )}
@@ -332,7 +332,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
       {/* Mobile filter button */}
       <div className="md:hidden flex items-center justify-between mb-4">
         <p className="text-sm font-bold text-slate-600">
-          <span className="text-blue-700 font-black">{total}</span> propiedades
+          <span className="text-slate-800 font-black">{total}</span> propiedades
         </p>
         <button
           onClick={() => setMobileOpen(true)}
@@ -341,7 +341,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
           <Icon name="tune" className="text-sm" />
           Filtros
           {activeCount > 0 && (
-            <span className="px-1.5 py-0.5 bg-blue-700 text-white text-[10px] font-black rounded-full">
+            <span className="px-1.5 py-0.5 bg-slate-800 text-white text-[10px] font-black rounded-full">
               {activeCount}
             </span>
           )}
@@ -380,7 +380,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
             />
             <button
               onClick={() => setMobileOpen(false)}
-              className="w-full mt-5 py-3 bg-blue-700 text-white rounded-xl text-sm font-black"
+              className="w-full mt-5 py-3 bg-slate-800 text-white rounded-xl text-sm font-black"
             >
               Ver {total} propiedades
             </button>

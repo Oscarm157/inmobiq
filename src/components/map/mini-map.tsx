@@ -291,7 +291,7 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
       <div className="absolute bottom-2 right-2 z-[1000]">
         <a
           href="/mapa"
-          className="px-3 py-1.5 bg-blue-700 text-white text-[11px] font-bold rounded-full shadow-lg hover:bg-blue-800 transition-colors"
+          className="px-3 py-1.5 bg-slate-800 text-white text-[11px] font-bold rounded-full shadow-lg hover:bg-blue-800 transition-colors"
         >
           Ver mapa completo →
         </a>

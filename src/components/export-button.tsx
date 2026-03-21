@@ -102,7 +102,7 @@ export function ExportButton({
       <button
         onClick={() => setOpen((o) => !o)}
         disabled={!!loading}
-        className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
@@ -131,7 +131,7 @@ export function ExportButton({
                 onClick={() => handleExport(fmt)}
                 className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left"
               >
-                <span className="material-symbols-outlined text-blue-600 text-xl mt-0.5">{icon}</span>
+                <span className="material-symbols-outlined text-slate-700 text-xl mt-0.5">{icon}</span>
                 <span>
                   <span className="block text-sm font-bold text-slate-800">{label}</span>
                   <span className="block text-xs text-slate-500">{desc}</span>

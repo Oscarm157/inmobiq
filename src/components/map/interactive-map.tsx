@@ -441,7 +441,7 @@ export function InteractiveMap({
               onClick={() => setActiveLayer(layer)}
               className={`px-4 py-1.5 text-[11px] font-bold rounded-full transition-all duration-200 ${
                 activeLayer === layer
-                  ? "bg-blue-700 text-white shadow-md"
+                  ? "bg-slate-800 text-white shadow-md"
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
               }`}
             >

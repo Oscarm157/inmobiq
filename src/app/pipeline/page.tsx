@@ -10,7 +10,7 @@ export const metadata = {
 
 const statusConfig: Record<ProjectStatus, { label: string; color: string; icon: string }> = {
   planificacion: { label: "Planificación", color: "bg-orange-100 text-orange-700", icon: "draft" },
-  preventa: { label: "Pre-Venta", color: "bg-blue-100 text-blue-700", icon: "sell" },
+  preventa: { label: "Pre-Venta", color: "bg-slate-100 text-slate-800", icon: "sell" },
   construccion: { label: "En Construcción", color: "bg-green-100 text-green-700", icon: "construction" },
   entregado: { label: "Entregado", color: "bg-slate-100 text-slate-700", icon: "check_circle" },
 }
@@ -61,7 +61,7 @@ export default function PipelinePage() {
             <Icon name="filter_list" className="text-sm" />
             Filtrar
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+          <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
             <Icon name="ios_share" className="text-sm" />
             Exportar
           </button>
@@ -145,7 +145,7 @@ export default function PipelinePage() {
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-blue-600 rounded-full"
+                          className="h-full bg-slate-700 rounded-full"
                           style={{ width: `${(project.units_sold / project.units_total) * 100}%` }}
                         />
                       </div>
@@ -167,7 +167,7 @@ export default function PipelinePage() {
                           />
                         ))}
                       </div>
-                      <span className="text-[10px] font-bold text-blue-700">{project.investor_label}</span>
+                      <span className="text-[10px] font-bold text-slate-800">{project.investor_label}</span>
                     </div>
                   </div>
                 </div>

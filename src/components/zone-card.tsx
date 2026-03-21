@@ -57,7 +57,7 @@ export function ZoneCard({ zone, rank, maxListings }: ZoneCardProps) {
           </div>
           <Icon
             name="arrow_forward"
-            className="text-slate-300 text-sm group-hover:text-blue-600 transition-colors flex-shrink-0"
+            className="text-slate-300 text-sm group-hover:text-slate-700 transition-colors flex-shrink-0"
           />
         </div>
 

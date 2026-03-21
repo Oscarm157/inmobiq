@@ -43,7 +43,7 @@ export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
         <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           {hasVenta && (
             <div
-              className="bg-blue-600 transition-all duration-500"
+              className="bg-slate-700 transition-all duration-500"
               style={{ width: `${ventaPct}%` }}
             />
           )}
@@ -55,7 +55,7 @@ export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
           )}
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] font-bold text-blue-600">
+          <span className="text-[10px] font-bold text-slate-700">
             Venta {ventaPct}% ({data.ventaCount})
           </span>
           <span className="text-[10px] font-bold text-emerald-500">
@@ -110,7 +110,7 @@ function ComparisonRow({ label, venta, renta }: { label: string; venta: string; 
     <div>
       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{label}</p>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-blue-600">{venta}</span>
+        <span className="text-xs font-bold text-slate-700">{venta}</span>
         <span className="text-[10px] text-slate-300">vs</span>
         <span className="text-xs font-bold text-emerald-600">{renta}</span>
       </div>

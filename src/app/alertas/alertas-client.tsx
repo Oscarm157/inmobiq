@@ -166,7 +166,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-full text-sm font-bold shadow hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 text-white rounded-full text-sm font-bold shadow hover:bg-slate-900 transition-colors"
         >
           <Icon name={showForm ? "close" : "add"} className="text-base" />
           {showForm ? "Cancelar" : "Nueva alerta"}
@@ -275,7 +275,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
           <button
             onClick={handleCreate}
             disabled={saving}
-            className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white rounded-full text-sm font-bold shadow hover:bg-blue-700 transition-colors disabled:opacity-60"
+            className="w-full sm:w-auto px-6 py-2.5 bg-slate-700 text-white rounded-full text-sm font-bold shadow hover:bg-slate-900 transition-colors disabled:opacity-60"
           >
             {saving ? "Guardando…" : "Guardar alerta"}
           </button>
@@ -294,7 +294,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
           <p className="text-sm font-medium">Aún no tienes alertas configuradas</p>
           <button
             onClick={() => setShowForm(true)}
-            className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
+            className="text-slate-700 dark:text-blue-400 text-sm font-semibold hover:underline"
           >
             Crear tu primera alerta
           </button>
@@ -313,7 +313,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
               <div
                 className={`p-2.5 rounded-full flex-shrink-0 ${
                   alert.is_active
-                    ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                    ? "bg-slate-100 dark:bg-blue-900/40 text-slate-700 dark:text-blue-400"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                 }`}
               >
@@ -354,7 +354,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
                   onClick={() => handleToggle(alert)}
                   title={alert.is_active ? "Desactivar" : "Activar"}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
-                    alert.is_active ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-600"
+                    alert.is_active ? "bg-slate-700" : "bg-slate-300 dark:bg-slate-600"
                   }`}
                 >
                   <span

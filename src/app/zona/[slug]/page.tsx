@@ -84,7 +84,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
   // Badges
   const badges: { label: string; color: string }[] = []
   if (zone.avg_price_per_m2 > cityAvg * 1.1) {
-    badges.push({ label: "Premium District", color: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" })
+    badges.push({ label: "Premium District", color: "bg-slate-100 text-slate-800 dark:bg-blue-950 dark:text-blue-300" })
   }
   if (zone.price_trend_pct > 4) {
     badges.push({ label: "High Demand", color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" })
@@ -267,7 +267,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
-          <a href="/mapa" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+          <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>
@@ -339,7 +339,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
           <h3 className="text-2xl font-black tracking-tight">
             Proyectos en Pipeline
           </h3>
-          <a href="/pipeline" className="text-blue-700 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+          <a href="/pipeline" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver todos <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>

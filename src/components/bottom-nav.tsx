@@ -27,7 +27,7 @@ export function BottomNav() {
           key={item.label}
           href={item.href}
           className={`flex flex-col items-center gap-0.5 px-2 ${
-            isActive(item.href) ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"
+            isActive(item.href) ? "text-slate-700 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"
           }`}
         >
           <Icon name={item.icon} filled={isActive(item.href)} className="text-xl" />

@@ -29,8 +29,8 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
   const cells: KPICell[] = [
     {
       icon: "payments",
-      iconBg: "bg-blue-50 dark:bg-blue-950",
-      iconColor: "text-blue-700 dark:text-blue-400",
+      iconBg: "bg-slate-50 dark:bg-blue-950",
+      iconColor: "text-slate-800 dark:text-blue-400",
       label: "Precio / m²",
       value: formatPrice(zone.avg_price_per_m2),
       sub: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),

@@ -14,7 +14,7 @@ const presetIcons: Record<string, string> = {
 
 const presetColors: Record<string, { bg: string; text: string; border: string }> = {
   conservador: { bg: "bg-green-50 dark:bg-green-950/30", text: "text-green-700 dark:text-green-400", border: "border-green-200 dark:border-green-800" },
-  balanceado: { bg: "bg-blue-50 dark:bg-blue-950/30", text: "text-blue-700 dark:text-blue-400", border: "border-blue-200 dark:border-blue-800" },
+  balanceado: { bg: "bg-slate-50 dark:bg-blue-950/30", text: "text-slate-800 dark:text-blue-400", border: "border-blue-200 dark:border-blue-800" },
   agresivo: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-400", border: "border-amber-200 dark:border-amber-800" },
 }
 

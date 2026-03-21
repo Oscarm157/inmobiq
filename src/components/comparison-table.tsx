@@ -31,7 +31,7 @@ export function ComparisonTable({ zoneName, rows }: ComparisonTableProps) {
           <div key={row.label} className="flex items-center justify-between">
             <span className="text-xs font-bold">{row.label}</span>
             <div className="flex gap-10">
-              <span className="text-xs font-bold text-blue-700">
+              <span className="text-xs font-bold text-slate-800">
                 {row.zona}
               </span>
               <span className="text-xs font-medium text-slate-600">
