@@ -189,7 +189,7 @@ export const inmuebles24Adapter: ScraperAdapter = {
           apifyProxyCountry: "MX",
         },
       },
-      { batchSize: 2, delayMs: 45_000 },
+      { batchSize: 2, delayMs: 90_000 },
     );
 
     const listings = items.map(mapToRawListing);
