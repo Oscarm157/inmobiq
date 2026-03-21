@@ -129,12 +129,21 @@
   }
 }
 
-/* Hide icon text until Material Symbols font loads (prevents FOUT) */
+/* Material Symbols: hide text until font loads, show instantly once ready */
 .material-symbols-outlined {
-  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
 }
 .fonts-loaded .material-symbols-outlined {
-  visibility: visible;
+  font-size: inherit;
+  line-height: 1;
+  overflow: visible;
+  width: auto;
+  height: auto;
 }
 
 /* Card shadow from prototype */

@@ -21,7 +21,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <TopHeader />
       <main
-        className={`min-h-screen pb-20 transition-all duration-300 ${
+        className={`min-h-screen pb-20 ${
           collapsed ? "md:ml-16" : "md:ml-64"
         }`}
       >

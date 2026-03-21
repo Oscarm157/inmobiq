@@ -8,7 +8,7 @@ import "./globals.css"
 
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(s!=='light'&&d))document.documentElement.classList.add('dark')}catch(e){}})()`
 
-const fontLoadScript = `(function(){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')})}else{document.documentElement.classList.add('fonts-loaded')}})()`
+const fontLoadScript = `(function(){function m(){document.documentElement.classList.add('fonts-loaded')}if(!document.fonts){m();return}document.fonts.ready.then(m);setTimeout(m,3000)})()`
 
 export const metadata: Metadata = {
   title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
@@ -33,6 +33,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: fontLoadScript }} />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
@@ -60,7 +61,6 @@ export default function RootLayout({
             </AuthProvider>
           </CurrencyProvider>
         </ThemeProvider>
-        <script dangerouslySetInnerHTML={{ __html: fontLoadScript }} />
       </body>
     </html>
   )
