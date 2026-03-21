@@ -1,7 +1,100 @@
 import type { Zone } from "./types";
 
-// Tijuana zones with their approximate bounding boxes for fast lookup
-// Format: [minLat, maxLat, minLng, maxLng]
+// ─── Normalization ──────────────────────────────────────────────────────────
+
+/** Remove accents, lowercase, collapse whitespace */
+function normalize(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Generate a URL-safe slug from a name */
+export function slugify(text: string): string {
+  return normalize(text).replace(/\s+/g, "-").replace(/-+/g, "-");
+}
+
+// ─── Colonia extraction ─────────────────────────────────────────────────────
+
+/** Noise words to strip from address parsing */
+const NOISE = new Set([
+  "tijuana", "baja california", "bc", "b.c.", "b c", "mexico", "méxico", "mex",
+]);
+
+/**
+ * Extract the colonia/neighborhood from an address string.
+ * Addresses are typically: "Street 123, Colonia, Tijuana, B.C."
+ * We want the second-to-last meaningful part, or the last one.
+ */
+export function extractColonia(address: string | null): string | null {
+  if (!address) return null;
+
+  const parts = address
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .filter((s) => !s.match(/^\d{4,5}$/)) // remove zip codes
+    .filter((s) => !NOISE.has(normalize(s)));
+
+  if (parts.length === 0) return null;
+
+  // The colonia is typically the LAST meaningful part after filtering noise
+  // If there are 2+ parts, last is colonia, first is street
+  return parts.length >= 2 ? parts[parts.length - 1] : parts[0];
+}
+
+// ─── Zone matching ──────────────────────────────────────────────────────────
+
+/**
+ * Try to match a colonia name to an existing zone.
+ * Uses normalized comparison with fuzzy containment:
+ * - Exact match (normalized)
+ * - Zone name contained in colonia name (e.g. "Agua Caliente" matches "Residencial Agua Caliente")
+ * - Colonia name contained in zone name
+ */
+export function matchColoniaToZone(
+  colonia: string,
+  zones: Zone[],
+): Zone | null {
+  const normColonia = normalize(colonia);
+  if (!normColonia) return null;
+
+  // Pass 1: exact normalized match on zone name or slug
+  for (const zone of zones) {
+    const normZoneName = normalize(zone.name);
+    const normSlug = normalize(zone.slug.replace(/-/g, " "));
+    if (normColonia === normZoneName || normColonia === normSlug) {
+      return zone;
+    }
+  }
+
+  // Pass 2: zone name contained in colonia, or colonia contained in zone name
+  // Only match if the base name is 4+ chars (avoid false positives on short words)
+  let bestMatch: Zone | null = null;
+  let bestLen = 0;
+
+  for (const zone of zones) {
+    const normZoneName = normalize(zone.name);
+    if (normZoneName.length < 4) continue;
+
+    if (normColonia.includes(normZoneName) || normZoneName.includes(normColonia)) {
+      // Prefer longest match (most specific zone)
+      if (normZoneName.length > bestLen) {
+        bestMatch = zone;
+        bestLen = normZoneName.length;
+      }
+    }
+  }
+
+  return bestMatch;
+}
+
+// ─── Bounding box (secondary check) ────────────────────────────────────────
+
 type BoundingBox = [number, number, number, number];
 
 const ZONE_BBOXES: Record<string, BoundingBox> = {
@@ -19,114 +112,66 @@ const ZONE_BBOXES: Record<string, BoundingBox> = {
   "terrazas-de-la-presa": [32.415, 32.455, -116.930, -116.840],
 };
 
-// Common colonia names in Tijuana that help match to zones
-const COLONIA_KEYWORDS: Record<string, string[]> = {
-  "zona-rio": ["zona rio", "zona río", "rio tijuana", "río tijuana", "av reforma", "paseo de los héroes"],
-  "playas-de-tijuana": ["playas", "playas de tijuana", "el descanso", "club hipico"],
-  otay: ["otay", "mesa de otay", "granjas familiares", "los laureles"],
-  chapultepec: ["chapultepec", "lomas chapultepec", "fracc chapultepec"],
-  hipodromo: ["hipódromo", "hipodromo", "el maestro", "postal"],
-  centro: ["centro", "zona centro", "calle segunda", "calle primera"],
-  "residencial-del-bosque": ["bosque", "colinas del bosque", "loma dorada"],
-  "la-mesa": ["la mesa", "mesa redonda", "villa del campo", "otay vista"],
-  "santa-fe": ["santa fe", "quinta del cedro", "urbi quinta", "valparaiso residencial", "valparaíso residencial", "porticos de san antonio", "la escondida", "tossa residencial"],
-  "san-antonio-del-mar": ["san antonio del mar", "real del mar", "punta bandera", "sueños del mar", "baja malibu", "baja malibú"],
-  "el-florido": ["florido", "el florido", "natura", "el refugio", "villa fontana", "francisco villa"],
-  "terrazas-de-la-presa": ["terrazas de la presa", "lomas de la presa", "el carrizo", "valle bonito"],
-};
-
-/** Point-in-bounding-box check */
 function isInBoundingBox(lat: number, lng: number, bbox: BoundingBox): boolean {
   const [minLat, maxLat, minLng, maxLng] = bbox;
   return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
 }
 
-/** Calculate distance between two lat/lng points (Haversine) */
-function haversineDistKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/** Find the nearest zone by distance to zone center */
-function nearestZone(lat: number, lng: number, zones: Zone[]): Zone | null {
-  if (!zones.length) return null;
-  let minDist = Infinity;
-  let nearest: Zone | null = null;
+function matchByBbox(lat: number, lng: number, zones: Zone[]): Zone | null {
   for (const zone of zones) {
-    const dist = haversineDistKm(lat, lng, zone.lat, zone.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearest = zone;
-    }
-  }
-  // Only assign if within 8km (max reasonable distance for Tijuana zones)
-  return minDist <= 8 ? nearest : null;
-}
-
-/** Keyword-based fallback matching using address/title text */
-function matchByKeyword(text: string, zones: Zone[]): Zone | null {
-  const normalized = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  for (const [slug, keywords] of Object.entries(COLONIA_KEYWORDS)) {
-    for (const kw of keywords) {
-      const normalizedKw = kw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      if (normalized.includes(normalizedKw)) {
-        const zone = zones.find((z) => z.slug === slug);
-        if (zone) return zone;
-      }
+    const bbox = ZONE_BBOXES[zone.slug];
+    if (bbox && isInBoundingBox(lat, lng, bbox)) {
+      return zone;
     }
   }
   return null;
 }
 
+// ─── Main assignment logic ──────────────────────────────────────────────────
+
 export interface AssignmentResult {
   zoneId: string | null;
-  method: "bbox" | "nearest" | "keyword" | "none";
+  method: "colonia" | "bbox" | "none";
+  /** If no zone matched, this is the extracted colonia name for auto-creation */
+  newColoniaName: string | null;
 }
 
 /**
  * Assigns a listing to a zone using:
- * 1. Bounding-box check (fast, spatial)
- * 2. Nearest-zone fallback (lat/lng available)
- * 3. Keyword matching in title/address (no coordinates)
+ * 1. Extract colonia from address → match to existing zone (normalized + fuzzy)
+ * 2. Bounding-box check with coords (only for well-known zones)
+ * 3. If no match → return colonia name for potential auto-creation
+ *
+ * NEVER forces to "nearest zone" — if it doesn't match, it's a new zone.
  */
 export function assignZone(
   lat: number | null,
   lng: number | null,
   address: string | null,
   title: string | null,
-  zones: Zone[]
+  zones: Zone[],
 ): AssignmentResult {
-  // 1. Bounding box
-  if (lat !== null && lng !== null) {
-    for (const zone of zones) {
-      const bbox = ZONE_BBOXES[zone.slug];
-      if (bbox && isInBoundingBox(lat, lng, bbox)) {
-        return { zoneId: zone.id, method: "bbox" };
-      }
-    }
-
-    // 2. Nearest zone (lat/lng available but outside all bboxes)
-    const near = nearestZone(lat, lng, zones);
-    if (near) {
-      return { zoneId: near.id, method: "nearest" };
-    }
-  }
-
-  // 3. Keyword matching
-  const text = [address, title].filter(Boolean).join(" ");
-  if (text) {
-    const matched = matchByKeyword(text, zones);
+  // 1. Try colonia-based matching first (most accurate)
+  const colonia = extractColonia(address);
+  if (colonia) {
+    const matched = matchColoniaToZone(colonia, zones);
     if (matched) {
-      return { zoneId: matched.id, method: "keyword" };
+      return { zoneId: matched.id, method: "colonia", newColoniaName: null };
     }
   }
 
-  return { zoneId: null, method: "none" };
+  // 2. Bounding box (only for known zones with hardcoded boxes)
+  if (lat !== null && lng !== null) {
+    const bboxMatch = matchByBbox(lat, lng, zones);
+    if (bboxMatch) {
+      return { zoneId: bboxMatch.id, method: "bbox", newColoniaName: null };
+    }
+  }
+
+  // 3. No match — return colonia name for auto-creation
+  return {
+    zoneId: null,
+    method: "none",
+    newColoniaName: colonia,
+  };
 }

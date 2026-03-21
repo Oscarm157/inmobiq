@@ -55,8 +55,6 @@ function buildSearchUrls(config: ScraperConfig): string[] {
     : ["venta"];
   const pages = config.pages ?? 5;
 
-  // Build paginated URLs — one per page so the actor doesn't need to handle pagination
-  // Inmuebles24 uses: base-url.html (page 1), base-url-pagina-2.html, etc.
   const urls: string[] = [];
 
   for (const lt of listingTypes) {
@@ -70,7 +68,6 @@ function buildSearchUrls(config: ScraperConfig): string[] {
       baseUrl = `https://www.inmuebles24.com/inmuebles-en-${ltSlug}-en-tijuana`;
     }
 
-    // Page 1 = base.html, Page N = base-pagina-N.html
     urls.push(`${baseUrl}.html`);
     for (let p = 2; p <= pages; p++) {
       urls.push(`${baseUrl}-pagina-${p}.html`);
@@ -180,7 +177,7 @@ export const inmuebles24Adapter: ScraperAdapter = {
       ACTOR_ID,
       {
         urls,
-        max_items_per_url: 50,  // Each URL is one page (~30 items), 50 as safety margin
+        max_items_per_url: 50,
         max_retries_per_url: 5,
         ignore_url_failures: true,
         proxy: {
@@ -189,7 +186,7 @@ export const inmuebles24Adapter: ScraperAdapter = {
           apifyProxyCountry: "MX",
         },
       },
-      { batchSize: 2, delayMs: 90_000 },
+      { batchSize: 5, delayMs: 60_000 },
     );
 
     const listings = items.map(mapToRawListing);
