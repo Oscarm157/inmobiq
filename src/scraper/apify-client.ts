@@ -51,3 +51,50 @@ export async function runApifyActor<T = Record<string, unknown>>(
 
   return items as T[];
 }
+
+/**
+ * Run an Apify actor in batches to avoid rate limits.
+ * Splits the `urls` field from input into smaller batches,
+ * runs the actor for each batch, and concatenates results.
+ */
+export async function runApifyActorBatched<T = Record<string, unknown>>(
+  actorId: string,
+  input: Record<string, unknown>,
+  batchOptions?: { batchSize?: number; delayMs?: number },
+  options?: { timeoutSecs?: number; memoryMbytes?: number },
+): Promise<T[]> {
+  const urls = input.urls as string[];
+  if (!urls || urls.length === 0) {
+    return runApifyActor<T>(actorId, input, options);
+  }
+
+  const batchSize = batchOptions?.batchSize ?? 2;
+  const delayMs = batchOptions?.delayMs ?? 45_000;
+
+  const batches: string[][] = [];
+  for (let i = 0; i < urls.length; i += batchSize) {
+    batches.push(urls.slice(i, i + batchSize));
+  }
+
+  const allItems: T[] = [];
+
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    console.log(`[apify] Batch ${i + 1}/${batches.length} — ${batch.length} URLs`);
+
+    const items = await runApifyActor<T>(
+      actorId,
+      { ...input, urls: batch },
+      options,
+    );
+    allItems.push(...items);
+
+    if (i < batches.length - 1) {
+      console.log(`[apify] Waiting ${(delayMs / 1000).toFixed(0)}s before next batch…`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  console.log(`[apify] All batches done — ${allItems.length} total items`);
+  return allItems;
+}

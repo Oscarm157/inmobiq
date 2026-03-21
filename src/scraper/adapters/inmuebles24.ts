@@ -1,4 +1,4 @@
-import { runApifyActor } from "../apify-client";
+import { runApifyActorBatched } from "../apify-client";
 import type { RawListing, ScraperAdapter, ScraperConfig } from "../types";
 import type { PropertyType, ListingType } from "@/types/database";
 
@@ -176,17 +176,21 @@ export const inmuebles24Adapter: ScraperAdapter = {
       `[inmuebles24] Calling Apify actor with ${urls.length} page URLs`,
     );
 
-    const items = await runApifyActor<ApifyI24Listing>(ACTOR_ID, {
-      urls,
-      max_items_per_url: 50,  // Each URL is one page (~30 items), 50 as safety margin
-      max_retries_per_url: 5,
-      ignore_url_failures: true,
-      proxy: {
-        useApifyProxy: true,
-        apifyProxyGroups: ["RESIDENTIAL"],
-        apifyProxyCountry: "MX",
+    const items = await runApifyActorBatched<ApifyI24Listing>(
+      ACTOR_ID,
+      {
+        urls,
+        max_items_per_url: 50,  // Each URL is one page (~30 items), 50 as safety margin
+        max_retries_per_url: 5,
+        ignore_url_failures: true,
+        proxy: {
+          useApifyProxy: true,
+          apifyProxyGroups: ["RESIDENTIAL"],
+          apifyProxyCountry: "MX",
+        },
       },
-    });
+      { batchSize: 2, delayMs: 90_000 },
+    );
 
     const listings = items.map(mapToRawListing);
     console.log(`[inmuebles24] Mapped ${listings.length} listings from Apify`);
