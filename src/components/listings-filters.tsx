@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { useCurrency } from "@/contexts/currency-context"
 import type { PropertyType, ListingType } from "@/types/database"
+import { ZONES } from "@/lib/filter-utils"
 
 const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
   { value: "casa", label: "Casa", icon: "home" },
@@ -12,17 +13,6 @@ const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
   { value: "terreno", label: "Terreno", icon: "landscape" },
   { value: "local", label: "Local", icon: "store" },
   { value: "oficina", label: "Oficina", icon: "business" },
-]
-
-const ZONES = [
-  { slug: "zona-rio", name: "Zona Río" },
-  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
-  { slug: "otay", name: "Otay" },
-  { slug: "chapultepec", name: "Chapultepec" },
-  { slug: "hipodromo", name: "Hipódromo" },
-  { slug: "centro", name: "Centro" },
-  { slug: "residencial-del-bosque", name: "Residencial del Bosque" },
-  { slug: "la-mesa", name: "La Mesa" },
 ]
 
 const BEDROOMS = [1, 2, 3, 4] as const
