@@ -14,14 +14,42 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string 
 ]
 
 export const ZONES = [
+  // Premium/Central
   { slug: "zona-rio", name: "Zona Río" },
-  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
-  { slug: "otay", name: "Otay" },
+  { slug: "cacho", name: "Cacho" },
   { slug: "chapultepec", name: "Chapultepec" },
   { slug: "hipodromo", name: "Hipódromo" },
+  { slug: "agua-caliente", name: "Agua Caliente" },
+  { slug: "lomas-de-agua-caliente", name: "Lomas de Agua Caliente" },
+  // Frontera/Norte
   { slug: "centro", name: "Centro" },
-  { slug: "residencial-del-bosque", name: "Residencial del Bosque" },
+  { slug: "libertad", name: "Libertad" },
+  { slug: "soler", name: "Soler" },
+  { slug: "federal", name: "Federal" },
+  // Costa
+  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
+  { slug: "baja-malibu", name: "Baja Malibú" },
+  { slug: "real-del-mar", name: "Real del Mar" },
+  { slug: "san-antonio-del-mar", name: "San Antonio del Mar" },
+  { slug: "punta-bandera", name: "Punta Bandera" },
+  { slug: "costa-coronado", name: "Costa Coronado" },
+  // Este
+  { slug: "otay", name: "Otay" },
   { slug: "la-mesa", name: "La Mesa" },
+  { slug: "las-americas", name: "Las Américas" },
+  { slug: "villa-fontana", name: "Villa Fontana" },
+  { slug: "montecarlo", name: "Montecarlo" },
+  { slug: "otay-universidad", name: "Otay Universidad" },
+  // Sur/Residencial
+  { slug: "residencial-del-bosque", name: "Residencial del Bosque" },
+  { slug: "santa-fe", name: "Santa Fe" },
+  { slug: "natura", name: "Natura" },
+  { slug: "colinas-de-california", name: "Colinas de California" },
+  { slug: "lomas-virreyes", name: "Lomas Virreyes" },
+  { slug: "insurgentes", name: "Insurgentes" },
+  // Periférico
+  { slug: "el-florido", name: "El Florido" },
+  { slug: "terrazas-de-la-presa", name: "Terrazas de la Presa" },
 ]
 
 export const BEDROOMS = [1, 2, 3, 4] as const
