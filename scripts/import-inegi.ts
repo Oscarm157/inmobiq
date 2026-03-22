@@ -274,7 +274,7 @@ function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
       // Internet & car — absolute counts
       vphInternet += p.VPH_INTER || 0
       vphAutom += p.VPH_AUTOM || 0
-      vphTotal += p.TVPH_CC || p.TVIVHAB || 0
+      vphTotal += p.TVPH_CC ?? p.TVIVHAB ?? 0
 
       // Social security
       derSS += p.PDER_SS || 0

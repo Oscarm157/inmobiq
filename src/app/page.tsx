@@ -185,7 +185,10 @@ export default async function HomePage({
         const byPop = [...allDemo].sort((a, b) => b.population - a.population).slice(0, 3)
         const totalPop = allDemo.reduce((s, d) => s + d.population, 0)
         const totalHouseholds = allDemo.reduce((s, d) => s + d.households, 0)
-        const avgInternet = Math.round(allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / allDemo.reduce((s, d) => s + d.occupied_dwellings, 0) * 10) / 10
+        const totalDwellings = allDemo.reduce((s, d) => s + d.occupied_dwellings, 0)
+        const avgInternet = totalDwellings > 0
+          ? Math.round((allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / totalDwellings) * 10) / 10
+          : 0
         return (
           <section>
             <div className="mb-6">
