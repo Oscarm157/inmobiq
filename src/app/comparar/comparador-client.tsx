@@ -117,7 +117,9 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
   }
 
   const availableToAdd = allZones.filter((z) => !selectedSlugs.includes(z.zone_slug))
-  const selectedZones = compData?.zones ?? []
+  const selectedZones = selectedSlugs
+    .map((slug) => allZones.find((z) => z.zone_slug === slug))
+    .filter(Boolean) as ZoneMetrics[]
   const zoneNames = Object.fromEntries(allZones.map((z) => [z.zone_slug, z.zone_name]))
 
   const copyShareUrl = () => {
@@ -199,7 +201,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
         )}
       </div>
 
-      {loading || isPending ? (
+      {isPending ? (
         <div className="flex items-center gap-3 text-slate-400 py-16 justify-center">
           <Icon name="progress_activity" className="animate-spin" />
           <span className="text-sm">Cargando datos…</span>
@@ -279,7 +281,13 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
           <ZoneRadarChart zones={selectedZones} colors={ZONE_COLORS.slice(0, selectedZones.length)} />
 
           {/* 3. Price trend chart */}
-          {compData?.trendSeries && compData.trendSeries.length > 0 && (
+          {loading && (
+            <div className="flex items-center gap-3 text-slate-400 py-8 justify-center">
+              <Icon name="progress_activity" className="animate-spin" />
+              <span className="text-sm">Cargando tendencia…</span>
+            </div>
+          )}
+          {!loading && compData?.trendSeries && compData.trendSeries.length > 0 && (
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
               <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 mb-5">
                 Evolución de precio/m² — últimas 12 semanas
