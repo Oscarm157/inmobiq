@@ -40,6 +40,25 @@ interface ZoneDemographics {
   economically_active: number
   median_age: number
   ageb_count: number
+  // Extended variables (populated when shapefile has SCINCE fields)
+  avg_education_years: number
+  pop_no_schooling: number
+  unemployed: number
+  pct_computer: number
+  pct_phone: number
+  pct_washer: number
+  pct_refrigerator: number
+  pct_female: number
+  pop_0_14: number
+  pop_15_64: number
+  pop_65_plus: number
+  // Derived indicators
+  nse_score: number
+  nse_label: string
+  dependency_ratio: number
+  unemployment_rate: number
+  economic_participation: number
+  pop_density: number
 }
 
 async function loadTijuanaAgebs(): Promise<AgebFeature[]> {
@@ -244,6 +263,15 @@ function buildZonePolygons(
   return { type: "FeatureCollection", features }
 }
 
+function computeNseLabel(score: number): string {
+  if (score >= 80) return "A/B"
+  if (score >= 65) return "C+"
+  if (score >= 50) return "C"
+  if (score >= 35) return "C-"
+  if (score >= 20) return "D+"
+  return "D/E"
+}
+
 function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
   return zoneAgebs.map((zone) => {
     let population = 0
@@ -258,6 +286,19 @@ function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
     let pea = 0
     let ageSum = 0
     let ageCount = 0
+    // Extended accumulators
+    let eduSum = 0
+    let eduCount = 0
+    let popNoSchooling = 0
+    let unemployed = 0
+    let vphComputer = 0
+    let vphPhone = 0
+    let vphWasher = 0
+    let vphRefri = 0
+    let pobFem = 0
+    let pop0_14 = 0
+    let pop15_64 = 0
+    let pop65plus = 0
 
     for (const ageb of zone.agebs) {
       const p = ageb.properties
@@ -274,7 +315,7 @@ function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
       // Internet & car — absolute counts
       vphInternet += p.VPH_INTER || 0
       vphAutom += p.VPH_AUTOM || 0
-      vphTotal += p.TVPH_CC || p.TVIVHAB || 0
+      vphTotal += p.TVPH_CC ?? p.TVIVHAB ?? 0
 
       // Social security
       derSS += p.PDER_SS || 0
@@ -287,7 +328,86 @@ function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
         ageSum += p.EMPOBTOT * p.POB_TOT
         ageCount += p.POB_TOT
       }
+
+      // Extended SCINCE variables
+      if (p.GRAPROES && p.POB_TOT) {
+        eduSum += p.GRAPROES * p.POB_TOT
+        eduCount += p.POB_TOT
+      }
+      popNoSchooling += p.P15YM_AN || 0
+      unemployed += p.PDESOCUP || 0
+      vphComputer += p.VPH_PC || 0
+      vphPhone += p.VPH_TELEF || 0
+      vphWasher += p.VPH_LAVAD || 0
+      vphRefri += p.VPH_REFRI || 0
+      pobFem += p.POB_FEM || 0
+      pop0_14 += p.P_0A14 || 0
+      pop15_64 += p.P_15A64 || 0
+      pop65plus += p.P_65YMAS || 0
     }
+
+    const pctInternet = vphTotal > 0
+      ? Math.round((vphInternet / vphTotal) * 1000) / 10
+      : 0
+    const pctCar = vphTotal > 0
+      ? Math.round((vphAutom / vphTotal) * 1000) / 10
+      : 0
+    const pctSS = population > 0
+      ? Math.round((derSS / population) * 1000) / 10
+      : 0
+    const avgEdu = eduCount > 0
+      ? Math.round((eduSum / eduCount) * 10) / 10
+      : 0
+    const pctComputer = vphTotal > 0
+      ? Math.round((vphComputer / vphTotal) * 1000) / 10
+      : 0
+    const pctPhone = vphTotal > 0
+      ? Math.round((vphPhone / vphTotal) * 1000) / 10
+      : 0
+    const pctWasher = vphTotal > 0
+      ? Math.round((vphWasher / vphTotal) * 1000) / 10
+      : 0
+    const pctRefri = vphTotal > 0
+      ? Math.round((vphRefri / vphTotal) * 1000) / 10
+      : 0
+    const pctFemale = population > 0
+      ? Math.round((pobFem / population) * 1000) / 10
+      : 0
+    const unemploymentRate = pea > 0
+      ? Math.round((unemployed / pea) * 1000) / 10
+      : 0
+    const economicParticipation = population > 0
+      ? Math.round((pea / population) * 1000) / 10
+      : 0
+    const dependencyRatio = pop15_64 > 0
+      ? Math.round(((pop0_14 + pop65plus) / pop15_64) * 1000) / 10
+      : 0
+
+    // NSE score: weighted average of normalized indicators
+    // When extended variables are available (eduCount > 0), use full formula
+    // Otherwise use reduced formula with available indicators
+    let nseScore: number
+    if (eduCount > 0) {
+      // Full NSE: education (30%) + internet (20%) + car (15%) + computer (15%) + SS (10%) + washer (10%)
+      const eduNorm = Math.min(100, (avgEdu / 16) * 100) // 16 years = postgrad
+      nseScore = Math.round(
+        eduNorm * 0.30 +
+        pctInternet * 0.20 +
+        pctCar * 0.15 +
+        pctComputer * 0.15 +
+        pctSS * 0.10 +
+        pctWasher * 0.10
+      )
+    } else {
+      // Reduced NSE: internet (30%) + car (25%) + SS (25%) + economic participation (20%)
+      nseScore = Math.round(
+        pctInternet * 0.30 +
+        pctCar * 0.25 +
+        pctSS * 0.25 +
+        economicParticipation * 0.20
+      )
+    }
+    nseScore = Math.min(100, Math.max(0, nseScore))
 
     return {
       zone_slug: zone.slug,
@@ -297,20 +417,33 @@ function computeDemographics(zoneAgebs: ZoneAgebs[]): ZoneDemographics[] {
       avg_occupants: viviendaCount > 0
         ? Math.round((totalOccupants / viviendaCount) * 10) / 10
         : 0,
-      pct_internet: vphTotal > 0
-        ? Math.round((vphInternet / vphTotal) * 1000) / 10
-        : 0,
-      pct_car: vphTotal > 0
-        ? Math.round((vphAutom / vphTotal) * 1000) / 10
-        : 0,
-      pct_social_security: population > 0
-        ? Math.round((derSS / population) * 1000) / 10
-        : 0,
+      pct_internet: pctInternet,
+      pct_car: pctCar,
+      pct_social_security: pctSS,
       economically_active: pea,
       median_age: ageCount > 0
         ? Math.round((ageSum / ageCount) * 10) / 10
         : 0,
       ageb_count: zone.agebs.length,
+      // Extended
+      avg_education_years: avgEdu,
+      pop_no_schooling: popNoSchooling,
+      unemployed,
+      pct_computer: pctComputer,
+      pct_phone: pctPhone,
+      pct_washer: pctWasher,
+      pct_refrigerator: pctRefri,
+      pct_female: pctFemale,
+      pop_0_14: pop0_14,
+      pop_15_64: pop15_64,
+      pop_65_plus: pop65plus,
+      // Derived
+      nse_score: nseScore,
+      nse_label: computeNseLabel(nseScore),
+      dependency_ratio: dependencyRatio,
+      unemployment_rate: unemploymentRate,
+      economic_participation: economicParticipation,
+      pop_density: 0, // Computed after polygon area calculation
     }
   })
 }
@@ -436,6 +569,25 @@ export interface ZoneDemographics {
   economically_active: number
   median_age: number
   ageb_count: number
+  // Extended variables (populated when shapefile has SCINCE fields)
+  avg_education_years: number
+  pop_no_schooling: number
+  unemployed: number
+  pct_computer: number
+  pct_phone: number
+  pct_washer: number
+  pct_refrigerator: number
+  pct_female: number
+  pop_0_14: number
+  pop_15_64: number
+  pop_65_plus: number
+  // Derived indicators
+  nse_score: number
+  nse_label: string
+  dependency_ratio: number
+  unemployment_rate: number
+  economic_participation: number
+  pop_density: number
 }
 
 const ZONE_DEMOGRAPHICS: ZoneDemographics[] = ${data}
@@ -446,6 +598,28 @@ export function getZoneDemographics(slug: string): ZoneDemographics | null {
 
 export function getAllDemographics(): ZoneDemographics[] {
   return ZONE_DEMOGRAPHICS
+}
+
+/** Compute NSE label from score */
+export function getNseLabel(score: number): string {
+  if (score >= 80) return "A/B"
+  if (score >= 65) return "C+"
+  if (score >= 50) return "C"
+  if (score >= 35) return "C-"
+  if (score >= 20) return "D+"
+  return "D/E"
+}
+
+/** NSE color for badges/UI */
+export function getNseColor(label: string): { bg: string; text: string } {
+  switch (label) {
+    case "A/B": return { bg: "bg-emerald-100 dark:bg-emerald-950", text: "text-emerald-700 dark:text-emerald-400" }
+    case "C+": return { bg: "bg-blue-100 dark:bg-blue-950", text: "text-blue-700 dark:text-blue-400" }
+    case "C": return { bg: "bg-sky-100 dark:bg-sky-950", text: "text-sky-700 dark:text-sky-400" }
+    case "C-": return { bg: "bg-amber-100 dark:bg-amber-950", text: "text-amber-700 dark:text-amber-400" }
+    case "D+": return { bg: "bg-orange-100 dark:bg-orange-950", text: "text-orange-700 dark:text-orange-400" }
+    default: return { bg: "bg-red-100 dark:bg-red-950", text: "text-red-700 dark:text-red-400" }
+  }
 }
 `
 

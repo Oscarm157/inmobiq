@@ -21,6 +21,7 @@ import { ZoneRadarChart } from "@/components/comparar/radar-chart"
 import { PriceAreaScatter } from "@/components/comparar/scatter-chart"
 import { TypeDetailTable } from "@/components/comparar/type-detail-table"
 import { VentaRentaZones } from "@/components/comparar/venta-renta-zones"
+import { DemographicComparison } from "@/components/comparar/demographic-comparison"
 import { MarketFilters } from "@/components/market-filters"
 import type { ZoneMetrics } from "@/types/database"
 import type { ZoneComparisonData } from "@/lib/data/comparator"
@@ -351,7 +352,10 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
             colors={ZONE_COLORS.slice(0, selectedZones.length)}
           />
 
-          {/* 6. Venta vs Renta */}
+          {/* 6. Demographic comparison */}
+          <DemographicComparison zones={selectedZones} colors={ZONE_COLORS.slice(0, selectedZones.length)} />
+
+          {/* 7. Venta vs Renta */}
           {listings.length > 0 && (
             <VentaRentaZones
               listings={listings}

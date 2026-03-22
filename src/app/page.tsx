@@ -185,7 +185,10 @@ export default async function HomePage({
         const byPop = [...allDemo].sort((a, b) => b.population - a.population).slice(0, 3)
         const totalPop = allDemo.reduce((s, d) => s + d.population, 0)
         const totalHouseholds = allDemo.reduce((s, d) => s + d.households, 0)
-        const avgInternet = Math.round(allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / allDemo.reduce((s, d) => s + d.occupied_dwellings, 0) * 10) / 10
+        const totalDwellings = allDemo.reduce((s, d) => s + d.occupied_dwellings, 0)
+        const avgInternet = totalDwellings > 0
+          ? Math.round((allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / totalDwellings) * 10) / 10
+          : 0
         return (
           <section>
             <div className="mb-6">
@@ -201,9 +204,11 @@ export default async function HomePage({
                 <p className="text-xs text-slate-400 mt-1">{totalHouseholds.toLocaleString("es-MX")} hogares</p>
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Conectividad</p>
-                <p className="text-2xl font-black text-slate-800 dark:text-white">{avgInternet}%</p>
-                <p className="text-xs text-slate-400 mt-1">viviendas con internet</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">NSE promedio</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">
+                  {Math.round(allDemo.reduce((s, d) => s + d.nse_score * d.population, 0) / totalPop)}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">{avgInternet}% con internet</p>
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Zonas más pobladas</p>
