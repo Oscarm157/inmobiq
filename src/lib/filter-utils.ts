@@ -4,6 +4,7 @@
  */
 
 import type { PropertyType, ListingType } from "@/types/database"
+import type { PropertyCategory } from "@/lib/data/normalize"
 
 export const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
   { value: "casa", label: "Casa", icon: "home" },
@@ -60,6 +61,7 @@ export interface MarketFilterState {
   tipos: PropertyType[]
   zonas: string[]
   listing_type: ListingType | ""
+  categoria: PropertyCategory | ""  // "residencial" | "comercial" | "terreno"
   precio_min: string
   precio_max: string
   area_min: string
@@ -76,6 +78,7 @@ export function buildMarketParams(state: MarketFilterState): URLSearchParams {
   if (state.tipos.length) p.set("tipo", state.tipos.join(","))
   if (state.zonas.length) p.set("zona", state.zonas.join(","))
   if (state.listing_type) p.set("operacion", state.listing_type)
+  if (state.categoria) p.set("categoria", state.categoria)
   if (state.precio_min) p.set("precio_min", state.precio_min)
   if (state.precio_max) p.set("precio_max", state.precio_max)
   if (state.area_min) p.set("area_min", state.area_min)
@@ -97,6 +100,10 @@ export function parseMarketParams(sp: URLSearchParams): MarketFilterState {
   const rawOp = sp.get("operacion")
   const listing_type: ListingType | "" = rawOp === "venta" || rawOp === "renta" ? rawOp : ""
 
+  // Sanitize categoria
+  const rawCat = sp.get("categoria")
+  const categoria: PropertyCategory | "" = rawCat === "residencial" || rawCat === "comercial" || rawCat === "terreno" ? rawCat : ""
+
   // Sanitize numeric strings (reject non-numeric values)
   const sanitizeNum = (val: string | null): string => {
     if (!val) return ""
@@ -112,6 +119,7 @@ export function parseMarketParams(sp: URLSearchParams): MarketFilterState {
     tipos,
     zonas,
     listing_type,
+    categoria,
     precio_min: sanitizeNum(sp.get("precio_min")),
     precio_max: sanitizeNum(sp.get("precio_max")),
     area_min: sanitizeNum(sp.get("area_min")),
@@ -125,6 +133,7 @@ export function hasActiveFilters(state: MarketFilterState) {
     state.tipos.length > 0 ||
     state.zonas.length > 0 ||
     state.listing_type !== "" ||
+    state.categoria !== "" ||
     state.precio_min !== "" ||
     state.precio_max !== "" ||
     state.area_min !== "" ||
@@ -138,6 +147,7 @@ export function countActiveFilters(state: MarketFilterState) {
     state.tipos.length +
     state.zonas.length +
     (state.listing_type ? 1 : 0) +
+    (state.categoria ? 1 : 0) +
     (state.precio_min || state.precio_max ? 1 : 0) +
     (state.area_min || state.area_max ? 1 : 0) +
     state.recamaras.length

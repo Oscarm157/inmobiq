@@ -33,6 +33,7 @@ interface SearchParams {
   tipo?: string
   zona?: string
   operacion?: string
+  categoria?: string
   precio_min?: string
   precio_max?: string
   area_min?: string
@@ -56,6 +57,7 @@ export default async function HomePage({
 
   const VALID_TYPES = new Set(["casa", "departamento", "terreno", "local", "oficina"])
   const VALID_OPS = new Set(["venta", "renta"])
+  const VALID_CATS = new Set(["residencial", "comercial", "terreno"])
 
   const filters = {
     tipos: sp.tipo
@@ -64,6 +66,9 @@ export default async function HomePage({
     zonas: sp.zona ? sp.zona.split(",") : undefined,
     listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
       ? (sp.operacion as ListingType)
+      : undefined,
+    categoria: sp.categoria && VALID_CATS.has(sp.categoria)
+      ? (sp.categoria as "residencial" | "comercial" | "terreno")
       : undefined,
     precio_min: safeNum(sp.precio_min),
     precio_max: safeNum(sp.precio_max),

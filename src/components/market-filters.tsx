@@ -98,7 +98,7 @@ export function MarketFilters() {
 
   const handleClear = () => {
     const empty: MarketFilterState = {
-      tipos: [], zonas: [], listing_type: "",
+      tipos: [], zonas: [], listing_type: "", categoria: "",
       precio_min: "", precio_max: "",
       area_min: "", area_max: "",
       recamaras: [],
@@ -155,6 +155,31 @@ export function MarketFilters() {
                       }`}
                     >
                       {op === "" ? "Todas" : op === "venta" ? "Venta" : "Renta"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categoría */}
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Categoría</p>
+                <div className="flex gap-2">
+                  {([
+                    { value: "" as const, label: "Todas" },
+                    { value: "residencial" as const, label: "Residencial" },
+                    { value: "comercial" as const, label: "Comercial" },
+                    { value: "terreno" as const, label: "Terreno" },
+                  ]).map(({ value, label }) => (
+                    <button
+                      key={value}
+                      onClick={() => handleChange({ ...state, categoria: value })}
+                      className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
+                        state.categoria === value
+                          ? "bg-slate-800 text-white shadow-sm"
+                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -312,6 +337,9 @@ export function MarketFilters() {
                 <div className="flex flex-wrap gap-1.5">
                   {state.listing_type && (
                     <FilterChip label={state.listing_type === "venta" ? "Venta" : "Renta"} onRemove={() => handleChange({ ...state, listing_type: "" })} />
+                  )}
+                  {state.categoria && (
+                    <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: "" })} />
                   )}
                   {state.tipos.map((t) => (
                     <FilterChip key={t} label={PROPERTY_TYPES.find((p) => p.value === t)?.label ?? t} onRemove={() => handleChange({ ...state, tipos: state.tipos.filter((x) => x !== t) })} />

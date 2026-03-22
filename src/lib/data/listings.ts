@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
+import { filterNormalizedListings, filterByCategory, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
 /** Build zone name lookup from mock data (single source of truth) */
 const MOCK_ZONE_LOOKUP = new Map(
@@ -11,6 +12,7 @@ export interface ListingFilters {
   tipos?: PropertyType[]
   zonas?: string[]   // zone slugs
   listing_type?: ListingType
+  categoria?: PropertyCategory  // "residencial" | "comercial" | "terreno"
   precio_min?: number
   precio_max?: number
   area_min?: number
@@ -41,6 +43,14 @@ async function resolveZoneSlugs(slugs: string[]): Promise<string[]> {
 
 export function applyMockFilters(filters: ListingFilters): ListingsResult {
   let results = [...MOCK_LISTINGS]
+
+  // Normalize: filter out suspected misclassified rentals
+  results = filterNormalizedListings(results)
+
+  // Category filter
+  if (filters.categoria) {
+    results = filterByCategory(results, filters.categoria)
+  }
 
   if (filters.tipos?.length) {
     results = results.filter((l) => filters.tipos!.includes(l.property_type))
@@ -93,7 +103,16 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       .order("created_at", { ascending: false })
       .limit(100)
 
-    if (filters.tipos?.length) query = query.in("property_type", filters.tipos)
+    // Resolve categoria + tipos into effective property type filter
+    const getListingsCatTypes: Record<PropertyCategory, PropertyType[]> = { residencial: RESIDENTIAL_TYPES, comercial: COMMERCIAL_TYPES, terreno: LAND_TYPES }
+    if (filters.categoria && filters.tipos?.length) {
+      const intersection = filters.tipos.filter((t) => getListingsCatTypes[filters.categoria!].includes(t))
+      query = query.in("property_type", intersection.length > 0 ? intersection : getListingsCatTypes[filters.categoria])
+    } else if (filters.categoria) {
+      query = query.in("property_type", getListingsCatTypes[filters.categoria])
+    } else if (filters.tipos?.length) {
+      query = query.in("property_type", filters.tipos)
+    }
     if (filters.zonas?.length) {
       const ids = await resolveZoneSlugs(filters.zonas)
       if (ids.length) query = query.in("zone_id", ids)
@@ -119,7 +138,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
     if (error) throw error
 
     // Map real DB columns to Listing interface
-    const listings: Listing[] = (data ?? []).map((row: Record<string, unknown>) => ({
+    let listings: Listing[] = (data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
       zone_id: row.zone_id as string,
       title: (row.title as string) ?? "",
@@ -138,6 +157,14 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       created_at: (row.created_at as string) ?? "",
       raw_data: (row.raw_data as Record<string, unknown>) ?? undefined,
     }))
+
+    // Normalize: filter out suspected misclassified rentals
+    listings = filterNormalizedListings(listings)
+
+    // Category filter
+    if (filters.categoria) {
+      listings = filterByCategory(listings, filters.categoria)
+    }
 
     return listings.length > 0
       ? { listings, total: listings.length }
@@ -332,11 +359,19 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
     const supabase = await createSupabaseServerClient()
     let query = supabase
       .from("listings")
-      .select("price_mxn, area_m2, property_type, listing_type, bedrooms, zone_id, zones(name, slug)")
+      .select("price_mxn, area_m2, property_type, listing_type, bedrooms, zone_id, zones!inner(name, slug)")
       .eq("is_active", true)
 
-    // Apply filters at query level
-    if (filters.tipos?.length) query = query.in("property_type", filters.tipos)
+    // Apply filters at query level (resolve categoria into property types)
+    const catTypes: Record<PropertyCategory, PropertyType[]> = { residencial: RESIDENTIAL_TYPES, comercial: COMMERCIAL_TYPES, terreno: LAND_TYPES }
+    if (filters.categoria && filters.tipos?.length) {
+      const intersection = filters.tipos.filter((t) => catTypes[filters.categoria!].includes(t))
+      query = query.in("property_type", intersection.length > 0 ? intersection : catTypes[filters.categoria])
+    } else if (filters.categoria) {
+      query = query.in("property_type", catTypes[filters.categoria])
+    } else if (filters.tipos?.length) {
+      query = query.in("property_type", filters.tipos)
+    }
     if (filters.listing_type) query = query.eq("listing_type", filters.listing_type)
     if (filters.zonas?.length) {
       const ids = await resolveZoneSlugs(filters.zonas)
@@ -372,10 +407,19 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
       price_mxn: number | null
       area_m2: number | null
       property_type: string
+      listing_type?: string
       zone_id: string
       zones: { name: string; slug: string } | null
     }
-    const listings = rows as unknown as Row[]
+    // Normalize: filter out suspected misclassified rentals
+    let listings = filterNormalizedListings(rows as unknown as Row[])
+
+    // Category filter
+    if (filters.categoria) {
+      listings = filterByCategory(listings, filters.categoria)
+    }
+
+    if (listings.length === 0) return mockListingsAnalytics(filters)
 
     // --- totalListings & medianPrice ---
     const withPrice = listings.filter((l) => (l.price_mxn ?? 0) > 0)
@@ -446,7 +490,7 @@ export async function getZoneListingsAnalytics(slug: string): Promise<ZoneListin
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from("listings")
-      .select("title, price_mxn, area_m2, property_type, bedrooms, zones!inner(slug)")
+      .select("title, price_mxn, area_m2, property_type, listing_type, bedrooms, zones!inner(slug)")
       .eq("is_active", true)
       .eq("zones.slug", slug)
 
@@ -459,10 +503,13 @@ export async function getZoneListingsAnalytics(slug: string): Promise<ZoneListin
       price_mxn: number | null
       area_m2: number | null
       property_type: string
+      listing_type?: string
       bedrooms: number | null
       zones: { slug: string } | null
     }
-    const listings = rows as unknown as Row[]
+    // Normalize: filter out suspected misclassified rentals
+    const listings = filterNormalizedListings(rows as unknown as Row[])
+    if (listings.length === 0) return mockZoneListingsAnalytics()
 
     // --- priceByBedrooms ---
     const priceByBedrooms = [1, 2, 3, 4].map((br) => {
