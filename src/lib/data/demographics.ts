@@ -976,3 +976,229 @@ export function getNseColor(label: string): { bg: string; text: string } {
     default: return { bg: "bg-red-100 dark:bg-red-950", text: "text-red-700 dark:text-red-400" }
   }
 }
+
+// ─── City-level averages for comparison bars ───
+
+export function getCityDemographicAverages() {
+  const all = ZONE_DEMOGRAPHICS.filter((d) => d.ageb_count > 0)
+  const n = all.length || 1
+  const totalPop = all.reduce((s, d) => s + d.population, 0)
+  const totalDwellings = all.reduce((s, d) => s + d.occupied_dwellings, 0) || 1
+  return {
+    avg_pct_internet: Math.round(all.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / totalDwellings * 10) / 10,
+    avg_pct_car: Math.round(all.reduce((s, d) => s + d.pct_car * d.occupied_dwellings, 0) / totalDwellings * 10) / 10,
+    avg_pct_social_security: Math.round(all.reduce((s, d) => s + d.pct_social_security * d.occupied_dwellings, 0) / totalDwellings * 10) / 10,
+    avg_median_age: Math.round(all.reduce((s, d) => s + d.median_age * d.population, 0) / (totalPop || 1) * 10) / 10,
+    avg_occupants: Math.round(all.reduce((s, d) => s + d.avg_occupants, 0) / n * 10) / 10,
+  }
+}
+
+// ─── Socioeconomic profile classification ───
+
+export function classifySocioeconomicProfile(d: ZoneDemographics): string {
+  if (d.nse_score >= 80) return "Premium"
+  if (d.nse_score >= 65) return "Medio-Alto"
+  if (d.nse_score >= 50) return "Medio"
+  if (d.nse_score >= 35) return "Medio-Bajo"
+  return "Popular"
+}
+
+export function getProfileColor(profile: string): string {
+  switch (profile) {
+    case "Premium": return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+    case "Medio-Alto": return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+    case "Medio": return "bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-400"
+    case "Medio-Bajo": return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+    default: return "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-400"
+  }
+}
+
+// ─── Buyer persona generator ───
+
+import type { ZoneMetrics } from "@/types/database"
+
+export function generateBuyerPersona(d: ZoneDemographics, zone: ZoneMetrics): { text: string; tags: string[] } {
+  const tags: string[] = []
+  let text = ""
+
+  const profile = classifySocioeconomicProfile(d)
+  const youngZone = d.median_age < 30
+  const highInternet = d.pct_internet > 75
+  const highCar = d.pct_car > 70
+  const bigHousehold = d.avg_occupants > 3.5
+
+  if (profile === "Premium" || profile === "Medio-Alto") {
+    tags.push("Profesionistas", "Doble ingreso")
+    if (highInternet) tags.push("Digitales")
+    if (highCar) tags.push("Movilidad propia")
+    text = youngZone
+      ? "Parejas jóvenes profesionistas con alto poder adquisitivo, orientados a tecnología y servicios digitales."
+      : "Familias establecidas con ingresos altos, buscan seguridad, espacio y plusvalía a largo plazo."
+  } else if (profile === "Medio") {
+    tags.push("Familias")
+    if (bigHousehold) tags.push("Hogares grandes")
+    if (youngZone) tags.push("Jóvenes")
+    text = bigHousehold
+      ? "Familias de clase media con hogares multigeneracionales, priorizan ubicación y acceso a servicios."
+      : "Clase media trabajadora que busca estabilidad, buena conectividad y cercanía a empleo."
+  } else {
+    tags.push("Primera vivienda")
+    if (youngZone) tags.push("Jóvenes")
+    if (bigHousehold) tags.push("Familias extensas")
+    text = "Familias en crecimiento buscando opciones accesibles. Alta sensibilidad al precio, priorizan espacio sobre ubicación."
+  }
+
+  if (d.pct_social_security > 75) tags.push("Empleo formal")
+  if (d.economic_participation > 55) tags.push("Alta PEA")
+
+  return { text, tags: tags.slice(0, 5) }
+}
+
+// ─── Opportunity score (0-100, 4 sub-scores of 25 each) ───
+
+export function computeOpportunityScore(
+  d: ZoneDemographics,
+  zone: ZoneMetrics,
+  allZones: ZoneMetrics[]
+): { total: number; price_score: number; density_score: number; digital_score: number; economic_score: number } {
+  const prices = allZones.filter((z) => z.avg_price_per_m2 > 0).map((z) => z.avg_price_per_m2)
+  const maxPrice = Math.max(...prices, 1)
+  const minPrice = Math.min(...prices, 0)
+  const priceRange = maxPrice - minPrice || 1
+
+  // Lower price = higher score (affordability)
+  const priceNorm = 1 - (zone.avg_price_per_m2 - minPrice) / priceRange
+  const price_score = Math.round(priceNorm * 25 * 10) / 10
+
+  // Higher density = more demand potential
+  const allDemo = ZONE_DEMOGRAPHICS.filter((dd) => dd.ageb_count > 0)
+  const densities = allDemo.map((dd) => dd.population / (dd.ageb_count || 1))
+  const maxDensity = Math.max(...densities, 1)
+  const density_score = Math.round((d.population / (d.ageb_count || 1)) / maxDensity * 25 * 10) / 10
+
+  // Digital connectivity
+  const digital_score = Math.round(d.pct_internet / 100 * 25 * 10) / 10
+
+  // Economic strength (PEA ratio + social security)
+  const peaRatio = d.population > 0 ? d.economically_active / d.population : 0
+  const ecoRaw = (peaRatio * 0.5 + d.pct_social_security / 100 * 0.5)
+  const economic_score = Math.round(ecoRaw * 25 * 10) / 10
+
+  const total = Math.round(price_score + density_score + digital_score + economic_score)
+
+  return { total, price_score, density_score, digital_score, economic_score }
+}
+
+// ─── Market Intelligence insights (census × real estate) ───
+
+export interface MarketInsight {
+  id: string
+  title: string
+  zone_name: string
+  zone_slug: string
+  metric_value: string
+  explanation: string
+  icon: string
+  accent: string
+}
+
+export function getMarketIntelligenceInsights(
+  allDemo: ZoneDemographics[],
+  zones: ZoneMetrics[],
+  riskData: { zone_slug: string; risk_label: string; risk_score: number }[]
+): MarketInsight[] {
+  const insights: MarketInsight[] = []
+
+  // 1. Highest opportunity zone (best combined score)
+  let bestOpp = { slug: "", name: "", score: 0 }
+  for (const demo of allDemo) {
+    const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+    if (!zone || zone.total_listings < 1) continue
+    const opp = computeOpportunityScore(demo, zone, zones)
+    if (opp.total > bestOpp.score) {
+      bestOpp = { slug: zone.zone_slug, name: zone.zone_name, score: opp.total }
+    }
+  }
+  if (bestOpp.slug) {
+    insights.push({
+      id: "best-opportunity",
+      title: "Mayor Oportunidad",
+      zone_name: bestOpp.name,
+      zone_slug: bestOpp.slug,
+      metric_value: `Score ${bestOpp.score}/100`,
+      explanation: "Mejor combinación de precio accesible, densidad poblacional, conectividad digital y fuerza económica.",
+      icon: "trending_up",
+      accent: "border-l-emerald-500",
+    })
+  }
+
+  // 2. Most underserved market (high population, low inventory)
+  let bestUnderserved = { slug: "", name: "", ratio: 0, pop: 0 }
+  for (const demo of allDemo) {
+    const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+    if (!zone || demo.population < 5000) continue
+    const ratio = demo.population / (zone.total_listings || 1)
+    if (ratio > bestUnderserved.ratio) {
+      bestUnderserved = { slug: zone.zone_slug, name: zone.zone_name, ratio, pop: demo.population }
+    }
+  }
+  if (bestUnderserved.slug) {
+    insights.push({
+      id: "underserved",
+      title: "Mercado Desatendido",
+      zone_name: bestUnderserved.name,
+      zone_slug: bestUnderserved.slug,
+      metric_value: `${Math.round(bestUnderserved.ratio).toLocaleString("es-MX")} hab/listing`,
+      explanation: `${bestUnderserved.pop.toLocaleString("es-MX")} habitantes con poca oferta inmobiliaria activa. Potencial de demanda insatisfecha.`,
+      icon: "group",
+      accent: "border-l-blue-500",
+    })
+  }
+
+  // 3. Most digital zone (highest internet penetration + highest NSE)
+  const digitalSorted = [...allDemo].sort((a, b) => b.pct_internet - a.pct_internet)
+  const topDigital = digitalSorted[0]
+  if (topDigital) {
+    const zone = zones.find((z) => z.zone_slug === topDigital.zone_slug)
+    if (zone) {
+      insights.push({
+        id: "most-digital",
+        title: "Más Conectada",
+        zone_name: zone.zone_name,
+        zone_slug: zone.zone_slug,
+        metric_value: `${topDigital.pct_internet}% internet`,
+        explanation: "Zona con mayor penetración digital. Ideal para estrategias de marketing online y proptech.",
+        icon: "wifi",
+        accent: "border-l-violet-500",
+      })
+    }
+  }
+
+  // 4. Lowest risk + high economy
+  const stableZones = riskData.filter((r) => r.risk_label === "Bajo")
+  let bestStable = { slug: "", name: "", pea: 0 }
+  for (const r of stableZones) {
+    const demo = allDemo.find((d) => d.zone_slug === r.zone_slug)
+    if (!demo) continue
+    const zone = zones.find((z) => z.zone_slug === r.zone_slug)
+    if (!zone) continue
+    const peaRatio = demo.population > 0 ? demo.economically_active / demo.population * 100 : 0
+    if (peaRatio > bestStable.pea) {
+      bestStable = { slug: zone.zone_slug, name: zone.zone_name, pea: peaRatio }
+    }
+  }
+  if (bestStable.slug) {
+    insights.push({
+      id: "stable-economy",
+      title: "Estable y Productiva",
+      zone_name: bestStable.name,
+      zone_slug: bestStable.slug,
+      metric_value: `${Math.round(bestStable.pea)}% PEA`,
+      explanation: "Riesgo bajo y alta participación económica. Perfil ideal para inversión conservadora a largo plazo.",
+      icon: "shield",
+      accent: "border-l-amber-500",
+    })
+  }
+
+  return insights
+}
