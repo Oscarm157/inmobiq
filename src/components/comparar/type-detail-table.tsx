@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Icon } from "@/components/icon"
 import { useCurrency } from "@/contexts/currency-context"
+import { getTypePresenceLabel } from "@/lib/activity-labels"
 import type { ZoneMetrics, PropertyType } from "@/types/database"
 
 const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
@@ -76,7 +77,7 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
               {zones.map((z) => (
                 <Fragment key={z.zone_slug}>
                   <th className="text-right px-3 py-1.5 text-[10px] font-medium text-slate-400 uppercase">
-                    Inv.
+                    Presencia
                   </th>
                   <th className="text-right px-3 py-1.5 text-[10px] font-medium text-slate-400 uppercase">
                     Ticket
@@ -105,13 +106,12 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
                     const ticket = z.avg_ticket_by_type[pt.value] ?? 0
                     return (
                       <Fragment key={z.zone_slug}>
-                        <td className={`text-right px-3 py-3 font-semibold ${
+                        <td className={`text-right px-3 py-3 font-semibold text-xs ${
                           inv === bestInv && inv > 0
                             ? "text-slate-700 dark:text-blue-400"
                             : "text-slate-700 dark:text-slate-300"
                         }`}>
-                          {inv > 0 ? inv : "—"}
-                          {inv === bestInv && inv > 0 && <span className="ml-0.5 text-[10px]">★</span>}
+                          {inv > 0 ? getTypePresenceLabel(inv, z.total_listings) : "—"}
                         </td>
                         <td className={`text-right px-3 py-3 font-semibold ${
                           ticket === bestTicket && ticket > 0

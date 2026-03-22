@@ -1,6 +1,7 @@
 "use client"
 
-import { formatPercent, formatNumber } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { getZoneActivityLabel, getCityActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics, CityMetrics } from "@/types/database"
 
@@ -36,8 +37,8 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
     },
     {
       label: "Inventario",
-      zoneValue: formatNumber(zone.total_listings),
-      cityValue: formatNumber(city.total_listings),
+      zoneValue: getZoneActivityLabel(zone.total_listings),
+      cityValue: getCityActivityLabel(city.total_listings),
       zoneRaw: zone.total_listings,
       cityRaw: city.total_listings,
     },

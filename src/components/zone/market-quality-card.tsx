@@ -85,7 +85,7 @@ export function MarketQualityCard({ data }: MarketQualityCardProps) {
       </div>
 
       <p className="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-        Basado en {data.totalListings} listings activos
+        Basado en muestra de mercado activa
       </p>
     </div>
   )

@@ -1,7 +1,8 @@
 "use client"
 
 import { Icon } from "@/components/icon"
-import { formatPercent, formatNumber } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics, CityMetrics } from "@/types/database"
 
@@ -48,8 +49,8 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-indigo-50 dark:bg-indigo-950",
       iconColor: "text-indigo-600 dark:text-indigo-400",
       label: "Inventario Activo",
-      value: formatNumber(zone.total_listings),
-      sub: "—",
+      value: getZoneActivityLabel(zone.total_listings),
+      sub: "",
       subColor: "text-slate-500",
     },
     {

@@ -106,7 +106,7 @@ export default async function PortafolioPage({
             ) : (
               <>
                 <p className="text-sm font-bold text-slate-500 mb-4 md:hidden">
-                  <span className="text-slate-800 font-black">{total}</span> propiedades encontradas
+                  Propiedades encontradas
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {listings.map((listing) => (

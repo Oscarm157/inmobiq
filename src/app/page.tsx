@@ -19,7 +19,8 @@ import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getPriceTrendData } from "@/lib/data/snapshots"
 import { getListingsAnalytics } from "@/lib/data/listings"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
-import { formatNumber, formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
+import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"
 
@@ -145,10 +146,10 @@ export default async function HomePage({
       <NarrativeInsight
         title="Resumen del mercado"
         body={topZone && mostActive
-          ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${formatNumber(mostActive.total_listings)} propiedades activas. En total, el mercado de Tijuana suma ${formatNumber(city.total_listings)} propiedades en ${city.total_zones} zonas monitoreadas.`
+          ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${describeActivity(mostActive.total_listings)}. El mercado de Tijuana monitorea ${city.total_zones} zonas clave.`
           : `No se encontraron resultados con los filtros seleccionados. Intenta ajustar los filtros para ver datos del mercado.`
         }
-        highlight={`${city.total_zones} zonas monitoreadas · ${formatNumber(city.total_listings)} propiedades activas`}
+        highlight={`${city.total_zones} zonas monitoreadas · ${getCityActivityLabel(city.total_listings)}`}
       />
 
       {/* ─── 5. Charts ─── */}
@@ -184,7 +185,7 @@ export default async function HomePage({
               Zonas Monitoreadas
             </h3>
             <p className="text-sm text-slate-500 font-medium">
-              {formatNumber(city.total_zones)} zonas · {formatNumber(city.total_listings)} propiedades activas
+              {city.total_zones} zonas · {getCityActivityLabel(city.total_listings)}
             </p>
           </div>
           <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">

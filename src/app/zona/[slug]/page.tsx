@@ -154,7 +154,8 @@ export default async function ZonePage({ params }: ZonePageProps) {
   const priceDistData = priceRanges
     .map((r) => {
       const count = allListings.filter((l) => l.price >= r.min && l.price < r.max).length
-      return { range: r.range, count, label: count > 0 ? `${count}` : "" }
+      const pct = allListings.length > 0 ? Math.round((count / allListings.length) * 100) : 0
+      return { range: r.range, count, label: count > 0 ? `${pct}%` : "" }
     })
     .filter((d) => d.count > 0)
 
@@ -258,7 +259,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
           <Icon name="info" className="text-amber-600 text-lg" />
           <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
-            Datos limitados ({zone.total_listings} {zone.total_listings === 1 ? "propiedad" : "propiedades"}). Las métricas pueden no ser representativas de la zona.
+            Pocos datos disponibles. Las métricas pueden no ser representativas de la zona.
           </p>
         </div>
       )}
@@ -364,11 +365,11 @@ function generateMainText(
   const diffPct = ((zone.avg_price_per_m2 - cityAvg) / cityAvg) * 100
 
   if (diffPct > 10) {
-    return `La ${zone.zone_name} se consolida como el epicentro del crecimiento vertical en la región fronteriza. Con una oferta dominada por ${topLabel} (${topCount} de ${zone.total_listings} propiedades activas), el distrito está experimentando una transición hacia el uso mixto de alta densidad. Los precios se mantienen ${Math.abs(diffPct).toFixed(0)}% por encima del promedio de la ciudad, reflejando la alta demanda del segmento corporativo y residencial de lujo.`
+    return `La ${zone.zone_name} se consolida como el epicentro del crecimiento vertical en la región fronteriza. Con una oferta dominada por ${topLabel}, el distrito está experimentando una transición hacia el uso mixto de alta densidad. Los precios se mantienen ${Math.abs(diffPct).toFixed(0)}% por encima del promedio de la ciudad, reflejando la alta demanda del segmento corporativo y residencial de lujo.`
   } else if (diffPct < -10) {
-    return `La ${zone.zone_name} representa una de las zonas con mayor potencial de revalorización en Tijuana. Con precios ${Math.abs(diffPct).toFixed(0)}% por debajo del promedio de la ciudad y una oferta concentrada en ${topLabel} (${topCount} unidades), la zona atrae inversionistas que buscan rendimientos superiores al promedio. La infraestructura en desarrollo y los proyectos de regeneración urbana podrían catalizar un cambio significativo en los próximos 24 meses.`
+    return `La ${zone.zone_name} representa una de las zonas con mayor potencial de revalorización en Tijuana. Con precios ${Math.abs(diffPct).toFixed(0)}% por debajo del promedio de la ciudad y una oferta concentrada en ${topLabel}, la zona atrae inversionistas que buscan rendimientos superiores al promedio. La infraestructura en desarrollo y los proyectos de regeneración urbana podrían catalizar un cambio significativo en los próximos 24 meses.`
   }
-  return `La ${zone.zone_name} mantiene un posicionamiento sólido dentro del mercado inmobiliario de Tijuana, con precios alineados al promedio general de la ciudad. La oferta se distribuye principalmente en ${topLabel} (${topCount} de ${zone.total_listings} propiedades), indicando un mercado maduro con demanda estable. La zona ofrece un balance atractivo entre riesgo y rendimiento para inversionistas con perfil moderado.`
+  return `La ${zone.zone_name} mantiene un posicionamiento sólido dentro del mercado inmobiliario de Tijuana, con precios alineados al promedio general de la ciudad. La oferta se distribuye principalmente en ${topLabel}, indicando un mercado maduro con demanda estable. La zona ofrece un balance atractivo entre riesgo y rendimiento para inversionistas con perfil moderado.`
 }
 
 function generateQuote(zone: ZoneMetrics): string {

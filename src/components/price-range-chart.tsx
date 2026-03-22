@@ -30,7 +30,7 @@ export function PriceRangeChart({ data }: PriceRangeChartProps) {
       data.map((d, i) => ({
         ...d,
         fill: BLUE_GRADIENT[i % BLUE_GRADIENT.length],
-        label: `${d.count} (${d.pct}%)`,
+        label: `${d.pct}%`,
       })),
     [data]
   )
@@ -41,7 +41,7 @@ export function PriceRangeChart({ data }: PriceRangeChartProps) {
   }, [data])
 
   const description = dominant
-    ? `El rango más común es ${dominant.range} con ${dominant.count} propiedades (${dominant.pct}%)`
+    ? `El rango más común es ${dominant.range} con ${dominant.pct}% de las propiedades`
     : "Distribución de propiedades por rango de precio"
 
   return (

@@ -113,7 +113,7 @@ export function ZoneDNACard({
 
         {/* Footer */}
         <p className="text-[10px] text-slate-500 mt-5">
-          Basado en {totalListings} propiedades activas · Actualizado hoy
+          Basado en muestra representativa del mercado · Actualizado hoy
         </p>
       </div>
     </div>

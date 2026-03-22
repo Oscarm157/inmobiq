@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { Icon } from "@/components/icon"
-import { formatPercent, formatNumber } from "@/lib/utils"
+import { formatPercent } from "@/lib/utils"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import { getPriceColor } from "@/lib/geo-data"
 import type { ZoneMetrics } from "@/types/database"
@@ -80,7 +81,7 @@ export function ZoneCard({ zone, rank, maxListings }: ZoneCardProps) {
                   className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[10px] font-medium"
                 >
                   <Icon name={info?.icon ?? "home"} className="text-[10px]" />
-                  {count}
+                  {info?.short ?? type}
                 </span>
               )
             })}
@@ -106,10 +107,10 @@ export function ZoneCard({ zone, rank, maxListings }: ZoneCardProps) {
                     style={{ width: `${inventoryPct}%`, backgroundColor: priceColor }}
                   />
                 </div>
-                <span className="text-slate-400">{formatNumber(zone.total_listings)}</span>
+                <span className="text-slate-400 text-[9px]">{getZoneActivityLabel(zone.total_listings)}</span>
               </div>
             ) : (
-              <span className="text-slate-400">{formatNumber(zone.total_listings)} props</span>
+              <span className="text-slate-400 text-[9px]">{getZoneActivityLabel(zone.total_listings)}</span>
             )}
           </div>
         </div>

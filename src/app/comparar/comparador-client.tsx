@@ -15,6 +15,7 @@ import {
 import { Icon } from "@/components/icon"
 import { getZoneComparisonData } from "@/lib/data/comparator"
 import { formatPercent } from "@/lib/utils"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import { ZoneRadarChart } from "@/components/comparar/radar-chart"
 import { PriceAreaScatter } from "@/components/comparar/scatter-chart"
@@ -229,8 +230,8 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
                   />
                   <MetricRow
                     label="Inventario"
-                    value={zone.total_listings.toLocaleString("es-MX")}
-                    sub="propiedades activas"
+                    value={getZoneActivityLabel(zone.total_listings)}
+                    sub="nivel de actividad"
                   />
                   <MetricRow
                     label="Ticket promedio"
@@ -263,7 +264,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
                               />
                             </div>
                             <span className="text-xs text-slate-500 dark:text-slate-400 w-24 text-right capitalize">
-                              {type} ({count})
+                              {type} {Math.round((count / zone.total_listings) * 100)}%
                             </span>
                           </div>
                         ))}
@@ -390,7 +391,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
                   />
                   <TableRow
                     label="Inventario"
-                    values={selectedZones.map((z) => z.total_listings.toLocaleString("es-MX"))}
+                    values={selectedZones.map((z) => getZoneActivityLabel(z.total_listings))}
                     highlight={selectedZones.map((z) => z.total_listings)}
                     higherIsBetter
                   />

@@ -53,7 +53,7 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
               <th className="px-4 py-3 text-right">Precio/m² Venta</th>
               <th className="px-4 py-3 text-right">Renta/m² Mes</th>
               <th className="px-4 py-3 text-right">Tendencia</th>
-              <th className="px-4 py-3 text-right">Listings</th>
+              <th className="px-4 py-3 text-right">Actividad</th>
               <th className="px-4 py-3 text-right">Yield Anual</th>
             </tr>
           </thead>
@@ -90,8 +90,8 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
                       {formatPercent(zone.price_trend_pct)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300 font-mono">
-                    {zone.total_listings.toLocaleString()}
+                  <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300 text-xs">
+                    {zone.total_listings >= 150 ? "Alta" : zone.total_listings >= 50 ? "Moderada" : "Baja"}
                   </td>
                   <td className="px-4 py-3 text-right font-mono">
                     <span className={`${Number(yieldPct) >= 8 ? "text-green-600 font-bold" : "text-slate-600 dark:text-slate-300"}`}>

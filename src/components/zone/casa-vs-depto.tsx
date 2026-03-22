@@ -103,10 +103,10 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
         </div>
         <div className="flex justify-between mt-1.5">
           <span className="text-[10px] font-bold" style={{ color: "#2563eb" }}>
-            Casa {casaPct}% ({casa!.count})
+            Casa {casaPct}%
           </span>
           <span className="text-[10px] font-bold" style={{ color: "#7c3aed" }}>
-            Depto {deptoPct}% ({depto!.count})
+            Depto {deptoPct}%
           </span>
         </div>
       </div>
@@ -129,9 +129,9 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
           deptoValue={`${formatPrice(depto!.median_price_m2)}/m²`}
         />
         <ComparisonRow
-          label="Listings"
-          casaValue={`${formatNumber(casa!.count)}`}
-          deptoValue={`${formatNumber(depto!.count)}`}
+          label="Presencia"
+          casaValue={casaPct >= 50 ? "Dominante" : "Secundario"}
+          deptoValue={deptoPct >= 50 ? "Dominante" : "Secundario"}
         />
       </div>
     </div>

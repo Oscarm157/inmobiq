@@ -220,7 +220,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
       {/* Results count + clear */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
         <p className="text-xs font-bold text-slate-600">
-          <span className="text-slate-800 font-black">{total}</span> propiedades
+          Propiedades encontradas
         </p>
         {hasActiveFilters(state) && (
           <button
@@ -332,7 +332,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
       {/* Mobile filter button */}
       <div className="md:hidden flex items-center justify-between mb-4">
         <p className="text-sm font-bold text-slate-600">
-          <span className="text-slate-800 font-black">{total}</span> propiedades
+          Propiedades encontradas
         </p>
         <button
           onClick={() => setMobileOpen(true)}
@@ -382,7 +382,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
               onClick={() => setMobileOpen(false)}
               className="w-full mt-5 py-3 bg-slate-800 text-white rounded-xl text-sm font-black"
             >
-              Ver {total} propiedades
+              Ver propiedades
             </button>
           </div>
         </div>

@@ -90,8 +90,8 @@ function VRCard({ data }: { data: ZoneVRData }) {
           )}
         </div>
         <div className="flex justify-between mt-1">
-          <span className="text-[10px] font-bold text-slate-700">Venta {ventaPct}% ({data.ventaCount})</span>
-          <span className="text-[10px] font-bold text-emerald-500">Renta {rentaPct}% ({data.rentaCount})</span>
+          <span className="text-[10px] font-bold text-slate-700">Venta {ventaPct}%</span>
+          <span className="text-[10px] font-bold text-emerald-500">Renta {rentaPct}%</span>
         </div>
       </div>
 

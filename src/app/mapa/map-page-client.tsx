@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import type { ZoneMetrics } from "@/types/database"
-import { formatNumber } from "@/lib/utils"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 
 // Dynamic import to avoid SSR issues with Mapbox GL
@@ -51,8 +51,8 @@ export function MapPageClient({ zones }: MapPageClientProps) {
                 <p className="text-xl font-black text-blue-700">{formatPrice(selectedZone.avg_price_per_m2)}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 font-semibold">Propiedades activas</p>
-                <p className="text-base font-bold">{formatNumber(selectedZone.total_listings)}</p>
+                <p className="text-[10px] text-slate-500 font-semibold">Nivel de actividad</p>
+                <p className="text-base font-bold">{getZoneActivityLabel(selectedZone.total_listings)}</p>
               </div>
               <div>
                 <p className="text-[10px] text-slate-500 font-semibold">Tendencia semanal</p>

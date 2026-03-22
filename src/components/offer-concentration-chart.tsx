@@ -35,14 +35,14 @@ export function OfferConcentrationChart({
   const top = sorted[0]
 
   const description = top
-    ? `${top.zone_name} concentra el ${top.pct}% de la oferta con ${top.count} propiedades`
+    ? `${top.zone_name} concentra el ${top.pct}% de la oferta`
     : "Distribución de propiedades por zona"
 
   const chartData = useMemo(
     () =>
       displayed.map((d) => ({
         ...d,
-        label: `${d.count} (${d.pct}%)`,
+        label: `${d.pct}%`,
       })),
     [displayed]
   )

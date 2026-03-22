@@ -67,17 +67,15 @@ function buildRowsFromZoneMetrics(zones: ZoneMetrics[], filters: ExportFilters) 
   for (const zone of zones) {
     if (filters.zone_slug && zone.zone_slug !== filters.zone_slug) continue
 
-    for (const [type, count] of Object.entries(zone.listings_by_type)) {
+    for (const [type] of Object.entries(zone.listings_by_type)) {
       if (filters.property_type && type !== filters.property_type) continue
       const avgTicket = zone.avg_ticket_by_type[type as keyof typeof zone.avg_ticket_by_type] ?? 0
       rows.push({
         Zona: zone.zone_name,
         "Tipo de Propiedad": typeLabels[type] ?? type,
-        "Cantidad de Listings": count,
         "Precio/m² Promedio (MXN)": zone.avg_price_per_m2,
         "Ticket Promedio (MXN)": avgTicket,
         "Tendencia (%)": zone.price_trend_pct,
-        "Total Inventario Zona": zone.total_listings,
       })
     }
   }

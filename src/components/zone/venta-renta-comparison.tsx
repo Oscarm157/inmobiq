@@ -56,10 +56,10 @@ export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
         </div>
         <div className="flex justify-between mt-1.5">
           <span className="text-[10px] font-bold text-slate-700">
-            Venta {ventaPct}% ({data.ventaCount})
+            Venta {ventaPct}%
           </span>
           <span className="text-[10px] font-bold text-emerald-500">
-            Renta {rentaPct}% ({data.rentaCount})
+            Renta {rentaPct}%
           </span>
         </div>
       </div>

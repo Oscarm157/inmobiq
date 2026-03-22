@@ -2,7 +2,6 @@
 
 import { useMemo } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
-import { formatNumber } from "@/lib/utils"
 
 interface TypeCompositionChartProps {
   data: { type: string; count: number; pct: number }[]
@@ -75,7 +74,7 @@ export function TypeCompositionChart({
     : ""
 
   const description = dominant
-    ? `${dominantLabel} domina con ${dominant.pct}% del mercado (${dominant.count} propiedades)`
+    ? `${dominantLabel} domina con ${dominant.pct}% del mercado`
     : "Composición por tipo de propiedad"
 
   return (
@@ -117,7 +116,7 @@ export function TypeCompositionChart({
             dominantBaseline="central"
             style={{ fontSize: 20, fontWeight: 700, fill: "#1e293b" }}
           >
-            {formatNumber(totalListings)}
+            100%
           </text>
           <text
             x="50%"
@@ -126,7 +125,7 @@ export function TypeCompositionChart({
             dominantBaseline="central"
             style={{ fontSize: 10, fill: "#94a3b8" }}
           >
-            propiedades
+            del mercado
           </text>
         </PieChart>
       </ResponsiveContainer>

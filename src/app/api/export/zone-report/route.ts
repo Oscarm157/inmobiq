@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { jsPDF } from "jspdf"
 import { getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { formatCurrency, formatPercent } from "@/lib/utils"
+import { getZoneActivityLabel, getCityActivityLabel } from "@/lib/activity-labels"
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
   const kpis = [
     { label: "Precio/m²", value: formatCurrency(zone.avg_price_per_m2) },
     { label: "Tendencia", value: formatPercent(zone.price_trend_pct) },
-    { label: "Inventario", value: zone.total_listings.toString() },
+    { label: "Inventario", value: getZoneActivityLabel(zone.total_listings) },
     { label: "Ticket Promedio", value: formatCurrency(zone.avg_ticket) },
   ]
 
@@ -103,10 +104,10 @@ export async function POST(req: NextRequest) {
       `${diffFromCity >= 0 ? "+" : ""}${diffFromCity.toFixed(1)}%`,
     ],
     [
-      "Total Listings",
-      zone.total_listings.toString(),
-      city.total_listings.toString(),
-      `${(((zone.total_listings - city.total_listings / city.total_zones) / (city.total_listings / city.total_zones)) * 100).toFixed(1)}%`,
+      "Nivel de Actividad",
+      getZoneActivityLabel(zone.total_listings),
+      getCityActivityLabel(city.total_listings),
+      "—",
     ],
     [
       "Tendencia Precio",
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
 
     doc.setFontSize(7)
     doc.setTextColor(100, 116, 139)
-    doc.text(`${count} (${pct.toFixed(0)}%)`, margin + 30 + barW + 3, y + 4)
+    doc.text(`${pct.toFixed(0)}%`, margin + 30 + barW + 3, y + 4)
 
     y += 9
   })

@@ -11,6 +11,7 @@ import {
   getZoneCentroid,
 } from "@/lib/geo-data"
 import { useCurrency } from "@/contexts/currency-context"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 
 type LayerMode = "zones" | "heatmap"
 
@@ -353,7 +354,7 @@ export function InteractiveMap({
                 <div style="display:inline-block;padding:2px 8px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:700;border-radius:10px;margin-bottom:8px">${props.priceLabel}</div>
                 <div style="font-size:18px;font-weight:800;color:#1e40af;margin-bottom:4px">${formatPrice(props.avgPrice)}<span style="font-size:12px;font-weight:500;color:#64748b">/m²</span></div>
                 <div style="display:flex;gap:12px;font-size:11px;color:#475569;margin-bottom:4px">
-                  <span>${props.totalListings} propiedades</span>
+                  <span>${getZoneActivityLabel(props.totalListings)}</span>
                   <span style="color:${trendColor};font-weight:600">${trendIcon} ${Math.abs(props.priceTrend).toFixed(1)}%</span>
                 </div>
                 <a href="/zona/${props.slug}" style="display:inline-block;margin-top:6px;padding:6px 12px;background:#1e40af;color:white;font-size:11px;font-weight:700;border-radius:6px;text-decoration:none">Ver análisis →</a>

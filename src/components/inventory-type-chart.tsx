@@ -31,21 +31,25 @@ interface InventoryTypeChartProps {
 export function InventoryTypeChart({ zones }: InventoryTypeChartProps) {
   const data = [...zones]
     .sort((a, b) => b.total_listings - a.total_listings)
-    .map((z) => ({
-      zone: z.zone_name.replace("Residencial del Bosque", "Res. Bosque"),
-      casa: (z.listings_by_type as Record<string, number>)?.casa ?? 0,
-      departamento: (z.listings_by_type as Record<string, number>)?.departamento ?? 0,
-      terreno: (z.listings_by_type as Record<string, number>)?.terreno ?? 0,
-      local: (z.listings_by_type as Record<string, number>)?.local ?? 0,
-      oficina: (z.listings_by_type as Record<string, number>)?.oficina ?? 0,
-    }))
+    .map((z) => {
+      const types = z.listings_by_type as Record<string, number>
+      const total = z.total_listings || 1
+      return {
+        zone: z.zone_name.replace("Residencial del Bosque", "Res. Bosque"),
+        casa: Math.round(((types?.casa ?? 0) / total) * 100),
+        departamento: Math.round(((types?.departamento ?? 0) / total) * 100),
+        terreno: Math.round(((types?.terreno ?? 0) / total) * 100),
+        local: Math.round(((types?.local ?? 0) / total) * 100),
+        oficina: Math.round(((types?.oficina ?? 0) / total) * 100),
+      }
+    })
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Distribución de inventario por tipo</CardTitle>
         <CardDescription>
-          Composición del mercado por tipo de propiedad en cada zona
+          Composición porcentual del mercado por tipo de propiedad en cada zona
         </CardDescription>
       </CardHeader>
       <CardContent>

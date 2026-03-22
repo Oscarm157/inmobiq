@@ -1,5 +1,5 @@
 import { Icon } from "@/components/icon"
-import { formatNumber } from "@/lib/utils"
+import { getCityActivityLabel } from "@/lib/activity-labels"
 
 interface KPIInventarioProps {
   totalListings: number
@@ -18,8 +18,7 @@ export function KPIInventario({ totalListings, absorptionPct }: KPIInventarioPro
             Inventario Total
           </p>
           <h4 className="text-2xl font-black">
-            {formatNumber(totalListings)}{" "}
-            <span className="text-sm font-medium text-slate-500">Unidades</span>
+            {getCityActivityLabel(totalListings)}
           </h4>
         </div>
       </div>

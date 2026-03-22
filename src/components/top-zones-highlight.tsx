@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
-import { formatNumber } from "@/lib/utils"
+import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics } from "@/types/database"
 import Link from "next/link"
@@ -40,7 +40,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">{zone.zone_name}</p>
-                <p className="text-xs text-slate-400">{formatNumber(zone.total_listings)} propiedades</p>
+                <p className="text-xs text-slate-400">{getZoneActivityLabel(zone.total_listings)}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold">{formatPrice(zone.avg_price_per_m2)}/m²</p>
@@ -81,8 +81,7 @@ export function TopZonesHighlight({ topByPrice, topByActivity }: TopZonesHighlig
                 <p className="text-xs text-slate-400">{formatPrice(zone.avg_price_per_m2)}/m²</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold">{formatNumber(zone.total_listings)}</p>
-                <p className="text-[10px] text-slate-400 font-medium">activas</p>
+                <p className="text-xs font-bold">{getZoneActivityLabel(zone.total_listings)}</p>
               </div>
             </Link>
           ))}
