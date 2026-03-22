@@ -5,7 +5,7 @@ import { extractFromPage } from "@/scraper/universal/extractor";
 import { normalizeToListing } from "@/scraper/universal/normalizer";
 import { getSupabaseClient } from "@/scraper/db";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   // Auth check

@@ -7,7 +7,7 @@ const USER_AGENTS = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
 ];
 
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 25_000;
 
 export interface FetchResult {
   html: string;
