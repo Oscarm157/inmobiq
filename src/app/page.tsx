@@ -204,9 +204,11 @@ export default async function HomePage({
                 <p className="text-xs text-slate-400 mt-1">{totalHouseholds.toLocaleString("es-MX")} hogares</p>
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Conectividad</p>
-                <p className="text-2xl font-black text-slate-800 dark:text-white">{avgInternet}%</p>
-                <p className="text-xs text-slate-400 mt-1">viviendas con internet</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">NSE promedio</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">
+                  {Math.round(allDemo.reduce((s, d) => s + d.nse_score * d.population, 0) / totalPop)}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">{avgInternet}% con internet</p>
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Zonas más pobladas</p>

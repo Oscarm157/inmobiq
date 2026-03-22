@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { ZONE_RISK_DATA } from "@/lib/mock-data"
+import { getZoneDemographics } from "@/lib/data/demographics"
 import type { Zone, ZoneRiskMetrics } from "@/types/database"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
@@ -73,11 +74,21 @@ export async function getZoneRiskMetrics(): Promise<ZoneRiskMetrics[]> {
             Number(prev.avg_price_per_m2)) *
           100
 
-        // Derive risk score from snapshot data
+        // Derive risk score from snapshot data + demographic factors
         const vacancyProxy = Math.max(0, 10 - priceTrend) * 1.5
+
+        // Demographic risk factor (0-20): low NSE or high unemployment → more risk
+        const demo = getZoneDemographics(zone.slug)
+        let demoRiskFactor = 10 // neutral default
+        if (demo && demo.ageb_count > 0) {
+          const nseRisk = Math.max(0, (70 - demo.nse_score) * 0.2) // low NSE adds risk
+          const unemploymentRisk = demo.unemployment_rate * 0.5 // high unemployment adds risk
+          demoRiskFactor = Math.min(20, Math.round(nseRisk + unemploymentRisk))
+        }
+
         const riskScore = Math.min(
           100,
-          Math.round(volatility * 4 + vacancyProxy + 20)
+          Math.round(volatility * 3 + vacancyProxy + demoRiskFactor + 15)
         )
         const capRate = Math.max(3, Math.min(12, 8 - priceTrend * 0.3))
         const liquidityScore = Math.min(

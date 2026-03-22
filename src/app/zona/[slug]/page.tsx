@@ -14,6 +14,10 @@ import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
 import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
 import { MarketQualityCard } from "@/components/zone/market-quality-card"
 import { DemographicsCard } from "@/components/zone/demographics-card"
+import { ZoneInsightsCard } from "@/components/zone/zone-insights-card"
+import { getZoneDemographics } from "@/lib/data/demographics"
+import { computeZoneInsights } from "@/lib/data/zone-insights"
+import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
 import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
@@ -50,12 +54,13 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params }: ZonePageProps) {
   const { slug } = await params
-  const [zone, city, allZones, { listings }, zoneAnalytics] = await Promise.all([
+  const [zone, city, allZones, { listings }, zoneAnalytics, riskMetrics] = await Promise.all([
     getZoneBySlug(slug),
     getCityMetrics(),
     getZoneMetrics(),
     getListings({ zonas: [slug] }),
     getZoneListingsAnalytics(slug),
+    getZoneRiskMetrics(),
   ])
   if (!zone) notFound()
 
@@ -325,6 +330,14 @@ export default async function ZonePage({ params }: ZonePageProps) {
 
           {/* Demographics — Censo 2020 */}
           <DemographicsCard slug={slug} />
+
+          {/* Cross-referenced Insights — INEGI × Market */}
+          {(() => {
+            const demo = getZoneDemographics(slug)
+            const risk = riskMetrics.find((r) => r.zone_slug === slug) ?? null
+            const insights = computeZoneInsights(demo, zone, risk, allZones)
+            return insights ? <ZoneInsightsCard insights={insights} /> : null
+          })()}
 
           {/* Risk Profile — Próximamente (requires 4+ weeks of data) */}
           <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">

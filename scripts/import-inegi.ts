@@ -599,6 +599,28 @@ export function getZoneDemographics(slug: string): ZoneDemographics | null {
 export function getAllDemographics(): ZoneDemographics[] {
   return ZONE_DEMOGRAPHICS
 }
+
+/** Compute NSE label from score */
+export function getNseLabel(score: number): string {
+  if (score >= 80) return "A/B"
+  if (score >= 65) return "C+"
+  if (score >= 50) return "C"
+  if (score >= 35) return "C-"
+  if (score >= 20) return "D+"
+  return "D/E"
+}
+
+/** NSE color for badges/UI */
+export function getNseColor(label: string): { bg: string; text: string } {
+  switch (label) {
+    case "A/B": return { bg: "bg-emerald-100 dark:bg-emerald-950", text: "text-emerald-700 dark:text-emerald-400" }
+    case "C+": return { bg: "bg-blue-100 dark:bg-blue-950", text: "text-blue-700 dark:text-blue-400" }
+    case "C": return { bg: "bg-sky-100 dark:bg-sky-950", text: "text-sky-700 dark:text-sky-400" }
+    case "C-": return { bg: "bg-amber-100 dark:bg-amber-950", text: "text-amber-700 dark:text-amber-400" }
+    case "D+": return { bg: "bg-orange-100 dark:bg-orange-950", text: "text-orange-700 dark:text-orange-400" }
+    default: return { bg: "bg-red-100 dark:bg-red-950", text: "text-red-700 dark:text-red-400" }
+  }
+}
 `
 
   fs.writeFileSync(outPath, content)

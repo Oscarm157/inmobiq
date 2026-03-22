@@ -4,6 +4,11 @@
  *
  * Source: INEGI SCINCE 2020 via SEDATU GeoServer
  * Note: Encuesta Intercensal 2025 estará disponible en septiembre 2026.
+ *
+ * NSE (Nivel Socioeconómico) computed from reduced formula using available
+ * census indicators: internet (30%), auto (25%), seguridad social (25%),
+ * participación económica (20%). Will use full formula (including education,
+ * computer, washer) when shapefile is re-imported with extended SCINCE fields.
  */
 
 export interface ZoneDemographics {
@@ -18,6 +23,25 @@ export interface ZoneDemographics {
   economically_active: number
   median_age: number
   ageb_count: number
+  // Extended variables (populated when shapefile has full SCINCE fields)
+  avg_education_years: number
+  pop_no_schooling: number
+  unemployed: number
+  pct_computer: number
+  pct_phone: number
+  pct_washer: number
+  pct_refrigerator: number
+  pct_female: number
+  pop_0_14: number
+  pop_15_64: number
+  pop_65_plus: number
+  // Derived indicators
+  nse_score: number
+  nse_label: string
+  dependency_ratio: number
+  unemployment_rate: number
+  economic_participation: number
+  pop_density: number
 }
 
 const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
@@ -32,7 +56,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 61.5,
     "economically_active": 5633,
     "median_age": 35.7,
-    "ageb_count": 5
+    "ageb_count": 5,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 65,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 59.2,
+    "pop_density": 0
   },
   {
     "zone_slug": "playas-de-tijuana",
@@ -45,7 +86,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 62.2,
     "economically_active": 22268,
     "median_age": 35.8,
-    "ageb_count": 19
+    "ageb_count": 19,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 69,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 50.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "otay",
@@ -58,7 +116,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 68.1,
     "economically_active": 43928,
     "median_age": 34.4,
-    "ageb_count": 30
+    "ageb_count": 30,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 68,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 56,
+    "pop_density": 0
   },
   {
     "zone_slug": "chapultepec",
@@ -71,7 +146,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 78,
     "economically_active": 12474,
     "median_age": 39.7,
-    "ageb_count": 7
+    "ageb_count": 7,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 81,
+    "nse_label": "A/B",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 57.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "hipodromo",
@@ -84,7 +176,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 0,
     "economically_active": 0,
     "median_age": 0,
-    "ageb_count": 0
+    "ageb_count": 0,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 0,
+    "nse_label": "D/E",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 0,
+    "pop_density": 0
   },
   {
     "zone_slug": "centro",
@@ -97,7 +206,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 61.3,
     "economically_active": 8242,
     "median_age": 35.2,
-    "ageb_count": 5
+    "ageb_count": 5,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 58,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 66,
+    "pop_density": 0
   },
   {
     "zone_slug": "residencial-del-bosque",
@@ -110,7 +236,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 76,
     "economically_active": 114404,
     "median_age": 28.9,
-    "ageb_count": 64
+    "ageb_count": 64,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 70,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 54.9,
+    "pop_density": 0
   },
   {
     "zone_slug": "la-mesa",
@@ -123,7 +266,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 71.5,
     "economically_active": 28492,
     "median_age": 33.6,
-    "ageb_count": 18
+    "ageb_count": 18,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 72,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 56.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "cacho",
@@ -136,7 +296,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 74.9,
     "economically_active": 11433,
     "median_age": 36.6,
-    "ageb_count": 8
+    "ageb_count": 8,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 75,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 61.6,
+    "pop_density": 0
   },
   {
     "zone_slug": "agua-caliente",
@@ -149,7 +326,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.4,
     "economically_active": 5444,
     "median_age": 38.3,
-    "ageb_count": 3
+    "ageb_count": 3,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 78,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 60,
+    "pop_density": 0
   },
   {
     "zone_slug": "lomas-de-agua-caliente",
@@ -162,7 +356,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 75.3,
     "economically_active": 69111,
     "median_age": 30.4,
-    "ageb_count": 37
+    "ageb_count": 37,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 68,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 54.7,
+    "pop_density": 0
   },
   {
     "zone_slug": "libertad",
@@ -175,7 +386,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 61.7,
     "economically_active": 14408,
     "median_age": 35.1,
-    "ageb_count": 7
+    "ageb_count": 7,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 65,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 56.7,
+    "pop_density": 0
   },
   {
     "zone_slug": "soler",
@@ -188,7 +416,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 68.6,
     "economically_active": 41917,
     "median_age": 34,
-    "ageb_count": 23
+    "ageb_count": 23,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 66,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "federal",
@@ -201,7 +446,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 0,
     "economically_active": 0,
     "median_age": 0,
-    "ageb_count": 0
+    "ageb_count": 0,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 0,
+    "nse_label": "D/E",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 0,
+    "pop_density": 0
   },
   {
     "zone_slug": "baja-malibu",
@@ -214,7 +476,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.4,
     "economically_active": 9725,
     "median_age": 28,
-    "ageb_count": 12
+    "ageb_count": 12,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 66,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "real-del-mar",
@@ -227,7 +506,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 66.3,
     "economically_active": 1011,
     "median_age": 25,
-    "ageb_count": 2
+    "ageb_count": 2,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 61,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 51.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "san-antonio-del-mar",
@@ -240,7 +536,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.4,
     "economically_active": 732,
     "median_age": 29,
-    "ageb_count": 1
+    "ageb_count": 1,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 80,
+    "nse_label": "A/B",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 48.3,
+    "pop_density": 0
   },
   {
     "zone_slug": "punta-bandera",
@@ -253,7 +566,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 0,
     "economically_active": 0,
     "median_age": 0,
-    "ageb_count": 0
+    "ageb_count": 0,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 0,
+    "nse_label": "D/E",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 0,
+    "pop_density": 0
   },
   {
     "zone_slug": "costa-coronado",
@@ -266,7 +596,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 0,
     "economically_active": 0,
     "median_age": 0,
-    "ageb_count": 0
+    "ageb_count": 0,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 0,
+    "nse_label": "D/E",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 0,
+    "pop_density": 0
   },
   {
     "zone_slug": "las-americas",
@@ -279,7 +626,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 70,
     "economically_active": 21453,
     "median_age": 30.5,
-    "ageb_count": 10
+    "ageb_count": 10,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 64,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 53.2,
+    "pop_density": 0
   },
   {
     "zone_slug": "villa-fontana",
@@ -292,7 +656,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.9,
     "economically_active": 104801,
     "median_age": 29,
-    "ageb_count": 68
+    "ageb_count": 68,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 69,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "montecarlo",
@@ -305,7 +686,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 72.5,
     "economically_active": 101938,
     "median_age": 29.1,
-    "ageb_count": 62
+    "ageb_count": 62,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 71,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 54.7,
+    "pop_density": 0
   },
   {
     "zone_slug": "otay-universidad",
@@ -318,7 +716,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 40.3,
     "economically_active": 2988,
     "median_age": 34,
-    "ageb_count": 1
+    "ageb_count": 1,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 57,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 33.4,
+    "pop_density": 0
   },
   {
     "zone_slug": "santa-fe",
@@ -331,7 +746,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 77.4,
     "economically_active": 25635,
     "median_age": 29.3,
-    "ageb_count": 22
+    "ageb_count": 22,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 76,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55,
+    "pop_density": 0
   },
   {
     "zone_slug": "natura",
@@ -344,7 +776,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 75.1,
     "economically_active": 27920,
     "median_age": 29.1,
-    "ageb_count": 33
+    "ageb_count": 33,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 71,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 53.7,
+    "pop_density": 0
   },
   {
     "zone_slug": "colinas-de-california",
@@ -357,7 +806,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.3,
     "economically_active": 35280,
     "median_age": 31.7,
-    "ageb_count": 16
+    "ageb_count": 16,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 70,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 56,
+    "pop_density": 0
   },
   {
     "zone_slug": "lomas-virreyes",
@@ -370,7 +836,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 75.4,
     "economically_active": 21314,
     "median_age": 31.2,
-    "ageb_count": 11
+    "ageb_count": 11,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 73,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55.1,
+    "pop_density": 0
   },
   {
     "zone_slug": "insurgentes",
@@ -383,7 +866,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 73.1,
     "economically_active": 14339,
     "median_age": 28.8,
-    "ageb_count": 15
+    "ageb_count": 15,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 70,
+    "nse_label": "C+",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 55.2,
+    "pop_density": 0
   },
   {
     "zone_slug": "el-florido",
@@ -396,7 +896,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 77.7,
     "economically_active": 75760,
     "median_age": 26.8,
-    "ageb_count": 66
+    "ageb_count": 66,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 63,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 54.5,
+    "pop_density": 0
   },
   {
     "zone_slug": "terrazas-de-la-presa",
@@ -409,7 +926,24 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pct_social_security": 79.1,
     "economically_active": 215435,
     "median_age": 26.1,
-    "ageb_count": 147
+    "ageb_count": 147,
+    "avg_education_years": 0,
+    "pop_no_schooling": 0,
+    "unemployed": 0,
+    "pct_computer": 0,
+    "pct_phone": 0,
+    "pct_washer": 0,
+    "pct_refrigerator": 0,
+    "pct_female": 0,
+    "pop_0_14": 0,
+    "pop_15_64": 0,
+    "pop_65_plus": 0,
+    "nse_score": 64,
+    "nse_label": "C",
+    "dependency_ratio": 0,
+    "unemployment_rate": 0,
+    "economic_participation": 53.9,
+    "pop_density": 0
   }
 ]
 
@@ -419,4 +953,26 @@ export function getZoneDemographics(slug: string): ZoneDemographics | null {
 
 export function getAllDemographics(): ZoneDemographics[] {
   return ZONE_DEMOGRAPHICS
+}
+
+/** Compute NSE label from score */
+export function getNseLabel(score: number): string {
+  if (score >= 80) return "A/B"
+  if (score >= 65) return "C+"
+  if (score >= 50) return "C"
+  if (score >= 35) return "C-"
+  if (score >= 20) return "D+"
+  return "D/E"
+}
+
+/** NSE color for badges/UI */
+export function getNseColor(label: string): { bg: string; text: string } {
+  switch (label) {
+    case "A/B": return { bg: "bg-emerald-100 dark:bg-emerald-950", text: "text-emerald-700 dark:text-emerald-400" }
+    case "C+": return { bg: "bg-blue-100 dark:bg-blue-950", text: "text-blue-700 dark:text-blue-400" }
+    case "C": return { bg: "bg-sky-100 dark:bg-sky-950", text: "text-sky-700 dark:text-sky-400" }
+    case "C-": return { bg: "bg-amber-100 dark:bg-amber-950", text: "text-amber-700 dark:text-amber-400" }
+    case "D+": return { bg: "bg-orange-100 dark:bg-orange-950", text: "text-orange-700 dark:text-orange-400" }
+    default: return { bg: "bg-red-100 dark:bg-red-950", text: "text-red-700 dark:text-red-400" }
+  }
 }
