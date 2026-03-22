@@ -45,8 +45,10 @@ export function normalizeToListing(
   extracted: ExtractedData,
   url: string,
 ): Partial<RawListing> & { _property_type_hint: string | null; _listing_type_hint: string | null } {
-  const portal = detectPortal(url);
-  const externalId = generateExternalId(url);
+  // Strip URL fragment (#...) — not needed for identification
+  const cleanUrl = url.split("#")[0];
+  const portal = detectPortal(cleanUrl);
+  const externalId = generateExternalId(cleanUrl);
 
   // Normalize property type
   const ptHint = (extracted.property_type_hint ?? "").toLowerCase().trim();
@@ -77,7 +79,7 @@ export function normalizeToListing(
   const listing: Partial<RawListing> & { _property_type_hint: string | null; _listing_type_hint: string | null } = {
     source_portal: portal,
     external_id: externalId,
-    external_url: url,
+    external_url: cleanUrl,
     title: extracted.title ?? null,
     description: extracted.description ?? null,
     price_mxn: priceMxn,

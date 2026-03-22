@@ -262,8 +262,18 @@ export function ScraperClient() {
           Scraper Manual
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Pega la URL de un listado inmobiliario para extraer sus datos
+          Pega la URL de una propiedad individual para extraer sus datos
         </p>
+        <div className="mt-3 text-xs text-slate-400 dark:text-slate-500 space-y-1">
+          <p>
+            <span className="text-emerald-500 font-medium">Funcionan:</span>{" "}
+            Propiedades.com, Century21
+          </p>
+          <p>
+            <span className="text-red-400 font-medium">Bloqueados:</span>{" "}
+            Inmuebles24, Vivanuncios, Segundamano, MercadoLibre (requieren Playwright vía terminal)
+          </p>
+        </div>
       </div>
 
       {/* URL Input */}

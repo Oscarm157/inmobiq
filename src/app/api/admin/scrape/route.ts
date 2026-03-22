@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       .eq("id", jobId);
 
     // Extract data (4 layers)
-    const extraction = await extractFromPage($, html);
+    const extraction = await extractFromPage($, html, url);
 
     // Normalize to listing shape
     const normalized = normalizeToListing(extraction.data, url);

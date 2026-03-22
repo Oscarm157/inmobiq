@@ -10,6 +10,12 @@ const PORTAL_HOSTNAMES: Record<string, SourcePortal> = {
   "www.vivanuncios.com.mx": "vivanuncios",
   "inmuebles.mercadolibre.com.mx": "mercadolibre",
   "www.mercadolibre.com.mx": "mercadolibre",
+  "propiedades.com": "otro",
+  "www.propiedades.com": "otro",
+  "century21mexico.com": "otro",
+  "www.century21mexico.com": "otro",
+  "century21.com.mx": "otro",
+  "www.century21.com.mx": "otro",
 };
 
 /**

@@ -106,6 +106,16 @@ function processJsonLdItem(item: Record<string, unknown>, result: Partial<Extrac
     result.currency = String(item.priceCurrency ?? "MXN").toUpperCase();
   }
 
+  // Listing type from businessFunction
+  if (!result.listing_type_hint) {
+    const bf = String(offers?.businessFunction ?? item.businessFunction ?? "").toLowerCase();
+    if (bf.includes("sell") || bf.includes("buy")) {
+      result.listing_type_hint = "venta";
+    } else if (bf.includes("lease") || bf.includes("rent")) {
+      result.listing_type_hint = "renta";
+    }
+  }
+
   // Geo
   const geo = item.geo as Record<string, unknown> | undefined;
   if (geo && !result.lat) {
@@ -150,7 +160,13 @@ function processJsonLdItem(item: Record<string, unknown>, result: Partial<Extrac
     result.bathrooms = parseInt(String(item.numberOfBathrooms), 10) || null;
   }
 
-  // Property type hint
+  // Recurse into offers.itemOffered (e.g. Propiedades.com nests House/Apartment here)
+  const itemOffered = offers?.itemOffered as Record<string, unknown> | undefined;
+  if (itemOffered && typeof itemOffered === "object") {
+    processJsonLdItem(itemOffered, result);
+  }
+
+  // Property type hint — prefer URL-detected type over @type (some portals misuse Apartment for houses)
   if (!result.property_type_hint) {
     if (type.includes("house") || type.includes("singlefamily")) {
       result.property_type_hint = "casa";
@@ -267,6 +283,20 @@ function extractHeuristics($: CheerioAPI): Partial<ExtractedData> {
     }
   }
 
+  // Bedrooms fallback — extract from title, description, or OG meta text
+  if (!result.bedrooms) {
+    const textSources = [
+      $("title").text(),
+      $("meta[name='description']").attr("content") ?? "",
+      $("meta[property='og:description']").attr("content") ?? "",
+    ].join(" ").toLowerCase();
+    const bedMatch = textSources.match(/(\d+)\s*(?:rec[aá]mara|habitaci[oó]n|dormitorio|bedroom|bed\b)/);
+    if (bedMatch) {
+      const n = parseInt(bedMatch[1], 10);
+      if (n >= 1 && n <= 20) result.bedrooms = n;
+    }
+  }
+
   // Bathrooms
   const bathSelectors = [
     "[class*='bath']", "[class*='bano']", "[class*='Bath']",
@@ -280,6 +310,20 @@ function extractHeuristics($: CheerioAPI): Partial<ExtractedData> {
         result.bathrooms = n;
         break;
       }
+    }
+  }
+
+  // Bathrooms fallback — extract from title/description text
+  if (!result.bathrooms) {
+    const textSources = [
+      $("title").text(),
+      $("meta[name='description']").attr("content") ?? "",
+      $("meta[property='og:description']").attr("content") ?? "",
+    ].join(" ").toLowerCase();
+    const bathMatch = textSources.match(/(\d+)\s*(?:ba[nñ]o|bathroom|bath\b)/);
+    if (bathMatch) {
+      const n = parseInt(bathMatch[1], 10);
+      if (n >= 1 && n <= 20) result.bathrooms = n;
     }
   }
 
@@ -331,29 +375,50 @@ function extractHeuristics($: CheerioAPI): Partial<ExtractedData> {
     }
   }
 
-  // Property type from page text
+  // Property type from URL first, then page text
   if (!result.property_type_hint) {
-    const bodyText = $("body").text().toLowerCase();
-    if (/\b(casa|house|residencia)\b/.test(bodyText)) {
+    const pageUrl = ($("link[rel='canonical']").attr("href") ?? $("meta[property='og:url']").attr("content") ?? "").toLowerCase();
+    if (/[\-/](casa|house)[\-/s]/.test(pageUrl)) {
       result.property_type_hint = "casa";
-    } else if (/\b(departamento|depa|apartamento|apartment)\b/.test(bodyText)) {
+    } else if (/[\-/](departamento|depa|apartamento|apartment)[\-/s]/.test(pageUrl)) {
       result.property_type_hint = "departamento";
-    } else if (/\b(terreno|lote|land)\b/.test(bodyText)) {
+    } else if (/[\-/](terreno|lote|land)[\-/s]/.test(pageUrl)) {
       result.property_type_hint = "terreno";
-    } else if (/\b(local comercial|local\s)\b/.test(bodyText)) {
+    } else if (/[\-/](local)[\-/s]/.test(pageUrl)) {
       result.property_type_hint = "local";
-    } else if (/\b(oficina|office)\b/.test(bodyText)) {
+    } else if (/[\-/](oficina|office)[\-/s]/.test(pageUrl)) {
       result.property_type_hint = "oficina";
+    } else {
+      const bodyText = $("body").text().toLowerCase();
+      if (/\b(casa|house|residencia)\b/.test(bodyText)) {
+        result.property_type_hint = "casa";
+      } else if (/\b(departamento|depa|apartamento|apartment)\b/.test(bodyText)) {
+        result.property_type_hint = "departamento";
+      } else if (/\b(terreno|lote|land)\b/.test(bodyText)) {
+        result.property_type_hint = "terreno";
+      } else if (/\b(local comercial|local\s)\b/.test(bodyText)) {
+        result.property_type_hint = "local";
+      } else if (/\b(oficina|office)\b/.test(bodyText)) {
+        result.property_type_hint = "oficina";
+      }
     }
   }
 
-  // Listing type from page text
+  // Listing type from page text & URL
   if (!result.listing_type_hint) {
-    const bodyText = $("body").text().toLowerCase();
-    if (/\b(venta|sale|for sale|en venta)\b/.test(bodyText)) {
+    // Check URL first (more reliable than body text which may mention both)
+    const pageUrl = ($("link[rel='canonical']").attr("href") ?? $("meta[property='og:url']").attr("content") ?? "").toLowerCase();
+    if (/[\-/](en-venta|venta|sale)[\-/]/.test(pageUrl)) {
       result.listing_type_hint = "venta";
-    } else if (/\b(renta|rent|alquiler|for rent|en renta)\b/.test(bodyText)) {
+    } else if (/[\-/](en-renta|renta|rent|alquiler)[\-/]/.test(pageUrl)) {
       result.listing_type_hint = "renta";
+    } else {
+      const bodyText = $("body").text().toLowerCase();
+      if (/\b(venta|sale|for sale|en venta)\b/.test(bodyText)) {
+        result.listing_type_hint = "venta";
+      } else if (/\b(renta|rent|alquiler|for rent|en renta)\b/.test(bodyText)) {
+        result.listing_type_hint = "renta";
+      }
     }
   }
 
@@ -451,6 +516,7 @@ ${cleanedHtml}`,
 export async function extractFromPage(
   $: CheerioAPI,
   html: string,
+  originalUrl?: string,
 ): Promise<ExtractionResult> {
   const layers = { jsonLd: false, openGraph: false, heuristic: false, ai: false };
 
@@ -472,6 +538,27 @@ export async function extractFromPage(
     lng: null,
     images: [],
   };
+
+  // Pre-layer: Extract property_type and listing_type from URL (most reliable signal)
+  const canonicalUrl = ($("link[rel='canonical']").attr("href") ?? $("meta[property='og:url']").attr("content") ?? originalUrl ?? "").toLowerCase();
+  if (canonicalUrl) {
+    if (/[\-/](casa|house)[\-/s]/.test(canonicalUrl)) {
+      data.property_type_hint = "casa";
+    } else if (/[\-/](departamento|depa|apartamento|apartment)[\-/s]/.test(canonicalUrl)) {
+      data.property_type_hint = "departamento";
+    } else if (/[\-/](terreno|lote|land)[\-/s]/.test(canonicalUrl)) {
+      data.property_type_hint = "terreno";
+    } else if (/[\-/](local)[\-/s]/.test(canonicalUrl)) {
+      data.property_type_hint = "local";
+    } else if (/[\-/](oficina|office)[\-/s]/.test(canonicalUrl)) {
+      data.property_type_hint = "oficina";
+    }
+    if (/[\-/](en-venta|venta|sale)[\-/]/.test(canonicalUrl)) {
+      data.listing_type_hint = "venta";
+    } else if (/[\-/](en-renta|renta|rent|alquiler)[\-/]/.test(canonicalUrl)) {
+      data.listing_type_hint = "renta";
+    }
+  }
 
   // Layer 1: JSON-LD
   const jsonLdData = extractJsonLd($);
@@ -546,7 +633,16 @@ function mergeExtracted(target: ExtractedData, source: Partial<ExtractedData>): 
 }
 
 function extractNumber(text: string): number | null {
-  const cleaned = text.replace(/,/g, "");
+  // Remove currency symbols and whitespace
+  let cleaned = text.replace(/[$\s]/g, "");
+  // Detect MX format: dots as thousand separators (e.g., "3.600.000")
+  // If there are 2+ dots, they're thousand separators, not decimals
+  const dotCount = (cleaned.match(/\./g) || []).length;
+  if (dotCount >= 2) {
+    cleaned = cleaned.replace(/\./g, "");
+  }
+  // Remove commas (thousand separators)
+  cleaned = cleaned.replace(/,/g, "");
   const match = cleaned.match(/[\d]+\.?\d*/);
   if (!match) return null;
   const n = parseFloat(match[0]);
