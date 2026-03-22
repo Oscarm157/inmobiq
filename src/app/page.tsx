@@ -21,6 +21,7 @@ import { getListingsAnalytics } from "@/lib/data/listings"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { formatCurrency } from "@/lib/utils"
 import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
+import { getAllDemographics } from "@/lib/data/demographics"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"
 
@@ -176,6 +177,54 @@ export default async function HomePage({
         </div>
         <TopZonesHighlight topByPrice={topByPrice} topByActivity={topByActivity} />
       </section>
+
+      {/* ─── 6b. Perfil Demográfico ─── */}
+      {(() => {
+        const allDemo = getAllDemographics().filter((d) => d.ageb_count > 0)
+        if (allDemo.length === 0) return null
+        const byPop = [...allDemo].sort((a, b) => b.population - a.population).slice(0, 3)
+        const totalPop = allDemo.reduce((s, d) => s + d.population, 0)
+        const totalHouseholds = allDemo.reduce((s, d) => s + d.households, 0)
+        const avgInternet = Math.round(allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / allDemo.reduce((s, d) => s + d.occupied_dwellings, 0) * 10) / 10
+        return (
+          <section>
+            <div className="mb-6">
+              <h3 className="text-2xl font-black tracking-tight">Perfil Demográfico</h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Datos del Censo 2020 (INEGI) para las zonas monitoreadas
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Población cubierta</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">{totalPop.toLocaleString("es-MX")}</p>
+                <p className="text-xs text-slate-400 mt-1">{totalHouseholds.toLocaleString("es-MX")} hogares</p>
+              </div>
+              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Conectividad</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">{avgInternet}%</p>
+                <p className="text-xs text-slate-400 mt-1">viviendas con internet</p>
+              </div>
+              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Zonas más pobladas</p>
+                <div className="space-y-1 mt-1">
+                  {byPop.map((d) => (
+                    <div key={d.zone_slug} className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+                        {zones.find((z) => z.zone_slug === d.zone_slug)?.zone_name ?? d.zone_slug}
+                      </span>
+                      <span className="text-xs text-slate-400 ml-2 flex-shrink-0">{d.population.toLocaleString("es-MX")}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400">
+              Fuente: INEGI Censo 2020 (SCINCE) · Encuesta Intercensal 2025 disponible sep. 2026
+            </p>
+          </section>
+        )
+      })()}
 
       {/* ─── 7. Zones Grid + Map ─── */}
       <section>

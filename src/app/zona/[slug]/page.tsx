@@ -13,6 +13,7 @@ import { PriceDistributionChart } from "@/components/zone/price-distribution-cha
 import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
 import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
 import { MarketQualityCard } from "@/components/zone/market-quality-card"
+import { DemographicsCard } from "@/components/zone/demographics-card"
 import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
 import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
@@ -321,6 +322,9 @@ export default async function ZonePage({ params }: ZonePageProps) {
 
           {/* Market Quality */}
           <MarketQualityCard data={marketQualityData} />
+
+          {/* Demographics — Censo 2020 */}
+          <DemographicsCard slug={slug} />
 
           {/* Risk Profile — Próximamente (requires 4+ weeks of data) */}
           <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">
