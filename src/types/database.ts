@@ -1,6 +1,6 @@
 export type PropertyType = "casa" | "departamento" | "terreno" | "local" | "oficina";
 export type ListingType = "venta" | "renta";
-export type SourcePortal = "inmuebles24" | "lamudi" | "vivanuncios" | "mercadolibre";
+export type SourcePortal = "inmuebles24" | "lamudi" | "vivanuncios" | "mercadolibre" | "otro";
 
 export interface Zone {
   id: string;
@@ -175,6 +175,30 @@ export interface Database {
         Insert: Omit<PriceAlert, "id" | "created_at" | "last_triggered_at">;
         Update: Partial<Pick<PriceAlert, "is_active" | "threshold_value" | "condition_type">>;
       };
+      user_profiles: {
+        Row: { id: string; email: string; full_name: string | null; avatar_url: string | null; role: UserRole; created_at: string; updated_at: string };
+        Insert: { id: string; email: string; full_name?: string | null; avatar_url?: string | null; role?: UserRole };
+        Update: Partial<{ full_name: string | null; avatar_url: string | null; role: UserRole }>;
+      };
+      scrape_jobs: {
+        Row: ScrapeJob;
+        Insert: {
+          user_id: string;
+          url: string;
+          status?: ScrapeJob["status"];
+          extracted_data?: Record<string, unknown> | null;
+          normalized_data?: Record<string, unknown> | null;
+          listing_id?: string | null;
+          error_message?: string | null;
+        };
+        Update: {
+          status?: ScrapeJob["status"];
+          extracted_data?: Record<string, unknown> | null;
+          normalized_data?: Record<string, unknown> | null;
+          listing_id?: string | null;
+          error_message?: string | null;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -184,4 +208,19 @@ export interface Database {
       source_portal: SourcePortal;
     };
   };
+}
+
+export type UserRole = "user" | "admin";
+
+export interface ScrapeJob {
+  id: string;
+  user_id: string;
+  url: string;
+  status: "pending" | "scraping" | "extracting" | "preview" | "saved" | "failed";
+  extracted_data: Record<string, unknown> | null;
+  normalized_data: Record<string, unknown> | null;
+  listing_id: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
 }

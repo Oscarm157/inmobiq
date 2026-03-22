@@ -20,7 +20,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { collapsed, toggle } = useSidebar()
-  const { user, signOut } = useAuth()
+  const { user, isAdmin, signOut } = useAuth()
 
   const handleSignOut = async () => {
     await signOut()
@@ -90,6 +90,28 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Admin section */}
+      {isAdmin && (
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+          <Link
+            href="/admin/scraper"
+            title={collapsed ? "Admin" : undefined}
+            className={`flex items-center gap-3 rounded-xl transition-all duration-200 ${
+              collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
+            } ${
+              isActive("/admin")
+                ? "bg-slate-700 text-white shadow-lg shadow-slate-500/20"
+                : "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+            }`}
+          >
+            <Icon name="admin_panel_settings" />
+            {!collapsed && (
+              <span className="text-sm font-semibold">Admin</span>
+            )}
+          </Link>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-1">

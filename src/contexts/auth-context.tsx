@@ -14,6 +14,7 @@ interface AuthContextValue {
   user: User | null
   session: Session | null
   loading: boolean
+  isAdmin: boolean
   signInWithGoogle: (redirectTo?: string) => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
   signUpWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(hasSupabaseConfig)
+  const [isAdmin, setIsAdmin] = useState(false)
   // Lazy-init: create client only when Supabase env vars are present
   const [supabase] = useState(() =>
     hasSupabaseConfig ? createSupabaseBrowserClient() : null
@@ -38,17 +40,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!supabase) return
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+        setIsAdmin((data as { role: string } | null)?.role === "admin")
+      } else {
+        setIsAdmin(false)
+      }
       setLoading(false)
     })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+        setIsAdmin((data as { role: string } | null)?.role === "admin")
+      } else {
+        setIsAdmin(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -89,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}
+      value={{ user, session, loading, isAdmin, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}
     >
       {children}
     </AuthContext.Provider>
