@@ -328,8 +328,8 @@ export default async function ZonePage({ params }: ZonePageProps) {
           {/* Market Quality */}
           <MarketQualityCard data={marketQualityData} />
 
-          {/* Demographics — Censo 2020 */}
-          <DemographicsCard slug={slug} />
+          {/* Demographics — Radiografía Socioeconómica */}
+          <DemographicsCard slug={slug} zone={zone} allZones={allZones} />
 
           {/* Cross-referenced Insights — INEGI × Market */}
           {(() => {

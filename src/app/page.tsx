@@ -21,7 +21,11 @@ import { getListingsAnalytics } from "@/lib/data/listings"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { formatCurrency } from "@/lib/utils"
 import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
-import { getAllDemographics } from "@/lib/data/demographics"
+import { getAllDemographics, getMarketIntelligenceInsights, computeOpportunityScore } from "@/lib/data/demographics"
+import { MarketIntelligence } from "@/components/market-intelligence"
+import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
+import { MarketDensityScatter } from "@/components/market-density-scatter"
+import type { DensityBubble } from "@/components/market-density-scatter"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"
 
@@ -178,56 +182,53 @@ export default async function HomePage({
         <TopZonesHighlight topByPrice={topByPrice} topByActivity={topByActivity} />
       </section>
 
-      {/* ─── 6b. Perfil Demográfico ─── */}
+      {/* ─── 6b. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
       {(() => {
         const allDemo = getAllDemographics().filter((d) => d.ageb_count > 0)
         if (allDemo.length === 0) return null
-        const byPop = [...allDemo].sort((a, b) => b.population - a.population).slice(0, 3)
-        const totalPop = allDemo.reduce((s, d) => s + d.population, 0)
-        const totalHouseholds = allDemo.reduce((s, d) => s + d.households, 0)
-        const totalDwellings = allDemo.reduce((s, d) => s + d.occupied_dwellings, 0)
-        const avgInternet = totalDwellings > 0
-          ? Math.round((allDemo.reduce((s, d) => s + d.pct_internet * d.occupied_dwellings, 0) / totalDwellings) * 10) / 10
-          : 0
+
+        const insights = getMarketIntelligenceInsights(allDemo, zones, riskData)
+
+        // Opportunity data for chart
+        const opportunityData = allDemo
+          .map((demo) => {
+            const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+            if (!zone || zone.total_listings < 1) return null
+            const opp = computeOpportunityScore(demo, zone, zones)
+            return {
+              zone_name: zone.zone_name,
+              zone_slug: zone.zone_slug,
+              ...opp,
+            }
+          })
+          .filter(Boolean) as Array<{ zone_name: string; zone_slug: string; total: number; price_score: number; density_score: number; digital_score: number; economic_score: number }>
+
+        // Density scatter data
+        const densityData: DensityBubble[] = allDemo
+          .map((demo) => {
+            const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+            if (!zone || zone.total_listings < 1 || demo.population < 100) return null
+            const opp = computeOpportunityScore(demo, zone, zones)
+            return {
+              zone_name: zone.zone_name,
+              zone_slug: zone.zone_slug,
+              density: Math.round(demo.population / demo.ageb_count),
+              price_m2: zone.avg_price_per_m2,
+              inventory: zone.total_listings,
+              opportunity: opp.total,
+            }
+          })
+          .filter(Boolean) as DensityBubble[]
+
         return (
-          <section>
-            <div className="mb-6">
-              <h3 className="text-2xl font-black tracking-tight">Perfil Demográfico</h3>
-              <p className="text-sm text-slate-500 font-medium">
-                Datos del Censo 2020 (INEGI) para las zonas monitoreadas
-              </p>
+          <>
+            <MarketIntelligence insights={insights} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <OpportunityIndexChart data={opportunityData} />
+              <MarketDensityScatter data={densityData} />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Población cubierta</p>
-                <p className="text-2xl font-black text-slate-800 dark:text-white">{totalPop.toLocaleString("es-MX")}</p>
-                <p className="text-xs text-slate-400 mt-1">{totalHouseholds.toLocaleString("es-MX")} hogares</p>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">NSE promedio</p>
-                <p className="text-2xl font-black text-slate-800 dark:text-white">
-                  {Math.round(allDemo.reduce((s, d) => s + d.nse_score * d.population, 0) / totalPop)}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">{avgInternet}% con internet</p>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Zonas más pobladas</p>
-                <div className="space-y-1 mt-1">
-                  {byPop.map((d) => (
-                    <div key={d.zone_slug} className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {zones.find((z) => z.zone_slug === d.zone_slug)?.zone_name ?? d.zone_slug}
-                      </span>
-                      <span className="text-xs text-slate-400 ml-2 flex-shrink-0">{d.population.toLocaleString("es-MX")}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <p className="text-[10px] text-slate-400">
-              Fuente: INEGI Censo 2020 (SCINCE) · Encuesta Intercensal 2025 disponible sep. 2026
-            </p>
-          </section>
+          </>
         )
       })()}
 
