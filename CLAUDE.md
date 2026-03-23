@@ -110,6 +110,20 @@ Listing scrapeado → isValidListing() → filterNormalizedListings()
 | `src/components/zone/zone-insights-card.tsx` | UI: indicadores cruzados |
 | `src/components/comparar/demographic-comparison.tsx` | UI: radar + tabla demográfica en comparador |
 
+### Drill-down de debug (dev-only)
+
+**IMPORTANTE: Esta funcionalidad NO es parte del producto final.** Los listings individuales no se muestran al usuario final — las propiedades no pertenecen a la plataforma.
+
+- **Feature flag**: `NEXT_PUBLIC_DEV_DRILLDOWN=true` en `.env.local` para activar
+- **Sin la variable**: todo se ve exactamente como el producto final, sin drill-down
+- **Con la variable**: clic en barras de distribución de precios o puntos del scatter revela los listings detrás
+- **Archivo flag**: `src/lib/dev-flags.ts`
+- **Panel**: `src/components/zone/drill-down-panel.tsx` — muestra tabla con listing_type badge (V=venta, R=renta)
+- **Reportes**: botón "Reportar" guarda en Supabase (`data_reports` table) con contexto automático (zona, gráfica, rango, IDs)
+- **API**: `POST /api/data-reports` — requiere autenticación
+- **Migración**: `supabase/migrations/20260323_data_reports.sql`
+- **Para apagar en producción**: simplemente no setear `NEXT_PUBLIC_DEV_DRILLDOWN` en Vercel
+
 ## Convenciones
 - Componentes server por defecto; "use client" solo cuando necesario
 - Datos mock en `src/lib/mock-data.ts` para cuando Supabase no está disponible

@@ -27,6 +27,8 @@ import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
 import { filterNormalizedListings, removeOutliers } from "@/lib/data/normalize"
+import { DEV_DRILLDOWN } from "@/lib/dev-flags"
+import type { DrillDownListing } from "@/components/zone/drill-down-panel"
 import type { PropertyType, ListingType, ZoneMetrics, Listing } from "@/types/database"
 import type { PropertyCategory } from "@/lib/data/normalize"
 
@@ -197,6 +199,19 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     })
     .filter((d) => d.count > 0)
 
+  // Dev drill-down: build listings-by-range map (only when feature flag is on)
+  const toDevListing = (l: Listing): DrillDownListing => ({
+    id: l.id, title: l.title, property_type: l.property_type, listing_type: l.listing_type,
+    price: l.price, area_m2: l.area_m2, price_per_m2: l.price_per_m2,
+    bedrooms: l.bedrooms, bathrooms: l.bathrooms, source: l.source, source_url: l.source_url,
+  })
+  const listingsByRange = DEV_DRILLDOWN
+    ? Object.fromEntries(priceRanges.map((r) => [
+        r.range,
+        chartListings.filter((l) => l.price >= r.min && l.price < r.max).map(toDevListing),
+      ]))
+    : undefined
+
   // --- Scatter data (m² vs price, outlier-cleaned) ---
   const scatterData = chartListings
     .filter((l) => l.area_m2 > 0 && l.price > 0)
@@ -205,6 +220,11 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       price: Math.round(l.price),
       type: l.property_type,
       title: l.title,
+      // Dev drill-down: include listing details when flag is on
+      ...(DEV_DRILLDOWN ? {
+        id: l.id, listing_type: l.listing_type, price_per_m2: l.price_per_m2,
+        bedrooms: l.bedrooms, bathrooms: l.bathrooms, source: l.source, source_url: l.source_url,
+      } : {}),
     }))
   const scatterTypes = [...new Set(scatterData.map((d) => d.type))]
 
@@ -325,8 +345,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       <div className="grid grid-cols-12 gap-6">
         {/* Left Column — Charts + Editorial */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
-          <PriceDistributionChart data={priceDistData} />
-          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} />
+          <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
+          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
           <PropertyCompositionChart data={compositionData} />
           <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
           <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
