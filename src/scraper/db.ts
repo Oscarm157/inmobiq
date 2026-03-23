@@ -215,18 +215,28 @@ export async function upsertListings(
 /**
  * Mark listings as inactive if they were not seen in the last 2 runs.
  * "Not seen in 2 runs" = last_seen_at older than 2× scrape interval (2 days).
+ * When listingType is provided, only deactivates listings of that type
+ * (prevents renta scrape from deactivating venta listings and vice versa).
  */
-export async function deactivateStaleListings(portal: SourcePortal): Promise<number> {
+export async function deactivateStaleListings(
+  portal: SourcePortal,
+  listingType?: "venta" | "renta",
+): Promise<number> {
   const sb = getSupabaseClient();
   const cutoff = new Date(Date.now() - 2 * 24 * 60 * 60 * 1_000).toISOString();
 
-  const { data, error } = await sb
+  let query = sb
     .from("listings")
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq("source_portal", portal)
     .eq("is_active", true)
-    .lt("last_seen_at", cutoff)
-    .select("id");
+    .lt("last_seen_at", cutoff);
+
+  if (listingType) {
+    query = query.eq("listing_type", listingType);
+  }
+
+  const { data, error } = await query.select("id");
 
   if (error) throw new Error(`Deactivate stale listings failed: ${error.message}`);
   return (data ?? []).length;

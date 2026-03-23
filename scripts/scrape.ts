@@ -138,10 +138,10 @@ async function runScraper(portal: SourcePortal, config: ScraperConfig, dryRun: b
       );
     }
 
-    // Deactivate stale listings
-    const deactivated = await deactivateStaleListings(portal);
+    // Deactivate stale listings (scoped to listing_type to avoid cross-contamination)
+    const deactivated = await deactivateStaleListings(portal, config.listing_type);
     if (deactivated > 0) {
-      console.log(`[scraper] Deactivated ${deactivated} stale listings for ${portal}`);
+      console.log(`[scraper] Deactivated ${deactivated} stale ${config.listing_type ?? "all"} listings for ${portal}`);
     }
 
     // Finalize run
