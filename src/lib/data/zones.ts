@@ -5,7 +5,7 @@ import {
 } from "@/lib/mock-data"
 import type { Zone, Snapshot, CitySnapshot, ZoneMetrics, CityMetrics, PropertyType } from "@/types/database"
 import type { ListingFilters } from "@/lib/data/listings"
-import { isValidSaleListing, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
+import { isValidListing, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
@@ -157,7 +157,7 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
 
     // Normalize: filter out suspected misclassified rentals
     const listingsData = listingsDataRaw?.filter((l) =>
-      isValidSaleListing(l.property_type, l.listing_type, l.price_mxn, l.area_m2).isValid
+      isValidListing(l.property_type, l.listing_type, l.price_mxn, l.area_m2).isValid
     ) ?? null
 
     if (!zones?.length || !latestSnaps?.length) {
@@ -272,8 +272,8 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
   }
 }
 
-export async function getZoneBySlug(slug: string): Promise<ZoneMetrics | null> {
-  const zones = await getZoneMetrics()
+export async function getZoneBySlug(slug: string, filters?: ListingFilters): Promise<ZoneMetrics | null> {
+  const zones = await getZoneMetrics(filters)
   return zones.find((z) => z.zone_slug === slug) ?? null
 }
 
