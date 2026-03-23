@@ -3,6 +3,28 @@ import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
 import { filterNormalizedListings, filterByCategory, effectivePriceMxn, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
+/** Dynamic price ranges based on listing type (venta = millions, renta = thousands) */
+function getPriceRanges(listingType?: string): { label: string; min: number; max: number }[] {
+  if (listingType === "renta") {
+    return [
+      { label: "<5K", min: 0, max: 5_000 },
+      { label: "5K-10K", min: 5_000, max: 10_000 },
+      { label: "10K-20K", min: 10_000, max: 20_000 },
+      { label: "20K-40K", min: 20_000, max: 40_000 },
+      { label: "40K-80K", min: 40_000, max: 80_000 },
+      { label: ">80K", min: 80_000, max: Infinity },
+    ]
+  }
+  return [
+    { label: "<1M", min: 0, max: 1_000_000 },
+    { label: "1M-3M", min: 1_000_000, max: 3_000_000 },
+    { label: "3M-5M", min: 3_000_000, max: 5_000_000 },
+    { label: "5M-10M", min: 5_000_000, max: 10_000_000 },
+    { label: "10M-20M", min: 10_000_000, max: 20_000_000 },
+    { label: ">20M", min: 20_000_000, max: Infinity },
+  ]
+}
+
 /** Build zone name lookup from mock data (single source of truth) */
 const MOCK_ZONE_LOOKUP = new Map(
   TIJUANA_ZONES.map((z) => [z.zone_id, { name: z.zone_name, slug: z.zone_slug }])
@@ -299,15 +321,8 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
     .map((z) => ({ zone_name: z.name, zone_slug: z.slug, median_price_m2: Math.round(median(z.values)), count: z.values.length }))
     .sort((a, b) => b.median_price_m2 - a.median_price_m2)
 
-  // priceDistribution
-  const ranges: { label: string; min: number; max: number }[] = [
-    { label: "<1M", min: 0, max: 1_000_000 },
-    { label: "1M-3M", min: 1_000_000, max: 3_000_000 },
-    { label: "3M-5M", min: 3_000_000, max: 5_000_000 },
-    { label: "5M-10M", min: 5_000_000, max: 10_000_000 },
-    { label: "10M-20M", min: 10_000_000, max: 20_000_000 },
-    { label: ">20M", min: 20_000_000, max: Infinity },
-  ]
+  // priceDistribution (dynamic ranges based on listing type)
+  const ranges = getPriceRanges(filters?.listing_type)
   const priceDistribution = ranges.map((r) => {
     const count = withPrice.filter((l) => l.price >= r.min && l.price < r.max).length
     return { range: r.label, count, pct: pct(count, withPrice.length) }
@@ -470,15 +485,8 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
       .map((z) => ({ zone_name: z.name, zone_slug: z.slug, median_price_m2: Math.round(median(z.values)), count: z.values.length }))
       .sort((a, b) => b.median_price_m2 - a.median_price_m2)
 
-    // --- priceDistribution ---
-    const ranges: { label: string; min: number; max: number }[] = [
-      { label: "<1M", min: 0, max: 1_000_000 },
-      { label: "1M-3M", min: 1_000_000, max: 3_000_000 },
-      { label: "3M-5M", min: 3_000_000, max: 5_000_000 },
-      { label: "5M-10M", min: 5_000_000, max: 10_000_000 },
-      { label: "10M-20M", min: 10_000_000, max: 20_000_000 },
-      { label: ">20M", min: 20_000_000, max: Infinity },
-    ]
+    // --- priceDistribution (dynamic ranges based on listing type) ---
+    const ranges = getPriceRanges(filters?.listing_type)
     const priceDistribution = ranges.map((r) => {
       const count = withPrice.filter((l) => l.price >= r.min && l.price < r.max).length
       return { range: r.label, count, pct: pct(count, withPrice.length) }

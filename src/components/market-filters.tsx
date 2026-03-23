@@ -164,26 +164,6 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
         <div className="absolute left-0 right-0 z-30 px-4 md:px-8 mt-3">
           <div className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl transition-opacity duration-150 ${isPending ? "opacity-90" : "opacity-100"}`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Operación */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Operación</p>
-                <div className="flex gap-2">
-                  {(["", "venta", "renta"] as const).map((op) => (
-                    <button
-                      key={op}
-                      onClick={() => handleChange({ ...state, listing_type: op })}
-                      className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
-                        state.listing_type === op
-                          ? "bg-slate-800 text-white shadow-sm"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      }`}
-                    >
-                      {op === "" ? "Todas" : op === "venta" ? "Venta" : "Renta"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Categoría */}
               <div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Categoría</p>
@@ -359,9 +339,6 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
             {hasActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria }) && (
               <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-slate-700">
                 <div className="flex flex-wrap gap-1.5">
-                  {state.listing_type && state.listing_type !== defaultOperacion && (
-                    <FilterChip label={state.listing_type === "venta" ? "Venta" : "Renta"} onRemove={() => handleChange({ ...state, listing_type: defaultOperacion as MarketFilterState["listing_type"] })} />
-                  )}
                   {state.categoria && state.categoria !== defaultCategoria && (
                     <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: defaultCategoria as MarketFilterState["categoria"] })} />
                   )}

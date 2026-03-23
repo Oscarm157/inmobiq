@@ -1,9 +1,11 @@
 "use client"
 
+import { Suspense } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "@/components/sidebar"
 import { TopHeader } from "@/components/top-header"
 import { BottomNav } from "@/components/bottom-nav"
+import { ModeTabs } from "@/components/mode-tabs"
 import { useSidebar } from "@/components/sidebar-provider"
 
 const FULL_SCREEN_ROUTES = ["/login"]
@@ -20,12 +22,15 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
     <>
       <Sidebar />
       <TopHeader />
+      <Suspense fallback={null}>
+        <ModeTabs />
+      </Suspense>
       <main
         className={`min-h-screen pb-20 ${
           collapsed ? "md:ml-16" : "md:ml-64"
         }`}
       >
-        <div className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
+        <div className="pt-[7.5rem] px-4 sm:px-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

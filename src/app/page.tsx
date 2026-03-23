@@ -153,7 +153,11 @@ export default async function HomePage({
         />
         <KPIPlusvalia
           trendPct={city.price_trend_pct}
-          riskNote="La demanda sostenida de compradores binacionales presiona los precios al alza en zonas costeras y céntricas."
+          riskNote={filters.listing_type === "renta"
+            ? "El rendimiento de renta depende de la ocupación y ubicación. Zonas céntricas tienden a mayor demanda."
+            : "La demanda sostenida de compradores binacionales presiona los precios al alza en zonas costeras y céntricas."
+          }
+          listingType={filters.listing_type}
         />
       </div>
 
