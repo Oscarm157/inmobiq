@@ -182,19 +182,43 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       return fallback
     }
 
-    // Build median price/m² lookup from individual listings
+    // Build median price/m² and median ticket lookups from validated individual listings
     const medianPriceByZone = new Map<string, number>()
+    const medianTicketByZone = new Map<string, number>()
+    const medianTicketByZoneType = new Map<string, number>() // key: "zoneId::propertyType"
     if (listingsData?.length) {
       const grouped = new Map<string, number[]>()
+      const ticketGrouped = new Map<string, number[]>()
+      const ticketByTypeGrouped = new Map<string, number[]>()
       for (const l of listingsData) {
-        if (l.area_m2 > 0 && l.price > 0) {
-          const arr = grouped.get(l.zone_id) ?? []
-          arr.push(l.price / l.area_m2)
-          grouped.set(l.zone_id, arr)
+        if (l.price > 0) {
+          // Ticket (absolute price)
+          const tArr = ticketGrouped.get(l.zone_id) ?? []
+          tArr.push(l.price)
+          ticketGrouped.set(l.zone_id, tArr)
+
+          // Ticket by type
+          const typeKey = `${l.zone_id}::${l.property_type}`
+          const ttArr = ticketByTypeGrouped.get(typeKey) ?? []
+          ttArr.push(l.price)
+          ticketByTypeGrouped.set(typeKey, ttArr)
+
+          // Price per m²
+          if (l.area_m2 > 0) {
+            const arr = grouped.get(l.zone_id) ?? []
+            arr.push(l.price / l.area_m2)
+            grouped.set(l.zone_id, arr)
+          }
         }
       }
       for (const [zoneId, values] of grouped) {
         medianPriceByZone.set(zoneId, Math.round(median(values)))
+      }
+      for (const [zoneId, values] of ticketGrouped) {
+        medianTicketByZone.set(zoneId, Math.round(median(values)))
+      }
+      for (const [key, values] of ticketByTypeGrouped) {
+        medianTicketByZoneType.set(key, Math.round(median(values)))
       }
     }
 
@@ -216,26 +240,34 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
         // Use median from listings for consistency with analytics pages
         const avgPricePerM2 = medianPriceByZone.get(zone.id) ?? Math.round(snapshotAvgPricePerM2)
 
-        // Weighted avg ticket (avg_price)
-        const totalTicket = zoneSnaps.reduce(
-          (sum, s) => sum + Number(s.avg_price) * Number(s.count_active), 0
-        )
-        const avgTicket = totalListings > 0 ? totalTicket / totalListings : 0
+        // Avg ticket: prefer validated listing median, fallback to snapshot avg_price
+        const snapshotTicket = (() => {
+          const totalTicket = zoneSnaps.reduce(
+            (sum, s) => sum + Number(s.avg_price) * Number(s.count_active), 0
+          )
+          return totalListings > 0 ? totalTicket / totalListings : 0
+        })()
+        const avgTicket = medianTicketByZone.get(zone.id) ?? Math.round(snapshotTicket)
 
         // listings_by_type: aggregate count_active per property_type
         const listingsByType: Record<string, number> = {}
-        const ticketByType: Record<string, number> = {}
+        const snapshotTicketByType: Record<string, number> = {}
         for (const s of zoneSnaps) {
           const pt = s.property_type
           listingsByType[pt] = (listingsByType[pt] ?? 0) + Number(s.count_active)
-          // weighted avg ticket per type
-          const existing = ticketByType[pt] ?? 0
-          ticketByType[pt] = existing + Number(s.avg_price) * Number(s.count_active)
+          const existing = snapshotTicketByType[pt] ?? 0
+          snapshotTicketByType[pt] = existing + Number(s.avg_price) * Number(s.count_active)
         }
-        // Normalize ticket by type
-        for (const pt of Object.keys(ticketByType)) {
+        // Normalize snapshot ticket by type (used as fallback)
+        for (const pt of Object.keys(snapshotTicketByType)) {
           const count = listingsByType[pt] ?? 1
-          ticketByType[pt] = count > 0 ? ticketByType[pt] / count : 0
+          snapshotTicketByType[pt] = count > 0 ? snapshotTicketByType[pt] / count : 0
+        }
+        // Prefer validated listing median per type, fallback to snapshot
+        const ticketByType: Record<string, number> = {}
+        for (const pt of Object.keys(listingsByType)) {
+          const typeKey = `${zone.id}::${pt}`
+          ticketByType[pt] = medianTicketByZoneType.get(typeKey) ?? Math.round(snapshotTicketByType[pt] ?? 0)
         }
 
         // Price trend vs previous week
