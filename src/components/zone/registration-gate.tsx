@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 import Link from "next/link"
@@ -12,8 +13,17 @@ interface RegistrationGateProps {
 export function RegistrationGate({ children, isGated }: RegistrationGateProps) {
   const { user, loading } = useAuth()
 
-  // Not gated, or user is authenticated — show content normally
-  if (!isGated || user || loading) {
+  const showGate = isGated && !user && !loading
+
+  // Prevent scroll when gate is active
+  useEffect(() => {
+    if (showGate) {
+      document.body.style.overflow = "hidden"
+      return () => { document.body.style.overflow = "" }
+    }
+  }, [showGate])
+
+  if (!showGate) {
     return <>{children}</>
   }
 

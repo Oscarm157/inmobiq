@@ -60,8 +60,12 @@ export function ModeBar() {
         }).catch(() => {})
       }
 
-      // Refresh server components to pick up new cookie values
-      router.refresh()
+      // Strip conflicting URL params and refresh server components
+      const url = new URL(window.location.href)
+      url.searchParams.delete("operacion")
+      url.searchParams.delete("categoria")
+      const cleanPath = url.pathname + (url.searchParams.toString() ? `?${url.searchParams.toString()}` : "")
+      router.replace(cleanPath)
     },
     [router, user],
   )
