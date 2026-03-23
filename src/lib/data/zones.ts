@@ -5,8 +5,28 @@ import {
 } from "@/lib/mock-data"
 import type { Zone, Snapshot, CitySnapshot, ZoneMetrics, CityMetrics, PropertyType } from "@/types/database"
 import type { ListingFilters } from "@/lib/data/listings"
+import { isValidSaleListing, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
+
+/** Resolve category filter into effective property types list */
+function resolveTypesWithCategory(filters?: ListingFilters): PropertyType[] | undefined {
+  const categoryTypes: Record<PropertyCategory, PropertyType[]> = {
+    residencial: RESIDENTIAL_TYPES,
+    comercial: COMMERCIAL_TYPES,
+    terreno: LAND_TYPES,
+  }
+  if (filters?.categoria) {
+    const catTypes = categoryTypes[filters.categoria]
+    // If tipos also specified, intersect with category types
+    if (filters.tipos?.length) {
+      const intersection = filters.tipos.filter((t) => catTypes.includes(t))
+      return intersection.length > 0 ? intersection : catTypes
+    }
+    return catTypes
+  }
+  return filters?.tipos?.length ? filters.tipos : undefined
+}
 
 /** Compute median of a numeric array (0 for empty arrays). */
 function median(arr: number[]): number {
@@ -34,10 +54,11 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     if (filters?.zonas?.length) {
       zones = zones.filter((z) => filters.zonas!.includes(z.zone_slug))
     }
-    // Apply property type filter: recalculate total_listings from listings_by_type
-    if (filters?.tipos?.length) {
+    // Apply property type / category filter: recalculate total_listings from listings_by_type
+    const effectiveTypes = resolveTypesWithCategory(filters)
+    if (effectiveTypes?.length) {
       zones = zones.map((z) => {
-        const filteredTotal = filters.tipos!.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
+        const filteredTotal = effectiveTypes.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
         return { ...z, total_listings: filteredTotal }
       }).filter((z) => z.total_listings > 0)
     }
@@ -64,7 +85,7 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     // Build filtered listings query
     let listingsQuery = supabase
       .from("listings")
-      .select("zone_id, price_mxn, area_m2")
+      .select("zone_id, price_mxn, area_m2, property_type, listing_type")
       .eq("is_active", true)
       .gt("price_mxn", 0)
       .gt("area_m2", 10)
@@ -76,10 +97,11 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       .select("zone_id, week_start, property_type, listing_type, count_active, avg_price, avg_price_per_m2")
       .eq("week_start", latestWeek)
 
-    // Apply filters
-    if (filters?.tipos?.length) {
-      listingsQuery = listingsQuery.in("property_type", filters.tipos)
-      latestSnapsQuery = latestSnapsQuery.in("property_type", filters.tipos)
+    // Apply filters (resolve category into property types)
+    const effectiveTypes = resolveTypesWithCategory(filters)
+    if (effectiveTypes?.length) {
+      listingsQuery = listingsQuery.in("property_type", effectiveTypes)
+      latestSnapsQuery = latestSnapsQuery.in("property_type", effectiveTypes)
     }
     if (filters?.listing_type) {
       listingsQuery = listingsQuery.eq("listing_type", filters.listing_type)
@@ -131,7 +153,12 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     const zones = zonesRes.data as Zone[] | null
     const latestSnaps = latestSnapsRes.data as RealSnapshot[] | null
     const prevSnaps = prevSnapsRes.data as Array<{ zone_id: string; avg_price_per_m2: number; count_active: number }> | null
-    const listingsData = listingsRes.data as Array<{ zone_id: string; price_mxn: number; area_m2: number }> | null
+    const listingsDataRaw = listingsRes.data as Array<{ zone_id: string; price_mxn: number; area_m2: number; property_type: PropertyType; listing_type: string }> | null
+
+    // Normalize: filter out suspected misclassified rentals
+    const listingsData = listingsDataRaw?.filter((l) =>
+      isValidSaleListing(l.property_type, l.listing_type, l.price_mxn, l.area_m2).isValid
+    ) ?? null
 
     if (!zones?.length || !latestSnaps?.length) {
       // Apply basic filters to mock fallback
@@ -139,9 +166,10 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       if (filters?.zonas?.length) {
         fallback = fallback.filter((z) => filters.zonas!.includes(z.zone_slug))
       }
-      if (filters?.tipos?.length) {
+      const fbTypes = resolveTypesWithCategory(filters)
+      if (fbTypes?.length) {
         fallback = fallback.map((z) => {
-          const filteredTotal = filters.tipos!.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
+          const filteredTotal = fbTypes.reduce((sum, t) => sum + (z.listings_by_type[t] ?? 0), 0)
           return { ...z, total_listings: filteredTotal }
         }).filter((z) => z.total_listings > 0)
       }
@@ -253,7 +281,7 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
   const zones = await getZoneMetrics(filters)
 
   const hasFilters = filters && (
-    (filters.tipos?.length ?? 0) > 0 || !!filters.listing_type ||
+    (filters.tipos?.length ?? 0) > 0 || !!filters.listing_type || !!filters.categoria ||
     (filters.zonas?.length ?? 0) > 0 || filters.precio_min != null ||
     filters.precio_max != null || filters.area_min != null ||
     filters.area_max != null || (filters.recamaras?.length ?? 0) > 0

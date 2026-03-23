@@ -23,6 +23,7 @@ import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
+import { filterNormalizedListings } from "@/lib/data/normalize"
 import type { PropertyType, ZoneMetrics, Listing } from "@/types/database"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
@@ -63,6 +64,9 @@ export default async function ZonePage({ params }: ZonePageProps) {
     getZoneRiskMetrics(),
   ])
   if (!zone) notFound()
+
+  // Normalize: filter out suspected misclassified rentals
+  const normalizedListings = filterNormalizedListings(listings as Listing[])
 
   const cityAvg = city.avg_price_per_m2
 
@@ -129,7 +133,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
     .sort((a, b) => b.avgTicket - a.avgTicket)
 
   // --- ADN de la Zona data ---
-  const typedListings = (listings as Listing[]).filter(
+  const typedListings = normalizedListings.filter(
     (l) => l.property_type === topTypeKey
   )
   const avgArea =
@@ -148,7 +152,7 @@ export default async function ZonePage({ params }: ZonePageProps) {
       : null
 
   // --- Price distribution data ---
-  const allListings = listings as Listing[]
+  const allListings = normalizedListings
   const priceRanges = [
     { min: 0, max: 1_000_000, range: "<$1M" },
     { min: 1_000_000, max: 3_000_000, range: "$1M–3M" },

@@ -32,6 +32,7 @@ describe("parseMarketParams — URL to state", () => {
     expect(state.tipos).toEqual([])
     expect(state.zonas).toEqual([])
     expect(state.listing_type).toBe("")
+    expect(state.categoria).toBe("")
     expect(state.precio_min).toBe("")
     expect(state.precio_max).toBe("")
     expect(state.area_min).toBe("")
@@ -116,7 +117,7 @@ describe("parseMarketParams — URL to state", () => {
 
 describe("buildMarketParams — State to URL", () => {
   const empty: MarketFilterState = {
-    tipos: [], zonas: [], listing_type: "",
+    tipos: [], zonas: [], listing_type: "", categoria: "",
     precio_min: "", precio_max: "",
     area_min: "", area_max: "",
     recamaras: [],
