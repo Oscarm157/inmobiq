@@ -83,25 +83,32 @@ export async function GET() {
   const supabase = await createSupabaseServerClient()
 
   // Fetch zones
-  const { data: zones, error: zonesErr } = await supabase.from("zones").select("id, slug, name")
-  if (zonesErr || !zones?.length) {
+  const zonesRes = await supabase.from("zones").select("id, slug, name")
+  const zonesErr = zonesRes.error
+  const zones = (zonesRes.data ?? []) as Array<{ id: string; slug: string; name: string }>
+  if (zonesErr || zones.length === 0) {
     return NextResponse.json({ error: "Failed to fetch zones", detail: zonesErr?.message }, { status: 500 })
   }
 
   // Fetch active listings
-  const { data: listings, error: listingsErr } = await supabase
+  const listingsRes = await supabase
     .from("listings")
     .select("id, zone_id, property_type, listing_type, price_mxn, price_usd, area_m2, is_active")
     .eq("is_active", true)
+  const listingsErr = listingsRes.error
+  const rawListings = (listingsRes.data ?? []) as Array<{
+    id: string; zone_id: string; property_type: string; listing_type: string
+    price_mxn: number | null; price_usd: number | null; area_m2: number | null
+  }>
 
   if (listingsErr) {
     return NextResponse.json({ error: "Failed to fetch listings", detail: listingsErr.message }, { status: 500 })
   }
 
-  const allListings = (listings ?? []).map((l) => {
-    const row = l as { id: string; zone_id: string; property_type: string; listing_type: string; price_mxn: number | null; price_usd: number | null; area_m2: number | null }
-    return { ...row, price: effectivePriceMxn(row.price_mxn, row.price_usd) ?? 0 }
-  })
+  const allListings = rawListings.map((l) => ({
+    ...l,
+    price: effectivePriceMxn(l.price_mxn, l.price_usd) ?? 0,
+  }))
 
   const results: AuditResult[] = []
   const operations = ["venta", "renta"] as const
