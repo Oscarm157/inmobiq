@@ -163,52 +163,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
       {open && (
         <div className="absolute left-0 right-0 z-30 px-4 md:px-8 mt-3">
           <div className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl transition-opacity duration-150 ${isPending ? "opacity-90" : "opacity-100"}`}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Operación */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Operación</p>
-                <div className="flex gap-2">
-                  {(["", "venta", "renta"] as const).map((op) => (
-                    <button
-                      key={op}
-                      onClick={() => handleChange({ ...state, listing_type: op })}
-                      className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
-                        state.listing_type === op
-                          ? "bg-slate-800 text-white shadow-sm"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      }`}
-                    >
-                      {op === "" ? "Todas" : op === "venta" ? "Venta" : "Renta"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Categoría */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Categoría</p>
-                <div className="flex gap-2">
-                  {([
-                    { value: "" as const, label: "Todas" },
-                    { value: "residencial" as const, label: "Residencial" },
-                    { value: "comercial" as const, label: "Comercial" },
-                    { value: "terreno" as const, label: "Terreno" },
-                  ]).map(({ value, label }) => (
-                    <button
-                      key={value}
-                      onClick={() => handleChange({ ...state, categoria: value })}
-                      className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
-                        state.categoria === value
-                          ? "bg-slate-800 text-white shadow-sm"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Tipo de propiedad */}
               <div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Tipo de Propiedad</p>

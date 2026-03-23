@@ -16,7 +16,7 @@ import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
 import { MarketQualityCard } from "@/components/zone/market-quality-card"
 import { DemographicsCard } from "@/components/zone/demographics-card"
 import { ZoneInsightsCard } from "@/components/zone/zone-insights-card"
-import { ZoneFilters } from "@/components/zone/zone-filters"
+import { RegistrationGate } from "@/components/zone/registration-gate"
 import { getZoneDemographics } from "@/lib/data/demographics"
 import { computeZoneInsights } from "@/lib/data/zone-insights"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -36,6 +36,9 @@ import { COOKIE_CATEGORIA, COOKIE_OPERACION, parseCategoria, parseOperacion } fr
 
 // Force dynamic rendering — page reads cookies() for user preferences
 export const dynamic = "force-dynamic"
+
+// Zones accessible without registration
+const PUBLIC_ZONES = new Set(["zona-rio"])
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -311,6 +314,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   }
 
   return (
+    <RegistrationGate isGated={!PUBLIC_ZONES.has(slug)}>
     <div className="space-y-8">
       {/* [A] Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -339,10 +343,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         </div>
       </div>
 
-      {/* [A2] Zone Filters */}
-      <Suspense fallback={<div className="h-10" />}>
-        <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
-      </Suspense>
+      {/* [A2] Mode is now controlled by the global ModeBar */}
 
       {/* [B] KPI Ticker Strip */}
       <KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} />
@@ -462,6 +463,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         </div>
       </section>
     </div>
+    </RegistrationGate>
   )
 }
 

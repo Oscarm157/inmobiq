@@ -9,6 +9,7 @@ import {
 } from "react"
 import type { User, Session } from "@supabase/supabase-js"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
+import { setPreferredCategoria, setPreferredOperacion } from "@/lib/preference-cookies"
 
 interface AuthContextValue {
   user: User | null
@@ -46,10 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         const { data } = await supabase
           .from("user_profiles")
-          .select("role")
+          .select("role, preferred_categoria, preferred_operacion")
           .eq("id", session.user.id)
           .single()
-        setIsAdmin((data as { role: string } | null)?.role === "admin")
+        const profile = data as { role: string; preferred_categoria?: string; preferred_operacion?: string } | null
+        setIsAdmin(profile?.role === "admin")
+        // Sync DB preferences → cookies
+        if (profile?.preferred_categoria) setPreferredCategoria(profile.preferred_categoria)
+        if (profile?.preferred_operacion) setPreferredOperacion(profile.preferred_operacion)
       } else {
         setIsAdmin(false)
       }
@@ -64,10 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         const { data } = await supabase
           .from("user_profiles")
-          .select("role")
+          .select("role, preferred_categoria, preferred_operacion")
           .eq("id", session.user.id)
           .single()
-        setIsAdmin((data as { role: string } | null)?.role === "admin")
+        const profile = data as { role: string; preferred_categoria?: string; preferred_operacion?: string } | null
+        setIsAdmin(profile?.role === "admin")
+        // Sync DB preferences → cookies on login
+        if (profile?.preferred_categoria) setPreferredCategoria(profile.preferred_categoria)
+        if (profile?.preferred_operacion) setPreferredOperacion(profile.preferred_operacion)
       } else {
         setIsAdmin(false)
       }

@@ -36,3 +36,17 @@ export function setPreferredOperacion(value: string) {
   if (!VALID_OPERACIONES.has(value)) return
   document.cookie = `${COOKIE_OPERACION}=${value};path=/;max-age=${MAX_AGE};samesite=lax`
 }
+
+// ── Client-side readers (parse from document.cookie) ──
+
+/** Client-side: read current categoria from cookie */
+export function readCookieCategoria(): "residencial" | "comercial" | "terreno" {
+  const match = document.cookie.match(new RegExp(`${COOKIE_CATEGORIA}=(\\w+)`))
+  return parseCategoria(match?.[1])
+}
+
+/** Client-side: read current operacion from cookie */
+export function readCookieOperacion(): "venta" | "renta" {
+  const match = document.cookie.match(new RegExp(`${COOKIE_OPERACION}=(\\w+)`))
+  return parseOperacion(match?.[1])
+}

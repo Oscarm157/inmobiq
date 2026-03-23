@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { Sidebar } from "@/components/sidebar"
 import { TopHeader } from "@/components/top-header"
+import { ModeBar } from "@/components/mode-bar"
 import { BottomNav } from "@/components/bottom-nav"
 import { useSidebar } from "@/components/sidebar-provider"
 
@@ -20,12 +21,13 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
     <>
       <Sidebar />
       <TopHeader />
+      <ModeBar />
       <main
         className={`min-h-screen pb-20 ${
           collapsed ? "md:ml-16" : "md:ml-64"
         }`}
       >
-        <div className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
+        <div className="pt-[8.5rem] px-4 sm:px-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>
