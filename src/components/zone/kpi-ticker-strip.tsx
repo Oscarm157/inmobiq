@@ -26,7 +26,10 @@ interface KPICell {
 
 export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProps) {
   const { formatPrice } = useCurrency()
-  const diffFromCity = ((zone.avg_price_per_m2 - city.avg_price_per_m2) / city.avg_price_per_m2) * 100
+  const noData = zone.avg_price_per_m2 === 0 && zone.total_listings === 0
+  const diffFromCity = city.avg_price_per_m2 > 0
+    ? ((zone.avg_price_per_m2 - city.avg_price_per_m2) / city.avg_price_per_m2) * 100
+    : 0
   const trendPositive = zone.price_trend_pct >= 0
 
   const cells: KPICell[] = [
@@ -35,9 +38,9 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-slate-50 dark:bg-blue-950",
       iconColor: "text-slate-800 dark:text-blue-400",
       label: "Precio / m²",
-      value: formatPrice(zone.avg_price_per_m2),
-      sub: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
-      subColor: zone.price_trend_pct === 0 ? "text-slate-400" : trendPositive ? "text-emerald-600" : "text-red-600",
+      value: zone.avg_price_per_m2 > 0 ? formatPrice(zone.avg_price_per_m2) : "—",
+      sub: zone.avg_price_per_m2 === 0 ? "Sin datos" : zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
+      subColor: zone.avg_price_per_m2 === 0 ? "text-slate-400" : zone.price_trend_pct === 0 ? "text-slate-400" : trendPositive ? "text-emerald-600" : "text-red-600",
       tooltip: "Precio promedio por metro cuadrado de construcción. Se calcula con listings activos que pasaron validación de precio y tienen área registrada.",
     },
     {
@@ -45,7 +48,9 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-violet-50 dark:bg-violet-950",
       iconColor: "text-violet-700 dark:text-violet-400",
       label: "Ticket Promedio",
-      value: formatPrice(zone.avg_ticket),
+      value: zone.avg_ticket > 0 ? formatPrice(zone.avg_ticket) : "—",
+      sub: zone.avg_ticket === 0 ? "Sin datos" : undefined,
+      subColor: "text-slate-400",
       tooltip: "Precio promedio de una propiedad completa en esta zona (no por m²). Incluye todos los tipos de propiedad del filtro activo.",
     },
     {
@@ -60,21 +65,21 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
     },
     {
       icon: "trending_up",
-      iconBg: trendPositive ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950",
-      iconColor: trendPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+      iconBg: noData ? "bg-slate-50 dark:bg-slate-800" : trendPositive ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950",
+      iconColor: noData ? "text-slate-400" : trendPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
       label: "Tendencia",
-      value: zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
-      sub: zone.price_trend_pct === 0 ? "" : "vs periodo anterior",
+      value: noData ? "—" : zone.price_trend_pct === 0 ? "Sin histórico" : formatPercent(zone.price_trend_pct),
+      sub: noData ? "Sin datos" : zone.price_trend_pct === 0 ? "" : "vs periodo anterior",
       subColor: "text-slate-400",
       tooltip: "Cambio porcentual del precio promedio por m² comparado con el periodo anterior (snapshots semanales). Positivo = precios subiendo.",
     },
     {
       icon: "compare_arrows",
-      iconBg: diffFromCity > 0 ? "bg-amber-50 dark:bg-amber-950" : "bg-emerald-50 dark:bg-emerald-950",
-      iconColor: diffFromCity > 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400",
+      iconBg: noData ? "bg-slate-50 dark:bg-slate-800" : diffFromCity > 0 ? "bg-amber-50 dark:bg-amber-950" : "bg-emerald-50 dark:bg-emerald-950",
+      iconColor: noData ? "text-slate-400" : diffFromCity > 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400",
       label: "vs Ciudad",
-      value: `${diffFromCity > 0 ? "+" : ""}${diffFromCity.toFixed(1)}%`,
-      sub: diffFromCity > 0 ? "más caro" : "más barato",
+      value: noData ? "—" : `${diffFromCity > 0 ? "+" : ""}${diffFromCity.toFixed(1)}%`,
+      sub: noData ? "Sin datos" : diffFromCity > 0 ? "más caro" : "más barato",
       subColor: "text-slate-400",
       tooltip: "Diferencia porcentual del precio/m² de esta zona vs el promedio de toda Tijuana. Positivo = zona más cara que el promedio.",
     },

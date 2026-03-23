@@ -318,8 +318,20 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       {/* [B] KPI Ticker Strip */}
       <KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} />
 
-      {/* [B2] Low listings warning */}
-      {zone.total_listings < 3 && (
+      {/* [B2] No data / low data warning */}
+      {zone.total_listings === 0 && zone.avg_price_per_m2 === 0 ? (
+        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-5 flex items-center gap-3">
+          <Icon name="search_off" className="text-slate-400 text-xl" />
+          <div>
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">
+              Sin datos de {rawOp === "renta" ? "renta" : rawOp === "venta" ? "venta" : "este tipo"}{rawCat !== "todas" ? ` ${rawCat}` : ""} en esta zona
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Intenta cambiar los filtros de operación o categoría para ver datos disponibles.
+            </p>
+          </div>
+        </div>
+      ) : zone.total_listings < 3 && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
           <Icon name="info" className="text-amber-600 text-lg" />
           <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">

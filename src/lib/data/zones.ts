@@ -136,16 +136,24 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       }
     }
 
+    // Build prevSnapsQuery with same filters as latestSnapsQuery
+    let prevSnapsQuery = prevWeek
+      ? supabase
+          .from("snapshots")
+          .select("zone_id, avg_price_per_m2, count_active")
+          .eq("week_start", prevWeek)
+      : null
+    if (prevSnapsQuery) {
+      if (effectiveTypes?.length) prevSnapsQuery = prevSnapsQuery.in("property_type", effectiveTypes)
+      if (filters?.listing_type) prevSnapsQuery = prevSnapsQuery.eq("listing_type", filters.listing_type)
+      if (filterZoneIds?.length) prevSnapsQuery = prevSnapsQuery.in("zone_id", filterZoneIds)
+    }
+
     // Fetch zones, snapshots, and individual listings in parallel
     const [zonesRes, latestSnapsRes, prevSnapsRes, listingsRes] = await Promise.all([
       supabase.from("zones").select("*"),
       latestSnapsQuery,
-      prevWeek
-        ? supabase
-            .from("snapshots")
-            .select("zone_id, avg_price_per_m2, count_active")
-            .eq("week_start", prevWeek)
-        : Promise.resolve({ data: [] }),
+      prevSnapsQuery ?? Promise.resolve({ data: [] }),
       listingsQuery,
     ])
 
@@ -167,7 +175,22 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     }) ?? null
 
     if (!zones?.length || !latestSnaps?.length) {
-      // Apply basic filters to mock fallback
+      // When filtering by listing_type (venta/renta) and no snapshots exist,
+      // return empty metrics instead of mock data (which only has venta prices)
+      if (filters?.listing_type && zones?.length) {
+        return zones.map((zone) => ({
+          zone_id: zone.id,
+          zone_name: zone.name,
+          zone_slug: zone.slug,
+          avg_price_per_m2: 0,
+          price_trend_pct: 0,
+          avg_ticket: 0,
+          total_listings: 0,
+          listings_by_type: {} as Record<PropertyType, number>,
+          avg_ticket_by_type: {} as Record<PropertyType, number>,
+        }))
+      }
+      // No filters — safe to use mock fallback
       let fallback = TIJUANA_ZONES
       if (filters?.zonas?.length) {
         fallback = fallback.filter((z) => filters.zonas!.includes(z.zone_slug))
