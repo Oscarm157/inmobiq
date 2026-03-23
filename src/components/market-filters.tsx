@@ -14,6 +14,7 @@ import {
   countActiveFilters,
   type MarketFilterState,
 } from "@/lib/filter-utils"
+import { setPreferredCategoria, setPreferredOperacion } from "@/lib/preference-cookies"
 
 // Re-export for consumers that imported from this file
 export { buildMarketParams, parseMarketParams, type MarketFilterState } from "@/lib/filter-utils"
@@ -23,13 +24,25 @@ function preventScrollChange(e: React.WheelEvent<HTMLInputElement>) {
   (e.target as HTMLInputElement).blur()
 }
 
-export function MarketFilters() {
+interface MarketFiltersProps {
+  defaultOperacion?: string
+  defaultCategoria?: string
+}
+
+export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: MarketFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-  const [state, setState] = useState<MarketFilterState>(() => parseMarketParams(searchParams))
+  const [state, setState] = useState<MarketFilterState>(() => {
+    const parsed = parseMarketParams(searchParams)
+    return {
+      ...parsed,
+      listing_type: parsed.listing_type || (defaultOperacion as MarketFilterState["listing_type"]),
+      categoria: parsed.categoria || (defaultCategoria as MarketFilterState["categoria"]),
+    }
+  })
   const [open, setOpen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -88,6 +101,9 @@ export function MarketFilters() {
 
   const handleChange = (next: MarketFilterState) => {
     setState(next)
+    // Persist category/operation preference in cookie
+    if (next.categoria) setPreferredCategoria(next.categoria)
+    if (next.listing_type) setPreferredOperacion(next.listing_type)
     pushFilters(next)
   }
 
@@ -97,22 +113,25 @@ export function MarketFilters() {
   }
 
   const handleClear = () => {
-    const empty: MarketFilterState = {
-      tipos: [], zonas: [], listing_type: "", categoria: "",
+    const defaults: MarketFilterState = {
+      tipos: [], zonas: [],
+      listing_type: defaultOperacion as MarketFilterState["listing_type"],
+      categoria: defaultCategoria as MarketFilterState["categoria"],
       precio_min: "", precio_max: "",
       area_min: "", area_max: "",
       recamaras: [],
     }
-    setState(empty)
+    setState(defaults)
     isLocalUpdate.current = true
     if (debounceRef.current) clearTimeout(debounceRef.current)
+    // Clear URL params — server will re-apply cookie defaults
     startTransition(() => router.replace(pathname, { scroll: false }))
   }
 
   const toggle = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]
 
-  const activeCount = countActiveFilters(state)
+  const activeCount = countActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria })
 
   return (
     <div ref={panelRef}>
@@ -332,14 +351,14 @@ export function MarketFilters() {
             </div>
 
             {/* Footer: active filter chips + clear */}
-            {hasActiveFilters(state) && (
+            {hasActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria }) && (
               <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-slate-700">
                 <div className="flex flex-wrap gap-1.5">
-                  {state.listing_type && (
-                    <FilterChip label={state.listing_type === "venta" ? "Venta" : "Renta"} onRemove={() => handleChange({ ...state, listing_type: "" })} />
+                  {state.listing_type && state.listing_type !== defaultOperacion && (
+                    <FilterChip label={state.listing_type === "venta" ? "Venta" : "Renta"} onRemove={() => handleChange({ ...state, listing_type: defaultOperacion as MarketFilterState["listing_type"] })} />
                   )}
-                  {state.categoria && (
-                    <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: "" })} />
+                  {state.categoria && state.categoria !== defaultCategoria && (
+                    <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: defaultCategoria as MarketFilterState["categoria"] })} />
                   )}
                   {state.tipos.map((t) => (
                     <FilterChip key={t} label={PROPERTY_TYPES.find((p) => p.value === t)?.label ?? t} onRemove={() => handleChange({ ...state, tipos: state.tipos.filter((x) => x !== t) })} />

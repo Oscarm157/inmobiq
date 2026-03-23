@@ -12,6 +12,7 @@ interface ZoneCardProps {
   zone: ZoneMetrics
   rank?: number
   maxListings?: number
+  filterParams?: string
 }
 
 const TYPE_LABELS: Record<string, { short: string; icon: string }> = {
@@ -22,7 +23,7 @@ const TYPE_LABELS: Record<string, { short: string; icon: string }> = {
   oficina: { short: "Oficina", icon: "business" },
 }
 
-export function ZoneCard({ zone, rank, maxListings }: ZoneCardProps) {
+export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProps) {
   const { formatPrice } = useCurrency()
   const isPositive = zone.price_trend_pct > 0
   const priceColor = getPriceColor(zone.avg_price_per_m2)
@@ -39,7 +40,7 @@ export function ZoneCard({ zone, rank, maxListings }: ZoneCardProps) {
     : 0
 
   return (
-    <Link href={`/zona/${zone.zone_slug}`} className="group">
+    <Link href={`/zona/${zone.zone_slug}${filterParams ? `?${filterParams}` : ""}`} className="group">
       <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300 border border-slate-100">
         {/* Header */}
         <div className="flex justify-between items-start mb-3">

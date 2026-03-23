@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useTransition } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { setPreferredCategoria, setPreferredOperacion } from "@/lib/preference-cookies"
 
 type Operacion = "venta" | "renta" | ""
 type Categoria = "residencial" | "comercial" | "terreno" | ""
@@ -32,6 +33,10 @@ export function ZoneFilters() {
 
   const pushParams = useCallback(
     (op: Operacion, cat: Categoria) => {
+      // Persist preference in cookie (only specific values, not "todas")
+      if (cat) setPreferredCategoria(cat)
+      if (op) setPreferredOperacion(op)
+
       const p = new URLSearchParams()
       // Only add params that differ from the default (venta+residencial)
       if (op && op !== "venta") p.set("operacion", op)

@@ -26,8 +26,10 @@ import { MarketIntelligence } from "@/components/market-intelligence"
 import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
 import { MarketDensityScatter } from "@/components/market-density-scatter"
 import type { DensityBubble } from "@/components/market-density-scatter"
+import { cookies } from "next/headers"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"
+import { COOKIE_CATEGORIA, COOKIE_OPERACION, parseCategoria, parseOperacion } from "@/lib/preference-cookies"
 
 interface SearchParams {
   tipo?: string
@@ -48,6 +50,11 @@ export default async function HomePage({
 }) {
   const sp = await searchParams
 
+  // Read persistent preferences from cookies (fallback: venta + residencial)
+  const cookieStore = await cookies()
+  const cookieOp = parseOperacion(cookieStore.get(COOKIE_OPERACION)?.value)
+  const cookieCat = parseCategoria(cookieStore.get(COOKIE_CATEGORIA)?.value)
+
   // Sanitize and parse filter params
   const safeNum = (val?: string): number | undefined => {
     if (!val) return undefined
@@ -66,10 +73,10 @@ export default async function HomePage({
     zonas: sp.zona ? sp.zona.split(",") : undefined,
     listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
       ? (sp.operacion as ListingType)
-      : undefined,
+      : (sp.operacion === "todas" ? undefined : cookieOp as ListingType),
     categoria: sp.categoria && VALID_CATS.has(sp.categoria)
       ? (sp.categoria as "residencial" | "comercial" | "terreno")
-      : undefined,
+      : (sp.categoria === "todas" ? undefined : cookieCat),
     precio_min: safeNum(sp.precio_min),
     precio_max: safeNum(sp.precio_max),
     area_min: safeNum(sp.area_min),
@@ -123,7 +130,7 @@ export default async function HomePage({
                 Filtros
               </button>
             }>
-              <MarketFilters />
+              <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
             </Suspense>
             <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
               <Icon name="ios_share" className="text-sm" />
@@ -258,10 +265,23 @@ export default async function HomePage({
         {(() => {
           const sorted = [...zones].sort((a, b) => b.total_listings - a.total_listings)
           const maxListings = sorted[0]?.total_listings ?? 1
+
+          // Build filter params for zone links (only include non-default values)
+          const zfp = new URLSearchParams()
+          if (filters.listing_type && filters.listing_type !== cookieOp) {
+            zfp.set("operacion", filters.listing_type)
+          }
+          if (filters.categoria && filters.categoria !== cookieCat) {
+            zfp.set("categoria", filters.categoria)
+          }
+          if (sp.operacion === "todas") zfp.set("operacion", "todas")
+          if (sp.categoria === "todas") zfp.set("categoria", "todas")
+          const zoneFilterStr = zfp.toString()
+
           return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {sorted.map((zone, i) => (
-                <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} />
+                <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} filterParams={zoneFilterStr} />
               ))}
             </div>
           )
