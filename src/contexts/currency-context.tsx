@@ -1,10 +1,11 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
+import { USD_TO_MXN } from "@/lib/data/normalize"
 
 export type CurrencyCode = "MXN" | "USD"
 
-const DEFAULT_EXCHANGE_RATE = 17.5
+const DEFAULT_EXCHANGE_RATE = USD_TO_MXN
 
 interface CurrencyContextType {
   currency: CurrencyCode

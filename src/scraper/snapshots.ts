@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { PropertyType, ListingType } from "@/types/database";
-import { isValidListing } from "@/lib/data/normalize";
+import { isValidListing, effectivePriceMxn } from "@/lib/data/normalize";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -11,13 +11,9 @@ function getSupabaseClient() {
   return createClient(url, key);
 }
 
-const USD_TO_MXN = 17.5; // Approximate exchange rate for price normalization
-
 /** Get the effective price in MXN (using USD conversion as fallback) */
 function effectivePrice(l: ListingRow): number | null {
-  if (l.price_mxn) return l.price_mxn;
-  if (l.price_usd) return l.price_usd * USD_TO_MXN;
-  return null;
+  return effectivePriceMxn(l.price_mxn, l.price_usd);
 }
 
 /** Get the start of the current ISO week (Monday) */
