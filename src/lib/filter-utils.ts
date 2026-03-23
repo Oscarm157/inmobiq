@@ -128,12 +128,19 @@ export function parseMarketParams(sp: URLSearchParams): MarketFilterState {
   }
 }
 
-export function hasActiveFilters(state: MarketFilterState) {
+interface FilterDefaults {
+  listing_type?: string
+  categoria?: string
+}
+
+export function hasActiveFilters(state: MarketFilterState, defaults?: FilterDefaults) {
+  const defOp = defaults?.listing_type ?? ""
+  const defCat = defaults?.categoria ?? ""
   return (
     state.tipos.length > 0 ||
     state.zonas.length > 0 ||
-    state.listing_type !== "" ||
-    state.categoria !== "" ||
+    (state.listing_type !== "" && state.listing_type !== defOp) ||
+    (state.categoria !== "" && state.categoria !== defCat) ||
     state.precio_min !== "" ||
     state.precio_max !== "" ||
     state.area_min !== "" ||
@@ -142,12 +149,14 @@ export function hasActiveFilters(state: MarketFilterState) {
   )
 }
 
-export function countActiveFilters(state: MarketFilterState) {
+export function countActiveFilters(state: MarketFilterState, defaults?: FilterDefaults) {
+  const defOp = defaults?.listing_type ?? ""
+  const defCat = defaults?.categoria ?? ""
   return (
     state.tipos.length +
     state.zonas.length +
-    (state.listing_type ? 1 : 0) +
-    (state.categoria ? 1 : 0) +
+    (state.listing_type && state.listing_type !== defOp ? 1 : 0) +
+    (state.categoria && state.categoria !== defCat ? 1 : 0) +
     (state.precio_min || state.precio_max ? 1 : 0) +
     (state.area_min || state.area_max ? 1 : 0) +
     state.recamaras.length

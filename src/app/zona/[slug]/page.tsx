@@ -31,6 +31,11 @@ import { DEV_DRILLDOWN } from "@/lib/dev-flags"
 import type { DrillDownListing } from "@/components/zone/drill-down-panel"
 import type { PropertyType, ListingType, ZoneMetrics, Listing } from "@/types/database"
 import type { PropertyCategory } from "@/lib/data/normalize"
+import { cookies } from "next/headers"
+import { COOKIE_CATEGORIA, COOKIE_OPERACION, parseCategoria, parseOperacion } from "@/lib/preference-cookies"
+
+// Force dynamic rendering — page reads cookies() for user preferences
+export const dynamic = "force-dynamic"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -69,12 +74,17 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   const { slug } = await params
   const sp = await searchParams
 
-  // Parse filters with investor-friendly defaults: venta + residencial
+  // Read persistent preferences from cookies (fallback: venta + residencial)
+  const cookieStore = await cookies()
+  const cookieOp = parseOperacion(cookieStore.get(COOKIE_OPERACION)?.value)
+  const cookieCat = parseCategoria(cookieStore.get(COOKIE_CATEGORIA)?.value)
+
+  // Parse filters — URL params override cookie, cookie overrides hardcoded defaults
   const VALID_OPS = new Set(["venta", "renta", "todas"])
   const VALID_CATS = new Set(["residencial", "comercial", "terreno", "todas"])
 
-  const rawOp = sp.operacion && VALID_OPS.has(sp.operacion) ? sp.operacion : "venta"
-  const rawCat = sp.categoria && VALID_CATS.has(sp.categoria) ? sp.categoria : "residencial"
+  const rawOp = sp.operacion && VALID_OPS.has(sp.operacion) ? sp.operacion : cookieOp
+  const rawCat = sp.categoria && VALID_CATS.has(sp.categoria) ? sp.categoria : cookieCat
 
   const filters: ListingFilters = {
     zonas: [slug],
@@ -331,7 +341,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
       {/* [A2] Zone Filters */}
       <Suspense fallback={<div className="h-10" />}>
-        <ZoneFilters />
+        <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
       </Suspense>
 
       {/* [B] KPI Ticker Strip */}
