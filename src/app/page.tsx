@@ -159,6 +159,9 @@ export default async function HomePage({
         />
       </div>
 
+      {/* ─── 2b. Mini Map ─── */}
+      <MiniMapWrapper zones={zones} />
+
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
       <PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} />
 
@@ -261,9 +264,6 @@ export default async function HomePage({
           <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
             Ver mapa <Icon name="arrow_forward" className="text-sm" />
           </a>
-        </div>
-        <div className="mb-6">
-          <MiniMapWrapper zones={zones} />
         </div>
         {(() => {
           const sorted = [...zones].sort((a, b) => b.total_listings - a.total_listings)
