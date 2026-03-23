@@ -1,12 +1,16 @@
+"use client"
+
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { formatCurrency } from "@/lib/utils"
 
 interface KPIInventarioProps {
   medianPrice: number
+  avgPrice: number
   listingType?: string
 }
 
-export function KPIInventario({ medianPrice, listingType }: KPIInventarioProps) {
+export function KPIInventario({ medianPrice, avgPrice, listingType }: KPIInventarioProps) {
   const isRenta = listingType === "renta"
 
   return (
@@ -17,17 +21,34 @@ export function KPIInventario({ medianPrice, listingType }: KPIInventarioProps) 
         </div>
         <div className="text-right">
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
-            Ticket Promedio
+            {isRenta ? "Ticket Renta" : "Ticket Venta"}
           </p>
-          <h4 className="text-2xl font-black">
-            {medianPrice > 0 ? formatCurrency(medianPrice) : "Sin datos"}
-          </h4>
+          <p className="text-[9px] text-slate-400 mt-0.5">Tijuana</p>
         </div>
       </div>
-      <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-lg">
-        <p className="text-[10px] font-medium text-indigo-800 leading-tight">
-          {isRenta ? "Renta mediana mensual" : "Precio mediano de venta"} en Tijuana
-        </p>
+
+      <div className="space-y-3">
+        {/* Mediana */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-500">Mediana</span>
+            <InfoTooltip content="El valor del medio: 50% de las propiedades cuestan más y 50% menos. Más estable que el promedio porque no se distorsiona con precios extremos." />
+          </div>
+          <span className="text-xl font-black text-slate-800">
+            {medianPrice > 0 ? formatCurrency(medianPrice) : "—"}
+          </span>
+        </div>
+
+        {/* Promedio */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-500">Promedio</span>
+            <InfoTooltip content="La suma de todos los precios dividida entre el total. Puede ser más alto que la mediana si hay propiedades muy caras que jalan el número hacia arriba." />
+          </div>
+          <span className="text-lg font-bold text-slate-600">
+            {avgPrice > 0 ? formatCurrency(avgPrice) : "—"}
+          </span>
+        </div>
       </div>
     </div>
   )

@@ -220,6 +220,7 @@ export interface ListingsAnalytics {
   offerConcentration: { zone_name: string; zone_slug: string; count: number; pct: number }[]
   totalListings: number
   medianPrice: number
+  avgPrice: number
 }
 
 export interface ZoneListingsAnalytics {
@@ -298,6 +299,7 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
       offerConcentration,
       totalListings,
       medianPrice: 3850000,
+      avgPrice: 4200000,
     }
   }
 
@@ -305,6 +307,7 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
   const totalListings = filtered.length
   const withPrice = filtered.filter((l) => l.price > 0)
   const medianPrice = median(withPrice.map((l) => l.price))
+  const avgPrice = withPrice.length > 0 ? Math.round(withPrice.reduce((s, l) => s + l.price, 0) / withPrice.length) : 0
 
   // pricePerM2ByZone
   const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
@@ -350,7 +353,7 @@ function mockListingsAnalytics(filters: ListingFilters = {}): ListingsAnalytics 
     .map((z) => ({ zone_name: z.name, zone_slug: z.slug, count: z.count, pct: pct(z.count, totalListings) }))
     .sort((a, b) => b.count - a.count)
 
-  return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice }
+  return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice, avgPrice }
 }
 
 function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
@@ -467,10 +470,11 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
 
     if (listings.length === 0) return mockListingsAnalytics(filters)
 
-    // --- totalListings & medianPrice ---
+    // --- totalListings, medianPrice & avgPrice ---
     const withPrice = listings.filter((l) => l.price > 0)
     const totalListings = listings.length
     const medianPrice = median(withPrice.map((l) => l.price))
+    const avgPrice = withPrice.length > 0 ? Math.round(withPrice.reduce((s, l) => s + l.price, 0) / withPrice.length) : 0
 
     // --- pricePerM2ByZone ---
     const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
@@ -514,7 +518,7 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
       .map((z) => ({ zone_name: z.name, zone_slug: z.slug, count: z.count, pct: pct(z.count, totalListings) }))
       .sort((a, b) => b.count - a.count)
 
-    return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice }
+    return { pricePerM2ByZone, priceDistribution, compositionByType, offerConcentration, totalListings, medianPrice, avgPrice }
   } catch {
     return mockListingsAnalytics()
   }

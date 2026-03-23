@@ -150,6 +150,7 @@ export default async function HomePage({
         />
         <KPIInventario
           medianPrice={analytics.medianPrice}
+          avgPrice={analytics.avgPrice}
           listingType={filters.listing_type}
         />
         <KPIComposicion
