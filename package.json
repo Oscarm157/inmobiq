@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "scrape": "node node_modules/tsx/dist/cli.mjs scripts/scrape.ts",
-    "scrape:dry": "node node_modules/tsx/dist/cli.mjs scripts/scrape.ts --dry-run"
+    "scrape:dry": "node node_modules/tsx/dist/cli.mjs scripts/scrape.ts --dry-run",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit": "node node_modules/tsx/dist/cli.mjs scripts/audit-data.ts"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
