@@ -82,10 +82,11 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     categoria: rawCat !== "todas" ? (rawCat as PropertyCategory) : undefined,
   }
 
-  const [zone, city, allZones, { listings }, zoneAnalytics, riskMetrics] = await Promise.all([
+  const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics] = await Promise.all([
     getZoneBySlug(slug, filters),
     getCityMetrics(filters),
     getZoneMetrics(),
+    getZoneMetrics(filters),
     getListings(filters),
     getZoneListingsAnalytics(slug, filters),
     getZoneRiskMetrics(),
@@ -400,7 +401,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           {(() => {
             const demo = getZoneDemographics(slug)
             const risk = riskMetrics.find((r) => r.zone_slug === slug) ?? null
-            const insights = computeZoneInsights(demo, zone, risk, allZones)
+            const insights = computeZoneInsights(demo, zone, risk, allZonesFiltered)
             return insights ? <ZoneInsightsCard insights={insights} /> : null
           })()}
 

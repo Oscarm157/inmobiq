@@ -44,14 +44,22 @@ export function computeZoneInsights(
 
   // --- Affordability Index ---
   // High price + low NSE = low affordability
-  // Normalize price relative to city max
-  const maxPrice = Math.max(...allMetrics.map((m) => m.avg_price_per_m2), 1)
-  const priceNorm = (metrics.avg_price_per_m2 / maxPrice) * 100
+  // Normalize price relative to city median (more robust than max)
+  const prices = allMetrics.map((m) => m.avg_price_per_m2).sort((a, b) => a - b)
+  const medianPrice = prices.length > 0
+    ? prices[Math.floor(prices.length / 2)]
+    : 1
+  // Ratio > 1 means above median price, < 1 means below
+  const priceRatio = metrics.avg_price_per_m2 / Math.max(medianPrice, 1)
   const nse = demo.nse_score
-  // Affordability = how much NSE "covers" the price level
-  // If NSE is high and price is low → very affordable (high score)
+  // nseNorm: 0-100 rescaled so median NSE (~55) maps to ~0.5
+  const nseNorm = nse / 100
+  // Affordability = NSE capacity vs price level
+  // ratio approach: high NSE + low price → high score, but capped by price level
+  // priceRatio of 2.0 means twice the median → expensive
+  // nseNorm of 0.65 means above-average socioeconomic level
   const affordability = nse > 0
-    ? clamp(100 - (priceNorm - nse * 0.8))
+    ? clamp(Math.round((nseNorm / Math.max(priceRatio, 0.3)) * 80))
     : 0
 
   // --- Demand Pressure ---
