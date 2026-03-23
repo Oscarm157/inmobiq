@@ -27,6 +27,8 @@ import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
 import { filterNormalizedListings, removeOutliers } from "@/lib/data/normalize"
+import { DEV_DRILLDOWN } from "@/lib/dev-flags"
+import type { DrillDownListing } from "@/components/zone/drill-down-panel"
 import type { PropertyType, ListingType, ZoneMetrics, Listing } from "@/types/database"
 import type { PropertyCategory } from "@/lib/data/normalize"
 
@@ -93,13 +95,13 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   // Normalize: filter out invalid pricing
   const normalizedListings = filterNormalizedListings(listings as Listing[])
 
-  const cityAvg = city.avg_price_per_m2
+  const cityAvg = city.avg_price_per_m2 || 1 // guard against division by zero
 
   // Determine top property type
-  const sortedTypes = Object.entries(zone.listings_by_type).sort(
-    ([, a], [, b]) => b - a
-  )
-  const topType = sortedTypes[0]
+  const sortedTypes = Object.entries(zone.listings_by_type)
+    .filter(([, count]) => count > 0)
+    .sort(([, a], [, b]) => b - a)
+  const topType = sortedTypes[0] ?? ["casa", 0]
   const topTypeKey = topType[0] as PropertyType
   const topLabel = PROPERTY_LABELS[topTypeKey].toLowerCase()
   const topPct = zone.total_listings > 0
@@ -177,8 +179,9 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       : null
 
   // --- Clean data for charts (remove statistical outliers) ---
-  const allListings = normalizedListings
-  const chartListings = removeOutliers(allListings, (l) => l.price)
+  // validListings = price-validated, chartListings = also IQR-cleaned for graphs
+  const validListings = normalizedListings
+  const chartListings = removeOutliers(validListings, (l) => l.price)
 
   // --- Price distribution data (use clean set) ---
   const priceRanges = [
@@ -197,6 +200,19 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     })
     .filter((d) => d.count > 0)
 
+  // Dev drill-down: build listings-by-range map (only when feature flag is on)
+  const toDevListing = (l: Listing): DrillDownListing => ({
+    id: l.id, title: l.title, property_type: l.property_type, listing_type: l.listing_type,
+    price: l.price, area_m2: l.area_m2, price_per_m2: l.price_per_m2,
+    bedrooms: l.bedrooms, bathrooms: l.bathrooms, source: l.source, source_url: l.source_url,
+  })
+  const listingsByRange = DEV_DRILLDOWN
+    ? Object.fromEntries(priceRanges.map((r) => [
+        r.range,
+        chartListings.filter((l) => l.price >= r.min && l.price < r.max).map(toDevListing),
+      ]))
+    : undefined
+
   // --- Scatter data (m² vs price, outlier-cleaned) ---
   const scatterData = chartListings
     .filter((l) => l.area_m2 > 0 && l.price > 0)
@@ -205,12 +221,17 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       price: Math.round(l.price),
       type: l.property_type,
       title: l.title,
+      // Dev drill-down: include listing details when flag is on
+      ...(DEV_DRILLDOWN ? {
+        id: l.id, listing_type: l.listing_type, price_per_m2: l.price_per_m2,
+        bedrooms: l.bedrooms, bathrooms: l.bathrooms, source: l.source, source_url: l.source_url,
+      } : {}),
     }))
   const scatterTypes = [...new Set(scatterData.map((d) => d.type))]
 
   // --- Venta vs Renta data ---
-  const ventaListings = allListings.filter((l) => l.listing_type === "venta")
-  const rentaListings = allListings.filter((l) => l.listing_type === "renta")
+  const ventaListings = validListings.filter((l) => l.listing_type === "venta")
+  const rentaListings = validListings.filter((l) => l.listing_type === "renta")
   const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
   const ventaRentaData = {
     ventaCount: ventaListings.length,
@@ -224,7 +245,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   }
 
   // --- Market quality data (extracted from raw_data) ---
-  const rawListings = allListings.filter((l) => l.raw_data)
+  const rawListings = validListings.filter((l) => l.raw_data)
   const photoCounts = rawListings.map((l) => {
     const rd = l.raw_data!
     const pics = (rd.visible_pictures as { pictures?: unknown[]; additional_pictures_count?: number } | undefined)
@@ -232,7 +253,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     const additional = pics?.additional_pictures_count ?? 0
     return listed + additional
   })
-  const withGPS = allListings.filter((l) => {
+  const withGPS = validListings.filter((l) => {
     // Check if listing has lat/lng via raw_data geolocation
     const geo = (l.raw_data?.posting_location as { posting_geolocation?: { geolocation?: { latitude: number } } } | undefined)
     return geo?.posting_geolocation?.geolocation?.latitude != null
@@ -254,10 +275,10 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   const marketQualityData = {
     avgPhotos: photoCounts.length > 0 ? photoCounts.reduce((a, b) => a + b, 0) / photoCounts.length : 0,
-    pctWithGPS: allListings.length > 0 ? Math.round((withGPS / allListings.length) * 100) : 0,
+    pctWithGPS: validListings.length > 0 ? Math.round((withGPS / validListings.length) * 100) : 0,
     pctPremium: rawListings.length > 0 ? Math.round((premiumCount / rawListings.length) * 100) : 0,
     avgPropertyAge: ages.length > 0 ? ages.reduce((a, b) => a + b, 0) / ages.length : null,
-    totalListings: allListings.length,
+    totalListings: validListings.length,
   }
 
   return (
@@ -325,8 +346,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       <div className="grid grid-cols-12 gap-6">
         {/* Left Column — Charts + Editorial */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
-          <PriceDistributionChart data={priceDistData} />
-          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} />
+          <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
+          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
           <PropertyCompositionChart data={compositionData} />
           <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
           <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />

@@ -146,6 +146,21 @@ export interface PipelineProject {
   investor_label: string;
 }
 
+// Data quality reports (dev tool)
+export type DataReportChartType = "price_distribution" | "scatter" | "concentration" | "ticket_promedio" | "other";
+export type DataReportStatus = "open" | "resolved" | "dismissed";
+
+export interface DataReport {
+  id: string;
+  user_id: string | null;
+  zone_slug: string;
+  chart_type: DataReportChartType;
+  chart_context: Record<string, unknown>;
+  description: string;
+  status: DataReportStatus;
+  created_at: string;
+}
+
 // Supabase Database type
 export interface Database {
   public: {
@@ -179,6 +194,18 @@ export interface Database {
         Row: { id: string; email: string; full_name: string | null; avatar_url: string | null; role: UserRole; created_at: string; updated_at: string };
         Insert: { id: string; email: string; full_name?: string | null; avatar_url?: string | null; role?: UserRole };
         Update: Partial<{ full_name: string | null; avatar_url: string | null; role: UserRole }>;
+      };
+      data_reports: {
+        Row: DataReport;
+        Insert: {
+          user_id: string;
+          zone_slug: string;
+          chart_type: DataReportChartType;
+          chart_context?: Record<string, unknown>;
+          description: string;
+          status?: DataReportStatus;
+        };
+        Update: Partial<{ status: DataReportStatus }>;
       };
       scrape_jobs: {
         Row: ScrapeJob;

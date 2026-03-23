@@ -13,6 +13,7 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { Icon } from "@/components/icon"
 
 const TYPE_COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -34,20 +35,32 @@ const chartConfig = {
   price: { label: "Precio", color: "#2563eb" },
 } satisfies ChartConfig
 
-interface ScatterPoint {
+export interface ScatterPoint {
   area: number
   price: number
   type: string
   title: string
+  /** Dev-only fields for drill-down */
+  id?: string
+  listing_type?: string
+  price_per_m2?: number
+  bedrooms?: number | null
+  bathrooms?: number | null
+  source?: string
+  source_url?: string
 }
 
 interface PriceAreaScatterProps {
   data: ScatterPoint[]
   availableTypes: string[]
+  /** Dev mode: enable point inspection */
+  devMode?: boolean
+  zoneSlug?: string
 }
 
-export function PriceAreaScatter({ data, availableTypes }: PriceAreaScatterProps) {
+export function PriceAreaScatter({ data, availableTypes, devMode, zoneSlug }: PriceAreaScatterProps) {
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set(availableTypes))
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
   if (!data.length) return null
 
@@ -71,11 +84,16 @@ export function PriceAreaScatter({ data, availableTypes }: PriceAreaScatterProps
     return `$${v}`
   }
 
+  const selected = selectedIdx !== null ? filteredData[selectedIdx] : null
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-3">
         <h3 className="text-sm font-bold text-slate-800">Precio vs Área</h3>
-        <p className="text-xs text-slate-500 mt-1">¿Pagas más por más metros? Cada punto = 1 propiedad · Abajo-derecha = más m² por menos precio (mejor valor)</p>
+        <p className="text-xs text-slate-500 mt-1">
+          ¿Pagas más por más metros? Cada punto = 1 propiedad · Abajo-derecha = más m² por menos precio (mejor valor)
+          {devMode && <span className="text-amber-500 ml-1">· clic en punto para inspeccionar</span>}
+        </p>
       </div>
 
       {/* Type Filters */}
@@ -128,22 +146,62 @@ export function PriceAreaScatter({ data, availableTypes }: PriceAreaScatterProps
             tickFormatter={formatPrice}
             width={60}
           />
-          <Scatter data={filteredData}>
+          <Scatter
+            data={filteredData}
+            cursor={devMode ? "pointer" : undefined}
+            onClick={devMode ? (_: unknown, index: number) => {
+              setSelectedIdx((prev) => prev === index ? null : index)
+            } : undefined}
+          >
             {filteredData.map((entry, i) => (
               <Cell
                 key={i}
                 fill={TYPE_COLORS[entry.type] ?? "#6b7280"}
-                fillOpacity={0.45}
+                fillOpacity={selectedIdx === i ? 0.9 : 0.45}
                 stroke={TYPE_COLORS[entry.type] ?? "#6b7280"}
-                strokeOpacity={0.7}
-                strokeWidth={1}
-                r={14}
+                strokeOpacity={selectedIdx === i ? 1 : 0.7}
+                strokeWidth={selectedIdx === i ? 2 : 1}
+                r={selectedIdx === i ? 18 : 14}
               />
             ))}
           </Scatter>
         </ScatterChart>
       </ChartContainer>
 
+      {/* Dev: Selected point detail */}
+      {devMode && selected?.id && (
+        <div className="mt-3 border border-amber-200 dark:border-amber-800 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Icon name="bug_report" className="text-amber-600 text-sm" />
+              <span className="text-xs font-bold text-amber-800 dark:text-amber-300">DEV · Detalle del punto</span>
+            </div>
+            <button onClick={() => setSelectedIdx(null)} className="text-amber-500 hover:text-amber-700">
+              <Icon name="close" className="text-sm" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div><span className="text-amber-600 font-bold">Título:</span> {selected.title}</div>
+            <div><span className="text-amber-600 font-bold">Tipo:</span> {TYPE_LABELS[selected.type] ?? selected.type}</div>
+            <div>
+              <span className="text-amber-600 font-bold">Op:</span>{" "}
+              <span className={selected.listing_type === "renta" ? "text-orange-600 font-bold" : ""}>
+                {selected.listing_type ?? "—"}
+              </span>
+            </div>
+            <div><span className="text-amber-600 font-bold">Precio:</span> {formatPrice(selected.price)}</div>
+            <div><span className="text-amber-600 font-bold">Área:</span> {selected.area}m²</div>
+            <div><span className="text-amber-600 font-bold">$/m²:</span> {selected.price_per_m2 ? formatPrice(Math.round(selected.price_per_m2)) : "—"}</div>
+            <div><span className="text-amber-600 font-bold">Rec:</span> {selected.bedrooms ?? "—"}</div>
+            <div>
+              <span className="text-amber-600 font-bold">Fuente:</span>{" "}
+              {selected.source_url && selected.source_url !== "#" ? (
+                <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{selected.source}</a>
+              ) : (selected.source ?? "—")}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -27,9 +27,65 @@
 
 ### Datos de mercado
 - **Listings**: precio, area_m2, price_per_m2, recámaras, baños, tipo (casa/depto/terreno/local/oficina)
-- **Snapshots**: agregados semanales por zona (count, avg/median/min/max price, price/m²)
+- **Snapshots**: agregados semanales por zona+property_type+listing_type (count, avg/median/min/max price, price/m²)
 - **ZoneMetrics**: avg_price_per_m2, price_trend_pct, avg_ticket, total_listings, listings_by_type
 - **ZoneRiskMetrics**: risk_score (incluye factor demográfico), volatility, cap_rate, vacancy_rate, liquidity_score
+
+### Normalización de datos (`src/lib/data/normalize.ts`)
+
+#### Categorías de propiedad
+| Categoría | Tipos | Caso de uso |
+|-----------|-------|-------------|
+| `residencial` | casa, departamento | Inversión habitacional — el default para inversionistas |
+| `comercial` | local, oficina | Inversión comercial — KPIs y métricas diferentes |
+| `terreno` | terreno | Desarrollo — sin recámaras/baños, solo m² y precio |
+
+#### Reglas de precio absoluto (MXN)
+Cualquier listing fuera de estos rangos se descarta como dato inválido:
+
+| Operación | Categoría | Mínimo | Máximo | Lógica |
+|-----------|-----------|--------|--------|--------|
+| **Venta** | Residencial | $300,000 | $50,000,000 | No hay casas <$300K en Tijuana 2025 |
+| **Venta** | Comercial | $200,000 | $100,000,000 | |
+| **Venta** | Terreno | $100,000 | $80,000,000 | |
+| **Renta** | Residencial | $3,000 | $150,000 | Renta mensual |
+| **Renta** | Comercial | $3,000 | $500,000 | Bodegas/locales grandes |
+| **Renta** | Terreno | $1,000 | $200,000 | |
+
+#### Reglas de precio/m² (MXN/m²)
+Se valida adicionalmente contra rango de precio por metro cuadrado:
+
+| Operación | Categoría | Min/m² | Max/m² |
+|-----------|-----------|--------|--------|
+| **Venta** | Residencial | $3,000 | $200,000 |
+| **Venta** | Comercial | $5,000 | $300,000 |
+| **Venta** | Terreno | $1,000 | $100,000 |
+| **Renta** | Residencial | $30 | $2,000 |
+| **Renta** | Comercial | $30 | $5,000 |
+| **Renta** | Terreno | $5 | $1,000 |
+
+#### Remoción de outliers (IQR)
+Para gráficas (scatter, distribución), se usa el método IQR con multiplicador 2.0:
+- Q1 = percentil 25, Q3 = percentil 75, IQR = Q3 - Q1
+- Rango válido: [Q1 - 2×IQR, Q3 + 2×IQR]
+- Solo para visualización — KPIs usan datos completos filtrados
+- Multiplicador 2.0 (no 1.5) porque precios inmobiliarios son naturalmente sesgados a la derecha
+- Función: `removeOutliers(items, getValue, multiplier)`
+
+#### Flujo de normalización
+```
+Listing scrapeado → isValidListing() → filterNormalizedListings()
+  ↓ pasa validación?
+  SÍ → entra a métricas de zona, snapshots, gráficas
+  NO → descartado (reason: price_too_low | price_too_high | price_per_m2_out_of_range | missing_data)
+```
+
+### Filtros de zona (`/zona/[slug]`)
+- **Defaults**: `operacion=venta` + `categoria=residencial` (perfil inversionista)
+- **URL params**: `?operacion=renta&categoria=comercial` cambia la vista
+- **Componente**: `src/components/zone/zone-filters.tsx` — toggles Operación + Categoría
+- Los filtros se pasan a: `getZoneBySlug`, `getListings`, `getZoneListingsAnalytics`, `getCityMetrics`
+- Todas las gráficas, KPIs y cards reciben datos ya filtrados
 
 ### Indicadores cruzados (INEGI × Mercado)
 - `src/lib/data/zone-insights.ts` — affordability_index, demand_pressure, appreciation_potential
@@ -47,9 +103,26 @@
 | `src/lib/data/risk.ts` | Métricas de riesgo (con factor demográfico) |
 | `src/lib/data/comparator.ts` | Comparación entre zonas |
 | `src/scraper/zone-assigner.ts` | Asignación de propiedades a zonas |
+| `src/lib/data/normalize.ts` | Validación de precios, categorías, remoción de outliers |
+| `src/lib/filter-utils.ts` | URL ↔ filtros (tipos, zonas, operación, categoría) |
+| `src/components/zone/zone-filters.tsx` | UI: toggles Operación + Categoría en zona |
 | `src/components/zone/demographics-card.tsx` | UI: perfil demográfico con NSE |
 | `src/components/zone/zone-insights-card.tsx` | UI: indicadores cruzados |
 | `src/components/comparar/demographic-comparison.tsx` | UI: radar + tabla demográfica en comparador |
+
+### Drill-down de debug (dev-only)
+
+**IMPORTANTE: Esta funcionalidad NO es parte del producto final.** Los listings individuales no se muestran al usuario final — las propiedades no pertenecen a la plataforma.
+
+- **Feature flag**: `NEXT_PUBLIC_DEV_DRILLDOWN=true` en `.env.local` para activar
+- **Sin la variable**: todo se ve exactamente como el producto final, sin drill-down
+- **Con la variable**: clic en barras de distribución de precios o puntos del scatter revela los listings detrás
+- **Archivo flag**: `src/lib/dev-flags.ts`
+- **Panel**: `src/components/zone/drill-down-panel.tsx` — muestra tabla con listing_type badge (V=venta, R=renta)
+- **Reportes**: botón "Reportar" guarda en Supabase (`data_reports` table) con contexto automático (zona, gráfica, rango, IDs)
+- **API**: `POST /api/data-reports` — requiere autenticación
+- **Migración**: `supabase/migrations/20260323_data_reports.sql`
+- **Para apagar en producción**: simplemente no setear `NEXT_PUBLIC_DEV_DRILLDOWN` en Vercel
 
 ## Convenciones
 - Componentes server por defecto; "use client" solo cuando necesario
@@ -57,3 +130,16 @@
 - Precios siempre en MXN internamente; conversión USD en frontend via `useCurrency()`
 - Activity labels cualitativos en vez de conteos exactos de listings
 - Los archivos generados (demographics.ts, geo-data.ts) NO se editan manualmente
+
+## Roadmap
+
+### Próximo: Tooltips informativos en gráficas
+- Agregar tooltips sutiles a cada gráfica/card explicando qué muestra y cómo interpretarla
+- Ejemplos: scatter ("cada punto = 1 propiedad, abajo-derecha = mejor valor"), distribución de precios, índice de concentración
+- Objetivo: que cualquier usuario entienda las gráficas sin conocimiento previo
+
+### Futuro: Perfiles de usuario por nicho
+- Quiz/onboarding para determinar perfil del inversionista
+- Perfiles: residencial-venta, residencial-renta, comercial, desarrollo (terrenos)
+- KPIs y cards especializados por perfil (ej: cap rate solo para renta, yield, ROI)
+- Dashboard personalizado según perfil seleccionado
