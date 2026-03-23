@@ -1,4 +1,6 @@
 import type { Zone } from "./types";
+import { booleanPointInPolygon, point } from "@turf/turf";
+import { ZONE_GEOJSON } from "@/lib/geo-data";
 
 // ─── Normalization ──────────────────────────────────────────────────────────
 
@@ -93,60 +95,49 @@ export function matchColoniaToZone(
   return bestMatch;
 }
 
-// ─── Bounding box (secondary check) ────────────────────────────────────────
+// ─── Title-based zone extraction ────────────────────────────────────────────
 
-type BoundingBox = [number, number, number, number];
+/**
+ * Extract zone name from listing title as a fallback.
+ * Titles often contain zone references: "Depto en Zona Rio", "Casa en Playas".
+ * Uses same fuzzy matching as colonia but against the full title text.
+ */
+function matchZoneFromTitle(title: string | null, zones: Zone[]): Zone | null {
+  if (!title) return null;
+  const normTitle = normalize(title);
+  if (!normTitle) return null;
 
-const ZONE_BBOXES: Record<string, BoundingBox> = {
-  // Premium/Central
-  "zona-rio": [32.506, 32.526, -117.050, -117.020],
-  "cacho": [32.515, 32.530, -117.035, -117.015],
-  "chapultepec": [32.490, 32.510, -117.015, -116.995],
-  "hipodromo": [32.500, 32.520, -117.005, -116.985],
-  "agua-caliente": [32.498, 32.515, -117.010, -116.988],
-  "lomas-de-agua-caliente": [32.478, 32.498, -117.005, -116.980],
-  // Frontera/Norte
-  "centro": [32.525, 32.540, -117.050, -117.025],
-  "libertad": [32.530, 32.545, -117.060, -117.040],
-  "soler": [32.520, 32.535, -117.055, -117.038],
-  "federal": [32.538, 32.550, -117.045, -117.025],
-  // Costa
-  "playas-de-tijuana": [32.510, 32.540, -117.140, -117.105],
-  "baja-malibu": [32.470, 32.490, -117.125, -117.105],
-  "real-del-mar": [32.450, 32.470, -117.120, -117.095],
-  "san-antonio-del-mar": [32.425, 32.450, -117.105, -117.080],
-  "punta-bandera": [32.425, 32.445, -117.115, -117.090],
-  "costa-coronado": [32.410, 32.430, -117.110, -117.085],
-  // Este
-  "otay": [32.530, 32.555, -116.980, -116.945],
-  "la-mesa": [32.490, 32.515, -116.975, -116.950],
-  "las-americas": [32.520, 32.540, -116.965, -116.940],
-  "villa-fontana": [32.505, 32.525, -116.950, -116.925],
-  "montecarlo": [32.490, 32.510, -116.945, -116.920],
-  "otay-universidad": [32.525, 32.545, -116.975, -116.950],
-  // Sur/Residencial
-  "residencial-del-bosque": [32.460, 32.480, -116.935, -116.910],
-  "santa-fe": [32.430, 32.455, -117.060, -117.035],
-  "natura": [32.420, 32.440, -117.050, -117.025],
-  "colinas-de-california": [32.480, 32.500, -117.040, -117.020],
-  "lomas-virreyes": [32.470, 32.490, -117.035, -117.015],
-  "insurgentes": [32.460, 32.480, -117.050, -117.030],
-  // Periférico
-  "el-florido": [32.450, 32.480, -116.890, -116.850],
-  "terrazas-de-la-presa": [32.430, 32.455, -116.920, -116.890],
-  // Zonas target
-  "buena-vista": [32.510, 32.528, -117.038, -117.018],
-};
+  let best: Zone | null = null;
+  let bestLen = 0;
 
-function isInBoundingBox(lat: number, lng: number, bbox: BoundingBox): boolean {
-  const [minLat, maxLat, minLng, maxLng] = bbox;
-  return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
+  for (const zone of zones) {
+    const normName = normalize(zone.name);
+    if (normName.length < 4) continue;
+    if (normTitle.includes(normName) && normName.length > bestLen) {
+      best = zone;
+      bestLen = normName.length;
+    }
+  }
+
+  return best;
 }
 
-function matchByBbox(lat: number, lng: number, zones: Zone[]): Zone | null {
+// ─── Point-in-polygon (INEGI AGEB boundaries) ──────────────────────────────
+
+/** Build a slug→feature lookup for fast access */
+const ZONE_FEATURES = new Map(
+  ZONE_GEOJSON.features.map((f) => [f.properties?.slug as string, f]),
+);
+
+/**
+ * Check if coordinates fall inside any zone polygon (INEGI AGEB boundaries).
+ * More precise than bounding boxes — uses actual polygon geometry.
+ */
+function matchByPolygon(lat: number, lng: number, zones: Zone[]): Zone | null {
+  const pt = point([lng, lat]); // GeoJSON uses [lng, lat]
   for (const zone of zones) {
-    const bbox = ZONE_BBOXES[zone.slug];
-    if (bbox && isInBoundingBox(lat, lng, bbox)) {
+    const feature = ZONE_FEATURES.get(zone.slug);
+    if (feature && booleanPointInPolygon(pt, feature as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>)) {
       return zone;
     }
   }
@@ -196,15 +187,16 @@ export function findNearestZone(
 
 export interface AssignmentResult {
   zoneId: string | null;
-  method: "colonia" | "bbox" | "nearest" | "none";
+  method: "colonia" | "title" | "polygon" | "nearest" | "none";
 }
 
 /**
- * Assigns a listing to a zone using:
+ * Assigns a listing to a zone using a 4-step cascade:
  * 1. Extract colonia from address → match to existing zone (normalized + fuzzy)
- * 2. Bounding-box check with coords (only for well-known zones)
- * 3. Nearest zone by distance (within 3km radius)
- * 4. If no match → returns null (listing goes to "Otros" zone)
+ * 2. Extract zone name from title → match to existing zone (fallback text signal)
+ * 3. Point-in-polygon with INEGI AGEB boundaries (precise geographic match)
+ * 4. Nearest zone by distance (within 3km radius)
+ * 5. If no match → returns null (listing goes to "Otros" zone)
  */
 export function assignZone(
   lat: number | null,
@@ -213,7 +205,7 @@ export function assignZone(
   title: string | null,
   zones: Zone[],
 ): AssignmentResult {
-  // 1. Try colonia-based matching first (most accurate)
+  // 1. Try colonia-based matching first (most accurate — structured data)
   const colonia = extractColonia(address);
   if (colonia) {
     const matched = matchColoniaToZone(colonia, zones);
@@ -222,20 +214,26 @@ export function assignZone(
     }
   }
 
-  // 2. Bounding box (only for known zones with hardcoded boxes)
+  // 2. Try extracting zone name from title (strong text signal)
+  const titleMatch = matchZoneFromTitle(title, zones);
+  if (titleMatch) {
+    return { zoneId: titleMatch.id, method: "title" };
+  }
+
+  // 3. Point-in-polygon with INEGI AGEB boundaries (precise geometry)
   if (lat !== null && lng !== null) {
-    const bboxMatch = matchByBbox(lat, lng, zones);
-    if (bboxMatch) {
-      return { zoneId: bboxMatch.id, method: "bbox" };
+    const polygonMatch = matchByPolygon(lat, lng, zones);
+    if (polygonMatch) {
+      return { zoneId: polygonMatch.id, method: "polygon" };
     }
 
-    // 3. Nearest zone by distance (within 3km)
+    // 4. Nearest zone by distance (within 3km)
     const nearest = findNearestZone(lat, lng, zones);
     if (nearest) {
       return { zoneId: nearest.id, method: "nearest" };
     }
   }
 
-  // 4. No match — will be assigned to "Otros" by caller
+  // 5. No match — will be assigned to "Otros" by caller
   return { zoneId: null, method: "none" };
 }
