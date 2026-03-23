@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 interface MarketQualityData {
   avgPhotos: number
@@ -61,9 +62,12 @@ export function MarketQualityCard({ data }: MarketQualityCardProps) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Calidad del Mercado
-        </h4>
+        <div className="flex items-center gap-1.5">
+          <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Calidad del Mercado
+          </h4>
+          <InfoTooltip content="Score compuesto basado en: cantidad de fotos por listing (detalle), % con ubicación GPS (precisión) y % de listings premium (inversión del vendedor). Score alto = datos más confiables." />
+        </div>
         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${qualityColor}`}>
           {qualityLabel} · {qualityScore}/100
         </span>

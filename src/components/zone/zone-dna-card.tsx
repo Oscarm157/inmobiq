@@ -1,8 +1,10 @@
 "use client"
 
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { useCurrency } from "@/contexts/currency-context"
 import type { PropertyType } from "@/types/database"
+import type { PropertyCategory } from "@/lib/data/normalize"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casa",
@@ -29,6 +31,7 @@ interface ZoneDNACardProps {
   avgBathrooms: number | null
   avgPricePerM2: number
   totalListings: number
+  categoria?: PropertyCategory
 }
 
 export function ZoneDNACard({
@@ -40,24 +43,26 @@ export function ZoneDNACard({
   avgBathrooms,
   avgPricePerM2,
   totalListings,
+  categoria,
 }: ZoneDNACardProps) {
   const { formatPrice } = useCurrency()
+  const showBedBath = categoria !== "comercial" && categoria !== "terreno"
   const metrics = [
     {
       icon: "straighten",
       label: "Superficie prom.",
       value: avgArea > 0 ? `${Math.round(avgArea)} m²` : "—",
     },
-    {
+    ...(showBedBath ? [{
       icon: "bed",
       label: "Recámaras prom.",
       value: avgBedrooms ? avgBedrooms.toFixed(1) : "—",
-    },
-    {
+    }] : []),
+    ...(showBedBath ? [{
       icon: "bathtub",
       label: "Baños prom.",
       value: avgBathrooms ? avgBathrooms.toFixed(1) : "—",
-    },
+    }] : []),
     {
       icon: "price_change",
       label: "Precio / m²",
@@ -76,9 +81,12 @@ export function ZoneDNACard({
       <div className="relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">
-            ADN de la Zona
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">
+              ADN de la Zona
+            </p>
+            <InfoTooltip content="Resumen del tipo de propiedad dominante y sus promedios. Los valores se calculan con todos los listings activos filtrados por categoría y operación seleccionada." className="[&_button]:text-blue-300/70 [&_button:hover]:text-blue-200" />
+          </div>
           <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
             <Icon name={PROPERTY_ICONS[dominantType]} className="text-lg text-blue-300" />
           </div>

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/chart"
 import { useCurrency } from "@/contexts/currency-context"
 import { DrillDownPanel, type DrillDownListing } from "@/components/zone/drill-down-panel"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 const chartConfig = {
   count: { label: "Propiedades", color: "#2563eb" },
@@ -43,9 +44,12 @@ export function PriceDistributionChart({ data, listingsByRange, zoneSlug }: Pric
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Distribución de Precios
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Distribución de Precios
+          </h3>
+          <InfoTooltip content="Cantidad de propiedades en cada rango de precio. Se excluyen precios fuera de rango para evitar distorsiones. Las barras más altas indican los rangos de precio más comunes en la zona." />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5">
           Concentración de propiedades por rango de precio ({currency})
           {devMode && <span className="text-amber-500 ml-2">· clic en barra para inspeccionar</span>}

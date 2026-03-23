@@ -14,6 +14,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 const TYPE_COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -89,7 +90,10 @@ export function PriceAreaScatter({ data, availableTypes, devMode, zoneSlug }: Pr
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-3">
-        <h3 className="text-sm font-bold text-slate-800">Precio vs Área</h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-bold text-slate-800">Precio vs Área</h3>
+          <InfoTooltip content="Cada punto es una propiedad activa. Eje X = superficie en m², eje Y = precio. Los puntos hacia abajo-derecha representan mejor valor (más metros por menos precio). Se filtran outliers con método IQR ×2 para evitar distorsiones." />
+        </div>
         <p className="text-xs text-slate-500 mt-1">
           ¿Pagas más por más metros? Cada punto = 1 propiedad · Abajo-derecha = más m² por menos precio (mejor valor)
           {devMode && <span className="text-amber-500 ml-1">· clic en punto para inspeccionar</span>}
