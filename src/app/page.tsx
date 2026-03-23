@@ -5,7 +5,7 @@ import { PriceChart } from "@/components/price-chart"
 import { ZonesBarChart } from "@/components/zones-bar-chart"
 import { KPIPrecio } from "@/components/kpi-precio"
 import { KPIInventario } from "@/components/kpi-inventario"
-import { KPIPlusvalia } from "@/components/kpi-plusvalia"
+import { KPIComposicion } from "@/components/kpi-plusvalia"
 import { MiniMapWrapper } from "@/components/map/mini-map-wrapper"
 import { NarrativeInsight } from "@/components/narrative-insight"
 import { InventoryTypeChart } from "@/components/inventory-type-chart"
@@ -149,16 +149,13 @@ export default async function HomePage({
           trendPct={city.price_trend_pct}
         />
         <KPIInventario
-          totalListings={city.total_listings}
-          absorptionPct={76}
-        />
-        <KPIPlusvalia
-          trendPct={city.price_trend_pct}
-          riskNote={filters.listing_type === "renta"
-            ? "El rendimiento de renta depende de la ocupación y ubicación. Zonas céntricas tienden a mayor demanda."
-            : "La demanda sostenida de compradores binacionales presiona los precios al alza en zonas costeras y céntricas."
-          }
+          medianPrice={mostActive?.avg_ticket ?? analytics.medianPrice}
+          zoneName={mostActive?.zone_name ?? "—"}
           listingType={filters.listing_type}
+        />
+        <KPIComposicion
+          composition={analytics.compositionByType}
+          totalListings={analytics.totalListings}
         />
       </div>
 
