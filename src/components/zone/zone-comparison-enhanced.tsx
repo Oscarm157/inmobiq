@@ -4,6 +4,7 @@ import { formatPercent } from "@/lib/utils"
 import { getZoneActivityLabel, getCityActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics, CityMetrics } from "@/types/database"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 interface ZoneComparisonEnhancedProps {
   zone: ZoneMetrics
@@ -53,9 +54,12 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
-      <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
-        Zona vs Ciudad
-      </h4>
+      <div className="flex items-center gap-1.5 mb-4">
+        <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+          Zona vs Ciudad
+        </h4>
+        <InfoTooltip content="Compara las métricas de esta zona contra el promedio de toda Tijuana. Las barras más largas indican valores más altos. Útil para identificar si la zona está por arriba o debajo del mercado." />
+      </div>
 
       <div className="space-y-4">
         {rows.map((row) => {

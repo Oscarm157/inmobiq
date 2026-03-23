@@ -5,6 +5,7 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 const chartConfig = {
   casa_median: { label: "Casa", color: "#2563eb" },
@@ -66,9 +67,12 @@ export function PriceByBedroomsChart({ data, zoneName }: PriceByBedroomsChartPro
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Precio por recámaras
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Precio por recámaras
+          </h3>
+          <InfoTooltip content="Precio mediano por número de recámaras, separado por casa y departamento. La mediana es más representativa que el promedio porque no se distorsiona con propiedades de lujo." />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5">
           ¿Cuánto más cuesta una recámara extra en {zoneName}?{example}
         </p>

@@ -201,8 +201,8 @@ export interface ListingsAnalytics {
 }
 
 export interface ZoneListingsAnalytics {
-  priceByBedrooms: { bedrooms: number; casa_median: number | null; depto_median: number | null; casa_count: number; depto_count: number }[]
-  casaVsDepto: { type: string; median_price: number; median_area: number; median_price_m2: number; count: number }[]
+  priceByBedrooms: { bedrooms: number; casa_median: number | null; depto_median: number | null; casa_count: number; depto_count: number }[] | null
+  typeComparison: { type: string; median_price: number; median_area: number; median_price_m2: number; count: number }[]
   scatterData: { price: number; area: number; type: string; title: string }[]
 }
 
@@ -346,7 +346,7 @@ function mockZoneListingsAnalytics(): ZoneListingsAnalytics {
       { bedrooms: 3, casa_median: 4800000, depto_median: 3500000, casa_count: 42, depto_count: 38 },
       { bedrooms: 4, casa_median: 6500000, depto_median: 5200000, casa_count: 25, depto_count: 12 },
     ],
-    casaVsDepto: [
+    typeComparison: [
       { type: "casa", median_price: 4800000, median_area: 180, median_price_m2: 26667, count: 85 },
       { type: "departamento", median_price: 3200000, median_area: 95, median_price_m2: 33684, count: 147 },
     ],
@@ -558,21 +558,29 @@ export async function getZoneListingsAnalytics(slug: string, filters?: ListingFi
     const listings = filterNormalizedListings(rowsWithPrice)
     if (listings.length === 0) return mockZoneListingsAnalytics()
 
-    // --- priceByBedrooms ---
-    const priceByBedrooms = [1, 2, 3, 4].map((br) => {
-      const casas = listings.filter((l) => l.property_type === "casa" && l.bedrooms === br && l.price > 0)
-      const deptos = listings.filter((l) => l.property_type === "departamento" && l.bedrooms === br && l.price > 0)
-      return {
-        bedrooms: br,
-        casa_median: casas.length > 0 ? Math.round(median(casas.map((l) => l.price))) : null,
-        depto_median: deptos.length > 0 ? Math.round(median(deptos.map((l) => l.price))) : null,
-        casa_count: casas.length,
-        depto_count: deptos.length,
-      }
-    })
+    // --- priceByBedrooms (only for residencial) ---
+    const isResidencial = !filters?.categoria || filters.categoria === "residencial"
+    const priceByBedrooms = isResidencial
+      ? [1, 2, 3, 4].map((br) => {
+          const casas = listings.filter((l) => l.property_type === "casa" && l.bedrooms === br && l.price > 0)
+          const deptos = listings.filter((l) => l.property_type === "departamento" && l.bedrooms === br && l.price > 0)
+          return {
+            bedrooms: br,
+            casa_median: casas.length > 0 ? Math.round(median(casas.map((l) => l.price))) : null,
+            depto_median: deptos.length > 0 ? Math.round(median(deptos.map((l) => l.price))) : null,
+            casa_count: casas.length,
+            depto_count: deptos.length,
+          }
+        })
+      : null
 
-    // --- casaVsDepto ---
-    const casaVsDepto = (["casa", "departamento"] as const).map((type) => {
+    // --- typeComparison (category-aware) ---
+    const comparisonTypes: string[] =
+      filters?.categoria === "comercial" ? ["local", "oficina"] :
+      filters?.categoria === "terreno" ? [] :
+      ["casa", "departamento"]
+
+    const typeComparison = comparisonTypes.map((type) => {
       const items = listings.filter((l) => l.property_type === type && l.price > 0 && (l.area_m2 ?? 0) > 0)
       const medPrice = Math.round(median(items.map((l) => l.price)))
       const medArea = Math.round(median(items.map((l) => l.area_m2!)))
@@ -590,7 +598,7 @@ export async function getZoneListingsAnalytics(slug: string, filters?: ListingFi
         title: l.title ?? "",
       }))
 
-    return { priceByBedrooms, casaVsDepto, scatterData }
+    return { priceByBedrooms, typeComparison, scatterData }
   } catch {
     return mockZoneListingsAnalytics()
   }

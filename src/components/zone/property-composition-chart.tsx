@@ -5,6 +5,7 @@ import {
   ChartContainer,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 const COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -33,9 +34,12 @@ export function PropertyCompositionChart({ data }: PropertyCompositionChartProps
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Índice de Concentración
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Índice de Concentración
+          </h3>
+          <InfoTooltip content="Mide qué tan dominante es cada tipo de propiedad en la zona vs el promedio de la ciudad. Escala 0–10: valores altos indican que ese tipo está sobre-representado aquí comparado con otras zonas." />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5">
           Densidad relativa por tipo de propiedad (escala 0–10)
         </p>

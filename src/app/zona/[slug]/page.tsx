@@ -21,7 +21,7 @@ import { getZoneDemographics } from "@/lib/data/demographics"
 import { computeZoneInsights } from "@/lib/data/zone-insights"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
-import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
+import { TypeComparison } from "@/components/zone/type-comparison"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
@@ -349,8 +349,12 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
           <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
           <PropertyCompositionChart data={compositionData} />
-          <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
-          <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
+          {rawCat !== "terreno" && (
+            <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
+          )}
+          {zoneAnalytics.priceByBedrooms && rawCat !== "comercial" && rawCat !== "terreno" && (
+            <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
+          )}
           <EditorialCard
             zoneName={zone.zone_name}
             mainText={mainText}
@@ -370,10 +374,13 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
             avgBathrooms={avgBathrooms}
             avgPricePerM2={zone.avg_price_per_m2}
             totalListings={zone.total_listings}
+            categoria={rawCat as PropertyCategory}
           />
 
-          {/* Casa vs Departamento */}
-          <CasaVsDepto data={zoneAnalytics.casaVsDepto} zoneName={zone.zone_name} />
+          {/* Type comparison: Casa vs Depto (residencial) / Local vs Oficina (comercial) */}
+          {rawCat !== "terreno" && (
+            <TypeComparison data={zoneAnalytics.typeComparison} zoneName={zone.zone_name} categoria={rawCat} />
+          )}
 
           {/* Venta vs Renta — only show when renta listings exist */}
           {ventaRentaData.rentaCount > 0 && (

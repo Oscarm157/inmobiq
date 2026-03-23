@@ -6,6 +6,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { useCurrency } from "@/contexts/currency-context"
+import { InfoTooltip } from "@/components/info-tooltip"
 
 const COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -41,9 +42,12 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Ticket Promedio por Tipo
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Ticket Promedio por Tipo
+          </h3>
+          <InfoTooltip content="Precio promedio de venta por tipo de propiedad en esta zona. Se calculan solo con listings activos que pasaron validación de precio (se excluyen precios atípicos)." />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5">
           Precio promedio de propiedad en {zoneName}
         </p>
