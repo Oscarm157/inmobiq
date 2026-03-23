@@ -19,16 +19,17 @@ const TYPE_LABELS: Record<string, string> = {
   oficina: "Oficinas",
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  casa: "bg-blue-500",
-  departamento: "bg-indigo-500",
-  terreno: "bg-amber-500",
-  local: "bg-emerald-500",
-  oficina: "bg-rose-500",
+const TYPE_COLORS: Record<string, { bar: string; dot: string }> = {
+  casa: { bar: "bg-blue-500", dot: "bg-blue-500" },
+  departamento: { bar: "bg-indigo-400", dot: "bg-indigo-400" },
+  terreno: { bar: "bg-amber-400", dot: "bg-amber-400" },
+  local: { bar: "bg-emerald-500", dot: "bg-emerald-500" },
+  oficina: { bar: "bg-rose-400", dot: "bg-rose-400" },
 }
 
 export function KPIComposicion({ composition, totalListings }: KPIComposicionProps) {
-  const top3 = [...composition].sort((a, b) => b.count - a.count).slice(0, 3)
+  const sorted = [...composition].sort((a, b) => b.pct - a.pct)
+  const top = sorted[0]
 
   return (
     <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300">
@@ -41,33 +42,33 @@ export function KPIComposicion({ composition, totalListings }: KPIComposicionPro
             Composición
           </p>
           <h4 className="text-2xl font-black">
-            {totalListings > 0 ? `${totalListings} props` : "Sin datos"}
+            {top ? `${TYPE_LABELS[top.type] ?? top.type} ${top.pct}%` : "Sin datos"}
           </h4>
         </div>
       </div>
 
-      {/* Mini bar */}
       {totalListings > 0 && (
-        <div className="space-y-2">
-          <div className="flex h-2.5 w-full rounded-full overflow-hidden">
-            {composition.map((item) => (
-              <div
-                key={item.type}
-                className={`${TYPE_COLORS[item.type] ?? "bg-slate-300"}`}
-                style={{ width: `${item.pct}%` }}
-              />
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {top3.map((item) => (
-              <div key={item.type} className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${TYPE_COLORS[item.type] ?? "bg-slate-300"}`} />
-                <span className="text-[10px] font-bold text-slate-600">
-                  {TYPE_LABELS[item.type] ?? item.type} {item.pct}%
+        <div className="space-y-2.5">
+          {sorted.filter(s => s.pct > 0).map((item) => {
+            const colors = TYPE_COLORS[item.type] ?? { bar: "bg-slate-300", dot: "bg-slate-300" }
+            return (
+              <div key={item.type} className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full shrink-0 ${colors.dot}`} />
+                <span className="text-[11px] font-bold text-slate-600 w-16 shrink-0">
+                  {TYPE_LABELS[item.type] ?? item.type}
+                </span>
+                <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${colors.bar}`}
+                    style={{ width: `${item.pct}%` }}
+                  />
+                </div>
+                <span className="text-[11px] font-black text-slate-700 w-10 text-right">
+                  {item.pct}%
                 </span>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
       )}
     </div>

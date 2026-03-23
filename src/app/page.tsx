@@ -149,8 +149,7 @@ export default async function HomePage({
           trendPct={city.price_trend_pct}
         />
         <KPIInventario
-          medianPrice={mostActive?.avg_ticket ?? analytics.medianPrice}
-          zoneName={mostActive?.zone_name ?? "—"}
+          medianPrice={analytics.medianPrice}
           listingType={filters.listing_type}
         />
         <KPIComposicion

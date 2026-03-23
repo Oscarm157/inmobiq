@@ -3,11 +3,10 @@ import { formatCurrency } from "@/lib/utils"
 
 interface KPIInventarioProps {
   medianPrice: number
-  zoneName: string
   listingType?: string
 }
 
-export function KPIInventario({ medianPrice, zoneName, listingType }: KPIInventarioProps) {
+export function KPIInventario({ medianPrice, listingType }: KPIInventarioProps) {
   const isRenta = listingType === "renta"
 
   return (
@@ -27,7 +26,7 @@ export function KPIInventario({ medianPrice, zoneName, listingType }: KPIInventa
       </div>
       <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-lg">
         <p className="text-[10px] font-medium text-indigo-800 leading-tight">
-          <span className="font-bold">{isRenta ? "Renta mediana" : "Precio mediano"}</span> en la zona más activa: {zoneName}
+          {isRenta ? "Renta mediana mensual" : "Precio mediano de venta"} en Tijuana
         </p>
       </div>
     </div>
