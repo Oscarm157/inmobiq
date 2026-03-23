@@ -29,6 +29,8 @@ export interface Listing {
   scraped_at: string;
   created_at: string;
   raw_data?: Record<string, unknown>;
+  /** Debug: original currency of the listing (price is always stored in MXN after conversion) */
+  original_currency?: "MXN" | "USD";
 }
 
 export interface Snapshot {

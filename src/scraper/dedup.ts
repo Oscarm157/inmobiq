@@ -1,9 +1,6 @@
 import { createHash } from "crypto";
 import { getSupabaseClient } from "./db";
-
-// ─── Constants ──────────────────────────────────────────────────────────────
-
-const USD_TO_MXN = 17.5; // Fixed rate for fingerprint normalization only
+import { USD_TO_MXN } from "@/lib/data/normalize";
 
 // ─── Fingerprint Computation (pure, no DB) ──────────────────────────────────
 

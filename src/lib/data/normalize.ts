@@ -8,6 +8,23 @@
 import type { PropertyType } from "@/types/database"
 
 /* ------------------------------------------------------------------ */
+/*  Exchange Rate                                                       */
+/* ------------------------------------------------------------------ */
+
+/** Fixed exchange rate for USD→MXN conversion in data normalization. */
+export const USD_TO_MXN = 17.5
+
+/** Compute effective price in MXN from a row with price_mxn/price_usd columns. */
+export function effectivePriceMxn(
+  priceMxn: number | null,
+  priceUsd: number | null,
+): number | null {
+  if (priceMxn && priceMxn > 0) return priceMxn
+  if (priceUsd && priceUsd > 0) return priceUsd * USD_TO_MXN
+  return null
+}
+
+/* ------------------------------------------------------------------ */
 /*  Property Categories                                                */
 /* ------------------------------------------------------------------ */
 

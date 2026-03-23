@@ -5,7 +5,7 @@ import {
 } from "@/lib/mock-data"
 import type { Zone, Snapshot, CitySnapshot, ZoneMetrics, CityMetrics, PropertyType } from "@/types/database"
 import type { ListingFilters } from "@/lib/data/listings"
-import { isValidListing, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
+import { isValidListing, effectivePriceMxn, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
@@ -85,9 +85,9 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     // Build filtered listings query
     let listingsQuery = supabase
       .from("listings")
-      .select("zone_id, price_mxn, area_m2, property_type, listing_type")
+      .select("zone_id, price_mxn, price_usd, area_m2, property_type, listing_type")
       .eq("is_active", true)
-      .gt("price_mxn", 0)
+      .or("price_mxn.gt.0,price_usd.gt.0")
       .gt("area_m2", 10)
       .lt("area_m2", 50000)
 
@@ -107,8 +107,7 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       listingsQuery = listingsQuery.eq("listing_type", filters.listing_type)
       latestSnapsQuery = latestSnapsQuery.eq("listing_type", filters.listing_type)
     }
-    if (filters?.precio_min != null) listingsQuery = listingsQuery.gte("price_mxn", filters.precio_min)
-    if (filters?.precio_max != null) listingsQuery = listingsQuery.lte("price_mxn", filters.precio_max)
+    // Price filters applied post-fetch after USD→MXN conversion
     if (filters?.area_min != null) listingsQuery = listingsQuery.gte("area_m2", filters.area_min)
     if (filters?.area_max != null) listingsQuery = listingsQuery.lte("area_m2", filters.area_max)
     if (filters?.recamaras?.length) {
@@ -153,12 +152,19 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     const zones = zonesRes.data as Zone[] | null
     const latestSnaps = latestSnapsRes.data as RealSnapshot[] | null
     const prevSnaps = prevSnapsRes.data as Array<{ zone_id: string; avg_price_per_m2: number; count_active: number }> | null
-    const listingsDataRaw = listingsRes.data as Array<{ zone_id: string; price_mxn: number; area_m2: number; property_type: PropertyType; listing_type: string }> | null
+    const listingsDataRaw = listingsRes.data as Array<{ zone_id: string; price_mxn: number | null; price_usd: number | null; area_m2: number; property_type: PropertyType; listing_type: string }> | null
 
-    // Normalize: filter out suspected misclassified rentals
-    const listingsData = listingsDataRaw?.filter((l) =>
-      isValidListing(l.property_type, l.listing_type, l.price_mxn, l.area_m2).isValid
-    ) ?? null
+    // Add effective price (USD→MXN converted) and normalize
+    const listingsData = listingsDataRaw?.map((l) => ({
+      ...l,
+      price: effectivePriceMxn(l.price_mxn, l.price_usd) ?? 0,
+    })).filter((l) => {
+      if (l.price <= 0) return false
+      if (!isValidListing(l.property_type, l.listing_type, l.price, l.area_m2).isValid) return false
+      if (filters?.precio_min != null && l.price < filters.precio_min) return false
+      if (filters?.precio_max != null && l.price > filters.precio_max) return false
+      return true
+    }) ?? null
 
     if (!zones?.length || !latestSnaps?.length) {
       // Apply basic filters to mock fallback
@@ -181,9 +187,9 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
     if (listingsData?.length) {
       const grouped = new Map<string, number[]>()
       for (const l of listingsData) {
-        if (l.area_m2 > 0 && l.price_mxn > 0) {
+        if (l.area_m2 > 0 && l.price > 0) {
           const arr = grouped.get(l.zone_id) ?? []
-          arr.push(l.price_mxn / l.area_m2)
+          arr.push(l.price / l.area_m2)
           grouped.set(l.zone_id, arr)
         }
       }

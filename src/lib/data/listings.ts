@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import type { Listing, PropertyType, ListingType } from "@/types/database"
-import { filterNormalizedListings, filterByCategory, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
+import { filterNormalizedListings, filterByCategory, effectivePriceMxn, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
 
 /** Build zone name lookup from mock data (single source of truth) */
 const MOCK_ZONE_LOOKUP = new Map(
@@ -118,8 +118,10 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       if (ids.length) query = query.in("zone_id", ids)
     }
     if (filters.listing_type) query = query.eq("listing_type", filters.listing_type)
-    if (filters.precio_min != null) query = query.or(`price_mxn.gte.${filters.precio_min},price_usd.gte.${filters.precio_min}`)
-    if (filters.precio_max != null) query = query.or(`price_mxn.lte.${filters.precio_max},price_usd.lte.${filters.precio_max}`)
+    // Price filters applied post-fetch after USD→MXN conversion (can't do arithmetic in Supabase filter)
+    if (filters.precio_min != null || filters.precio_max != null) {
+      query = query.or("price_mxn.gt.0,price_usd.gt.0")
+    }
     if (filters.area_min != null) query = query.gte("area_m2", filters.area_min)
     if (filters.area_max != null) query = query.lte("area_m2", filters.area_max)
     if (filters.recamaras?.length) {
@@ -137,29 +139,40 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
     const { data, error } = await query
     if (error) throw error
 
-    // Map real DB columns to Listing interface
-    let listings: Listing[] = (data ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      zone_id: row.zone_id as string,
-      title: (row.title as string) ?? "",
-      property_type: row.property_type as Listing["property_type"],
-      listing_type: row.listing_type as Listing["listing_type"],
-      price: (row.price_mxn as number) ?? (row.price_usd as number) ?? 0,
-      area_m2: (row.area_m2 as number) ?? 0,
-      price_per_m2: (row.area_m2 as number) > 0
-        ? ((row.price_mxn as number) ?? (row.price_usd as number) ?? 0) / (row.area_m2 as number)
-        : 0,
-      bedrooms: (row.bedrooms as number) ?? null,
-      bathrooms: (row.bathrooms as number) ?? null,
-      source: row.source_portal as Listing["source"],
-      source_url: (row.external_url as string) ?? "",
-      scraped_at: (row.scraped_at as string) ?? "",
-      created_at: (row.created_at as string) ?? "",
-      raw_data: (row.raw_data as Record<string, unknown>) ?? undefined,
-    }))
+    // Map real DB columns to Listing interface (USD→MXN conversion happens here)
+    let listings: Listing[] = (data ?? []).map((row: Record<string, unknown>) => {
+      const priceMxn = effectivePriceMxn(row.price_mxn as number | null, row.price_usd as number | null) ?? 0
+      const area = (row.area_m2 as number) ?? 0
+      return {
+        id: row.id as string,
+        zone_id: row.zone_id as string,
+        title: (row.title as string) ?? "",
+        property_type: row.property_type as Listing["property_type"],
+        listing_type: row.listing_type as Listing["listing_type"],
+        price: priceMxn,
+        area_m2: area,
+        price_per_m2: area > 0 ? priceMxn / area : 0,
+        bedrooms: (row.bedrooms as number) ?? null,
+        bathrooms: (row.bathrooms as number) ?? null,
+        source: row.source_portal as Listing["source"],
+        source_url: (row.external_url as string) ?? "",
+        scraped_at: (row.scraped_at as string) ?? "",
+        created_at: (row.created_at as string) ?? "",
+        raw_data: (row.raw_data as Record<string, unknown>) ?? undefined,
+        original_currency: (row.price_mxn as number | null) ? "MXN" as const : (row.price_usd as number | null) ? "USD" as const : undefined,
+      }
+    })
 
     // Normalize: filter out suspected misclassified rentals
     listings = filterNormalizedListings(listings)
+
+    // Post-fetch price filters (applied here because USD→MXN conversion happens in mapping)
+    if (filters.precio_min != null) {
+      listings = listings.filter((l) => l.price >= filters.precio_min!)
+    }
+    if (filters.precio_max != null) {
+      listings = listings.filter((l) => l.price <= filters.precio_max!)
+    }
 
     // Category filter
     if (filters.categoria) {
@@ -359,7 +372,7 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
     const supabase = await createSupabaseServerClient()
     let query = supabase
       .from("listings")
-      .select("price_mxn, area_m2, property_type, listing_type, bedrooms, zone_id, zones!inner(name, slug)")
+      .select("price_mxn, price_usd, area_m2, property_type, listing_type, bedrooms, zone_id, zones!inner(name, slug)")
       .eq("is_active", true)
 
     // Apply filters at query level (resolve categoria into property types)
@@ -377,8 +390,10 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
       const ids = await resolveZoneSlugs(filters.zonas)
       if (ids.length) query = query.in("zone_id", ids)
     }
-    if (filters.precio_min != null) query = query.gte("price_mxn", filters.precio_min)
-    if (filters.precio_max != null) query = query.lte("price_mxn", filters.precio_max)
+    // Price filters applied post-fetch after USD→MXN conversion
+    if (filters.precio_min != null || filters.precio_max != null) {
+      query = query.or("price_mxn.gt.0,price_usd.gt.0")
+    }
     if (filters.area_min != null) query = query.gte("area_m2", filters.area_min)
     if (filters.area_max != null) query = query.lte("area_m2", filters.area_max)
     if (filters.recamaras?.length) {
@@ -405,14 +420,30 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
 
     type Row = {
       price_mxn: number | null
+      price_usd: number | null
       area_m2: number | null
       property_type: string
       listing_type?: string
       zone_id: string
       zones: { name: string; slug: string } | null
     }
+
+    // Add effective price (USD→MXN converted) to each row
+    const rowsWithPrice = (rows as unknown as Row[]).map((l) => ({
+      ...l,
+      price: effectivePriceMxn(l.price_mxn, l.price_usd) ?? 0,
+    }))
+
     // Normalize: filter out suspected misclassified rentals
-    let listings = filterNormalizedListings(rows as unknown as Row[])
+    let listings = filterNormalizedListings(rowsWithPrice)
+
+    // Post-fetch price filters (applied here because USD→MXN conversion happens above)
+    if (filters.precio_min != null) {
+      listings = listings.filter((l) => l.price >= filters.precio_min!)
+    }
+    if (filters.precio_max != null) {
+      listings = listings.filter((l) => l.price <= filters.precio_max!)
+    }
 
     // Category filter
     if (filters.categoria) {
@@ -422,17 +453,17 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
     if (listings.length === 0) return mockListingsAnalytics(filters)
 
     // --- totalListings & medianPrice ---
-    const withPrice = listings.filter((l) => (l.price_mxn ?? 0) > 0)
+    const withPrice = listings.filter((l) => l.price > 0)
     const totalListings = listings.length
-    const medianPrice = median(withPrice.map((l) => l.price_mxn!))
+    const medianPrice = median(withPrice.map((l) => l.price))
 
     // --- pricePerM2ByZone ---
     const zoneMap = new Map<string, { name: string; slug: string; values: number[] }>()
     for (const l of listings) {
-      if ((l.price_mxn ?? 0) > 0 && (l.area_m2 ?? 0) > 0 && l.zones) {
+      if (l.price > 0 && (l.area_m2 ?? 0) > 0 && l.zones) {
         const key = l.zones.slug
         if (!zoneMap.has(key)) zoneMap.set(key, { name: l.zones.name, slug: l.zones.slug, values: [] })
-        zoneMap.get(key)!.values.push(l.price_mxn! / l.area_m2!)
+        zoneMap.get(key)!.values.push(l.price / l.area_m2!)
       }
     }
     const pricePerM2ByZone = Array.from(zoneMap.values())
@@ -449,7 +480,7 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
       { label: ">20M", min: 20_000_000, max: Infinity },
     ]
     const priceDistribution = ranges.map((r) => {
-      const count = withPrice.filter((l) => l.price_mxn! >= r.min && l.price_mxn! < r.max).length
+      const count = withPrice.filter((l) => l.price >= r.min && l.price < r.max).length
       return { range: r.label, count, pct: pct(count, withPrice.length) }
     })
 
@@ -490,7 +521,7 @@ export async function getZoneListingsAnalytics(slug: string, filters?: ListingFi
     const supabase = await createSupabaseServerClient()
     let zlaQuery = supabase
       .from("listings")
-      .select("title, price_mxn, area_m2, property_type, listing_type, bedrooms, zones!inner(slug)")
+      .select("title, price_mxn, price_usd, area_m2, property_type, listing_type, bedrooms, zones!inner(slug)")
       .eq("is_active", true)
       .eq("zones.slug", slug)
 
@@ -509,24 +540,32 @@ export async function getZoneListingsAnalytics(slug: string, filters?: ListingFi
     type Row = {
       title: string | null
       price_mxn: number | null
+      price_usd: number | null
       area_m2: number | null
       property_type: string
       listing_type?: string
       bedrooms: number | null
       zones: { slug: string } | null
     }
+
+    // Add effective price (USD→MXN converted) to each row
+    const rowsWithPrice = (rows as unknown as Row[]).map((l) => ({
+      ...l,
+      price: effectivePriceMxn(l.price_mxn, l.price_usd) ?? 0,
+    }))
+
     // Normalize: filter out suspected misclassified rentals
-    const listings = filterNormalizedListings(rows as unknown as Row[])
+    const listings = filterNormalizedListings(rowsWithPrice)
     if (listings.length === 0) return mockZoneListingsAnalytics()
 
     // --- priceByBedrooms ---
     const priceByBedrooms = [1, 2, 3, 4].map((br) => {
-      const casas = listings.filter((l) => l.property_type === "casa" && l.bedrooms === br && (l.price_mxn ?? 0) > 0)
-      const deptos = listings.filter((l) => l.property_type === "departamento" && l.bedrooms === br && (l.price_mxn ?? 0) > 0)
+      const casas = listings.filter((l) => l.property_type === "casa" && l.bedrooms === br && l.price > 0)
+      const deptos = listings.filter((l) => l.property_type === "departamento" && l.bedrooms === br && l.price > 0)
       return {
         bedrooms: br,
-        casa_median: casas.length > 0 ? Math.round(median(casas.map((l) => l.price_mxn!))) : null,
-        depto_median: deptos.length > 0 ? Math.round(median(deptos.map((l) => l.price_mxn!))) : null,
+        casa_median: casas.length > 0 ? Math.round(median(casas.map((l) => l.price))) : null,
+        depto_median: deptos.length > 0 ? Math.round(median(deptos.map((l) => l.price))) : null,
         casa_count: casas.length,
         depto_count: deptos.length,
       }
@@ -534,18 +573,18 @@ export async function getZoneListingsAnalytics(slug: string, filters?: ListingFi
 
     // --- casaVsDepto ---
     const casaVsDepto = (["casa", "departamento"] as const).map((type) => {
-      const items = listings.filter((l) => l.property_type === type && (l.price_mxn ?? 0) > 0 && (l.area_m2 ?? 0) > 0)
-      const medPrice = Math.round(median(items.map((l) => l.price_mxn!)))
+      const items = listings.filter((l) => l.property_type === type && l.price > 0 && (l.area_m2 ?? 0) > 0)
+      const medPrice = Math.round(median(items.map((l) => l.price)))
       const medArea = Math.round(median(items.map((l) => l.area_m2!)))
-      const medPriceM2 = Math.round(median(items.map((l) => l.price_mxn! / l.area_m2!)))
+      const medPriceM2 = Math.round(median(items.map((l) => l.price / l.area_m2!)))
       return { type, median_price: medPrice, median_area: medArea, median_price_m2: medPriceM2, count: items.length }
     })
 
     // --- scatterData ---
     const scatterData = listings
-      .filter((l) => (l.price_mxn ?? 0) > 0 && (l.area_m2 ?? 0) > 0)
+      .filter((l) => l.price > 0 && (l.area_m2 ?? 0) > 0)
       .map((l) => ({
-        price: l.price_mxn!,
+        price: l.price,
         area: l.area_m2!,
         type: l.property_type,
         title: l.title ?? "",
