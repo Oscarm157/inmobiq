@@ -25,12 +25,14 @@ export function parseOperacion(raw: string | undefined | null): "venta" | "renta
   return "venta"
 }
 
-/** Client-side: persist categoria preference */
+/** Client-side: persist categoria preference (validates before writing) */
 export function setPreferredCategoria(value: string) {
+  if (!VALID_CATEGORIAS.has(value)) return
   document.cookie = `${COOKIE_CATEGORIA}=${value};path=/;max-age=${MAX_AGE};samesite=lax`
 }
 
-/** Client-side: persist operacion preference */
+/** Client-side: persist operacion preference (validates before writing) */
 export function setPreferredOperacion(value: string) {
+  if (!VALID_OPERACIONES.has(value)) return
   document.cookie = `${COOKIE_OPERACION}=${value};path=/;max-age=${MAX_AGE};samesite=lax`
 }

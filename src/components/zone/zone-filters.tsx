@@ -20,16 +20,23 @@ const CAT_OPTIONS: { value: Categoria; label: string }[] = [
   { value: "", label: "Todas" },
 ]
 
-export function ZoneFilters() {
+interface ZoneFiltersProps {
+  defaultOperacion?: string
+  defaultCategoria?: string
+}
+
+export function ZoneFilters({ defaultOperacion = "venta", defaultCategoria = "residencial" }: ZoneFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const isLocalUpdate = useRef(false)
 
-  // Read current values from URL (defaults applied by the server component)
-  const currentOp = (searchParams.get("operacion") ?? "venta") as Operacion
-  const currentCat = (searchParams.get("categoria") ?? "residencial") as Categoria
+  // Read current values from URL; map "todas" to ""; fallback to cookie-based defaults
+  const rawOp = searchParams.get("operacion")
+  const rawCat = searchParams.get("categoria")
+  const currentOp = (rawOp === "todas" ? "" : rawOp ?? defaultOperacion) as Operacion
+  const currentCat = (rawCat === "todas" ? "" : rawCat ?? defaultCategoria) as Categoria
 
   const pushParams = useCallback(
     (op: Operacion, cat: Categoria) => {

@@ -34,6 +34,9 @@ import type { PropertyCategory } from "@/lib/data/normalize"
 import { cookies } from "next/headers"
 import { COOKIE_CATEGORIA, COOKIE_OPERACION, parseCategoria, parseOperacion } from "@/lib/preference-cookies"
 
+// Force dynamic rendering — page reads cookies() for user preferences
+export const dynamic = "force-dynamic"
+
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
   departamento: "Departamentos",
@@ -338,7 +341,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
       {/* [A2] Zone Filters */}
       <Suspense fallback={<div className="h-10" />}>
-        <ZoneFilters />
+        <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
       </Suspense>
 
       {/* [B] KPI Ticker Strip */}

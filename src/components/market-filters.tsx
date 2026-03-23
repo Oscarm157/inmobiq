@@ -55,8 +55,13 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
       isLocalUpdate.current = false
       return
     }
-    setState(parseMarketParams(searchParams))
-  }, [searchParams])
+    const parsed = parseMarketParams(searchParams)
+    setState({
+      ...parsed,
+      listing_type: parsed.listing_type || (defaultOperacion as MarketFilterState["listing_type"]),
+      categoria: parsed.categoria || (defaultCategoria as MarketFilterState["categoria"]),
+    })
+  }, [searchParams, defaultOperacion, defaultCategoria])
 
   // Cleanup debounce on unmount
   useEffect(() => {
