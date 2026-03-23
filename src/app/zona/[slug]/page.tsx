@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { ExportButton } from "@/components/export-button"
@@ -15,6 +16,7 @@ import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
 import { MarketQualityCard } from "@/components/zone/market-quality-card"
 import { DemographicsCard } from "@/components/zone/demographics-card"
 import { ZoneInsightsCard } from "@/components/zone/zone-insights-card"
+import { ZoneFilters } from "@/components/zone/zone-filters"
 import { getZoneDemographics } from "@/lib/data/demographics"
 import { computeZoneInsights } from "@/lib/data/zone-insights"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -22,9 +24,11 @@ import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
 import { CasaVsDepto } from "@/components/zone/casa-vs-depto"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
+import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
-import { filterNormalizedListings } from "@/lib/data/normalize"
-import type { PropertyType, ZoneMetrics, Listing } from "@/types/database"
+import { filterNormalizedListings, removeOutliers } from "@/lib/data/normalize"
+import type { PropertyType, ListingType, ZoneMetrics, Listing } from "@/types/database"
+import type { PropertyCategory } from "@/lib/data/normalize"
 
 const PROPERTY_LABELS: Record<PropertyType, string> = {
   casa: "Casas",
@@ -34,8 +38,14 @@ const PROPERTY_LABELS: Record<PropertyType, string> = {
   oficina: "Oficinas",
 }
 
+interface ZoneSearchParams {
+  operacion?: string
+  categoria?: string
+}
+
 interface ZonePageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<ZoneSearchParams>
 }
 
 export async function generateStaticParams() {
@@ -53,19 +63,34 @@ export async function generateMetadata({ params }: ZonePageProps) {
   }
 }
 
-export default async function ZonePage({ params }: ZonePageProps) {
+export default async function ZonePage({ params, searchParams }: ZonePageProps) {
   const { slug } = await params
+  const sp = await searchParams
+
+  // Parse filters with investor-friendly defaults: venta + residencial
+  const VALID_OPS = new Set(["venta", "renta", "todas"])
+  const VALID_CATS = new Set(["residencial", "comercial", "terreno", "todas"])
+
+  const rawOp = sp.operacion && VALID_OPS.has(sp.operacion) ? sp.operacion : "venta"
+  const rawCat = sp.categoria && VALID_CATS.has(sp.categoria) ? sp.categoria : "residencial"
+
+  const filters: ListingFilters = {
+    zonas: [slug],
+    listing_type: rawOp !== "todas" ? (rawOp as ListingType) : undefined,
+    categoria: rawCat !== "todas" ? (rawCat as PropertyCategory) : undefined,
+  }
+
   const [zone, city, allZones, { listings }, zoneAnalytics, riskMetrics] = await Promise.all([
-    getZoneBySlug(slug),
-    getCityMetrics(),
+    getZoneBySlug(slug, filters),
+    getCityMetrics(filters),
     getZoneMetrics(),
-    getListings({ zonas: [slug] }),
-    getZoneListingsAnalytics(slug),
+    getListings(filters),
+    getZoneListingsAnalytics(slug, filters),
     getZoneRiskMetrics(),
   ])
   if (!zone) notFound()
 
-  // Normalize: filter out suspected misclassified rentals
+  // Normalize: filter out invalid pricing
   const normalizedListings = filterNormalizedListings(listings as Listing[])
 
   const cityAvg = city.avg_price_per_m2
@@ -151,8 +176,11 @@ export default async function ZonePage({ params }: ZonePageProps) {
       ? withBathrooms.reduce((s, l) => s + l.bathrooms!, 0) / withBathrooms.length
       : null
 
-  // --- Price distribution data ---
+  // --- Clean data for charts (remove statistical outliers) ---
   const allListings = normalizedListings
+  const chartListings = removeOutliers(allListings, (l) => l.price)
+
+  // --- Price distribution data (use clean set) ---
   const priceRanges = [
     { min: 0, max: 1_000_000, range: "<$1M" },
     { min: 1_000_000, max: 3_000_000, range: "$1M–3M" },
@@ -163,14 +191,14 @@ export default async function ZonePage({ params }: ZonePageProps) {
   ]
   const priceDistData = priceRanges
     .map((r) => {
-      const count = allListings.filter((l) => l.price >= r.min && l.price < r.max).length
-      const pct = allListings.length > 0 ? Math.round((count / allListings.length) * 100) : 0
+      const count = chartListings.filter((l) => l.price >= r.min && l.price < r.max).length
+      const pct = chartListings.length > 0 ? Math.round((count / chartListings.length) * 100) : 0
       return { range: r.range, count, label: count > 0 ? `${pct}%` : "" }
     })
     .filter((d) => d.count > 0)
 
-  // --- Scatter data (m² vs price) ---
-  const scatterData = allListings
+  // --- Scatter data (m² vs price, outlier-cleaned) ---
+  const scatterData = chartListings
     .filter((l) => l.area_m2 > 0 && l.price > 0)
     .map((l) => ({
       area: Math.round(l.area_m2),
@@ -260,6 +288,11 @@ export default async function ZonePage({ params }: ZonePageProps) {
           <ExportButton zoneSlug={slug} />
         </div>
       </div>
+
+      {/* [A2] Zone Filters */}
+      <Suspense fallback={<div className="h-10" />}>
+        <ZoneFilters />
+      </Suspense>
 
       {/* [B] KPI Ticker Strip */}
       <KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} />

@@ -483,16 +483,24 @@ export async function getListingsAnalytics(filters: ListingFilters = {}): Promis
 
 /* ---------- getZoneListingsAnalytics ---------- */
 
-export async function getZoneListingsAnalytics(slug: string): Promise<ZoneListingsAnalytics> {
+export async function getZoneListingsAnalytics(slug: string, filters?: ListingFilters): Promise<ZoneListingsAnalytics> {
   if (useMock()) return mockZoneListingsAnalytics()
 
   try {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
+    let zlaQuery = supabase
       .from("listings")
       .select("title, price_mxn, area_m2, property_type, listing_type, bedrooms, zones!inner(slug)")
       .eq("is_active", true)
       .eq("zones.slug", slug)
+
+    // Apply listing_type and categoria filters at query level
+    if (filters?.listing_type) zlaQuery = zlaQuery.eq("listing_type", filters.listing_type)
+    const zlaCatTypes: Record<PropertyCategory, PropertyType[]> = { residencial: RESIDENTIAL_TYPES, comercial: COMMERCIAL_TYPES, terreno: LAND_TYPES }
+    if (filters?.categoria) zlaQuery = zlaQuery.in("property_type", zlaCatTypes[filters.categoria])
+    else if (filters?.tipos?.length) zlaQuery = zlaQuery.in("property_type", filters.tipos)
+
+    const { data, error } = await zlaQuery
 
     if (error) throw error
     const rows = data ?? []

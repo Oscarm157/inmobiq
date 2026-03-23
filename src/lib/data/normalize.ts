@@ -1,9 +1,8 @@
 /**
- * Listing normalization — detect misclassified rentals and categorize properties.
+ * Listing normalization — validate prices, detect misclassified listings,
+ * categorize properties, and remove statistical outliers.
  *
- * Problem: some listings marked as "venta" actually have rental-level prices
- * (e.g. $200/m² instead of $30,000/m²), skewing all zone metrics.
- * This module provides utilities to detect and filter these outliers.
+ * Business rules for Tijuana real estate market (2025-2026).
  */
 
 import type { PropertyType } from "@/types/database"
@@ -39,78 +38,110 @@ export function isCommercial(type: PropertyType): boolean {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Sale price/m² sanity thresholds (MXN)                              */
+/*  Price validation thresholds (MXN)                                  */
 /* ------------------------------------------------------------------ */
 
 /**
- * Minimum credible sale price per m² by category.
- * Anything below these thresholds for a "venta" listing is almost certainly
- * a misclassified rental (monthly rent posted as sale price).
+ * Absolute price bounds per listing type × category.
  *
- * Rationale (Tijuana market, 2025-2026):
- * - Cheapest residential sales: ~$5,000 MXN/m² in peripheral zones
- * - Cheapest commercial sales:  ~$8,000 MXN/m²
- * - Cheapest land:              ~$1,500 MXN/m²
- * - Typical monthly rents:      $100-400 MXN/m² → these show up as outliers
+ * VENTA — total property price:
+ *   Residencial: $300K – $50M (no existe casa <$300K en Tijuana 2025)
+ *   Comercial:   $200K – $100M
+ *   Terreno:     $100K – $80M
+ *
+ * RENTA — monthly rent:
+ *   Residencial: $3K – $150K (casas/deptos, renta mensual)
+ *   Comercial:   $3K – $500K (locales/oficinas grandes)
+ *   Terreno:     $1K – $200K
  */
-const MIN_SALE_PRICE_PER_M2: Record<PropertyCategory, number> = {
-  residencial: 3_000,  // $3,000/m² — very conservative lower bound
-  comercial: 5_000,    // $5,000/m²
-  terreno: 1_000,      // $1,000/m²
+const PRICE_BOUNDS: Record<string, Record<PropertyCategory, { min: number; max: number }>> = {
+  venta: {
+    residencial: { min: 300_000, max: 50_000_000 },
+    comercial: { min: 200_000, max: 100_000_000 },
+    terreno: { min: 100_000, max: 80_000_000 },
+  },
+  renta: {
+    residencial: { min: 3_000, max: 150_000 },
+    comercial: { min: 3_000, max: 500_000 },
+    terreno: { min: 1_000, max: 200_000 },
+  },
 }
 
 /**
- * Maximum credible sale price per m² by category.
- * Anything above is likely a data entry error.
+ * Price per m² sanity bounds per listing type × category.
+ *
+ * VENTA — price/m²:
+ *   Residencial: $3K – $200K/m²
+ *   Comercial:   $5K – $300K/m²
+ *   Terreno:     $1K – $100K/m²
+ *
+ * RENTA — monthly rent/m²:
+ *   Residencial: $30 – $2,000/m²
+ *   Comercial:   $30 – $5,000/m²
+ *   Terreno:     $5 – $1,000/m²
  */
-const MAX_SALE_PRICE_PER_M2: Record<PropertyCategory, number> = {
-  residencial: 200_000, // $200k/m² — ultra-luxury ceiling
-  comercial: 300_000,   // $300k/m²
-  terreno: 100_000,     // $100k/m²
+const PRICE_PER_M2_BOUNDS: Record<string, Record<PropertyCategory, { min: number; max: number }>> = {
+  venta: {
+    residencial: { min: 3_000, max: 200_000 },
+    comercial: { min: 5_000, max: 300_000 },
+    terreno: { min: 1_000, max: 100_000 },
+  },
+  renta: {
+    residencial: { min: 30, max: 2_000 },
+    comercial: { min: 30, max: 5_000 },
+    terreno: { min: 5, max: 1_000 },
+  },
 }
 
 /* ------------------------------------------------------------------ */
-/*  Outlier detection                                                  */
+/*  Listing validation                                                 */
 /* ------------------------------------------------------------------ */
 
 export interface NormalizationResult {
   isValid: boolean
-  reason?: "suspected_rental" | "price_too_high" | "missing_data"
+  reason?: "price_too_low" | "price_too_high" | "price_per_m2_out_of_range" | "missing_data"
 }
 
 /**
- * Check if a listing marked as "venta" has a credible sale price.
- * Returns false for likely misclassified rentals or data errors.
+ * Validate a listing has credible pricing for its type.
+ * Works for both venta AND renta listings.
  */
-export function isValidSaleListing(
+export function isValidListing(
   propertyType: PropertyType,
   listingType: string,
   priceMxn: number | null,
   areaM2: number | null,
 ): NormalizationResult {
-  // Only validate "venta" listings — renta prices are naturally low
-  if (listingType !== "venta") return { isValid: true }
-
-  // Can't validate without both price and area
-  if (!priceMxn || priceMxn <= 0 || !areaM2 || areaM2 <= 0) {
+  if (!priceMxn || priceMxn <= 0) {
     return { isValid: false, reason: "missing_data" }
   }
 
-  const pricePerM2 = priceMxn / areaM2
+  const lt = listingType === "renta" ? "renta" : "venta"
   const category = getPropertyCategory(propertyType)
-  const minPrice = MIN_SALE_PRICE_PER_M2[category]
-  const maxPrice = MAX_SALE_PRICE_PER_M2[category]
 
-  if (pricePerM2 < minPrice) {
-    return { isValid: false, reason: "suspected_rental" }
+  // Check absolute price bounds
+  const bounds = PRICE_BOUNDS[lt]?.[category]
+  if (bounds) {
+    if (priceMxn < bounds.min) return { isValid: false, reason: "price_too_low" }
+    if (priceMxn > bounds.max) return { isValid: false, reason: "price_too_high" }
   }
 
-  if (pricePerM2 > maxPrice) {
-    return { isValid: false, reason: "price_too_high" }
+  // Check price/m² bounds (only when area is available)
+  if (areaM2 && areaM2 > 0) {
+    const pricePerM2 = priceMxn / areaM2
+    const m2Bounds = PRICE_PER_M2_BOUNDS[lt]?.[category]
+    if (m2Bounds) {
+      if (pricePerM2 < m2Bounds.min || pricePerM2 > m2Bounds.max) {
+        return { isValid: false, reason: "price_per_m2_out_of_range" }
+      }
+    }
   }
 
   return { isValid: true }
 }
+
+/** @deprecated Use isValidListing instead */
+export const isValidSaleListing = isValidListing
 
 /* ------------------------------------------------------------------ */
 /*  Filtering helpers for listings arrays                              */
@@ -132,12 +163,12 @@ function getPrice(l: ListingLike): number | null {
 }
 
 /**
- * Filter out listings that are likely misclassified (rentals posted as sales).
- * Works with both Listing interface (price) and DB rows (price_mxn).
+ * Filter out listings with invalid pricing (misclassified, data errors).
+ * Validates both venta and renta listings.
  */
 export function filterNormalizedListings<T extends ListingLike>(listings: T[]): T[] {
   return listings.filter((l) => {
-    const result = isValidSaleListing(
+    const result = isValidListing(
       l.property_type as PropertyType,
       l.listing_type ?? "venta",
       getPrice(l),
@@ -157,4 +188,35 @@ export function filterByCategory<T extends ListingLike>(
   return listings.filter(
     (l) => getPropertyCategory(l.property_type as PropertyType) === category,
   )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Statistical outlier removal (IQR)                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Remove statistical outliers using the Interquartile Range method.
+ * Use for chart data only — KPIs should reflect the full filtered market.
+ *
+ * @param items     Array of items to filter
+ * @param getValue  Function to extract the numeric value to evaluate
+ * @param multiplier  IQR multiplier (default 2.0 — generous for skewed real estate data)
+ */
+export function removeOutliers<T>(
+  items: T[],
+  getValue: (item: T) => number,
+  multiplier = 2.0,
+): T[] {
+  if (items.length < 4) return items
+  const values = items.map(getValue).sort((a, b) => a - b)
+  const q1 = values[Math.floor(values.length * 0.25)]
+  const q3 = values[Math.floor(values.length * 0.75)]
+  const iqr = q3 - q1
+  if (iqr === 0) return items // all values equal, nothing to remove
+  const lower = q1 - multiplier * iqr
+  const upper = q3 + multiplier * iqr
+  return items.filter((item) => {
+    const v = getValue(item)
+    return v >= lower && v <= upper
+  })
 }

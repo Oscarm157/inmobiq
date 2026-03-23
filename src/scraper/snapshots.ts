@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { PropertyType, ListingType } from "@/types/database";
-import { isValidSaleListing } from "@/lib/data/normalize";
+import { isValidListing } from "@/lib/data/normalize";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -107,7 +107,7 @@ export async function calculateWeeklySnapshots(): Promise<{
       const a = l.area_m2;
       if (a === null || a <= 10 || a >= 50000) return false;
       // Exclude suspected misclassified rentals (sale price too low for property type)
-      return isValidSaleListing(property_type, listing_type, effectivePrice(l), a).isValid;
+      return isValidListing(property_type, listing_type, effectivePrice(l), a).isValid;
     });
 
     const prices = validListings.map(effectivePrice).filter((p): p is number => p !== null && p > 0);
@@ -166,7 +166,7 @@ export async function calculateWeeklySnapshots(): Promise<{
   const allPricesPerM2 = allListings
     .filter((l) => {
       if (l.area_m2 === null || l.area_m2 <= 10 || l.area_m2 >= 50000) return false;
-      return isValidSaleListing(l.property_type, l.listing_type, effectivePrice(l), l.area_m2).isValid;
+      return isValidListing(l.property_type, l.listing_type, effectivePrice(l), l.area_m2).isValid;
     })
     .map((l) => {
       const p = effectivePrice(l);
