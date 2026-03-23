@@ -98,10 +98,10 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch listings", detail: listingsErr.message }, { status: 500 })
   }
 
-  const allListings = (listings ?? []).map((l) => ({
-    ...l,
-    price: effectivePriceMxn(l.price_mxn, l.price_usd) ?? 0,
-  }))
+  const allListings = (listings ?? []).map((l) => {
+    const row = l as { id: string; zone_id: string; property_type: string; listing_type: string; price_mxn: number | null; price_usd: number | null; area_m2: number | null }
+    return { ...row, price: effectivePriceMxn(row.price_mxn, row.price_usd) ?? 0 }
+  })
 
   const results: AuditResult[] = []
   const operations = ["venta", "renta"] as const
