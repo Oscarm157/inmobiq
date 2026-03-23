@@ -10,12 +10,12 @@ type SortKey = "price" | "rent" | "trend" | "activity" | "yield"
 type SortDir = "asc" | "desc"
 
 interface PriceTableProps {
-  zones: ZoneMetrics[]
+  ventaZones: ZoneMetrics[]
   rentaZones?: ZoneMetrics[]
   riskData?: ZoneRiskMetrics[]
 }
 
-export function PriceTable({ zones, rentaZones = [], riskData = [] }: PriceTableProps) {
+export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: PriceTableProps) {
   const [currency, setCurrency] = useState<"MXN" | "USD">("MXN")
   const [sortKey, setSortKey] = useState<SortKey>("price")
   const [sortDir, setSortDir] = useState<SortDir>("desc")
@@ -26,8 +26,8 @@ export function PriceTable({ zones, rentaZones = [], riskData = [] }: PriceTable
 
   const fmt = (value: number) => formatCurrency(value, currency)
 
-  // Build rows with computed values
-  const rows = zones.map((zone) => {
+  // Build rows from VENTA zones (always), with renta lookup for comparison
+  const rows = ventaZones.map((zone) => {
     const rentPerM2 = rentaRealLookup.get(zone.zone_slug) ?? rentaMockLookup.get(zone.zone_slug) ?? 0
     const yearlyRent = rentPerM2 * 12
     const yieldPct = zone.avg_price_per_m2 > 0 && yearlyRent > 0

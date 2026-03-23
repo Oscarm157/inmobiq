@@ -86,8 +86,9 @@ export default async function HomePage({
       : undefined,
   }
 
-  const [zones, rentaZones, city, priceTrend, analytics, riskData] = await Promise.all([
+  const [zones, ventaZonesForTable, rentaZonesForTable, city, priceTrend, analytics, riskData] = await Promise.all([
     getZoneMetrics(filters),
+    getZoneMetrics({ ...filters, listing_type: "venta" }),
     getZoneMetrics({ ...filters, listing_type: "renta" }),
     getCityMetrics(filters),
     getPriceTrendData(),
@@ -162,7 +163,7 @@ export default async function HomePage({
       </div>
 
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
-      <PriceTable zones={zones} rentaZones={rentaZones} riskData={riskData} />
+      <PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} />
 
       {/* ─── 4. Resumen Ejecutivo ─── */}
       <NarrativeInsight
