@@ -98,16 +98,33 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   const cityAvg = city.avg_price_per_m2 || 1 // guard against division by zero
 
-  // Determine top property type
-  const sortedTypes = Object.entries(zone.listings_by_type)
-    .filter(([, count]) => count > 0)
-    .sort(([, a], [, b]) => b - a)
-  const topType = sortedTypes[0] ?? ["casa", 0]
-  const topTypeKey = topType[0] as PropertyType
-  const topLabel = PROPERTY_LABELS[topTypeKey].toLowerCase()
-  const topPct = zone.total_listings > 0
-    ? Math.round((topType[1] / zone.total_listings) * 100)
-    : 0
+  // Determine top property type — use listing-level counts from typeComparison
+  // (same source as TypeComparison component) for consistency, falling back to snapshots
+  const tcSorted = [...zoneAnalytics.typeComparison]
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count)
+  const tcTotal = tcSorted.reduce((sum, t) => sum + t.count, 0)
+
+  let topTypeKey: PropertyType
+  let topPct: number
+  let topLabel: string
+
+  if (tcSorted.length > 0 && tcTotal > 0) {
+    topTypeKey = tcSorted[0].type as PropertyType
+    topPct = Math.round((tcSorted[0].count / tcTotal) * 100)
+    topLabel = PROPERTY_LABELS[topTypeKey].toLowerCase()
+  } else {
+    // Fallback to snapshot data (terrenos or no typeComparison data)
+    const sortedTypes = Object.entries(zone.listings_by_type)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a)
+    const topType = sortedTypes[0] ?? ["casa", 0]
+    topTypeKey = topType[0] as PropertyType
+    topLabel = PROPERTY_LABELS[topTypeKey].toLowerCase()
+    topPct = zone.total_listings > 0
+      ? Math.round((topType[1] / zone.total_listings) * 100)
+      : 0
+  }
 
   // Absorption rate
   const absorptionPct = Math.min(
@@ -116,7 +133,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   )
 
   // Generate editorial content
-  const mainText = generateMainText(zone, cityAvg, topLabel, topType[1])
+  const topCount = tcSorted.length > 0 ? tcSorted[0].count : (Object.values(zone.listings_by_type)[0] ?? 0)
+  const mainText = generateMainText(zone, cityAvg, topLabel, topCount)
   const quote = generateQuote(zone)
 
   // Badges
