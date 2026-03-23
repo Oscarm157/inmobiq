@@ -140,8 +140,6 @@ export function isValidListing(
   return { isValid: true }
 }
 
-/** @deprecated Use isValidListing instead */
-export const isValidSaleListing = isValidListing
 
 /* ------------------------------------------------------------------ */
 /*  Filtering helpers for listings arrays                              */

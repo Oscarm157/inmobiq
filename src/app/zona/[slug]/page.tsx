@@ -95,13 +95,13 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   // Normalize: filter out invalid pricing
   const normalizedListings = filterNormalizedListings(listings as Listing[])
 
-  const cityAvg = city.avg_price_per_m2
+  const cityAvg = city.avg_price_per_m2 || 1 // guard against division by zero
 
   // Determine top property type
-  const sortedTypes = Object.entries(zone.listings_by_type).sort(
-    ([, a], [, b]) => b - a
-  )
-  const topType = sortedTypes[0]
+  const sortedTypes = Object.entries(zone.listings_by_type)
+    .filter(([, count]) => count > 0)
+    .sort(([, a], [, b]) => b - a)
+  const topType = sortedTypes[0] ?? ["casa", 0]
   const topTypeKey = topType[0] as PropertyType
   const topLabel = PROPERTY_LABELS[topTypeKey].toLowerCase()
   const topPct = zone.total_listings > 0
@@ -179,8 +179,9 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       : null
 
   // --- Clean data for charts (remove statistical outliers) ---
-  const allListings = normalizedListings
-  const chartListings = removeOutliers(allListings, (l) => l.price)
+  // validListings = price-validated, chartListings = also IQR-cleaned for graphs
+  const validListings = normalizedListings
+  const chartListings = removeOutliers(validListings, (l) => l.price)
 
   // --- Price distribution data (use clean set) ---
   const priceRanges = [
@@ -229,8 +230,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   const scatterTypes = [...new Set(scatterData.map((d) => d.type))]
 
   // --- Venta vs Renta data ---
-  const ventaListings = allListings.filter((l) => l.listing_type === "venta")
-  const rentaListings = allListings.filter((l) => l.listing_type === "renta")
+  const ventaListings = validListings.filter((l) => l.listing_type === "venta")
+  const rentaListings = validListings.filter((l) => l.listing_type === "renta")
   const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
   const ventaRentaData = {
     ventaCount: ventaListings.length,
@@ -244,7 +245,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   }
 
   // --- Market quality data (extracted from raw_data) ---
-  const rawListings = allListings.filter((l) => l.raw_data)
+  const rawListings = validListings.filter((l) => l.raw_data)
   const photoCounts = rawListings.map((l) => {
     const rd = l.raw_data!
     const pics = (rd.visible_pictures as { pictures?: unknown[]; additional_pictures_count?: number } | undefined)
@@ -252,7 +253,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     const additional = pics?.additional_pictures_count ?? 0
     return listed + additional
   })
-  const withGPS = allListings.filter((l) => {
+  const withGPS = validListings.filter((l) => {
     // Check if listing has lat/lng via raw_data geolocation
     const geo = (l.raw_data?.posting_location as { posting_geolocation?: { geolocation?: { latitude: number } } } | undefined)
     return geo?.posting_geolocation?.geolocation?.latitude != null
@@ -274,10 +275,10 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   const marketQualityData = {
     avgPhotos: photoCounts.length > 0 ? photoCounts.reduce((a, b) => a + b, 0) / photoCounts.length : 0,
-    pctWithGPS: allListings.length > 0 ? Math.round((withGPS / allListings.length) * 100) : 0,
+    pctWithGPS: validListings.length > 0 ? Math.round((withGPS / validListings.length) * 100) : 0,
     pctPremium: rawListings.length > 0 ? Math.round((premiumCount / rawListings.length) * 100) : 0,
     avgPropertyAge: ages.length > 0 ? ages.reduce((a, b) => a + b, 0) / ages.length : null,
-    totalListings: allListings.length,
+    totalListings: validListings.length,
   }
 
   return (
