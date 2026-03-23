@@ -6,19 +6,77 @@ import { Icon } from "@/components/icon"
 import { formatCurrency, formatPercent, MXN_USD_RATE } from "@/lib/utils"
 import type { ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
 
+type SortKey = "price" | "rent" | "trend" | "activity" | "yield"
+type SortDir = "asc" | "desc"
+
 interface PriceTableProps {
   zones: ZoneMetrics[]
+  rentaZones?: ZoneMetrics[]
   riskData?: ZoneRiskMetrics[]
 }
 
-export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
+export function PriceTable({ zones, rentaZones = [], riskData = [] }: PriceTableProps) {
   const [currency, setCurrency] = useState<"MXN" | "USD">("MXN")
+  const [sortKey, setSortKey] = useState<SortKey>("price")
+  const [sortDir, setSortDir] = useState<SortDir>("desc")
 
-  const rentLookup = new Map(riskData.map((r) => [r.zone_slug, r.avg_rent_per_m2]))
-
-  const sortedZones = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+  // Build renta lookup from real data, fallback to riskData mock
+  const rentaRealLookup = new Map(rentaZones.map((z) => [z.zone_slug, z.avg_price_per_m2]))
+  const rentaMockLookup = new Map(riskData.map((r) => [r.zone_slug, r.avg_rent_per_m2]))
 
   const fmt = (value: number) => formatCurrency(value, currency)
+
+  // Build rows with computed values
+  const rows = zones.map((zone) => {
+    const rentPerM2 = rentaRealLookup.get(zone.zone_slug) ?? rentaMockLookup.get(zone.zone_slug) ?? 0
+    const yearlyRent = rentPerM2 * 12
+    const yieldPct = zone.avg_price_per_m2 > 0 && yearlyRent > 0
+      ? (yearlyRent / zone.avg_price_per_m2) * 100
+      : 0
+    return { zone, rentPerM2, yieldPct }
+  })
+
+  // Sort
+  const sorted = [...rows].sort((a, b) => {
+    let va = 0, vb = 0
+    switch (sortKey) {
+      case "price": va = a.zone.avg_price_per_m2; vb = b.zone.avg_price_per_m2; break
+      case "rent": va = a.rentPerM2; vb = b.rentPerM2; break
+      case "trend": va = a.zone.price_trend_pct; vb = b.zone.price_trend_pct; break
+      case "activity": va = a.zone.total_listings; vb = b.zone.total_listings; break
+      case "yield": va = a.yieldPct; vb = b.yieldPct; break
+    }
+    return sortDir === "desc" ? vb - va : va - vb
+  })
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"))
+    } else {
+      setSortKey(key)
+      setSortDir("desc")
+    }
+  }
+
+  function SortHeader({ label, col, align = "right" }: { label: string; col: SortKey; align?: string }) {
+    const active = sortKey === col
+    return (
+      <th
+        className={`px-4 py-3 text-${align} cursor-pointer select-none hover:text-slate-800 dark:hover:text-slate-200 transition-colors`}
+        onClick={() => toggleSort(col)}
+      >
+        <span className="inline-flex items-center gap-1">
+          {label}
+          {active && (
+            <Icon
+              name={sortDir === "desc" ? "arrow_downward" : "arrow_upward"}
+              className="text-[10px]"
+            />
+          )}
+        </span>
+      </th>
+    )
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
@@ -50,22 +108,18 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
           <thead>
             <tr className="text-left text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50">
               <th className="px-6 py-3">Zona</th>
-              <th className="px-4 py-3 text-right">Precio/m² Venta</th>
-              <th className="px-4 py-3 text-right">Renta/m² Mes</th>
-              <th className="px-4 py-3 text-right">Tendencia</th>
-              <th className="px-4 py-3 text-right">Actividad</th>
-              <th className="px-4 py-3 text-right">Yield Anual</th>
+              <SortHeader label="Precio/m² Venta" col="price" />
+              <SortHeader label="Renta/m² Mes" col="rent" />
+              <SortHeader label="Tendencia" col="trend" />
+              <SortHeader label="Actividad" col="activity" />
+              <SortHeader label="Yield Anual" col="yield" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {sortedZones.map((zone) => {
-              const rentPerM2 = rentLookup.get(zone.zone_slug) ?? 0
-              const yearlyRent = rentPerM2 * 12
-              const yieldPct = zone.avg_price_per_m2 > 0 && yearlyRent > 0
-                ? ((yearlyRent / zone.avg_price_per_m2) * 100).toFixed(1)
-                : "—"
+            {sorted.map(({ zone, rentPerM2, yieldPct }) => {
               const trendUp = zone.price_trend_pct > 0
               const trendDown = zone.price_trend_pct < 0
+              const yieldStr = yieldPct > 0 ? `${yieldPct.toFixed(1)}%` : "—"
 
               return (
                 <tr key={zone.zone_slug} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -75,7 +129,7 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-right font-mono font-bold">
-                    {fmt(zone.avg_price_per_m2)}
+                    {zone.avg_price_per_m2 > 0 ? fmt(zone.avg_price_per_m2) : "—"}
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-slate-600 dark:text-slate-300">
                     {rentPerM2 > 0 ? fmt(rentPerM2) : "—"}
@@ -94,8 +148,8 @@ export function PriceTable({ zones, riskData = [] }: PriceTableProps) {
                     {zone.total_listings >= 150 ? "Alta" : zone.total_listings >= 50 ? "Moderada" : "Baja"}
                   </td>
                   <td className="px-4 py-3 text-right font-mono">
-                    <span className={`${Number(yieldPct) >= 8 ? "text-green-600 font-bold" : "text-slate-600 dark:text-slate-300"}`}>
-                      {yieldPct === "—" ? "—" : `${yieldPct}%`}
+                    <span className={`${yieldPct >= 4 && yieldPct <= 15 ? "text-green-600 font-bold" : "text-slate-600 dark:text-slate-300"}`}>
+                      {yieldStr}
                     </span>
                   </td>
                 </tr>
