@@ -65,7 +65,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       setDemoMultiplier(0.93 + Math.random() * 0.13)
       timerRef.current = setInterval(() => {
         setDemoMultiplier(0.93 + Math.random() * 0.13)
-      }, 2500)
+      }, 1700)
     }
 
     return () => clearInterval(timerRef.current)
