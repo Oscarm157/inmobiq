@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { DemoScroll } from "@/components/demo-scroll"
+import { DemoVideo } from "@/components/demo-video"
 import { Icon } from "@/components/icon"
 import { ZoneCard } from "@/components/zone-card"
 import { PriceChart } from "@/components/price-chart"
@@ -108,6 +109,16 @@ export default async function HomePage({
   return (
     <div className="space-y-10">
       <Suspense><DemoScroll /></Suspense>
+      <DemoVideo
+        pricePerM2={city.avg_price_per_m2}
+        totalListings={analytics.totalListings}
+        totalZones={city.total_zones}
+        topZones={topByPrice.slice(0, 8).map((z) => ({
+          name: z.zone_name,
+          pricePerM2: z.avg_price_per_m2,
+          trend: z.price_trend_pct,
+        }))}
+      />
       {/* ─── 1. Header ─── */}
       <div id="demo-header" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
