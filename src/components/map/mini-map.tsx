@@ -15,7 +15,7 @@ interface MiniMapProps {
   height?: string
 }
 
-export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
+export function MiniMap({ zones, height = "420px" }: MiniMapProps) {
   const { formatPrice } = useCurrency()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null)
@@ -44,11 +44,16 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
         style: "mapbox://styles/mapbox/light-v11",
         center: TIJUANA_CENTER,
         zoom: 11,
-        interactive: false,
+        interactive: true,
         attributionControl: false,
       })
 
       mapInstanceRef.current = map
+
+      map.addControl(
+        new mapboxgl.default.NavigationControl({ showCompass: false }),
+        "top-right"
+      )
 
       // Enrich GeoJSON with colors
       const enriched = {
@@ -178,10 +183,7 @@ export function MiniMap({ zones, height = "280px" }: MiniMapProps) {
           },
         })
 
-        // Re-enable pointer events for hover/click
         const canvas = map.getCanvas()
-        canvas.style.pointerEvents = "auto"
-
         let hoveredId: number | null = null
 
         const popup = new mapboxgl.default.Popup({
