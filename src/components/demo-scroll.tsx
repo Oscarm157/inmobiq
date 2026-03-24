@@ -25,7 +25,7 @@ export function DemoScroll() {
   // Tuning
   const SPEED = 1.2          // pixels per frame (~72px/sec at 60fps)
   const PAUSE_EVERY = 550    // pause every N pixels scrolled
-  const PAUSE_MS = 2000      // 2 second pause
+  const PAUSE_MS = 1000      // 1 second pause
   const START_DELAY = 1500   // wait before starting
 
   const stop = useCallback(() => {
