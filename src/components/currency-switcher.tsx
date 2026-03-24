@@ -84,12 +84,17 @@ export function CurrencySwitcher() {
               min="0.1"
               value={rateInput}
               onChange={(e) => setRateInput(e.target.value)}
-              onBlur={handleRateBlur}
               onKeyDown={(e) => e.key === "Enter" && handleRateBlur()}
               className="flex-1 px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20"
             />
             <span className="text-xs text-slate-500 dark:text-slate-400">MXN</span>
           </div>
+          <button
+            onClick={handleRateBlur}
+            className="w-full mt-2 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            Actualizar
+          </button>
         </div>
       )}
     </div>

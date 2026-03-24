@@ -4,7 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { Icon } from "@/components/icon"
 import { InfoTooltip } from "@/components/info-tooltip"
-import { formatCurrency, formatPercent, MXN_USD_RATE } from "@/lib/utils"
+import { useCurrency } from "@/contexts/currency-context"
+import { formatCurrency, formatPercent } from "@/lib/utils"
 import type { ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
 
 type SortKey = "price" | "rent" | "trend" | "activity" | "yield"
@@ -17,15 +18,17 @@ interface PriceTableProps {
 }
 
 export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: PriceTableProps) {
-  const [currency, setCurrency] = useState<"MXN" | "USD">("MXN")
+  const { currency, exchangeRate, setCurrency: setGlobalCurrency } = useCurrency()
   const [sortKey, setSortKey] = useState<SortKey>("price")
   const [sortDir, setSortDir] = useState<SortDir>("desc")
+
+  const setCurrency = (fn: (c: "MXN" | "USD") => "MXN" | "USD") => setGlobalCurrency(fn(currency))
 
   // Build renta lookup from real data, fallback to riskData mock
   const rentaRealLookup = new Map(rentaZones.map((z) => [z.zone_slug, z.avg_price_per_m2]))
   const rentaMockLookup = new Map(riskData.map((r) => [r.zone_slug, r.avg_rent_per_m2]))
 
-  const fmt = (value: number) => formatCurrency(value, currency)
+  const fmt = (value: number) => formatCurrency(value, currency, exchangeRate)
 
   // Build rows from VENTA zones (always), with renta lookup for comparison
   const rows = ventaZones.map((zone) => {
@@ -91,7 +94,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
           <div>
             <h3 className="text-lg font-black tracking-tight">Precio por m² — Tijuana</h3>
             <p className="text-xs text-slate-500 font-medium">
-              Tipo de cambio: $1 USD = ${MXN_USD_RATE.toFixed(2)} MXN
+              Tipo de cambio: $1 USD = ${exchangeRate.toFixed(2)} MXN
             </p>
           </div>
         </div>

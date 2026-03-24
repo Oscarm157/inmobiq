@@ -10,13 +10,13 @@ import { USD_TO_MXN } from "@/lib/data/normalize"
 /** @deprecated Use USD_TO_MXN from normalize.ts */
 export const MXN_USD_RATE = USD_TO_MXN
 
-export function formatCurrency(value: number, currency: "MXN" | "USD" = "MXN"): string {
+export function formatCurrency(value: number, currency: "MXN" | "USD" = "MXN", rate?: number): string {
   if (currency === "USD") {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
-    }).format(value / USD_TO_MXN)
+    }).format(value / (rate ?? USD_TO_MXN))
   }
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
