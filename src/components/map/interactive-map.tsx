@@ -112,30 +112,45 @@ export function InteractiveMap({
         className: "inmobiq-popup",
       })
 
-      // Build enriched GeoJSON with zone metrics
-      const enriched = {
-        ...ZONE_GEOJSON,
-        features: ZONE_GEOJSON.features.map((f) => {
-          const props = f.properties as { slug: string; name: string }
-          const metrics = zones.find((z) => z.zone_slug === props.slug)
-          const color = metrics
-            ? getPriceColor(metrics.avg_price_per_m2)
-            : "#94a3b8"
-          const priceLabel = metrics
-            ? getPriceLabel(metrics.avg_price_per_m2)
-            : "Sin datos"
-          return {
-            ...f,
-            properties: {
-              ...props,
-              color,
-              priceLabel,
-              avgPrice: metrics?.avg_price_per_m2 ?? 0,
-              totalListings: metrics?.total_listings ?? 0,
-              priceTrend: metrics?.price_trend_pct ?? 0,
-            },
-          }
-        }),
+      // Build enriched GeoJSON — explode MultiPolygons into individual islands
+      const explodedFeatures: GeoJSON.Feature[] = []
+      for (const f of ZONE_GEOJSON.features) {
+        const props = f.properties as { slug: string; name: string }
+        const metrics = zones.find((z) => z.zone_slug === props.slug)
+        const color = metrics ? getPriceColor(metrics.avg_price_per_m2) : "#94a3b8"
+        const priceLabel = metrics ? getPriceLabel(metrics.avg_price_per_m2) : "Sin datos"
+        const baseProps = {
+          ...props,
+          color,
+          priceLabel,
+          avgPrice: metrics?.avg_price_per_m2 ?? 0,
+          totalListings: metrics?.total_listings ?? 0,
+          priceTrend: metrics?.price_trend_pct ?? 0,
+        }
+
+        const geom = f.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon
+        if (geom.type === "MultiPolygon") {
+          // Each sub-polygon gets its own feature with an island_id
+          geom.coordinates.forEach((polyCoords, i) => {
+            explodedFeatures.push({
+              type: "Feature",
+              id: explodedFeatures.length,
+              properties: { ...baseProps, island_id: `${props.slug}-${i + 1}` },
+              geometry: { type: "Polygon", coordinates: polyCoords },
+            })
+          })
+        } else {
+          explodedFeatures.push({
+            type: "Feature",
+            id: explodedFeatures.length,
+            properties: { ...baseProps, island_id: `${props.slug}-1` },
+            geometry: geom,
+          })
+        }
+      }
+      const enriched: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: explodedFeatures,
       }
 
       map.on("load", () => {
@@ -295,6 +310,15 @@ export function InteractiveMap({
         // ── Hover interaction ──
         let hoveredId: number | null = null
 
+        // Island ID tooltip (for manual polygon editing)
+        const islandTooltip = new mapboxgl.default.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          maxWidth: "200px",
+          offset: [0, -10],
+          className: "island-tooltip",
+        })
+
         map.on("mousemove", "zones-fill", (e) => {
           if (!e.features?.length) return
           map.getCanvas().style.cursor = "pointer"
@@ -311,6 +335,15 @@ export function InteractiveMap({
             { source: "zones", id: hoveredId },
             { hover: true }
           )
+
+          // Show island_id tooltip
+          const islandId = feature.properties?.island_id
+          if (islandId) {
+            islandTooltip
+              .setLngLat(e.lngLat)
+              .setHTML(`<div style="font-family:monospace;font-size:11px;font-weight:700;color:#1e40af;padding:2px 4px">${islandId}</div>`)
+              .addTo(map)
+          }
         })
 
         map.on("mouseleave", "zones-fill", () => {
@@ -322,6 +355,7 @@ export function InteractiveMap({
             )
             hoveredId = null
           }
+          islandTooltip.remove()
         })
 
         // ── Click interaction ──
