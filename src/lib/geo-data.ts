@@ -2691,7 +2691,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "id": 11,
       "properties": {
         "slug": "soler",
-        "name": "Soler"
+        "name": "Mirador-Soler"
       },
       "geometry": {
         "type": "MultiPolygon",

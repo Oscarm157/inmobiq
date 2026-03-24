@@ -138,7 +138,7 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "13",
-    zone_name: "Soler",
+    zone_name: "Mirador-Soler",
     zone_slug: "soler",
     avg_price_per_m2: 13500,
     price_trend_pct: 0.8,
@@ -429,7 +429,7 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
     liquidity_score: 78, market_maturity: "maduro", avg_rent_per_m2: 115, risk_label: "Medio",
   },
   {
-    zone_slug: "soler", zone_name: "Soler",
+    zone_slug: "soler", zone_name: "Mirador-Soler",
     risk_score: 62, volatility: 6.5, cap_rate: 8.8, vacancy_rate: 13.5,
     liquidity_score: 58, market_maturity: "maduro", avg_rent_per_m2: 105, risk_label: "Alto",
   },

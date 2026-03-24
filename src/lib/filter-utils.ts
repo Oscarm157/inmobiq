@@ -24,7 +24,7 @@ export const ZONES = [
   // Frontera/Norte
   { slug: "centro", name: "Centro" },
   { slug: "libertad", name: "Libertad" },
-  { slug: "soler", name: "Soler" },
+  { slug: "soler", name: "Mirador-Soler" },
   // Costa
   { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
   { slug: "baja-malibu", name: "Baja Malibú" },
