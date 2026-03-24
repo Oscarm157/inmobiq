@@ -37,8 +37,8 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "4",
-    zone_name: "Chapultepec",
-    zone_slug: "chapultepec",
+    zone_name: "Hipódromo-Chapultepec",
+    zone_slug: "hipodromo-chapultepec",
     avg_price_per_m2: 28900,
     price_trend_pct: 3.5,
     avg_ticket: 4100000,
@@ -48,13 +48,13 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "5",
-    zone_name: "Hipódromo",
-    zone_slug: "hipodromo",
+    zone_name: "Hipódromo-Chapultepec (legacy)",
+    zone_slug: "hipodromo-chapultepec-legacy",
     avg_price_per_m2: 26800,
     price_trend_pct: -1.2,
     avg_ticket: 3600000,
-    total_listings: 134,
-    listings_by_type: { casa: 48, departamento: 62, terreno: 5, local: 12, oficina: 7 },
+    total_listings: 0,
+    listings_by_type: { casa: 0, departamento: 0, terreno: 0, local: 0, oficina: 0 },
     avg_ticket_by_type: { casa: 4500000, departamento: 2800000, terreno: 4200000, local: 3200000, oficina: 2200000 },
   },
   {
@@ -392,12 +392,12 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
     liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
   },
   {
-    zone_slug: "chapultepec", zone_name: "Chapultepec",
+    zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec",
     risk_score: 38, volatility: 4.1, cap_rate: 6.9, vacancy_rate: 7.2,
     liquidity_score: 68, market_maturity: "maduro", avg_rent_per_m2: 220, risk_label: "Bajo",
   },
   {
-    zone_slug: "hipodromo", zone_name: "Hipódromo",
+    zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec",
     risk_score: 58, volatility: 7.2, cap_rate: 6.2, vacancy_rate: 11.3,
     liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 195, risk_label: "Medio",
   },
@@ -562,7 +562,7 @@ export const PORTFOLIO_PRESETS: PortfolioPreset[] = [
     allocations: [
       { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 20 },
       { zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana", allocation_pct: 15 },
-      { zone_slug: "chapultepec", zone_name: "Chapultepec", allocation_pct: 15 },
+      { zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec", allocation_pct: 15 },
       { zone_slug: "cacho", zone_name: "Cacho", allocation_pct: 10 },
       { zone_slug: "real-del-mar", zone_name: "Real del Mar", allocation_pct: 10 },
       { zone_slug: "otay-universidad", zone_name: "Otay Universidad", allocation_pct: 10 },
@@ -634,7 +634,7 @@ export const PIPELINE_PROJECTS_EXTENDED: PipelineProject[] = [
     investors: 15, investor_label: "15 Inversores activos",
   },
   {
-    id: "p5", zone_slug: "chapultepec", zone_name: "Chapultepec",
+    id: "p5", zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec",
     name: "Parque Chapultepec Living", status: "preventa", status_label: "Pre-Venta Fase 2",
     badge_color: "bg-blue-100 text-blue-700",
     description: "Departamentos con amenidades premium · 8 pisos",

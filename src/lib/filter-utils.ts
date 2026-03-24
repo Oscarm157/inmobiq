@@ -18,8 +18,7 @@ export const ZONES = [
   // Premium/Central
   { slug: "zona-rio", name: "Zona Río" },
   { slug: "cacho", name: "Cacho" },
-  { slug: "chapultepec", name: "Chapultepec" },
-  { slug: "hipodromo", name: "Hipódromo" },
+  { slug: "hipodromo-chapultepec", name: "Hipódromo-Chapultepec" },
   { slug: "agua-caliente", name: "Agua Caliente" },
   { slug: "lomas-de-agua-caliente", name: "Lomas de Agua Caliente" },
   // Frontera/Norte

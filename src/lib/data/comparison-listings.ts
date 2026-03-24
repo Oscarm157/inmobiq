@@ -7,8 +7,8 @@ export interface ComparisonListing extends Listing {
 }
 
 const MOCK_ID_TO_SLUG: Record<string, string> = {
-  "1": "zona-rio", "2": "playas-de-tijuana", "3": "otay", "4": "chapultepec",
-  "5": "hipodromo", "6": "centro", "7": "residencial-del-bosque", "8": "la-mesa",
+  "1": "zona-rio", "2": "playas-de-tijuana", "3": "otay", "4": "hipodromo-chapultepec",
+  "5": "hipodromo-chapultepec", "6": "centro", "7": "residencial-del-bosque", "8": "la-mesa",
 }
 
 const MOCK_SLUG_TO_NAME: Record<string, string> = {

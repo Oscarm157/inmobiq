@@ -77,8 +77,8 @@ async function loadTijuanaAgebs(): Promise<AgebFeature[]> {
   while (true) {
     const { done, value } = await source.read()
     if (done) break
-    // Filter: only Tijuana (municipality 02004)
-    if (value.properties.Cve_MunC === "02004") {
+    // Filter: Tijuana (02004) + Playas de Rosarito (02005) for border zones
+    if (value.properties.Cve_MunC === "02004" || value.properties.Cve_MunC === "02005") {
       agebs.push({
         geometry: value.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon,
         properties: value.properties,
@@ -86,7 +86,7 @@ async function loadTijuanaAgebs(): Promise<AgebFeature[]> {
     }
   }
 
-  console.log(`Loaded ${agebs.length} AGEBs for Tijuana`)
+  console.log(`Loaded ${agebs.length} AGEBs for Tijuana + Rosarito`)
   return agebs
 }
 
