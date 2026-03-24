@@ -4,15 +4,13 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 
 /**
- * Demo tour mode for video recording.
- * Activate with ?demo=true in the URL.
+ * Demo tour for video recording. Activate with ?demo=true.
  *
- * Scrolls to each key section, pauses to let it breathe, then moves on.
- * Uses native smooth scroll for natural easing.
- * Subtle play button — only visible if you know it's there.
+ * Scrolls to each section's title area with padding so the viewer
+ * sees the heading first, reads it, then the content beneath.
+ * Natural easing via CSS scroll-smooth. Longer pauses for context.
  */
 
-// Sections to visit (by ID). The component finds whichever exist on the page.
 const TOUR_SECTIONS = [
   "demo-header",
   "demo-kpis",
@@ -24,8 +22,21 @@ const TOUR_SECTIONS = [
   "demo-zonas",
 ]
 
-const PAUSE_BETWEEN = 1500 // ms to pause at each section
-const SCROLL_SETTLE = 800  // ms to wait for smooth scroll to finish
+// Pause durations per section (some need more time)
+const SECTION_PAUSE: Record<string, number> = {
+  "demo-header": 2500,      // Let them read the title + badges
+  "demo-kpis": 2000,        // 3 KPI cards
+  "demo-map": 2500,         // Map needs time to render
+  "demo-table": 2200,       // Table title + first rows
+  "demo-charts": 2000,      // First chart pair
+  "demo-destacadas": 2000,  // Highlighted zones
+  "demo-editorial": 2200,   // Analysis text
+  "demo-zonas": 2500,       // Zone grid
+}
+
+const DEFAULT_PAUSE = 1800
+const SCROLL_SETTLE = 1000  // Time for smooth scroll animation to finish
+const TOP_OFFSET = 20       // px padding above section when scrolling to it
 
 export function DemoScroll() {
   const searchParams = useSearchParams()
@@ -35,109 +46,114 @@ export function DemoScroll() {
   const [step, setStep] = useState(-1)
   const [totalSteps, setTotalSteps] = useState(0)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const timer2Ref = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  // Find which sections exist on this page
   const getSections = useCallback(() => {
     return TOUR_SECTIONS
       .map((id) => document.getElementById(id))
       .filter(Boolean) as HTMLElement[]
   }, [])
 
-  // Auto-start if ?demo=true
+  // Auto-start
   useEffect(() => {
     if (!isDemo) return
-    const timer = setTimeout(() => startTour(), 1200)
+    const timer = setTimeout(() => startTour(), 1500)
     return () => clearTimeout(timer)
   }, [isDemo])
 
   const startTour = useCallback(() => {
     const sections = getSections()
     if (sections.length === 0) return
-
-    window.scrollTo({ top: 0 })
+    // Start at top
+    window.scrollTo({ top: 0, behavior: "smooth" })
     setTotalSteps(sections.length)
-    setStep(0)
     setRunning(true)
+    // Pause at top first, then begin
+    timerRef.current = setTimeout(() => setStep(0), 1500)
   }, [getSections])
 
   const stopTour = useCallback(() => {
     setRunning(false)
     setStep(-1)
     clearTimeout(timerRef.current)
+    clearTimeout(timer2Ref.current)
   }, [])
 
-  // Drive the tour forward
+  // Drive the tour
   useEffect(() => {
     if (!running || step < 0) return
 
     const sections = getSections()
     if (step >= sections.length) {
-      // Tour complete
       setRunning(false)
       return
     }
 
     const el = sections[step]
-    el.scrollIntoView({ behavior: "smooth", block: "start" })
+    const sectionId = TOUR_SECTIONS.find((id) => document.getElementById(id) === el) ?? ""
+    const pauseMs = SECTION_PAUSE[sectionId] ?? DEFAULT_PAUSE
 
-    // Wait for scroll to settle, then pause, then advance
+    // Scroll so the element's top is TOP_OFFSET px below the viewport top
+    const rect = el.getBoundingClientRect()
+    const absoluteTop = rect.top + window.scrollY - TOP_OFFSET
+    window.scrollTo({ top: Math.max(0, absoluteTop), behavior: "smooth" })
+
+    // Wait for scroll to finish, then hold, then next
     timerRef.current = setTimeout(() => {
-      timerRef.current = setTimeout(() => {
+      timer2Ref.current = setTimeout(() => {
         setStep((s) => s + 1)
-      }, PAUSE_BETWEEN)
+      }, pauseMs)
     }, SCROLL_SETTLE)
 
-    return () => clearTimeout(timerRef.current)
+    return () => {
+      clearTimeout(timerRef.current)
+      clearTimeout(timer2Ref.current)
+    }
   }, [running, step, getSections])
 
   if (!isDemo) return null
 
-  // Subtle play button — small, semi-transparent, bottom-right
+  // Subtle play button
   if (!running && step === -1) {
     return (
       <button
         onClick={startTour}
-        className="fixed bottom-5 right-5 z-[9999] w-8 h-8 rounded-full bg-slate-900/30 hover:bg-slate-900/60 hover:scale-110 flex items-center justify-center transition-all duration-200 backdrop-blur-sm"
+        className="fixed bottom-5 right-5 z-[9999] w-7 h-7 rounded-full bg-black/15 hover:bg-black/40 hover:scale-110 flex items-center justify-center transition-all duration-300"
         aria-label="Iniciar demo"
       >
-        <svg width="10" height="12" viewBox="0 0 10 12" fill="white" className="ml-0.5 opacity-60">
-          <polygon points="0,0 10,6 0,12" />
+        <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor" className="ml-0.5 text-slate-400">
+          <polygon points="0,0 8,5 0,10" />
         </svg>
       </button>
     )
   }
 
-  // Progress indicator while running
-  const pct = totalSteps > 0 ? Math.round(((step) / totalSteps) * 100) : 0
+  const pct = totalSteps > 0 ? Math.round((step / totalSteps) * 100) : 0
 
   return (
     <div
-      className={`fixed bottom-5 right-5 z-[9999] transition-all duration-500 ${
+      className={`fixed bottom-5 right-5 z-[9999] transition-all duration-700 ${
         !running && step >= totalSteps ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
-      <div className="flex items-center gap-2.5 bg-slate-900/80 text-white px-3.5 py-2 rounded-full shadow-2xl backdrop-blur-md border border-white/10">
-        {/* Step dots */}
+      <div className="flex items-center gap-2 bg-black/60 text-white px-3 py-1.5 rounded-full backdrop-blur-md border border-white/5">
         <div className="flex gap-1">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                i < step ? "bg-blue-400" : i === step ? "bg-white" : "bg-white/20"
+              className={`w-1 h-1 rounded-full transition-all duration-500 ${
+                i < step ? "bg-blue-400" : i === step ? "bg-white scale-150" : "bg-white/15"
               }`}
             />
           ))}
         </div>
-
-        <span className="text-[10px] font-mono text-white/50">{pct}%</span>
-
         <button
           onClick={stopTour}
-          className="w-4 h-4 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition-colors"
+          className="w-3.5 h-3.5 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
           aria-label="Detener"
         >
-          <svg width="6" height="6" viewBox="0 0 6 6" fill="currentColor" className="opacity-60">
-            <rect width="6" height="6" rx="0.5" />
+          <svg width="5" height="5" viewBox="0 0 5 5" fill="currentColor" className="opacity-40">
+            <rect width="5" height="5" rx="0.5" />
           </svg>
         </button>
       </div>
