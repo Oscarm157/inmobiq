@@ -93,7 +93,7 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   // ─── Premium/Central ────────────────────────────────────────────────
   {
     zone_id: "9",
-    zone_name: "Cacho",
+    zone_name: "Cacho-Cumbres",
     zone_slug: "cacho",
     avg_price_per_m2: 30200,
     price_trend_pct: 3.8,
@@ -147,17 +147,7 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
     listings_by_type: { casa: 42, departamento: 25, terreno: 8, local: 10, oficina: 3 },
     avg_ticket_by_type: { casa: 1800000, departamento: 1200000, terreno: 2200000, local: 1400000, oficina: 900000 },
   },
-  {
-    zone_id: "14",
-    zone_name: "Federal",
-    zone_slug: "federal",
-    avg_price_per_m2: 12800,
-    price_trend_pct: 0.5,
-    avg_ticket: 1500000,
-    total_listings: 72,
-    listings_by_type: { casa: 35, departamento: 20, terreno: 6, local: 8, oficina: 3 },
-    avg_ticket_by_type: { casa: 1700000, departamento: 1100000, terreno: 2000000, local: 1300000, oficina: 850000 },
-  },
+  // Federal merged into Zona Río
   // ─── Costa ──────────────────────────────────────────────────────────
   {
     zone_id: "15",
@@ -418,7 +408,7 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
   },
   // ─── Premium/Central ────────────────────────────────────────────────
   {
-    zone_slug: "cacho", zone_name: "Cacho",
+    zone_slug: "cacho", zone_name: "Cacho-Cumbres",
     risk_score: 33, volatility: 3.5, cap_rate: 6.5, vacancy_rate: 5.8,
     liquidity_score: 82, market_maturity: "consolidado", avg_rent_per_m2: 235, risk_label: "Bajo",
   },
@@ -443,11 +433,7 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
     risk_score: 62, volatility: 6.5, cap_rate: 8.8, vacancy_rate: 13.5,
     liquidity_score: 58, market_maturity: "maduro", avg_rent_per_m2: 105, risk_label: "Alto",
   },
-  {
-    zone_slug: "federal", zone_name: "Federal",
-    risk_score: 64, volatility: 6.8, cap_rate: 9.2, vacancy_rate: 14.0,
-    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 100, risk_label: "Alto",
-  },
+  // Federal merged into Zona Río
   // ─── Costa ──────────────────────────────────────────────────────────
   {
     zone_slug: "baja-malibu", zone_name: "Baja Malibú",
@@ -545,7 +531,7 @@ export const PORTFOLIO_PRESETS: PortfolioPreset[] = [
     risk_score: 30,
     allocations: [
       { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 25 },
-      { zone_slug: "cacho", zone_name: "Cacho", allocation_pct: 20 },
+      { zone_slug: "cacho", zone_name: "Cacho-Cumbres", allocation_pct: 20 },
       { zone_slug: "otay", zone_name: "Otay", allocation_pct: 15 },
       { zone_slug: "agua-caliente", zone_name: "Agua Caliente", allocation_pct: 15 },
       { zone_slug: "la-mesa", zone_name: "La Mesa", allocation_pct: 15 },
@@ -563,7 +549,7 @@ export const PORTFOLIO_PRESETS: PortfolioPreset[] = [
       { zone_slug: "zona-rio", zone_name: "Zona Río", allocation_pct: 20 },
       { zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana", allocation_pct: 15 },
       { zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec", allocation_pct: 15 },
-      { zone_slug: "cacho", zone_name: "Cacho", allocation_pct: 10 },
+      { zone_slug: "cacho", zone_name: "Cacho-Cumbres", allocation_pct: 10 },
       { zone_slug: "real-del-mar", zone_name: "Real del Mar", allocation_pct: 10 },
       { zone_slug: "otay-universidad", zone_name: "Otay Universidad", allocation_pct: 10 },
       { zone_slug: "santa-fe", zone_name: "Santa Fe", allocation_pct: 10 },

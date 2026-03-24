@@ -17,7 +17,7 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string 
 export const ZONES = [
   // Premium/Central
   { slug: "zona-rio", name: "Zona Río" },
-  { slug: "cacho", name: "Cacho" },
+  { slug: "cacho", name: "Cacho-Cumbres" },
   { slug: "hipodromo-chapultepec", name: "Hipódromo-Chapultepec" },
   { slug: "agua-caliente", name: "Agua Caliente" },
   { slug: "lomas-de-agua-caliente", name: "Lomas de Agua Caliente" },
@@ -25,7 +25,6 @@ export const ZONES = [
   { slug: "centro", name: "Centro" },
   { slug: "libertad", name: "Libertad" },
   { slug: "soler", name: "Soler" },
-  { slug: "federal", name: "Federal" },
   // Costa
   { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
   { slug: "baja-malibu", name: "Baja Malibú" },

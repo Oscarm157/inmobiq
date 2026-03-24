@@ -1907,7 +1907,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "id": 7,
       "properties": {
         "slug": "cacho",
-        "name": "Cacho"
+        "name": "Cacho-Cumbres"
       },
       "geometry": {
         "type": "Polygon",
@@ -3167,41 +3167,6 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "type": "Feature",
       "id": 12,
       "properties": {
-        "slug": "federal",
-        "name": "Federal"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -117.045,
-              32.55
-            ],
-            [
-              -117.025,
-              32.55
-            ],
-            [
-              -117.025,
-              32.538
-            ],
-            [
-              -117.045,
-              32.538
-            ],
-            [
-              -117.045,
-              32.55
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 13,
-      "properties": {
         "slug": "baja-malibu",
         "name": "Baja Malibú"
       },
@@ -3469,7 +3434,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 14,
+      "id": 13,
       "properties": {
         "slug": "real-del-mar",
         "name": "Real del Mar"
@@ -3542,7 +3507,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 15,
+      "id": 14,
       "properties": {
         "slug": "san-antonio-del-mar",
         "name": "San Antonio del Mar"
@@ -3831,7 +3796,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 16,
+      "id": 15,
       "properties": {
         "slug": "punta-bandera",
         "name": "Punta Bandera"
@@ -3866,7 +3831,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 17,
+      "id": 16,
       "properties": {
         "slug": "costa-coronado",
         "name": "Costa Coronado"
@@ -4367,7 +4332,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 18,
+      "id": 17,
       "properties": {
         "slug": "las-americas",
         "name": "Las Américas"
@@ -4566,7 +4531,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 19,
+      "id": 18,
       "properties": {
         "slug": "villa-fontana",
         "name": "Villa Fontana"
@@ -5131,7 +5096,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 20,
+      "id": 19,
       "properties": {
         "slug": "montecarlo",
         "name": "Montecarlo"
@@ -5824,7 +5789,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 21,
+      "id": 20,
       "properties": {
         "slug": "otay-universidad",
         "name": "Otay Universidad"
@@ -5879,7 +5844,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 22,
+      "id": 21,
       "properties": {
         "slug": "santa-fe",
         "name": "Santa Fe"
@@ -6384,7 +6349,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 23,
+      "id": 22,
       "properties": {
         "slug": "natura",
         "name": "Natura"
@@ -7633,7 +7598,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 24,
+      "id": 23,
       "properties": {
         "slug": "colinas-de-california",
         "name": "Colinas de California"
@@ -7952,7 +7917,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 25,
+      "id": 24,
       "properties": {
         "slug": "lomas-virreyes",
         "name": "Lomas Virreyes"
@@ -8329,7 +8294,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 26,
+      "id": 25,
       "properties": {
         "slug": "insurgentes",
         "name": "Insurgentes"
@@ -8858,7 +8823,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 27,
+      "id": 26,
       "properties": {
         "slug": "el-florido",
         "name": "El Florido"
@@ -10015,7 +9980,7 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
     },
     {
       "type": "Feature",
-      "id": 28,
+      "id": 27,
       "properties": {
         "slug": "terrazas-de-la-presa",
         "name": "Terrazas de la Presa"
