@@ -17,28 +17,22 @@ import * as turf from "@turf/turf"
 import { ZONE_GEOJSON } from "../src/lib/geo-data"
 
 // ─── Zone → CP mapping (approved by user) ────────────────────────────────────
-// Strategy:
-//   - "expand": UNION existing polygon + CP polygons (zones already close)
-//   - "relocate": TRANSLATE existing polygon to the CP centroid (zones far off but right size)
+// Strategy: UNION the existing polygon with CP polygons to expand, not replace.
+// This ensures we never lose AGEBs that the current polygon already captures.
 
-const ZONE_CP_MAP: Record<string, { cps: number[]; mode: "expand" | "relocate" }> = {
-  // ─── Zones already in correct position — expand with CPs ───
-  "hipodromo-chapultepec": { cps: [22020, 22025], mode: "expand" },
-  "agua-caliente":          { cps: [22024, 22030], mode: "expand" },
-  "cacho":                  { cps: [22044, 22045, 22046], mode: "expand" },
-  "villa-fontana":          { cps: [22200, 22210], mode: "expand" },
-  "centro":                 { cps: [22000, 22100], mode: "expand" },
-  "lomas-de-agua-caliente": { cps: [22034], mode: "expand" },
-  // ─── Zones severely misplaced — relocate to correct position ───
-  "playas-de-tijuana":      { cps: [22400, 22410], mode: "relocate" },
-  "libertad":               { cps: [22105, 22106], mode: "relocate" },
-  "las-americas":           { cps: [22640], mode: "relocate" },
-  "insurgentes":            { cps: [22117], mode: "relocate" },
-  "otay":                   { cps: [22600], mode: "relocate" },
-  "el-florido":             { cps: [22237, 22244], mode: "relocate" },
-  "la-mesa":                { cps: [22040], mode: "relocate" },
-  "baja-malibu":            { cps: [22560], mode: "relocate" },
-  "soler":                  { cps: [22500], mode: "relocate" },
+const ZONE_CP_MAP: Record<string, { cps: number[]; existingSlugs: string[] }> = {
+  "hipodromo-chapultepec": {
+    cps: [22020, 22025],
+    existingSlugs: ["chapultepec", "hipodromo"],  // Union both existing zones + CPs
+  },
+  "agua-caliente": {
+    cps: [22024, 22030],
+    existingSlugs: ["agua-caliente"],
+  },
+  "cacho": {
+    cps: [22044, 22045, 22046],
+    existingSlugs: ["cacho"],
+  },
 }
 
 // ─── Load SEPOMEX CP polygons ────────────────────────────────────────────────
@@ -80,69 +74,46 @@ console.log("Building expanded zone polygons (existing + SEPOMEX CPs)...\n")
 const newPolygons = new Map<string, GeoJSON.Feature>()
 
 for (const [zoneSlug, config] of Object.entries(ZONE_CP_MAP)) {
-  console.log(`\n─── ${zoneSlug} (${config.mode}) ───`)
+  console.log(`\n─── ${zoneSlug} ───`)
 
-  // Get CP target centroid
-  const cpFeatures: GeoJSON.Feature<GeoJSON.Polygon>[] = []
+  // Collect all features to union: existing zone polygons + CP polygons
+  const featuresToUnion: GeoJSON.Feature[] = []
+
+  // Add existing zone polygons
+  for (const slug of config.existingSlugs) {
+    const existing = ZONE_GEOJSON.features.find((f: any) => f.properties?.slug === slug)
+    if (existing) {
+      featuresToUnion.push(existing as GeoJSON.Feature)
+      const area = turf.area(existing as any) / 1_000_000
+      console.log(`  Existing "${slug}": ${area.toFixed(2)} km²`)
+    }
+  }
+
+  // Add CP polygons
   for (const cp of config.cps) {
     const feat = cpPolygons.get(cp)
     if (feat) {
-      cpFeatures.push(feat)
+      featuresToUnion.push(feat)
       console.log(`  CP ${cp}: ${feat.geometry.coordinates[0].length} vertices`)
     } else {
       console.log(`  ⚠ CP ${cp}: NOT FOUND`)
     }
   }
 
-  const existing = ZONE_GEOJSON.features.find((f: any) => f.properties?.slug === zoneSlug)
-  let unified: any = null
+  if (featuresToUnion.length === 0) {
+    console.log(`  SKIPPED — no features to union`)
+    continue
+  }
 
-  if (config.mode === "relocate" && existing && cpFeatures.length > 0) {
-    // Compute target centroid from CP polygons
-    let cpUnion: any = cpFeatures[0]
-    for (let i = 1; i < cpFeatures.length; i++) {
-      try { cpUnion = turf.union(turf.featureCollection([cpUnion, cpFeatures[i]])) } catch {}
-    }
-    const targetCenter = turf.centroid(cpUnion)
-    const currentCenter = turf.centroid(existing as any)
-
-    const dLng = targetCenter.geometry.coordinates[0] - currentCenter.geometry.coordinates[0]
-    const dLat = targetCenter.geometry.coordinates[1] - currentCenter.geometry.coordinates[1]
-
-    console.log(`  Relocating: Δlng=${dLng.toFixed(5)}, Δlat=${dLat.toFixed(5)}`)
-
-    // Translate coordinates
-    function translateCoords(coords: any): any {
-      if (typeof coords[0] === "number") {
-        return [coords[0] + dLng, coords[1] + dLat, ...coords.slice(2)]
-      }
-      return coords.map(translateCoords)
-    }
-
-    const existingArea = turf.area(existing as any) / 1_000_000
-    console.log(`  Existing: ${existingArea.toFixed(2)} km² (keeping size, moving position)`)
-
-    unified = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: (existing as any).geometry.type,
-        coordinates: translateCoords((existing as any).geometry.coordinates),
-      },
-    }
-  } else if (config.mode === "expand" && existing) {
-    // Union existing + CPs
-    const featuresToUnion: GeoJSON.Feature[] = [existing as GeoJSON.Feature, ...cpFeatures]
-    const area = turf.area(existing as any) / 1_000_000
-    console.log(`  Existing: ${area.toFixed(2)} km²`)
-
-    unified = featuresToUnion[0]
-    for (let i = 1; i < featuresToUnion.length; i++) {
-      try {
-        unified = turf.union(turf.featureCollection([unified, featuresToUnion[i]]))
-      } catch (e) {
-        console.log(`  ⚠ Union failed at step ${i}: ${e}`)
-      }
+  // Union all features together
+  let unified: any = featuresToUnion[0]
+  for (let i = 1; i < featuresToUnion.length; i++) {
+    try {
+      unified = turf.union(
+        turf.featureCollection([unified, featuresToUnion[i]])
+      )
+    } catch (e) {
+      console.log(`  ⚠ Union failed at step ${i}: ${e}`)
     }
   }
 
@@ -175,13 +146,34 @@ console.log("\n\n═══ Updating geo-data.ts ═══\n")
 
 const features: GeoJSON.Feature[] = []
 let id = 0
-const allReplaceSlugs = new Set(Object.keys(ZONE_CP_MAP))
+const slugsToRemove = new Set(["hipodromo"]) // merged into hipodromo-chapultepec
+const slugsToReplace = new Set(["chapultepec", "agua-caliente", "cacho"])
 
 for (const existing of ZONE_GEOJSON.features) {
   const slug = (existing.properties as any)?.slug
   const name = (existing.properties as any)?.name
 
-  if (allReplaceSlugs.has(slug)) {
+  if (slugsToRemove.has(slug)) {
+    console.log(`  REMOVED: ${slug}`)
+    continue
+  }
+
+  if (slug === "chapultepec") {
+    // Replace with hipodromo-chapultepec
+    const newPoly = newPolygons.get("hipodromo-chapultepec")
+    if (newPoly) {
+      features.push({
+        type: "Feature",
+        id: id++,
+        properties: { slug: "hipodromo-chapultepec", name: "Hipódromo-Chapultepec" },
+        geometry: newPoly.geometry,
+      })
+      console.log(`  REPLACED: chapultepec → hipodromo-chapultepec`)
+    }
+    continue
+  }
+
+  if (slugsToReplace.has(slug)) {
     const newPoly = newPolygons.get(slug)
     if (newPoly) {
       features.push({
