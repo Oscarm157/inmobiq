@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
+import { DemoScroll } from "@/components/demo-scroll"
 import { Icon } from "@/components/icon"
 import { ExportButton } from "@/components/export-button"
 import { EditorialCard } from "@/components/editorial-card"
@@ -312,6 +313,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   return (
     <div className="space-y-8">
+      <Suspense><DemoScroll /></Suspense>
       {/* [A] Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
