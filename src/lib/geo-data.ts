@@ -946,8 +946,8 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "type": "Feature",
       "id": 5,
       "properties": {
-        "slug": "residencial-del-bosque",
-        "name": "Residencial del Bosque"
+        "slug": "cerro-colorado",
+        "name": "Cerro Colorado"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -4533,8 +4533,8 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "type": "Feature",
       "id": 18,
       "properties": {
-        "slug": "villa-fontana",
-        "name": "Villa Fontana"
+        "slug": "zona-este",
+        "name": "Zona Este"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -5098,8 +5098,8 @@ export const ZONE_GEOJSON: GeoJSON.FeatureCollection = {
       "type": "Feature",
       "id": 19,
       "properties": {
-        "slug": "montecarlo",
-        "name": "Montecarlo"
+        "slug": "el-lago-cucapah",
+        "name": "El Lago-Cucapah"
       },
       "geometry": {
         "type": "MultiPolygon",

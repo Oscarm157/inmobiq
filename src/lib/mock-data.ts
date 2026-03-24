@@ -70,8 +70,8 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "7",
-    zone_name: "Residencial del Bosque",
-    zone_slug: "residencial-del-bosque",
+    zone_name: "Cerro Colorado",
+    zone_slug: "cerro-colorado",
     avg_price_per_m2: 22100,
     price_trend_pct: 5.3,
     avg_ticket: 3200000,
@@ -218,8 +218,8 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "21",
-    zone_name: "Villa Fontana",
-    zone_slug: "villa-fontana",
+    zone_name: "Zona Este",
+    zone_slug: "zona-este",
     avg_price_per_m2: 17500,
     price_trend_pct: 1.8,
     avg_ticket: 2200000,
@@ -229,8 +229,8 @@ export const TIJUANA_ZONES: ZoneMetrics[] = [
   },
   {
     zone_id: "22",
-    zone_name: "Montecarlo",
-    zone_slug: "montecarlo",
+    zone_name: "El Lago-Cucapah",
+    zone_slug: "el-lago-cucapah",
     avg_price_per_m2: 18800,
     price_trend_pct: 2.2,
     avg_ticket: 2500000,
@@ -397,7 +397,7 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
     liquidity_score: 82, market_maturity: "maduro", avg_rent_per_m2: 120, risk_label: "Alto",
   },
   {
-    zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
+    zone_slug: "cerro-colorado", zone_name: "Cerro Colorado",
     risk_score: 45, volatility: 5.5, cap_rate: 7.8, vacancy_rate: 5.5,
     liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 175, risk_label: "Medio",
   },
@@ -467,12 +467,12 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
     liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 150, risk_label: "Bajo",
   },
   {
-    zone_slug: "villa-fontana", zone_name: "Villa Fontana",
+    zone_slug: "zona-este", zone_name: "Zona Este",
     risk_score: 38, volatility: 3.2, cap_rate: 7.8, vacancy_rate: 6.2,
     liquidity_score: 60, market_maturity: "consolidado", avg_rent_per_m2: 135, risk_label: "Bajo",
   },
   {
-    zone_slug: "montecarlo", zone_name: "Montecarlo",
+    zone_slug: "el-lago-cucapah", zone_name: "El Lago-Cucapah",
     risk_score: 36, volatility: 3.0, cap_rate: 7.5, vacancy_rate: 5.8,
     liquidity_score: 62, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
   },
@@ -650,7 +650,7 @@ export const PIPELINE_PROJECTS_EXTENDED: PipelineProject[] = [
     investors: 4, investor_label: "4 Inversores activos",
   },
   {
-    id: "p8", zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
+    id: "p8", zone_slug: "cerro-colorado", zone_name: "Cerro Colorado",
     name: "Bosque Sereno Villas", status: "construccion", status_label: "60% Vendido",
     badge_color: "bg-green-100 text-green-700",
     description: "Casas residenciales · Fraccionamiento cerrado",

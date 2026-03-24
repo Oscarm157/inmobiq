@@ -52,7 +52,7 @@ export function Sidebar() {
           <div>
             <h1 className="text-lg font-bold text-blue-900 dark:text-blue-300">Inmobiq</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
-              Executive Terminal
+              Panel de Análisis
             </p>
           </div>
         )}

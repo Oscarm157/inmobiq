@@ -191,7 +191,7 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pop_density": 0
   },
   {
-    "zone_slug": "residencial-del-bosque",
+    "zone_slug": "cerro-colorado",
     "population": 208360,
     "households": 60627,
     "occupied_dwellings": 60649,
@@ -581,7 +581,7 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pop_density": 0
   },
   {
-    "zone_slug": "villa-fontana",
+    "zone_slug": "zona-este",
     "population": 187136,
     "households": 54657,
     "occupied_dwellings": 54690,
@@ -611,7 +611,7 @@ const ZONE_DEMOGRAPHICS: ZoneDemographics[] = [
     "pop_density": 0
   },
   {
-    "zone_slug": "montecarlo",
+    "zone_slug": "el-lago-cucapah",
     "population": 194420,
     "households": 55920,
     "occupied_dwellings": 55946,

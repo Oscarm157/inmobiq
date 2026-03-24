@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { formatCurrency, formatPercent, MXN_USD_RATE } from "@/lib/utils"
 import type { ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
 
@@ -58,7 +59,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
     }
   }
 
-  function SortHeader({ label, col, align = "right" }: { label: string; col: SortKey; align?: string }) {
+  function SortHeader({ label, col, align = "right", tooltip }: { label: string; col: SortKey; align?: string; tooltip?: string }) {
     const active = sortKey === col
     return (
       <th
@@ -67,6 +68,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
       >
         <span className="inline-flex items-center gap-1">
           {label}
+          {tooltip && <InfoTooltip content={tooltip} />}
           {active && (
             <Icon
               name={sortDir === "desc" ? "arrow_downward" : "arrow_upward"}
@@ -112,7 +114,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
               <SortHeader label="Renta/m² Mes" col="rent" />
               <SortHeader label="Tendencia" col="trend" />
               <SortHeader label="Actividad" col="activity" />
-              <SortHeader label="Yield Anual" col="yield" />
+              <SortHeader label="Yield Anual" col="yield" tooltip="Rendimiento anual estimado: renta × 12 / precio de venta" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

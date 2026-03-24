@@ -1,6 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { useCurrency } from "@/contexts/currency-context"
 import type { ComparisonListing } from "@/lib/data/comparison-listings"
 import type { ZoneMetrics } from "@/types/database"
@@ -110,6 +111,7 @@ function VRCard({ data }: { data: ZoneVRData }) {
           <div className="flex items-center gap-2 pt-1">
             <Icon name="trending_up" className="text-xs text-emerald-600" />
             <span className="text-[10px] text-slate-500">Yield</span>
+            <InfoTooltip content="Rendimiento anual estimado: renta × 12 / precio de venta" />
             <span className="text-xs font-black text-emerald-600 ml-auto">{data.yieldPct.toFixed(1)}%</span>
           </div>
         )}

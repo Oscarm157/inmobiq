@@ -1,6 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
+import { InfoTooltip } from "@/components/info-tooltip"
 import { useCurrency } from "@/contexts/currency-context"
 
 interface VentaRentaData {
@@ -89,6 +90,7 @@ export function VentaRentaComparison({ data }: VentaRentaComparisonProps) {
           <div className="flex items-center gap-2">
             <Icon name="trending_up" className="text-sm text-emerald-600" />
             <span className="text-xs text-slate-500">Yield estimado</span>
+            <InfoTooltip content="Rendimiento anual estimado: renta mensual × 12 / precio de venta. Indica el retorno bruto que generaría una propiedad en renta." />
             <span className="text-sm font-black text-emerald-600 ml-auto">
               {yieldPct.toFixed(1)}% anual
             </span>

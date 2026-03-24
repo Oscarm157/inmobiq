@@ -80,8 +80,8 @@ export function applyMockFilters(filters: ListingFilters): ListingsResult {
   if (filters.zonas?.length) {
     // Mock data uses simple numeric IDs; just filter by zone_id matching the slug index
     const MOCK_SLUG_TO_ID: Record<string, string> = {
-      "zona-rio": "1", "playas-de-tijuana": "2", otay: "3", chapultepec: "4",
-      hipodromo: "5", centro: "6", "residencial-del-bosque": "7", "la-mesa": "8",
+      "zona-rio": "1", "playas-de-tijuana": "2", otay: "3", "hipodromo-chapultepec": "4",
+      centro: "6", "cerro-colorado": "7", "la-mesa": "8",
     }
     const ids = filters.zonas.map((s) => MOCK_SLUG_TO_ID[s]).filter(Boolean)
     if (ids.length) results = results.filter((l) => ids.includes(l.zone_id))
