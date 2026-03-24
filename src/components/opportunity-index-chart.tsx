@@ -75,7 +75,7 @@ export function OpportunityIndexChart({ data }: OpportunityIndexChartProps) {
             Índice de Oportunidad
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Score compuesto: precio bajo + densidad poblacional + conectividad + fuerza económica
+            Potencial de inversión: precio accesible + demanda poblacional + conectividad + economía local
           </p>
         </div>
         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">

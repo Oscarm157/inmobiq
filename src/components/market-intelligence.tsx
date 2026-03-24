@@ -19,7 +19,7 @@ export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
           </span>
         </div>
         <p className="text-sm text-slate-500 font-medium">
-          Insights generados al cruzar datos del Censo 2020 con el mercado inmobiliario activo
+          Insights de las zonas con mayor actividad de mercado, cruzando datos del Censo 2020
         </p>
       </div>
 

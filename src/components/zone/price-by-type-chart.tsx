@@ -40,7 +40,7 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
   const chartData = data.map((d) => ({ ...d, label: formatPrice(d.avgTicket) }))
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -52,11 +52,11 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
           Precio promedio de propiedad en {zoneName}
         </p>
       </div>
-      <ChartContainer config={chartConfig} className="h-[220px] w-full">
+      <ChartContainer config={chartConfig} className="h-[170px] w-full">
         <BarChart
           data={chartData}
           layout="vertical"
-          margin={{ top: 0, right: 100, left: 0, bottom: 0 }}
+          margin={{ top: 0, right: 90, left: 0, bottom: 0 }}
         >
           <XAxis type="number" hide />
           <YAxis
@@ -64,10 +64,10 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
             type="category"
             tickLine={false}
             axisLine={false}
-            width={110}
+            width={100}
             className="text-xs font-semibold"
           />
-          <Bar dataKey="avgTicket" radius={[0, 6, 6, 0]} barSize={20}>
+          <Bar dataKey="avgTicket" radius={[0, 6, 6, 0]} barSize={16}>
             {chartData.map((entry) => (
               <Cell key={entry.typeKey} fill={COLORS[entry.typeKey] ?? "#6b7280"} />
             ))}

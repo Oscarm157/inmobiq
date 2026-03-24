@@ -10,7 +10,7 @@ export function EditorialCard({ zoneName, mainText, quote }: EditorialCardProps)
   return (
     <div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 mb-6">
-        Perspectiva del Inversor
+        Análisis de Zona
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>

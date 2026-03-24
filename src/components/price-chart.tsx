@@ -35,7 +35,7 @@ export function PriceChart({ data }: PriceChartProps) {
       <CardHeader>
         <CardTitle>Tendencia de precio x m²</CardTitle>
         <CardDescription>
-          Evolución del precio promedio por metro cuadrado en Tijuana — últimos 12 meses
+          Evolución del precio promedio por metro cuadrado en Tijuana
         </CardDescription>
       </CardHeader>
       <CardContent>

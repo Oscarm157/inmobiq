@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, LabelList } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, LabelList } from "recharts"
 import {
   ChartContainer,
   type ChartConfig,
@@ -8,11 +8,11 @@ import {
 import { InfoTooltip } from "@/components/info-tooltip"
 
 const chartConfig = {
-  casa_median: { label: "Casa", color: "#2563eb" },
-  depto_median: { label: "Departamento", color: "#7c3aed" },
+  casa_count: { label: "Casa", color: "#2563eb" },
+  depto_count: { label: "Departamento", color: "#7c3aed" },
 } satisfies ChartConfig
 
-interface PriceByBedroomsData {
+interface BedroomDistributionData {
   bedrooms: number
   casa_median: number | null
   depto_median: number | null
@@ -20,66 +20,47 @@ interface PriceByBedroomsData {
   depto_count: number
 }
 
-interface PriceByBedroomsChartProps {
-  data: PriceByBedroomsData[]
+interface BedroomDistributionChartProps {
+  data: BedroomDistributionData[]
   zoneName: string
 }
 
-function shortPrice(v: number | null): string {
-  if (v == null || v === 0) return ""
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`
-  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`
-  return `$${v}`
-}
-
-function buildExample(data: PriceByBedroomsData[]): string {
-  // Find two consecutive bedroom counts with casa data to show price jump
-  const withCasa = data.filter((d) => d.casa_median != null && d.casa_median > 0)
-  if (withCasa.length >= 2) {
-    const a = withCasa[0]
-    const b = withCasa[1]
-    const diff = (b.casa_median! - a.casa_median!) / a.casa_median! * 100
-    if (diff > 0) {
-      return ` Ej: una casa de ${b.bedrooms} rec. cuesta ${Math.round(diff)}% más que una de ${a.bedrooms} rec.`
-    }
-  }
-  return ""
-}
-
-export function PriceByBedroomsChart({ data, zoneName }: PriceByBedroomsChartProps) {
+export function BedroomDistributionChart({ data, zoneName }: BedroomDistributionChartProps) {
   if (!data.length) return null
 
-  const hasDepto = data.some((d) => d.depto_median != null && d.depto_median > 0)
+  const hasDepto = data.some((d) => d.depto_count > 0)
 
-  // Transform data: replace null with 0 for Recharts but track originals for hiding
   const chartData = data.map((d) => ({
     bedrooms: `${d.bedrooms} rec`,
-    casa_median: d.casa_median ?? 0,
-    depto_median: d.depto_median ?? 0,
-    _casa_null: d.casa_median == null || d.casa_median === 0,
-    _depto_null: d.depto_median == null || d.depto_median === 0,
-    casa_label: shortPrice(d.casa_median),
-    depto_label: shortPrice(d.depto_median),
+    casa_count: d.casa_count,
+    depto_count: d.depto_count,
+    casa_label: d.casa_count > 0 ? `${d.casa_count}` : "",
+    depto_label: d.depto_count > 0 ? `${d.depto_count}` : "",
   }))
 
-  const example = buildExample(data)
+  // Find dominant bedroom count
+  const totalByBed = data.map((d) => ({ bed: d.bedrooms, total: d.casa_count + d.depto_count }))
+  const dominant = totalByBed.reduce((a, b) => (b.total > a.total ? b : a), totalByBed[0])
+  const totalAll = totalByBed.reduce((sum, b) => sum + b.total, 0)
+  const dominantPct = totalAll > 0 ? Math.round((dominant.total / totalAll) * 100) : 0
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
-      <div className="mb-4">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+      <div className="mb-3">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-            Precio por recámaras
+            Distribución por Recámaras
           </h3>
-          <InfoTooltip content="Precio mediano por número de recámaras, separado por casa y departamento. La mediana es más representativa que el promedio porque no se distorsiona con propiedades de lujo." />
+          <InfoTooltip content="Cantidad de propiedades activas por número de recámaras. Muestra la composición del inventario para identificar la oferta dominante en la zona." />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">
-          ¿Cuánto más cuesta una recámara extra en {zoneName}?{example}
+          Inventario por número de recámaras en {zoneName}
+          {dominantPct > 0 && ` · ${dominant.bed} rec domina con ${dominantPct}%`}
         </p>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-3">
+      <div className="flex flex-wrap gap-3 mb-2">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#2563eb" }} />
           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Casa</span>
@@ -92,31 +73,33 @@ export function PriceByBedroomsChart({ data, zoneName }: PriceByBedroomsChartPro
         )}
       </div>
 
-      <ChartContainer config={chartConfig} className="h-[260px] w-full">
+      <ChartContainer config={chartConfig} className="h-[180px] w-full">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 10, left: 10, bottom: 0 }}
+          layout="vertical"
+          margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" vertical={false} />
-          <XAxis
+          <XAxis type="number" hide />
+          <YAxis
             dataKey="bedrooms"
+            type="category"
             tickLine={false}
             axisLine={false}
+            width={60}
             className="text-xs font-semibold"
           />
-          <YAxis hide />
-          <Bar dataKey="casa_median" fill="#2563eb" radius={[4, 4, 0, 0]} barSize={hasDepto ? 28 : 40}>
+          <Bar dataKey="casa_count" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={hasDepto ? 12 : 16}>
             <LabelList
               dataKey="casa_label"
-              position="top"
+              position="right"
               className="text-[10px] font-bold fill-slate-600 dark:fill-slate-300"
             />
           </Bar>
           {hasDepto && (
-            <Bar dataKey="depto_median" fill="#7c3aed" radius={[4, 4, 0, 0]} barSize={28}>
+            <Bar dataKey="depto_count" fill="#7c3aed" radius={[0, 4, 4, 0]} barSize={12}>
               <LabelList
                 dataKey="depto_label"
-                position="top"
+                position="right"
                 className="text-[10px] font-bold fill-slate-600 dark:fill-slate-300"
               />
             </Bar>

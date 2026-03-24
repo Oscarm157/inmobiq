@@ -86,10 +86,11 @@ export default async function HomePage({
       : undefined,
   }
 
-  const [zones, ventaZonesForTable, rentaZonesForTable, city, priceTrend, analytics, riskData] = await Promise.all([
+  const [zones, ventaZonesForTable, rentaZonesForTable, inventoryZones, city, priceTrend, analytics, riskData] = await Promise.all([
     getZoneMetrics(filters),
     getZoneMetrics({ ...filters, listing_type: "venta" }),
     getZoneMetrics({ ...filters, listing_type: "renta" }),
+    getZoneMetrics({ listing_type: filters.listing_type }),
     getCityMetrics(filters),
     getPriceTrendData(),
     getListingsAnalytics(filters),
@@ -100,7 +101,7 @@ export default async function HomePage({
   const topZone = zones.length > 0 ? zones.reduce((a, b) => a.avg_price_per_m2 > b.avg_price_per_m2 ? a : b) : null
   const mostActive = zones.length > 0 ? zones.reduce((a, b) => a.total_listings > b.total_listings ? a : b) : null
   const topByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
-  const topByActivity = [...zones].sort((a, b) => b.total_listings - a.total_listings)
+  const topByAffordable = [...zones].sort((a, b) => a.avg_price_per_m2 - b.avg_price_per_m2)
   const hasTrendHistory = priceTrend.length > 1
 
   return (
@@ -187,17 +188,17 @@ export default async function HomePage({
       </div>
 
       {hasTrendHistory && <PriceChart data={priceTrend} />}
-      <InventoryTypeChart zones={zones} />
+      <InventoryTypeChart zones={inventoryZones} />
 
       {/* ─── 6. Zonas Destacadas ─── */}
       <section>
         <div className="mb-6">
           <h3 className="text-2xl font-black tracking-tight">Zonas Destacadas</h3>
           <p className="text-sm text-slate-500 font-medium">
-            Las zonas más caras y con mayor volumen de actividad en Tijuana
+            Las zonas más caras y más económicas en Tijuana
           </p>
         </div>
-        <TopZonesHighlight topByPrice={topByPrice} topByActivity={topByActivity} />
+        <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
       </section>
 
       {/* ─── 6b. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
@@ -205,12 +206,17 @@ export default async function HomePage({
         const allDemo = getAllDemographics().filter((d) => d.ageb_count > 0)
         if (allDemo.length === 0) return null
 
-        const insights = getMarketIntelligenceInsights(allDemo, zones, riskData)
+        // Focus on zones with significant market activity (>= 20 listings)
+        const activeZones = zones.filter((z) => z.total_listings >= 20)
+        const activeSlugs = new Set(activeZones.map((z) => z.zone_slug))
+        const relevantDemo = allDemo.filter((d) => activeSlugs.has(d.zone_slug))
+
+        const insights = getMarketIntelligenceInsights(relevantDemo, activeZones, riskData)
 
         // Opportunity data for chart
-        const opportunityData = allDemo
+        const opportunityData = relevantDemo
           .map((demo) => {
-            const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+            const zone = activeZones.find((z) => z.zone_slug === demo.zone_slug)
             if (!zone || zone.total_listings < 1) return null
             const opp = computeOpportunityScore(demo, zone, zones)
             return {
@@ -222,9 +228,9 @@ export default async function HomePage({
           .filter(Boolean) as Array<{ zone_name: string; zone_slug: string; total: number; price_score: number; density_score: number; digital_score: number; economic_score: number }>
 
         // Density scatter data
-        const densityData: DensityBubble[] = allDemo
+        const densityData: DensityBubble[] = relevantDemo
           .map((demo) => {
-            const zone = zones.find((z) => z.zone_slug === demo.zone_slug)
+            const zone = activeZones.find((z) => z.zone_slug === demo.zone_slug)
             if (!zone || zone.total_listings < 1 || demo.population < 100) return null
             const opp = computeOpportunityScore(demo, zone, zones)
             return {

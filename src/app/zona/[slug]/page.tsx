@@ -20,7 +20,7 @@ import { ZoneFilters } from "@/components/zone/zone-filters"
 import { getZoneDemographics } from "@/lib/data/demographics"
 import { computeZoneInsights } from "@/lib/data/zone-insights"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
-import { PriceByBedroomsChart } from "@/components/zone/price-by-bedrooms-chart"
+import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
@@ -373,8 +373,13 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
       {/* [C] Main Content Grid */}
       <div className="grid grid-cols-12 gap-6">
-        {/* Left Column — Charts + Editorial */}
+        {/* Left Column — Editorial + Charts */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
+          <EditorialCard
+            zoneName={zone.zone_name}
+            mainText={mainText}
+            quote={quote}
+          />
           <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
           <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
           <PropertyCompositionChart data={compositionData} />
@@ -382,13 +387,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
             <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
           )}
           {zoneAnalytics.priceByBedrooms && rawCat !== "comercial" && rawCat !== "terreno" && (
-            <PriceByBedroomsChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
+            <BedroomDistributionChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
           )}
-          <EditorialCard
-            zoneName={zone.zone_name}
-            mainText={mainText}
-            quote={quote}
-          />
         </div>
 
         {/* Right Sidebar */}
@@ -419,8 +419,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           {/* Zone vs City Comparison */}
           <ZoneComparisonEnhanced zone={zone} city={city} />
 
-          {/* Market Quality */}
-          <MarketQualityCard data={marketQualityData} />
+          {/* Market Quality — hidden for now */}
+          {/* <MarketQualityCard data={marketQualityData} /> */}
 
           {/* Demographics — Radiografía Socioeconómica */}
           <DemographicsCard slug={slug} zone={zone} allZones={allZones} />
@@ -474,21 +474,22 @@ function generateMainText(
   topCount: number
 ): string {
   const diffPct = ((zone.avg_price_per_m2 - cityAvg) / cityAvg) * 100
+  const trendDir = zone.price_trend_pct > 0 ? "al alza" : zone.price_trend_pct < 0 ? "a la baja" : "estables"
 
   if (diffPct > 10) {
-    return `La ${zone.zone_name} se consolida como el epicentro del crecimiento vertical en la región fronteriza. Con una oferta dominada por ${topLabel}, el distrito está experimentando una transición hacia el uso mixto de alta densidad. Los precios se mantienen ${Math.abs(diffPct).toFixed(0)}% por encima del promedio de la ciudad, reflejando la alta demanda del segmento corporativo y residencial de lujo.`
+    return `${zone.zone_name} se posiciona como una de las zonas premium de Tijuana, con precios ${Math.abs(diffPct).toFixed(0)}% por encima del promedio de la ciudad y tendencia ${trendDir}. La oferta se concentra en ${topLabel}, reflejando un mercado de alta demanda tanto en compra-venta como en renta. En comparación con otras zonas, aquí el metro cuadrado tiene un precio consolidado que marca referencia para la ciudad.`
   } else if (diffPct < -10) {
-    return `La ${zone.zone_name} representa una de las zonas con mayor potencial de revalorización en Tijuana. Con precios ${Math.abs(diffPct).toFixed(0)}% por debajo del promedio de la ciudad y una oferta concentrada en ${topLabel}, la zona atrae inversionistas que buscan rendimientos superiores al promedio. La infraestructura en desarrollo y los proyectos de regeneración urbana podrían catalizar un cambio significativo en los próximos 24 meses.`
+    return `${zone.zone_name} opera con precios ${Math.abs(diffPct).toFixed(0)}% por debajo del promedio de Tijuana, con tendencia ${trendDir}. Su oferta está concentrada en ${topLabel}, con un mercado activo que presenta buenas opciones tanto para compra como para renta. Comparada con zonas de mayor precio, ofrece accesibilidad sin sacrificar conectividad ni servicios básicos de la ciudad.`
   }
-  return `La ${zone.zone_name} mantiene un posicionamiento sólido dentro del mercado inmobiliario de Tijuana, con precios alineados al promedio general de la ciudad. La oferta se distribuye principalmente en ${topLabel}, indicando un mercado maduro con demanda estable. La zona ofrece un balance atractivo entre riesgo y rendimiento para inversionistas con perfil moderado.`
+  return `${zone.zone_name} mantiene precios alineados al promedio general de Tijuana con tendencia ${trendDir}. La oferta se distribuye principalmente en ${topLabel}, indicando un mercado maduro con demanda estable en ambas operaciones — compra-venta y renta. Frente a otras zonas, se posiciona como una opción equilibrada en precio y actividad.`
 }
 
 function generateQuote(zone: ZoneMetrics): string {
   if (zone.price_trend_pct > 4) {
-    return `El corredor de ${zone.zone_name} ya no es solo para uso tradicional; la demanda está empujando los límites de precio hacia niveles históricos.`
+    return `Los precios en ${zone.zone_name} muestran presión al alza sostenida — la demanda activa está superando la oferta disponible en la zona.`
   }
   if (zone.price_trend_pct < 0) {
-    return `La corrección actual en ${zone.zone_name} no debe interpretarse como debilidad — es una consolidación natural que abre ventanas de oportunidad.`
+    return `${zone.zone_name} atraviesa una fase de ajuste en precios — los valores se están recalibrando respecto a semanas anteriores.`
   }
-  return `${zone.zone_name} sigue siendo una apuesta segura para inversionistas que buscan estabilidad con crecimiento orgánico sostenido.`
+  return `${zone.zone_name} muestra estabilidad en sus precios, con movimiento orgánico consistente con el ritmo general del mercado.`
 }

@@ -32,7 +32,7 @@ interface PropertyCompositionChartProps {
 
 export function PropertyCompositionChart({ data }: PropertyCompositionChartProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -44,11 +44,11 @@ export function PropertyCompositionChart({ data }: PropertyCompositionChartProps
           Densidad relativa por tipo de propiedad (escala 0–10)
         </p>
       </div>
-      <ChartContainer config={chartConfig} className="h-[200px] w-full">
+      <ChartContainer config={chartConfig} className="h-[160px] w-full">
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 0, right: 70, left: 0, bottom: 0 }}
+          margin={{ top: 0, right: 60, left: 0, bottom: 0 }}
         >
           <XAxis type="number" hide domain={[0, 10]} />
           <YAxis
@@ -56,10 +56,10 @@ export function PropertyCompositionChart({ data }: PropertyCompositionChartProps
             type="category"
             tickLine={false}
             axisLine={false}
-            width={110}
+            width={100}
             className="text-xs font-semibold"
           />
-          <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={20}>
+          <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={16}>
             {data.map((entry) => (
               <Cell key={entry.typeKey} fill={COLORS[entry.typeKey] ?? "#6b7280"} />
             ))}
