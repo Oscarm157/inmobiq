@@ -315,7 +315,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     <div className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
       {/* [A] Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div id="demo-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           {badges.length > 0 && (
             <div className="flex items-center gap-2 mb-2">
@@ -347,7 +347,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       </Suspense>
 
       {/* [B] KPI Ticker Strip */}
-      <KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} />
+      <div id="demo-kpis"><KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} /></div>
 
       {/* [B2] Low listings warning */}
       {zone.total_listings < 3 && (
@@ -360,7 +360,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       )}
 
       {/* [B3] Zone Map — right after KPIs for immediate spatial context */}
-      <section>
+      <section id="demo-map">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
           <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
@@ -377,12 +377,12 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       <div className="grid grid-cols-12 gap-6">
         {/* Left Column — Editorial + Charts */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
-          <EditorialCard
+          <div id="demo-editorial"><EditorialCard
             zoneName={zone.zone_name}
             mainText={mainText}
             quote={quote}
-          />
-          <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
+          /></div>
+          <div id="demo-charts"><PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} /></div>
           <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
           <PropertyCompositionChart data={compositionData} />
           {rawCat !== "terreno" && (

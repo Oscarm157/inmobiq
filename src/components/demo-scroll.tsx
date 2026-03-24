@@ -4,145 +4,142 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 
 /**
- * Demo auto-scroll mode for video recording.
+ * Demo tour mode for video recording.
  * Activate with ?demo=true in the URL.
  *
- * Scrolls smoothly through the page with pauses at regular intervals
- * so each section is visible for a moment. Professional and clean.
+ * Scrolls to each key section, pauses to let it breathe, then moves on.
+ * Uses native smooth scroll for natural easing.
+ * Subtle play button — only visible if you know it's there.
  */
+
+// Sections to visit (by ID). The component finds whichever exist on the page.
+const TOUR_SECTIONS = [
+  "demo-header",
+  "demo-kpis",
+  "demo-map",
+  "demo-table",
+  "demo-charts",
+  "demo-destacadas",
+  "demo-editorial",
+  "demo-zonas",
+]
+
+const PAUSE_BETWEEN = 1500 // ms to pause at each section
+const SCROLL_SETTLE = 800  // ms to wait for smooth scroll to finish
+
 export function DemoScroll() {
   const searchParams = useSearchParams()
   const isDemo = searchParams.get("demo") === "true"
 
-  const [active, setActive] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [finished, setFinished] = useState(false)
-  const rafRef = useRef<number>(0)
-  const pauseRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const currentY = useRef(0)
-  const pixelsSincePause = useRef(0)
+  const [running, setRunning] = useState(false)
+  const [step, setStep] = useState(-1)
+  const [totalSteps, setTotalSteps] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  // Tuning
-  const SPEED = 1.2          // pixels per frame (~72px/sec at 60fps)
-  const PAUSE_EVERY = 550    // pause every N pixels scrolled
-  const PAUSE_MS = 1000      // 1 second pause
-  const START_DELAY = 1500   // wait before starting
-
-  const stop = useCallback(() => {
-    setActive(false)
-    cancelAnimationFrame(rafRef.current)
-    clearTimeout(pauseRef.current)
+  // Find which sections exist on this page
+  const getSections = useCallback(() => {
+    return TOUR_SECTIONS
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[]
   }, [])
 
-  // Start on mount if demo=true
+  // Auto-start if ?demo=true
   useEffect(() => {
     if (!isDemo) return
-
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0 })
-      currentY.current = 0
-      pixelsSincePause.current = 0
-      setActive(true)
-      setFinished(false)
-      setProgress(0)
-    }, START_DELAY)
-
-    return () => {
-      clearTimeout(timer)
-      cancelAnimationFrame(rafRef.current)
-      clearTimeout(pauseRef.current)
-    }
+    const timer = setTimeout(() => startTour(), 1200)
+    return () => clearTimeout(timer)
   }, [isDemo])
 
-  // Animation loop
+  const startTour = useCallback(() => {
+    const sections = getSections()
+    if (sections.length === 0) return
+
+    window.scrollTo({ top: 0 })
+    setTotalSteps(sections.length)
+    setStep(0)
+    setRunning(true)
+  }, [getSections])
+
+  const stopTour = useCallback(() => {
+    setRunning(false)
+    setStep(-1)
+    clearTimeout(timerRef.current)
+  }, [])
+
+  // Drive the tour forward
   useEffect(() => {
-    if (!active) return
+    if (!running || step < 0) return
 
-    let paused = false
-
-    function step() {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight
-      if (totalHeight <= 0 || currentY.current >= totalHeight) {
-        setProgress(100)
-        setFinished(true)
-        setActive(false)
-        return
-      }
-
-      if (paused) return
-
-      currentY.current = Math.min(currentY.current + SPEED, totalHeight)
-      window.scrollTo(0, currentY.current)
-      pixelsSincePause.current += SPEED
-
-      const pct = Math.round((currentY.current / totalHeight) * 100)
-      setProgress(pct)
-
-      // Check if it's time to pause
-      if (pixelsSincePause.current >= PAUSE_EVERY) {
-        paused = true
-        pixelsSincePause.current = 0
-        pauseRef.current = setTimeout(() => {
-          paused = false
-          rafRef.current = requestAnimationFrame(step)
-        }, PAUSE_MS)
-        return
-      }
-
-      rafRef.current = requestAnimationFrame(step)
+    const sections = getSections()
+    if (step >= sections.length) {
+      // Tour complete
+      setRunning(false)
+      return
     }
 
-    rafRef.current = requestAnimationFrame(step)
+    const el = sections[step]
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
 
-    return () => {
-      cancelAnimationFrame(rafRef.current)
-      clearTimeout(pauseRef.current)
-    }
-  }, [active])
+    // Wait for scroll to settle, then pause, then advance
+    timerRef.current = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
+        setStep((s) => s + 1)
+      }, PAUSE_BETWEEN)
+    }, SCROLL_SETTLE)
+
+    return () => clearTimeout(timerRef.current)
+  }, [running, step, getSections])
 
   if (!isDemo) return null
 
-  // Minimal, elegant indicator
+  // Subtle play button — small, semi-transparent, bottom-right
+  if (!running && step === -1) {
+    return (
+      <button
+        onClick={startTour}
+        className="fixed bottom-5 right-5 z-[9999] w-8 h-8 rounded-full bg-slate-900/30 hover:bg-slate-900/60 hover:scale-110 flex items-center justify-center transition-all duration-200 backdrop-blur-sm"
+        aria-label="Iniciar demo"
+      >
+        <svg width="10" height="12" viewBox="0 0 10 12" fill="white" className="ml-0.5 opacity-60">
+          <polygon points="0,0 10,6 0,12" />
+        </svg>
+      </button>
+    )
+  }
+
+  // Progress indicator while running
+  const pct = totalSteps > 0 ? Math.round(((step) / totalSteps) * 100) : 0
+
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[9999] transition-all duration-500 ${
-        finished ? "opacity-0 pointer-events-none" : "opacity-100"
+      className={`fixed bottom-5 right-5 z-[9999] transition-all duration-500 ${
+        !running && step >= totalSteps ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
-      <div className="flex items-center gap-3 bg-slate-900/90 text-white pl-4 pr-3 py-2.5 rounded-full shadow-2xl backdrop-blur-md border border-white/10">
-        {/* Progress ring */}
-        <svg width="20" height="20" viewBox="0 0 20 20" className="shrink-0">
-          <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
-          <circle
-            cx="10" cy="10" r="8" fill="none" stroke="#3b82f6" strokeWidth="2"
-            strokeDasharray={`${progress * 0.503} 50.3`}
-            strokeLinecap="round"
-            transform="rotate(-90 10 10)"
-            className="transition-all duration-300"
-          />
-        </svg>
+      <div className="flex items-center gap-2.5 bg-slate-900/80 text-white px-3.5 py-2 rounded-full shadow-2xl backdrop-blur-md border border-white/10">
+        {/* Step dots */}
+        <div className="flex gap-1">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                i < step ? "bg-blue-400" : i === step ? "bg-white" : "bg-white/20"
+              }`}
+            />
+          ))}
+        </div>
 
-        <span className="text-xs font-bold tracking-wide">
-          {active ? "DEMO" : "FIN"}
-        </span>
+        <span className="text-[10px] font-mono text-white/50">{pct}%</span>
 
-        <div className="w-px h-4 bg-white/20" />
-
-        <span className="text-xs font-mono text-white/60 w-8 text-right">
-          {progress}%
-        </span>
-
-        {active && (
-          <button
-            onClick={stop}
-            className="ml-1 w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            aria-label="Detener demo"
-          >
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
-              <rect width="8" height="8" rx="1" />
-            </svg>
-          </button>
-        )}
+        <button
+          onClick={stopTour}
+          className="w-4 h-4 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition-colors"
+          aria-label="Detener"
+        >
+          <svg width="6" height="6" viewBox="0 0 6 6" fill="currentColor" className="opacity-60">
+            <rect width="6" height="6" rx="0.5" />
+          </svg>
+        </button>
       </div>
     </div>
   )

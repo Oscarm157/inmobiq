@@ -109,7 +109,7 @@ export default async function HomePage({
     <div className="space-y-10">
       <Suspense><DemoScroll /></Suspense>
       {/* ─── 1. Header ─── */}
-      <div className="relative">
+      <div id="demo-header" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
@@ -146,7 +146,7 @@ export default async function HomePage({
       </div>
 
       {/* ─── 2. City KPIs ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="demo-kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <KPIPrecio
           pricePerM2={city.avg_price_per_m2}
           trendPct={city.price_trend_pct}
@@ -166,7 +166,7 @@ export default async function HomePage({
       <MiniMapWrapper zones={zones} />
 
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
-      <PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} />
+      <div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div>
 
       {/* ─── 4. Resumen Ejecutivo ─── */}
       <NarrativeInsight
@@ -179,7 +179,7 @@ export default async function HomePage({
       />
 
       {/* ─── 5. Charts ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div id="demo-charts" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ZonesBarChart data={analytics.pricePerM2ByZone} />
         <PriceRangeChart data={analytics.priceDistribution} />
       </div>
@@ -193,7 +193,7 @@ export default async function HomePage({
       <InventoryTypeChart zones={inventoryZones} />
 
       {/* ─── 6. Zonas Destacadas ─── */}
-      <section>
+      <section id="demo-destacadas">
         <div className="mb-6">
           <h3 className="text-2xl font-black tracking-tight">Zonas Destacadas</h3>
           <p className="text-sm text-slate-500 font-medium">
@@ -259,7 +259,7 @@ export default async function HomePage({
       })()}
 
       {/* ─── 7. Zones Grid + Map ─── */}
-      <section>
+      <section id="demo-zonas">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-2xl font-black tracking-tight">
