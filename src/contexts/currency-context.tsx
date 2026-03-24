@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react"
 import { USD_TO_MXN } from "@/lib/data/normalize"
 
 export type CurrencyCode = "MXN" | "USD"
@@ -45,6 +45,8 @@ function formatValue(value: number, currency: CurrencyCode): string {
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("MXN")
   const [exchangeRate, setExchangeRateState] = useState(DEFAULT_EXCHANGE_RATE)
+  const [demoMultiplier, setDemoMultiplier] = useState(1.0)
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
   // Hydrate from localStorage
   useEffect(() => {
@@ -56,6 +58,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       const parsed = parseFloat(storedRate)
       if (!isNaN(parsed) && parsed > 0) setExchangeRateState(parsed)
     }
+
+    // Demo mode: check URL for ?demo=true (client-side only)
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("demo") === "true") {
+      setDemoMultiplier(0.93 + Math.random() * 0.13)
+      timerRef.current = setInterval(() => {
+        setDemoMultiplier(0.93 + Math.random() * 0.13)
+      }, 2500)
+    }
+
+    return () => clearInterval(timerRef.current)
   }, [])
 
   const setCurrency = (c: CurrencyCode) => {
@@ -71,8 +84,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }
 
   const convert = useCallback(
-    (valueMxn: number) => (currency === "USD" ? valueMxn / exchangeRate : valueMxn),
-    [currency, exchangeRate],
+    (valueMxn: number) => {
+      const v = valueMxn * demoMultiplier
+      return currency === "USD" ? v / exchangeRate : v
+    },
+    [currency, exchangeRate, demoMultiplier],
   )
 
   const formatPrice = useCallback(
