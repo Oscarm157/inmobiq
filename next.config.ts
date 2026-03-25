@@ -18,7 +18,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.mapbox.com https://lh3.googleusercontent.com https://*.supabase.co https://*.googleusercontent.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://va.vercel-scripts.com",
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
     ].join("; "),
