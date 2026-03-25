@@ -13,7 +13,7 @@ export async function POST() {
   }
 
   // Rate limit: 10 exports per hour per user
-  const limited = rateLimit(`export-risk:${user.id}`, 10, 3_600_000)
+  const limited = await rateLimit(`export-risk:${user.id}`, 10, 3_600_000)
   if (limited) return limited
 
   const riskData = await getZoneRiskMetrics()

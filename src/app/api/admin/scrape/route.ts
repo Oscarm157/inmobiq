@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Rate limit: 5 scrapes per minute per admin
-  const limited = rateLimit(`admin-scrape:${check.userId}`, 5, 60_000);
+  const limited = await rateLimit(`admin-scrape:${check.userId}`, 5, 60_000);
   if (limited) return limited;
 
   // Parse body

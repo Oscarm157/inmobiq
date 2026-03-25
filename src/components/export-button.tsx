@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Icon } from "@/components/icon"
 
 type ExportFormat = "zone-pdf" | "risk-pdf" | "listings-excel" | "listings-csv"
@@ -28,7 +29,9 @@ export function ExportButton({
 }: ExportButtonProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState<ExportFormat | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -71,7 +74,20 @@ export function ExportButton({
       }
 
       const res = await fetch(url, fetchOpts)
-      if (!res.ok) throw new Error(`Error ${res.status}`)
+      if (!res.ok) {
+        if (res.status === 401) {
+          router.push(`/login?redirectedFrom=${encodeURIComponent(window.location.pathname)}`)
+          return
+        }
+        if (res.status === 429) {
+          const retryAfter = res.headers.get("Retry-After")
+          const secs = retryAfter ? parseInt(retryAfter, 10) : 60
+          setError(`Límite alcanzado. Intenta en ${Math.ceil(secs / 60)} min.`)
+          setTimeout(() => setError(null), 5000)
+          return
+        }
+        throw new Error(`Error ${res.status}`)
+      }
 
       const blob = await res.blob()
       const objUrl = URL.createObjectURL(blob)
@@ -84,8 +100,9 @@ export function ExportButton({
       a.download = filename
       a.click()
       URL.revokeObjectURL(objUrl)
-    } catch (err) {
-      console.error("Export error:", err)
+    } catch {
+      setError("Error al exportar. Intenta de nuevo.")
+      setTimeout(() => setError(null), 5000)
     } finally {
       setLoading(null)
     }
@@ -117,6 +134,12 @@ export function ExportButton({
           </>
         )}
       </button>
+
+      {error && (
+        <div className="absolute right-0 mt-2 w-60 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 text-xs font-medium px-4 py-3 rounded-xl shadow-lg border border-red-200 dark:border-red-800 z-50">
+          {error}
+        </div>
+      )}
 
       {open && (
         <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">

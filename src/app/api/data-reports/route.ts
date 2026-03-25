@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Rate limit: 10 reports per hour per user
-  const limited = rateLimit(`data-reports:${user.id}`, 10, 3_600_000)
+  const limited = await rateLimit(`data-reports:${user.id}`, 10, 3_600_000)
   if (limited) return limited
 
   let body: Record<string, unknown>

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit: 10 exports per hour per user
-  const limited = rateLimit(`export-zone:${user.id}`, 10, 3_600_000)
+  const limited = await rateLimit(`export-zone:${user.id}`, 10, 3_600_000)
   if (limited) return limited
 
   const body = await req.json().catch(() => ({}))

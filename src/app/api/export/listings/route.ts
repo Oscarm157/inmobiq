@@ -22,9 +22,11 @@ interface ExportBody {
 
 const MAX_ROWS = 5000
 
-async function fetchListingsFromSupabase(filters: ExportFilters): Promise<Listing[] | null> {
+async function fetchListingsFromSupabase(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  filters: ExportFilters
+): Promise<Listing[] | null> {
   try {
-    const supabase = await createSupabaseServerClient()
     let q = supabase.from("listings").select(`
       id, title, property_type, listing_type, price, area_m2, price_per_m2,
       bedrooms, bathrooms, source, source_url, scraped_at,
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit: 10 exports per hour per user
-  const limited = rateLimit(`export-listings:${user.id}`, 10, 3_600_000)
+  const limited = await rateLimit(`export-listings:${user.id}`, 10, 3_600_000)
   if (limited) return limited
 
   const body = await req.json().catch(() => ({})) as ExportBody
@@ -104,7 +106,7 @@ export async function POST(req: NextRequest) {
   const dateStr = now.toISOString().split("T")[0]
 
   // Try Supabase listings first, fall back to zone metrics summary
-  const listings = await fetchListingsFromSupabase(filters)
+  const listings = await fetchListingsFromSupabase(supabase, filters)
 
   let rows: Record<string, string | number>[]
 
