@@ -148,13 +148,13 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
           onFocus={() => {
             if (hasResults) setOpen(true)
           }}
-          placeholder="Buscar zona, colonia, propiedad..."
+          placeholder="Buscar zona o colonia..."
           className={`w-full border-none rounded-full py-2 pl-10 pr-4 text-sm outline-none transition-all ${
             mobileMode
               ? "bg-slate-100 focus:ring-2 focus:ring-blue-500/30 text-base"
               : "bg-slate-100 focus:ring-2 focus:ring-blue-500/20"
           }`}
-          aria-label="Buscar propiedades"
+          aria-label="Buscar zonas"
           aria-autocomplete="list"
           aria-expanded={open}
           role="combobox"

@@ -338,7 +338,7 @@ export default async function HomePage({
               className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
             >
               <Icon name="search" className="text-sm" />
-              Buscar Propiedades
+              Buscar Zonas
             </Link>
           </div>
         </div>

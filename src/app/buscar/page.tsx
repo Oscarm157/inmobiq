@@ -202,7 +202,7 @@ export default async function BuscarPage({
           <span className="text-sm text-slate-600">Búsqueda</span>
         </div>
         <h1 className="text-2xl font-bold text-slate-900">
-          {query ? `Resultados: ${query}` : "Buscar propiedades"}
+          {query ? `Resultados: ${query}` : "Buscar zonas"}
         </h1>
       </div>
 
@@ -212,7 +212,7 @@ export default async function BuscarPage({
             <Icon name="search" className="text-slate-400 text-2xl" />
           </div>
           <p className="text-sm text-slate-400 max-w-xs">
-            Ingresa al menos 3 caracteres para buscar zonas y propiedades en Tijuana.
+            Ingresa al menos 3 caracteres para buscar zonas y colonias en Tijuana.
           </p>
         </div>
       ) : (
