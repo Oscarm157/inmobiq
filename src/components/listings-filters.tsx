@@ -155,6 +155,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
           <input
             type="number"
             placeholder="Mínimo"
+            aria-label="Precio mínimo"
             value={state.precio_min}
             onChange={(e) => onChange({ ...state, precio_min: e.target.value })}
             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -162,6 +163,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
           <input
             type="number"
             placeholder="Máximo"
+            aria-label="Precio máximo"
             value={state.precio_max}
             onChange={(e) => onChange({ ...state, precio_max: e.target.value })}
             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -182,6 +184,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
           <input
             type="number"
             placeholder="Mín m²"
+            aria-label="Superficie mínima"
             value={state.area_min}
             onChange={(e) => onChange({ ...state, area_min: e.target.value })}
             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -189,6 +192,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
           <input
             type="number"
             placeholder="Máx m²"
+            aria-label="Superficie máxima"
             value={state.area_max}
             onChange={(e) => onChange({ ...state, area_max: e.target.value })}
             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

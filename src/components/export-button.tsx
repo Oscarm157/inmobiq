@@ -142,8 +142,8 @@ export function ExportButton({
       )}
 
       {open && (
-        <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">
-          <p className="px-4 pt-3 pb-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+        <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
+          <p className="px-4 pt-3 pb-1 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             Formato de exportación
           </p>
           {visibleFormats.map((fmt) => {
@@ -152,12 +152,12 @@ export function ExportButton({
               <button
                 key={fmt}
                 onClick={() => handleExport(fmt)}
-                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left"
+                className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
               >
-                <span className="material-symbols-outlined text-slate-700 text-xl mt-0.5">{icon}</span>
+                <span className="material-symbols-outlined text-slate-700 dark:text-slate-300 text-xl mt-0.5">{icon}</span>
                 <span>
-                  <span className="block text-sm font-bold text-slate-800">{label}</span>
-                  <span className="block text-xs text-slate-500">{desc}</span>
+                  <span className="block text-sm font-bold text-slate-800 dark:text-slate-100">{label}</span>
+                  <span className="block text-xs text-slate-500 dark:text-slate-400">{desc}</span>
                 </span>
               </button>
             )

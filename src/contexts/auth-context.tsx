@@ -18,6 +18,7 @@ interface AuthContextValue {
   signInWithGoogle: (redirectTo?: string) => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
   signUpWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -104,6 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
+  const resetPassword = async (email: string) => {
+    if (!supabase) return { error: "Supabase no configurado" }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    })
+    return { error: error?.message ?? null }
+  }
+
   const signOut = async () => {
     if (!supabase) return
     await supabase.auth.signOut()
@@ -111,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, isAdmin, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}
+      value={{ user, session, loading, isAdmin, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, signOut }}
     >
       {children}
     </AuthContext.Provider>

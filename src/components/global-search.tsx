@@ -173,7 +173,7 @@ export function GlobalSearch({ onClose, mobileMode = false }: GlobalSearchProps)
       {/* Dropdown */}
       {open && hasResults && (
         <div
-          className={`absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 ${
+          className={`absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50 ${
             mobileMode ? "relative mt-4 shadow-none border-0" : ""
           }`}
           role="listbox"

@@ -89,7 +89,12 @@ export default async function PortafolioPage({
 
         <div className="flex gap-6 items-start">
           {/* Filter Sidebar (desktop) + Bottom Sheet trigger (mobile) */}
-          <Suspense fallback={null}>
+          <Suspense fallback={
+            <div className="w-60 shrink-0 hidden md:block space-y-4">
+              <div className="h-8 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div className="h-64 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+            </div>
+          }>
             <ListingsFilters total={total} />
           </Suspense>
 

@@ -270,6 +270,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                     type="number"
                     min="0"
                     placeholder="Mínimo"
+                    aria-label="Precio mínimo"
                     value={state.precio_min}
                     onChange={(e) => handleInputChange({ ...state, precio_min: e.target.value })}
                     onWheel={preventScrollChange}
@@ -280,6 +281,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                     type="number"
                     min="0"
                     placeholder="Máximo"
+                    aria-label="Precio máximo"
                     value={state.precio_max}
                     onChange={(e) => handleInputChange({ ...state, precio_max: e.target.value })}
                     onWheel={preventScrollChange}
@@ -311,6 +313,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                     type="number"
                     min="0"
                     placeholder="Mín m²"
+                    aria-label="Superficie mínima"
                     value={state.area_min}
                     onChange={(e) => handleInputChange({ ...state, area_min: e.target.value })}
                     onWheel={preventScrollChange}
@@ -321,6 +324,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                     type="number"
                     min="0"
                     placeholder="Máx m²"
+                    aria-label="Superficie máxima"
                     value={state.area_max}
                     onChange={(e) => handleInputChange({ ...state, area_max: e.target.value })}
                     onWheel={preventScrollChange}

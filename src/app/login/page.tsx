@@ -6,12 +6,12 @@ import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 
 function LoginForm() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth()
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
   const searchParams = useSearchParams()
   const redirectedFrom = searchParams.get("redirectedFrom") ?? "/"
   const urlError = searchParams.get("error")
 
-  const [mode, setMode] = useState<"login" | "register">("login")
+  const [mode, setMode] = useState<"login" | "register" | "reset">("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -29,6 +29,17 @@ function LoginForm() {
     setLoading(true)
     setError(null)
     setSuccess(null)
+
+    if (mode === "reset") {
+      const { error } = await resetPassword(email)
+      if (error) {
+        setError(error)
+      } else {
+        setSuccess("Revisa tu correo para restablecer tu contraseña.")
+      }
+      setLoading(false)
+      return
+    }
 
     if (mode === "login") {
       const { error } = await signInWithEmail(email, password)
@@ -102,20 +113,22 @@ function LoginForm() {
                 className="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-blue-200 mb-1">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="••••••••"
-                className="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              />
-            </div>
+            {mode !== "reset" && (
+              <div>
+                <label className="block text-sm font-medium text-blue-200 mb-1">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  className="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                />
+              </div>
+            )}
 
             {error && (
               <div className="flex items-center gap-2 text-red-300 text-sm bg-red-500/10 rounded-lg px-3 py-2">
@@ -138,13 +151,23 @@ function LoginForm() {
             >
               {loading
                 ? "Cargando..."
+                : mode === "reset"
+                ? "Enviar enlace de recuperación"
                 : mode === "login"
                 ? "Iniciar sesión"
                 : "Crear cuenta"}
             </button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
+            {mode === "login" && (
+              <button
+                onClick={() => { setMode("reset"); setError(null); setSuccess(null) }}
+                className="block w-full text-blue-300/70 hover:text-white text-xs transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            )}
             <button
               onClick={() => {
                 setMode(mode === "login" ? "register" : "login")
@@ -153,7 +176,9 @@ function LoginForm() {
               }}
               className="text-blue-300 hover:text-white text-sm transition-colors"
             >
-              {mode === "login"
+              {mode === "reset"
+                ? "Volver a iniciar sesión"
+                : mode === "login"
                 ? "¿No tienes cuenta? Regístrate"
                 : "¿Ya tienes cuenta? Inicia sesión"}
             </button>

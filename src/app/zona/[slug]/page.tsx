@@ -350,7 +350,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       </div>
 
       {/* [A2] Zone Filters */}
-      <Suspense fallback={<div className="h-10" />}>
+      <Suspense fallback={<div className="h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
         <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
       </Suspense>
 
