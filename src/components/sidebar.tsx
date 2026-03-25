@@ -201,9 +201,17 @@ export function Sidebar() {
 /* ── Animated logo wordmark ── */
 const LOGO_TEXT = "INMOBIQ"
 
+function getReplayDelay(playCount: number): number | null {
+  if (playCount >= 10) return null      // stop after 10 plays
+  if (playCount < 2) return 2_000       // first 2: quick pause
+  if (playCount < 4) return 30_000      // plays 3-4: 30s pause
+  return 60_000                         // plays 5-10: 1 min pause
+}
+
 function LogoTyping() {
   const [visibleCount, setVisibleCount] = useState(0)
-  const [phase, setPhase] = useState<"typing" | "idle">("typing")
+  const [phase, setPhase] = useState<"typing" | "idle" | "done">("typing")
+  const [playCount, setPlayCount] = useState(0)
 
   useEffect(() => {
     if (phase === "typing") {
@@ -211,22 +219,33 @@ function LogoTyping() {
         const timer = setTimeout(() => setVisibleCount((c) => c + 1), 120)
         return () => clearTimeout(timer)
       }
-      setPhase("idle")
+      const newCount = playCount + 1
+      setPlayCount(newCount)
+      const delay = getReplayDelay(newCount)
+      if (delay === null) {
+        setPhase("done")
+      } else {
+        setPhase("idle")
+      }
     }
 
     if (phase === "idle") {
-      // Replay every 30 seconds
+      const delay = getReplayDelay(playCount)
+      if (delay === null) {
+        setPhase("done")
+        return
+      }
       const timer = setTimeout(() => {
         setVisibleCount(0)
         setPhase("typing")
-      }, 30_000)
+      }, delay)
       return () => clearTimeout(timer)
     }
-  }, [visibleCount, phase])
+  }, [visibleCount, phase, playCount])
 
   return (
     <h1
-      className="text-xl text-blue-900 dark:text-blue-300 tracking-wider"
+      className="text-2xl text-blue-900 dark:text-blue-300 tracking-wider"
       style={{ fontFamily: "'Bitcount Single', monospace" }}
     >
       {LOGO_TEXT.split("").map((char, i) => (
