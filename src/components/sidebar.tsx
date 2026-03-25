@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/auth-context"
 
 const navItems = [
   { icon: "monitoring", label: "Precios", href: "/" },
+  { icon: "explore", label: "Brújula", href: "/brujula" },
   { icon: "location_on", label: "Zonas", href: "/zona" },
   { icon: "map", label: "Mapa", href: "/mapa" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
@@ -203,12 +204,12 @@ const LOGO_TEXT = "INMOBIQ"
 
 function getReplayDelay(playCount: number): number | null {
   if (playCount >= 10) return null      // stop after 10 plays
-  if (playCount < 2) return 2_000       // first 2: quick pause
-  if (playCount < 4) return 30_000      // plays 3-4: 30s pause
-  return 60_000                         // plays 5-10: 1 min pause
+  if (playCount < 5) return 2_000       // first 5: quick pause
+  if (playCount < 7) return 30_000      // plays 6-7: 30s pause
+  return 60_000                         // plays 8-10: 1 min pause
 }
 
-function LogoTyping() {
+export function LogoTyping() {
   const [visibleCount, setVisibleCount] = useState(0)
   const [phase, setPhase] = useState<"typing" | "idle" | "done">("typing")
   const [playCount, setPlayCount] = useState(0)

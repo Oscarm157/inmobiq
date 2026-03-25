@@ -228,6 +228,16 @@ export interface Database {
           error_message?: string | null;
         };
       };
+      valuations: {
+        Row: Valuation;
+        Insert: {
+          user_id?: string | null;
+          input_mode?: ValuationInputMode;
+          status?: ValuationStatus;
+          screenshot_paths?: string[];
+        };
+        Update: Partial<Omit<Valuation, "id" | "created_at">>;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -240,6 +250,102 @@ export interface Database {
 }
 
 export type UserRole = "user" | "admin";
+
+// ── Brújula (property valuation) ──
+
+export type ValuationStatus = "pending" | "extracting" | "preview" | "completed" | "failed";
+export type ValuationVerdict = "muy_barata" | "barata" | "precio_justo" | "cara" | "muy_cara";
+export type ValuationInputMode = "screenshots" | "manual";
+
+export interface ExtractedPropertyData {
+  title: string | null;
+  property_type: PropertyType | null;
+  listing_type: ListingType | null;
+  price: number | null;
+  currency: "MXN" | "USD" | null;
+  area_m2: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parking: number | null;
+  address: string | null;
+  colonia: string | null;
+  features: string[];
+  confidence_notes: string[];
+}
+
+export interface ValuationResult {
+  // Zone context
+  zone_name: string;
+  zone_slug: string;
+  zone_avg_price_per_m2: number;
+  zone_avg_ticket: number;
+  zone_total_listings: number;
+
+  // Price analysis
+  price_per_m2: number;
+  price_premium_pct: number;
+  price_percentile: number;
+  price_vs_type_avg_pct: number;
+
+  // Size analysis
+  area_vs_zone_avg_pct: number;
+
+  // Zone risk profile
+  risk_score: number;
+  risk_label: string;
+  volatility: number;
+  liquidity_score: number;
+  cap_rate: number | null;
+
+  // Zone demographics
+  nse_score: number;
+  nse_label: string;
+  affordability_index: number;
+
+  // Market context
+  price_trend_pct: number;
+  demand_pressure: number;
+  appreciation_potential: number;
+
+  // Comparison data (for charts)
+  zone_price_distribution: { range: string; count: number; has_property: boolean }[];
+  comparable_listings: { price: number; area_m2: number; type: PropertyType; price_per_m2: number }[];
+
+  // Verdict
+  score: number;
+  verdict: ValuationVerdict;
+  verdict_reasons: string[];
+}
+
+export interface Valuation {
+  id: string;
+  user_id: string | null;
+  status: ValuationStatus;
+  input_mode: ValuationInputMode;
+  screenshot_paths: string[];
+  extracted_data: ExtractedPropertyData | null;
+  property_type: PropertyType | null;
+  listing_type: ListingType | null;
+  price_mxn: number | null;
+  area_m2: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parking: number | null;
+  address: string | null;
+  zone_id: string | null;
+  zone_slug: string | null;
+  zone_assignment_method: string | null;
+  valuation_result: ValuationResult | null;
+  verdict: ValuationVerdict | null;
+  score: number | null;
+  narrative: string | null;
+  ai_model: string | null;
+  ai_input_tokens: number;
+  ai_output_tokens: number;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface ScrapeJob {
   id: string;

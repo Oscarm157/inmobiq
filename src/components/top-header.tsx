@@ -10,6 +10,7 @@ import { useTheme } from "@/components/theme-provider"
 import { useAuth } from "@/contexts/auth-context"
 import { getActiveAlertCount } from "@/lib/data/alerts"
 import { CurrencySwitcher } from "@/components/currency-switcher"
+import { LogoTyping } from "@/components/sidebar"
 
 export function TopHeader() {
   const { collapsed } = useSidebar()
@@ -69,9 +70,9 @@ export function TopHeader() {
           <GlobalSearch />
         </div>
 
-        {/* Mobile: brand label */}
+        {/* Mobile: animated brand label */}
         <div className="flex md:hidden items-center gap-2 flex-1">
-          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Inmobiq</span>
+          <LogoTyping />
         </div>
 
         {/* Actions */}
