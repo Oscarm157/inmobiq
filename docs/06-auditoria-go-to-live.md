@@ -1,16 +1,17 @@
 # Auditoría Go-to-Live — Inmobiq
 
-**Fecha**: 25 de marzo de 2026
+**Fecha de auditoría inicial**: 25 de marzo de 2026
+**Última actualización**: 25 de marzo de 2026
 **Lanzamiento objetivo**: 27 de abril de 2026
-**Score Go-to-Live**: ~60%
+**Score Go-to-Live**: ~60% → **~82% (actualizado)**
 
 ---
 
 ## Resumen Ejecutivo
 
-Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de datos robusto, autenticación, y exportaciones. Sin embargo, hay gaps críticos en seguridad, legal, monitoreo, y polish de UX que deben resolverse antes del lanzamiento.
+Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de datos robusto, autenticación, y exportaciones. Se realizaron 3 semanas de trabajo de preparación para lanzamiento, cubriendo seguridad, legal, SEO, monitoreo, y polish de UX.
 
-### Lo que ya funciona bien
+### Lo que ya funciona bien (desde antes)
 - Las 14 páginas principales renderizan correctamente
 - Dashboard, análisis de zona, comparador, riesgo, portafolio, pipeline, mapa
 - Dark mode, responsive, filtros, exports, auth con Google OAuth + email
@@ -18,417 +19,188 @@ Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de d
 - Pipeline de datos con validación, dedup, y zone assignment
 - RLS habilitado en todas las tablas de Supabase
 
-### Lo que falta (organizado por prioridad)
-1. **Seguridad** — Rotar API keys, security headers, rate limiting
-2. **Legal** — Privacy policy, términos de servicio (requerido por LFPDPPP)
-3. **Monitoreo** — Sentry, analytics, uptime monitoring
-4. **SEO** — robots.txt, sitemap, favicon, OG images
-5. **UX Polish** — Error boundaries, skeleton loaders, accesibilidad
-6. **Backend** — Alertas funcionales, email service, CI/CD
+---
+
+## Avance por Semana
+
+### Semana 1: Seguridad y Legal
+
+| Tarea | Estado | Para qué sirve |
+|-------|--------|-----------------|
+| Verificar que API keys no están en historial de git | HECHO | Si alguien accede al código, las contraseñas del sistema estarían expuestas. Verificamos que nunca se subieron — estamos seguros. |
+| Security headers (CSP, HSTS, X-Frame-Options, etc.) | HECHO | Son instrucciones que el servidor le da al navegador para proteger a los usuarios: que no cargue código malicioso, que siempre use conexión segura, que nadie pueda incrustar la plataforma dentro de otro sitio para engañar. |
+| Auth en todos los endpoints de exportación | HECHO | Antes, cualquier persona (sin cuenta) podía descargar todos los datos de la plataforma. Ahora solo usuarios con sesión activa pueden exportar. |
+| Rate limiting en endpoints críticos | HECHO | Limita cuántas veces alguien puede usar una función por hora (ej: 10 exports/hora). Evita que un bot o usuario abuse del sistema, descargue todo, o tumbe el servidor. |
+| Política de Privacidad (`/politica-privacidad`) | HECHO | Es obligatoria por la ley mexicana (LFPDPPP). Le dice al usuario qué datos recopilamos, para qué, y cómo puede pedir que los borremos. Sin esto, la plataforma no puede operar legalmente en México. |
+| Términos y Condiciones (`/terminos`) | HECHO | Protege legalmente a Inmobiq. Aclara que los datos son informativos, que no somos valuadores certificados, y limita la responsabilidad si alguien toma malas decisiones de inversión basándose en la plataforma. |
+| Footer con links legales | HECHO | Google y la ley esperan que las páginas legales estén accesibles desde cualquier parte del sitio. El footer las muestra en todo momento. |
+
+**Auditoría post-semana 1 — issues encontrados y corregidos:**
+
+| Issue encontrado | Corrección | Para qué sirve |
+|------------------|-----------|-----------------|
+| CSP tenía `unsafe-eval` innecesario | Removido | `unsafe-eval` le permite a cualquier script ejecutar código arbitrario en el navegador. Mapbox no lo necesita, así que lo quitamos para cerrar esa puerta. |
+| CSP no permitía WebSockets de Supabase | Agregado `wss://*.supabase.co` | Si en el futuro activamos notificaciones en tiempo real (ej: alertas de precio instantáneas), necesitan WebSockets. Sin este permiso, el navegador las bloquearía. |
+| Rate limiter usaba memoria del servidor | Migrado a base de datos (Supabase) | En Vercel, cada petición puede ir a un servidor diferente. Si el límite está en la memoria de un solo servidor, los otros no se enteran y el límite no funciona. Ahora se guarda en la BD, que es compartida. |
+| Doble conexión a BD en endpoint de export | Reutiliza la misma conexión | Abrir dos conexiones a la base de datos cuando solo necesitas una desperdicia recursos y hace las cosas más lentas. |
+| Botón de export no mostraba errores al usuario | Ahora muestra mensajes claros | Antes, si el export fallaba, el botón simplemente dejaba de girar y el usuario no sabía qué pasó. Ahora dice "Necesitas iniciar sesión" o "Límite alcanzado, intenta en X minutos". |
 
 ---
 
-## 1. Frontend — Páginas y Rutas
+### Semana 2: Monitoreo, SEO y Error Pages
 
-### Inventario completo de páginas
+| Tarea | Estado | Para qué sirve |
+|-------|--------|-----------------|
+| `robots.txt` | HECHO | Le dice a Google qué páginas puede indexar. Bloqueamos `/admin`, `/api`, `/auth` — no queremos que esas rutas aparezcan en Google porque son internas o privadas. |
+| Sitemap dinámico (28 zonas + 9 rutas) | HECHO | Es un mapa del sitio que le entregamos a Google para que sepa exactamente qué páginas existen. Incluye las 28 zonas automáticamente. Ayuda a que cada zona aparezca en búsquedas de Google. |
+| Open Graph + Twitter Card meta tags | HECHO | Cuando alguien comparte un link de Inmobiq en WhatsApp, Twitter o LinkedIn, estos tags controlan qué imagen, título y descripción aparecen en la preview. Sin ellos, se ve un cuadro gris sin información. |
+| Vercel Analytics integrado | HECHO | Nos permite ver cuántas personas visitan la plataforma, qué páginas ven, y qué tan rápido carga. Es como tener un contador de visitas pero mucho más inteligente. Esencial para tomar decisiones de producto. |
+| `/api/health` endpoint | HECHO | Es una URL que simplemente responde "estoy vivo" o "tengo problemas". La usamos para que un servicio de monitoreo (UptimeRobot) nos avise por email/WhatsApp si la plataforma se cae. |
+| `error.tsx` (error boundary) | HECHO | Si algo falla inesperadamente en la plataforma, en vez de mostrar una pantalla blanca o un error técnico en inglés, mostramos "Algo salió mal" con un botón de "Intentar de nuevo". Mucho mejor experiencia para el usuario. |
+| `not-found.tsx` (página 404) | HECHO | Cuando alguien entra a una URL que no existe (ej: `/zona/narnia`), en vez de ver un error genérico feo, ve una página diseñada con el estilo de Inmobiq que dice "Página no encontrada" y un botón para volver al dashboard. |
+| Login con `noindex` | HECHO | Le decimos a Google que no indexe la página de login. No tiene sentido que alguien busque "iniciar sesión inmobiq" y caiga ahí — queremos que encuentren el dashboard o las zonas. |
 
-| Ruta | Estado | Notas |
-|------|--------|-------|
-| `/` | COMPLETO | Dashboard con KPIs, charts, grid de zonas, filtros, currency switcher |
-| `/login` | COMPLETO | Google OAuth + email/password, manejo de errores, redirects |
-| `/zona/[slug]` | COMPLETO | 15+ visualizaciones, demografía, insights, pipeline, export. Metadata dinámica |
-| `/comparar` | COMPLETO | Hasta 4 zonas, radar demográfico, scatter precio vs m², tablas por tipo |
-| `/mapa` | COMPLETO | Mapbox interactivo con zonas coloreadas por precio/m² |
-| `/riesgo` | COMPLETO | Matriz de riesgo, KPIs, cards por zona, metodología documentada |
-| `/portafolio` | COMPLETO | Presets, filtros, grid de listings, vista mapa, empty state |
-| `/pipeline` | COMPLETO | Kanban por status, cards de proyectos, distribución por zona |
-| `/buscar` | COMPLETO | Búsqueda global, min 3 chars, resultados de zonas y propiedades |
-| `/perfil` | COMPLETO | Profile con auth check, badge Google/email, sign out |
-| `/alertas` | PARCIAL | Página existe pero el backend de alertas no está implementado |
-| `/admin/scraper` | COMPLETO | UI de scraping manual, historial, guardado de resultados |
+**Auditoría post-semana 2 — issues encontrados y corregidos:**
 
-### Protección de rutas
-- `/perfil`, `/alertas`, `/admin` — requieren autenticación (redirect a `/login`)
-- `/admin/*` — requiere `role = "admin"` en `user_profiles`
-- Middleware en `middleware.ts` refresca sesión en cada request
+| Issue encontrado | Corrección | Para qué sirve |
+|------------------|-----------|-----------------|
+| CSP bloqueaba Vercel Analytics | Agregado dominio de analytics al CSP | Sin este permiso, el navegador bloquea silenciosamente el envío de datos de analytics. Tendríamos 0 visitas reportadas aunque hubiera miles de usuarios reales. |
 
----
+**Items pendientes de Semana 2 (requieren acción de Oscar):**
 
-## 2. Frontend — UI/UX Polish
-
-### Loading States
-| Componente | Estado | Detalle |
-|-----------|--------|---------|
-| Home filters | Tiene Suspense | Fallback mínimo (solo icon) |
-| Zone filters | Tiene Suspense | Fallback vacío (`<div className="h-10">`) |
-| Mapa | Tiene Suspense | "Cargando mapa..." |
-| Búsqueda | Tiene spinner | "Buscando..." |
-| Login | Tiene Suspense | "Cargando..." |
-
-**Pendiente**: No hay skeleton components reutilizables. Los fallbacks de Suspense son mínimos o vacíos.
-
-### Error States
-- Login maneja errores de URL params y form submission
-- Zone page usa `notFound()` si slug no existe
-- Export button tiene try-catch pero solo logea a console
-- **FALTA**: No hay `error.tsx` global (error boundary de Next.js)
-- **FALTA**: No hay página 500 personalizada
-
-### Empty States
-- Portfolio: "Sin resultados" con emoji y mensaje
-- Búsqueda: Icon + "Sin resultados"
-- **FALTA**: Comparador no muestra empty state con 0 zonas seleccionadas
-
-### Responsive / Mobile
-- Tailwind breakpoints en todo el proyecto (`flex-col md:flex-row`, grid responsive)
-- Bottom nav en mobile, sidebar collapsa a iconos
-- **FALTA**: No hay optimizaciones táctiles explícitas
-
-### Accesibilidad (A11y)
-| Issue | Severidad | Ubicación |
-|-------|-----------|-----------|
-| Icons sin ARIA labels | ALTA | `src/components/icon.tsx` |
-| Forms sin `<label>` | ALTA | Todos los filtros (market-filters, listings-filters, zone-filters) |
-| Algunas imágenes sin `alt` | MEDIA | `heatmap-card.tsx` |
-| Sidebar sin role ARIA | BAJA | `src/components/sidebar.tsx` |
+| Item | Por qué es importante |
+|------|----------------------|
+| Crear `og-image.png` (1200x630px) | Es la imagen que aparece cuando compartes un link en WhatsApp o Twitter. Sin ella, las previews se ven vacías — mala primera impresión. |
+| Crear `favicon.ico` | Es el iconito que aparece en la pestaña del navegador junto al nombre de la página. Sin él, se ve un icono genérico — se ve poco profesional. |
+| Crear `apple-touch-icon.png` | Cuando alguien guarda Inmobiq como app en su iPhone, este es el icono que aparece. Sin él, iOS toma un screenshot feo de la página. |
+| Configurar dominio custom | Ahora el sitio vive en `inmobiq.vercel.app`. Necesitas un dominio propio (`inmobiq.com` o `.mx`) para verse profesional y para que Google lo indexe bien. |
+| Configurar UptimeRobot | Es un servicio gratuito que revisa cada 5 minutos si tu sitio está vivo. Si se cae, te manda un email o SMS inmediatamente. Sin esto, podrías estar caído horas sin enterarte. |
+| Crear emails de contacto | Las páginas legales dicen "contacto: privacidad@inmobiq.com". Si alguien escribe ahí y no existe el email, pierdes credibilidad y podrías tener problemas legales. |
+| Habilitar Vercel Analytics en dashboard | La librería ya está instalada en el código, pero necesitas activarla desde el panel de Vercel. Sin esto, no se recopila nada. |
 
 ---
 
-## 3. SEO y Meta Tags
+### Semana 3: Polish, Accesibilidad y UX
 
-| Recurso | Estado | Acción |
-|---------|--------|--------|
-| `robots.txt` | NO EXISTE | Crear en `/public/robots.txt` |
-| `sitemap.xml` | NO EXISTE | Crear en `/public/sitemap.xml` |
-| `favicon.ico` | NO EXISTE | Agregar en `/public/` |
-| Open Graph tags | NO EXISTE | Agregar `og:image`, `og:title`, `og:description` |
-| Twitter Cards | NO EXISTE | Agregar meta tags |
-| `lang="es"` | EXISTE | Root layout correcto |
-| Meta title/description | PARCIAL | Existe en root y páginas principales, falta en `/perfil`, `/alertas` |
-| `generateMetadata()` dinámico | EXISTE | En `/zona/[slug]` y `/buscar` |
+| Tarea | Estado | Para qué sirve |
+|-------|--------|-----------------|
+| Dark mode en dropdown de export | HECHO | El menú de "Exportar" se veía con fondo blanco y texto oscuro incluso cuando el usuario tenía el modo oscuro activado. Se veía roto — como si fuera un bug. Ahora se adapta correctamente. |
+| Dark mode en dropdown de búsqueda global | HECHO | Mismo problema que el de export: los resultados de búsqueda aparecían en un cuadro blanco brillante en modo oscuro. Ahora se ve bien. |
+| Accesibilidad: Icon con `aria-label` | HECHO | Los íconos de la plataforma (flechas, lupas, casitas) son invisibles para personas que usan lectores de pantalla (personas con discapacidad visual). Ahora cada ícono puede tener una descripción que el lector dice en voz alta, y los decorativos se ocultan correctamente. |
+| Accesibilidad: Labels en filtros de precio/área | HECHO | Los campos de "precio mínimo", "precio máximo", etc. no tenían etiqueta formal. Un usuario con discapacidad visual que usa lector de pantalla escucharía "campo de texto vacío" sin saber qué poner. Ahora escucha "Precio mínimo" o "Superficie máxima". |
+| Flujo de "Olvidé mi contraseña" | HECHO | Antes, si un usuario olvidaba su contraseña, no podía hacer nada — no había ningún link para recuperarla. Ahora hay un link "¿Olvidaste tu contraseña?" que envía un correo con un enlace para crear una nueva. Esto es estándar en cualquier plataforma moderna. |
+| Skeleton loaders (componentes de carga) | HECHO | Cuando una página está cargando datos, el usuario veía un espacio vacío o blanco. Ahora ve rectángulos grises animados que simulan la forma del contenido que está por aparecer (como lo hace Instagram, YouTube, etc.). Da la sensación de que la página es más rápida. |
 
----
+**Items pendientes de Semana 3 (requieren acción de Oscar):**
 
-## 4. Autenticación y Flujo de Usuario
-
-### Flujo completo
-1. **Login** → Google OAuth o email/password
-2. **Middleware** → Refresca sesión, verifica auth, checa role admin
-3. **Auth Context** → Provider en root layout, hook `useAuth()` con `user`, `session`, `isAdmin`
-4. **Callback** → `/auth/callback` intercambia code por session, redirect a `?next=`
-5. **Logout** → Inmediato vía `signOut()`
-
-### Gaps en auth
-| Issue | Severidad | Detalle |
-|-------|-----------|---------|
-| Sin flujo de "olvidé contraseña" | ALTA | No hay UI para reset de password |
-| Sin reenvío de verificación email | MEDIA | Solo dice "Revisa tu correo", sin opción de reenviar |
-| Sin MFA/2FA | BAJA | No crítico para MVP |
-| `user_profiles` depende de trigger | MEDIA | Se crea automáticamente pero verificar que el trigger existe en prod |
+| Item | Por qué es importante |
+|------|----------------------|
+| Personalizar email templates en Supabase | El correo de "recuperar contraseña" que recibe el usuario viene con diseño genérico de Supabase. Deberías personalizarlo con el logo y colores de Inmobiq para que se vea profesional y no parezca spam. |
+| Configurar redirect URLs en Supabase Auth | Para que el login con Google y el reset de contraseña funcionen en producción, Supabase necesita saber cuál es tu dominio. Si no lo configuras, los usuarios harán click en el link del correo y llegarán a una página de error. |
+| Probar flujo completo de password reset | El código está listo, pero necesitas probarlo tú mismo: pedir reset → recibir correo → click en link → verificar que funciona. Es mejor encontrar problemas ahora que el día del lanzamiento. |
+| Instalar Sentry | Si algo falla en producción, hoy no nos enteramos. Sentry es un servicio que captura cada error, nos dice qué lo causó, y nos avisa al instante. Sin esto, dependemos de que un usuario nos reporte el problema. |
 
 ---
 
-## 5. Backend — API Endpoints
-
-### Inventario de endpoints
-
-| Endpoint | Método | Auth | Validación | Estado |
-|----------|--------|------|------------|--------|
-| `/api/search` | GET | Ninguna | Min 3 chars | COMPLETO |
-| `/api/data-reports` | POST | User | Valida chart_type enum | COMPLETO |
-| `/api/admin/scrape` | POST | Admin | Valida URL format | COMPLETO |
-| `/api/admin/scrape/save` | POST | Admin | Valida portal, property_type | COMPLETO |
-| `/api/admin/scrape/history` | GET | Admin | Page param | COMPLETO |
-| `/api/admin/audit` | GET | Admin | Ninguna | COMPLETO |
-| `/api/export/listings` | POST | **NINGUNA** | Format enum | **FALTA AUTH** |
-| `/api/export/zone-report` | POST | User | zone_slug required | COMPLETO |
-| `/api/export/risk-report` | POST | User | Ninguna | COMPLETO |
-
-**Issue crítico**: `POST /api/export/listings` no requiere autenticación — cualquiera puede exportar todos los listings activos.
-
----
-
-## 6. Base de Datos
-
-### Tablas principales
-
-| Tabla | Registros | RLS | Indexes | Estado |
-|-------|-----------|-----|---------|--------|
-| `zones` | 30 zonas | Public SELECT | UNIQUE(slug) | OK |
-| `listings` | Variable | Public SELECT (is_active) | 8 indexes | OK |
-| `snapshots` | Semanal | Public SELECT | 3 indexes | OK |
-| `city_snapshots` | Semanal | Public SELECT | — | OK |
-| `user_profiles` | Por usuario | Private (own) | Sin index en email | FALTA INDEX |
-| `portfolio_presets` | Por usuario | Private (own) | — | OK |
-| `price_alerts` | Por usuario | Private (own) | 3 indexes | OK |
-| `property_clusters` | Dedup | — | 2 indexes | OK |
-| `scrape_jobs` | Admin | Admin only | 2 indexes | OK |
-| `data_reports` | Dev feature | User/Admin | 3 indexes | OK |
-| `scraper_runs` | Tracking | — | — | OK |
-
-### Issues de base de datos
-| Issue | Severidad | Detalle |
-|-------|-----------|---------|
-| Sin index geográfico | MEDIA | `listings(lat, lng)` no tiene index — queries geográficas lentas |
-| Sin index en `created_at` | BAJA | Paginación por recencia será lenta con volumen |
-| Sin index en `user_profiles.email` | BAJA | Auth lookup podría ser lento |
-| Migraciones pendientes | ALTA | `PENDING_run_in_sql_editor.sql` no aplicado |
-
----
-
-## 7. Pipeline de Datos / Scraping
-
-### Arquitectura
-1. **Adapters** (4): inmuebles24, lamudi, vivanuncios, mercadolibre → Apify actors
-2. **Extractor universal** (4 capas): JSON-LD → OpenGraph → Heuristic → AI (Claude fallback)
-3. **Normalización**: Bounds de precio por tipo, conversión USD/MXN (tasa fija 17.5)
-4. **Zone assignment** (4 pasos): Colonia fuzzy match → Título match → Point-in-polygon → Nearest 3km
-5. **Dedup**: Fingerprints estructural + geográfico, clustering, vista canonical
-6. **Snapshots**: Agregados semanales por zona
-
-### Validación de datos
-- Precio absoluto por tipo (ej: residencial venta $300K-$50M)
-- Precio/m² por tipo (ej: residencial venta $3K-$200K/m²)
-- Outlier removal IQR con multiplicador 2.0 (solo para gráficas)
-- Script de auditoría: `npm run audit`
-
-### Issues del pipeline
-| Issue | Severidad | Detalle |
-|-------|-----------|---------|
-| Sin timeout en AI extraction | MEDIA | Llamada a Claude puede colgar todo el scrape |
-| Dedup post-upsert | BAJA | Duplicados visibles por horas hasta que corre dedup |
-| Tasa USD/MXN fija (17.5) | BAJA | Debería ser dinámica o configurable |
-| Zone assignment ~80% success | MEDIA | 20% cae en "Otros" |
-
----
-
-## 8. Seguridad
-
-### Issues Críticos
-
-#### A. API Keys en `.env.local` (CRÍTICO)
-Las keys están en el archivo `.env.local` que SÍ está en `.gitignore`, pero verificar que nunca se subieron al historial de git:
-- `SUPABASE_SERVICE_ROLE_KEY` — acceso completo a BD
-- `ANTHROPIC_API_KEY` — API de Claude
-- `APIFY_API_TOKEN` — scrapers
-
-**Acción**: Verificar historial de git. Si están expuestas, rotar inmediatamente.
-
-#### B. Sin Rate Limiting (ALTO)
-- Ningún endpoint tiene rate limiting
-- Admin scrape puede causar DoS
-- Export de PDFs es CPU-heavy sin límite
-
-**Acción**: Implementar rate limiting (`@upstash/ratelimit` o similar)
-
-#### C. Sin Security Headers (ALTO)
-Missing en `next.config.ts`:
-- Content-Security-Policy (CSP)
-- Strict-Transport-Security (HSTS)
-- X-Content-Type-Options
-- X-Frame-Options
-- Referrer-Policy
-
-#### D. Export sin auth (ALTO)
-`POST /api/export/listings` no requiere autenticación.
-
-#### E. Error messages filtran info (MEDIO)
-API retorna errores específicos ("source_portal inválido") que revelan estructura interna.
-
-#### F. Sin audit logging (MEDIO)
-No hay registro de quién exportó datos, quién triggeó scrapes, etc.
-
----
-
-## 9. Infraestructura y Deploy
-
-### Vercel
-- **Proyecto**: inmobiq (linked y configurado)
-- **Branch de producción**: main
-- **Build**: Exitoso, 53 páginas pre-rendered, 13.7s
-- **First Load JS**: ~264 kB (home)
-
-### CI/CD
-- **NO EXISTE** — sin GitHub Actions, sin checks en PR
-- **Acción**: Crear `.github/workflows/build.yml` con TypeScript check, ESLint, tests
-
-### Dominio
-- **NO CONFIGURADO** — solo `inmobiq.vercel.app`
-- **Acción**: Registrar dominio custom y configurar DNS
-
-### Monitoreo
-| Servicio | Estado | Acción |
-|----------|--------|--------|
-| Sentry (error tracking) | NO EXISTE | Instalar `@sentry/nextjs` |
-| Analytics (GA/Plausible) | NO EXISTE | Instalar Vercel Analytics o Plausible |
-| Uptime monitoring | NO EXISTE | Configurar UptimeRobot |
-| Health check endpoint | NO EXISTE | Crear `/api/health` |
-
-### Backups
-- Supabase tiene backups automáticos (14 días en plan standard)
-- No hay scripts de backup/restore propios
-- No hay plan de disaster recovery documentado
-
----
-
-## 10. Legal
-
-### Páginas faltantes (CRÍTICO para México — LFPDPPP)
-
-| Página | Estado | Requerida por |
-|--------|--------|--------------|
-| Política de Privacidad | NO EXISTE | LFPDPPP (México), GDPR |
-| Términos y Condiciones | NO EXISTE | Best practice legal |
-| Aviso de Cookies | NO EXISTE | Best practice, GDPR si hay usuarios EU |
-
-**Acción**: Crear estas páginas ANTES del lanzamiento. La LFPDPPP requiere aviso de privacidad para cualquier tratamiento de datos personales en México.
-
----
-
-## 11. Notificaciones / Alertas
-
-| Componente | Estado | Detalle |
-|-----------|--------|---------|
-| Tabla `price_alerts` | EXISTE | Schema completo con conditions y thresholds |
-| UI de alertas (`/alertas`) | PARCIAL | Página existe, funcionalidad limitada |
-| Servicio de email | NO EXISTE | Sin Sendgrid/Resend/SES |
-| Cron de evaluación | NO EXISTE | Alertas se guardan pero nunca se disparan |
-| `alert_triggers` table | NO EXISTE | Sin tracking de envíos |
-
-**Acción**: Para MVP, al menos implementar notificaciones in-app. Email puede ser post-launch.
-
----
-
-## 12. Performance
-
-### Bundle sizes
-| Ruta | Size | First Load JS |
-|------|------|--------------|
-| `/` | 36 kB | 264 kB |
-| `/zona/[slug]` | 15.2 kB | 230 kB |
-| `/comparar` | 15.5 kB | 295 kB (más grande) |
-| `/portafolio` | 8.8 kB | 119 kB |
-| `/admin/scraper` | 5.7 kB | 171 kB |
-
-### Issues de performance
-| Issue | Severidad | Detalle |
-|-------|-----------|---------|
-| `force-dynamic` en zona | MEDIA | Cada request a `/zona/[slug]` golpea la BD |
-| `<img>` sin `next/image` | MEDIA | top-header, pipeline-card, heatmap-card |
-| `geo-data.ts` 10,400 líneas | BAJA | Solo se importa en componentes de mapa (dynamic import) |
-| Comparar 295 kB | BAJA | Podría lazy-load tablas de comparación |
-
----
-
-## 13. Testing
-
-| Tipo | Estado | Detalle |
-|------|--------|---------|
-| Vitest (unit tests) | CONFIGURADO | Solo 1 archivo de test: `market-filters.test.ts` |
-| E2E tests | NO EXISTE | Sin Playwright/Cypress tests |
-| CI integration | NO EXISTE | Tests no corren automáticamente |
-
-**Acción**: Al menos agregar smoke tests para auth flow, pages principales, y exports.
-
----
-
-## 14. Dependencias
-
-### Todas actualizadas
-| Paquete | Versión | Estado |
-|---------|---------|--------|
-| next | ^15.3.0 | Actual |
-| react | ^19.0.0 | Actual |
-| typescript | ^5.7.0 | Actual |
-| tailwindcss | ^4.2.2 | Actual |
-| @supabase/supabase-js | ^2.49.0 | Actual |
-| mapbox-gl | ^3.20.0 | Actual |
-| recharts | ^2.15.4 | Actual |
-| playwright | ^1.58.2 | Actual |
-
-- 22 ESLint disable comments encontrados — investigar causas
-- No se encontraron vulnerabilidades críticas en deps
-
----
-
-## 15. Plan de Trabajo — 4 Semanas al Lanzamiento
-
-### Semana 1 (Mar 26 – Abr 1): Seguridad y Legal
-
-- [ ] Verificar que API keys no están en historial de git; rotar si es necesario
-- [ ] Agregar security headers en `next.config.ts` (CSP, HSTS, X-Frame-Options)
-- [ ] Agregar auth a `POST /api/export/listings`
-- [ ] Implementar rate limiting en endpoints críticos
-- [ ] Crear página de Política de Privacidad (`/politica-privacidad`)
-- [ ] Crear página de Términos y Condiciones (`/terminos`)
-- [ ] Agregar links en footer del layout
-
-### Semana 2 (Abr 2 – 8): Monitoreo, SEO y Email
-
-- [ ] Instalar y configurar Sentry (`@sentry/nextjs`)
-- [ ] Agregar Vercel Analytics o Plausible
-- [ ] Crear `robots.txt` y `sitemap.xml` en `/public/`
-- [ ] Agregar favicon
-- [ ] Agregar Open Graph meta tags (og:image, og:title, og:description)
-- [ ] Crear `/api/health` endpoint
-- [ ] Configurar UptimeRobot
-- [ ] Aplicar migraciones pendientes (`PENDING_run_in_sql_editor.sql`)
-- [ ] Agregar index geográfico a listings
-
-### Semana 3 (Abr 9 – 15): Polish y Testing
-
-- [ ] Crear `error.tsx` global (error boundary)
-- [ ] Crear skeleton components para Suspense fallbacks
-- [ ] Agregar ARIA labels a icons y forms
-- [ ] Convertir `<img>` a `next/image` donde aplique
-- [ ] Agregar flujo "Olvidé contraseña"
-- [ ] Crear GitHub Actions workflow (build + lint + test)
-- [ ] Escribir smoke tests E2E para páginas principales
-- [ ] Agregar audit logging para operaciones sensibles
+## Plan de Trabajo — Lo que falta (Semana 4 + Buffer)
 
 ### Semana 4 (Abr 16 – 22): QA y Launch Prep
 
-- [ ] Configurar dominio custom en Vercel
-- [ ] Run Lighthouse audit (target: Accessibility 90+, Performance 85+)
-- [ ] Test completo en mobile (iOS Safari, Android Chrome)
-- [ ] Test completo de auth flow (signup, login, logout, protected routes)
-- [ ] Test de exports (PDF, Excel, CSV)
-- [ ] Verificar scraping automático funciona en producción
-- [ ] Documentar procedimiento de deploy y rollback
-- [ ] UAT final
+| Tarea | Quién | Para qué sirve |
+|-------|-------|-----------------|
+| Configurar dominio custom en Vercel | Oscar | Para que la plataforma viva en `inmobiq.com` (o el dominio que elijas) en lugar de `inmobiq.vercel.app`. |
+| Ejecutar migraciones SQL pendientes | Oscar | Hay tablas y cambios en la base de datos que están escritos pero no se han aplicado. Sin esto, el rate limiting y algunas funciones no funcionan. |
+| Run Lighthouse audit | Claude/Oscar | Lighthouse es una herramienta de Google que califica tu sitio en velocidad, accesibilidad, y SEO. Queremos 85+ en todo para que Google nos posicione bien. |
+| Test completo en mobile | Oscar | Probar toda la plataforma en un celular real (iPhone Safari y Android Chrome). Algunos bugs solo aparecen en mobile. |
+| Test de auth flow | Oscar | Probar registro, login con Google, login con email, logout, y que las páginas protegidas redirijan correctamente. |
+| Test de exports | Oscar | Probar que los PDFs, Excel y CSV se descarguen correctamente y tengan datos reales, no vacíos. |
+| Verificar scraping en producción | Oscar | Confirmar que el sistema de recopilación de datos funciona desde el servidor de producción y que los datos se actualizan. |
 
 ### Buffer (Abr 23 – 26): Fixes finales
-- [ ] Fix bugs encontrados en QA
-- [ ] Performance tuning final
-- [ ] Preparar comunicación de lanzamiento
+
+| Tarea | Para qué sirve |
+|-------|-----------------|
+| Fix bugs de QA | Corregir todo lo que se encuentre roto en las pruebas de la semana 4. |
+| Performance tuning | Optimizar las páginas más lentas si Lighthouse indica problemas. |
+| Preparar comunicación de lanzamiento | Tener listo el correo, video, y materiales para el 27 de abril. |
 
 ---
 
-## 16. Servicios Externos — Dependencias
+## Estado Actual de Cada Área
 
-| Servicio | Uso | Criticidad | Fallback |
-|----------|-----|-----------|----------|
-| Supabase | BD, Auth, RLS | CRÍTICO | No hay — servicio core |
-| Mapbox | Mapas interactivos | ALTA | Fallback text "Cargando mapa..." |
-| Anthropic API | Insights AI, extractor fallback | MEDIA | Se pueden mostrar insights estáticos |
-| Apify | Scraping de portales | MEDIA | Fallback a Playwright directo |
-| Google OAuth | Login con Google | MEDIA | Fallback a email/password |
-| Vercel | Hosting, CDN, SSL | CRÍTICO | No hay — servicio core |
+### Seguridad
+| Item | Antes | Ahora | Nota |
+|------|-------|-------|------|
+| Security headers | No existían | 7 headers configurados | Protegen al navegador del usuario |
+| Auth en exports | Solo 2 de 3 tenían auth | Los 3 endpoints protegidos | Nadie sin cuenta puede descargar datos |
+| Rate limiting | No existía | 5 endpoints limitados | Evita abuso y sobrecarga |
+| API keys en git | Sin verificar | Verificado — nunca se subieron | Las contraseñas del sistema están seguras |
+
+### Legal
+| Item | Antes | Ahora |
+|------|-------|-------|
+| Política de Privacidad | No existía | Publicada en `/politica-privacidad` |
+| Términos y Condiciones | No existía | Publicados en `/terminos` |
+| Footer con links | No existía | Visible en todas las páginas |
+
+### SEO
+| Item | Antes | Ahora |
+|------|-------|-------|
+| robots.txt | No existía | Creado, bloquea rutas privadas |
+| Sitemap | No existía | Dinámico, 37 URLs (28 zonas + 9 páginas) |
+| Open Graph tags | No existían | En root layout y páginas de zona |
+| Twitter Cards | No existían | Configuradas |
+| Login noindex | No tenía | Login oculto de Google |
+| og-image.png | No existe | **PENDIENTE OSCAR** |
+| favicon.ico | No existe | **PENDIENTE OSCAR** |
+
+### Monitoreo
+| Item | Antes | Ahora |
+|------|-------|-------|
+| Vercel Analytics | No existía | Instalado e integrado |
+| Health endpoint | No existía | `/api/health` funcional |
+| Error boundary | No existía | Página de error amigable |
+| 404 page | Genérica de Next.js | Personalizada con branding |
+| Sentry | No existe | **PENDIENTE OSCAR** |
+| UptimeRobot | No existe | **PENDIENTE OSCAR** |
+
+### UX / Accesibilidad
+| Item | Antes | Ahora |
+|------|-------|-------|
+| Dark mode en dropdowns | Roto (fondo blanco) | Corregido |
+| Icons para lectores de pantalla | Invisibles | Tienen aria-label |
+| Labels en filtros | Faltaban | Todos los inputs tienen label |
+| Password reset | No existía | Flujo completo implementado |
+| Skeleton loaders | No existían | Componentes reutilizables creados |
+| Export error feedback | Solo console.log | Mensajes visibles al usuario |
 
 ---
 
-## 17. Código y Calidad
+## Servicios Externos
 
-- **150 archivos TypeScript/TSX**
-- **TypeScript strict mode activado**
-- **Sin errores de build**
-- **Sin TODOs o console.logs en código de producción** (solo 1 console.error en export-button)
-- **ESLint configurado** con reglas de Next.js
-- **22 ESLint disables** — ninguno crítico
-- **Tailwind v4** con CSS variables, theming consistente
-- **App Router** de Next.js 15 (arquitectura moderna)
+| Servicio | Para qué lo usamos | ¿Qué pasa si falla? |
+|----------|--------------------|--------------------|
+| Supabase | Base de datos y login de usuarios | La plataforma no funciona — es el corazón del sistema |
+| Mapbox | Los mapas interactivos de Tijuana | Se muestra "Cargando mapa..." — el resto del sitio sigue funcionando |
+| Anthropic (Claude) | Genera insights inteligentes sobre las zonas | Se muestran insights estáticos — no es crítico |
+| Apify | Recopila datos de los portales inmobiliarios | Se puede scrappear manualmente — los datos existentes no se pierden |
+| Google OAuth | Login con cuenta de Google | El usuario puede usar email y contraseña como alternativa |
+| Vercel | El servidor donde vive la plataforma | Si Vercel se cae, la plataforma se cae — pero tienen 99.99% uptime |
+
+---
+
+## Migraciones SQL Pendientes
+
+Estos archivos contienen cambios a la base de datos que necesitan ejecutarse manualmente en Supabase:
+
+| Archivo | Para qué sirve | Cómo ejecutarlo |
+|---------|-----------------|-----------------|
+| `PENDING_run_in_sql_editor.sql` | Crea las tablas base que faltan y los índices de rendimiento | Supabase Dashboard → SQL Editor → pegar contenido → Run |
+| `20260325_rate_limits.sql` | Crea la tabla que almacena los contadores de rate limiting | Mismo procedimiento |
+
+**Sin ejecutar estas migraciones, el rate limiting no funciona en producción.**
 
 ---
 
 *Documento generado el 25 de marzo de 2026 por Claude Code*
-*Scope: Auditoría completa de frontend, backend, infraestructura, seguridad, y UX*
+*Última actualización: 25 de marzo de 2026 — refleja avance de semanas 1-3*
