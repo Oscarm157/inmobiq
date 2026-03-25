@@ -20,11 +20,11 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const TYPE_COLORS: Record<string, { bar: string; dot: string }> = {
-  casa: { bar: "bg-blue-500", dot: "bg-blue-500" },
-  departamento: { bar: "bg-indigo-400", dot: "bg-indigo-400" },
-  terreno: { bar: "bg-amber-400", dot: "bg-amber-400" },
-  local: { bar: "bg-emerald-500", dot: "bg-emerald-500" },
-  oficina: { bar: "bg-rose-400", dot: "bg-rose-400" },
+  casa: { bar: "bg-blue-700", dot: "bg-blue-700" },
+  departamento: { bar: "bg-rose-600", dot: "bg-rose-600" },
+  terreno: { bar: "bg-emerald-600", dot: "bg-emerald-600" },
+  local: { bar: "bg-amber-500", dot: "bg-amber-500" },
+  oficina: { bar: "bg-violet-600", dot: "bg-violet-600" },
 }
 
 export function KPIComposicion({ composition, totalListings }: KPIComposicionProps) {

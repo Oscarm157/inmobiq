@@ -79,11 +79,11 @@ export function InventoryTypeChart({ zones }: InventoryTypeChartProps) {
               align="right"
               wrapperStyle={{ fontSize: "11px", paddingBottom: "8px" }}
             />
-            <Bar dataKey="departamento" stackId="a" fill="#7c3aed" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="casa" stackId="a" fill="#2563eb" />
+            <Bar dataKey="departamento" stackId="a" fill="#e11d48" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="casa" stackId="a" fill="#1d4ed8" />
             <Bar dataKey="local" stackId="a" fill="#d97706" />
             <Bar dataKey="terreno" stackId="a" fill="#059669" />
-            <Bar dataKey="oficina" stackId="a" fill="#6b7280" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="oficina" stackId="a" fill="#7c3aed" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ChartContainer>
       </CardContent>

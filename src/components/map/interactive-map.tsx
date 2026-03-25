@@ -462,14 +462,14 @@ export function InteractiveMap({
 
   return (
     <div
-      className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm"
+      className="relative isolate rounded-xl overflow-hidden border border-slate-200 shadow-sm"
       style={{ height }}
     >
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
 
       {/* Layer toggle — pill style */}
       {showLayerToggle && (
-        <div className="absolute top-3 left-3 z-[1000] flex gap-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-slate-200/80 p-1">
+        <div className="absolute top-3 left-3 z-10 flex gap-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-slate-200/80 p-1">
           {(["zones", "heatmap"] as LayerMode[]).map((layer) => (
             <button
               key={layer}
@@ -487,7 +487,7 @@ export function InteractiveMap({
       )}
 
       {/* Legend — gradient bar style */}
-      <div className="absolute bottom-4 left-3 z-[1000] bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/80 p-3 min-w-[140px]">
+      <div className="absolute bottom-4 left-3 z-10 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/80 p-3 min-w-[140px]">
         <p className="text-[9px] font-bold text-slate-400 mb-2 uppercase tracking-widest">
           Precio/m²
         </p>

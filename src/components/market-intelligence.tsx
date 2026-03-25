@@ -10,15 +10,15 @@ export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
   if (insights.length === 0) return null
 
   return (
-    <section>
+    <section className="relative -mx-4 md:-mx-6 px-4 md:px-6 py-8 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/60 to-teal-50/40 dark:from-slate-900 dark:via-blue-950/30 dark:to-teal-950/20 border border-blue-100/60 dark:border-blue-900/30">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-2xl font-black tracking-tight">Inteligencia de Mercado</h3>
-          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 text-[10px] font-bold rounded-full tracking-widest uppercase">
+          <span className="px-2 py-0.5 bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-400 text-[10px] font-bold rounded-full tracking-widest uppercase">
             Cruce Censo × Mercado
           </span>
         </div>
-        <p className="text-sm text-slate-500 font-medium">
+        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
           Insights de las zonas con mayor actividad de mercado, cruzando datos del Censo 2020
         </p>
       </div>
@@ -28,11 +28,11 @@ export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
           <Link
             key={insight.id}
             href={`/zona/${insight.zone_slug}`}
-            className={`group bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800 border-l-4 ${insight.accent} hover:scale-[1.01] transition-transform`}
+            className={`group bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-white/80 dark:border-slate-800 border-l-4 ${insight.accent} hover:scale-[1.01] hover:shadow-md transition-all`}
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                <Icon name={insight.icon} className="text-base text-slate-600 dark:text-slate-400" />
+              <div className="p-1.5 bg-blue-50 dark:bg-slate-800 rounded-lg">
+                <Icon name={insight.icon} className="text-base text-blue-600 dark:text-blue-400" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 {insight.title}
@@ -51,7 +51,7 @@ export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
               {insight.explanation}
             </p>
 
-            <div className="flex items-center gap-1 mt-3 text-[10px] font-bold text-slate-400 group-hover:text-blue-500 transition-colors">
+            <div className="flex items-center gap-1 mt-3 text-[10px] font-bold text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
               Ver zona <Icon name="arrow_forward" className="text-[10px]" />
             </div>
           </Link>

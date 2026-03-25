@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
@@ -50,7 +51,7 @@ export function Sidebar() {
       <div className={`flex items-center mb-4 ${collapsed ? "justify-center py-4" : "justify-between px-2 py-6"}`}>
         {!collapsed && (
           <div>
-            <h1 className="text-lg font-bold text-blue-900 dark:text-blue-300">Inmobiq</h1>
+            <LogoTyping />
             <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
               Panel de Análisis
             </p>
@@ -194,5 +195,49 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+  )
+}
+
+/* ── Animated logo wordmark ── */
+const LOGO_TEXT = "INMOBIQ"
+
+function LogoTyping() {
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [phase, setPhase] = useState<"typing" | "idle">("typing")
+
+  useEffect(() => {
+    if (phase === "typing") {
+      if (visibleCount < LOGO_TEXT.length) {
+        const timer = setTimeout(() => setVisibleCount((c) => c + 1), 120)
+        return () => clearTimeout(timer)
+      }
+      setPhase("idle")
+    }
+
+    if (phase === "idle") {
+      // Replay every 30 seconds
+      const timer = setTimeout(() => {
+        setVisibleCount(0)
+        setPhase("typing")
+      }, 30_000)
+      return () => clearTimeout(timer)
+    }
+  }, [visibleCount, phase])
+
+  return (
+    <h1
+      className="text-xl text-blue-900 dark:text-blue-300 tracking-wider"
+      style={{ fontFamily: "'Bitcount Single', monospace" }}
+    >
+      {LOGO_TEXT.split("").map((char, i) => (
+        <span
+          key={i}
+          className="inline-block transition-opacity duration-300"
+          style={{ opacity: i < visibleCount ? 1 : 0 }}
+        >
+          {char}
+        </span>
+      ))}
+    </h1>
   )
 }

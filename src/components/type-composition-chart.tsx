@@ -9,11 +9,11 @@ interface TypeCompositionChartProps {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  casa: "#2563eb",
-  departamento: "#7c3aed",
+  casa: "#1d4ed8",
+  departamento: "#e11d48",
   terreno: "#059669",
   local: "#d97706",
-  oficina: "#6b7280",
+  oficina: "#7c3aed",
 }
 
 const TYPE_LABELS: Record<string, string> = {

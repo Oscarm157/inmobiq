@@ -268,12 +268,12 @@ export function MiniMap({ zones, height = "420px" }: MiniMapProps) {
 
   return (
     <div
-      className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm"
+      className="relative isolate rounded-xl overflow-hidden border border-slate-200 shadow-sm"
       style={{ height }}
     >
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
       {/* Gradient legend */}
-      <div className="absolute top-3 left-3 z-[1000] bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-slate-200/80">
+      <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-slate-200/80">
         <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">
           Precio /m²
         </p>
@@ -290,7 +290,7 @@ export function MiniMap({ zones, height = "420px" }: MiniMapProps) {
           <span>$40k+</span>
         </div>
       </div>
-      <div className="absolute bottom-2 right-2 z-[1000]">
+      <div className="absolute bottom-2 right-2 z-10">
         <a
           href="/mapa"
           className="px-3 py-1.5 bg-slate-800 text-white text-[11px] font-bold rounded-full shadow-lg hover:bg-blue-800 transition-colors"
