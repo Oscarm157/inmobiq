@@ -33,6 +33,17 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
         <div className="pt-[7.5rem] px-4 sm:px-8 max-w-7xl mx-auto">
           {children}
         </div>
+        <footer className="px-4 sm:px-8 max-w-7xl mx-auto py-8 mt-12 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex flex-wrap gap-4 text-xs text-slate-400 dark:text-slate-500">
+            <span>&copy; {new Date().getFullYear()} Inmobiq</span>
+            <a href="/politica-privacidad" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              Política de Privacidad
+            </a>
+            <a href="/terminos" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              Términos y Condiciones
+            </a>
+          </div>
+        </footer>
       </main>
       <BottomNav />
     </>

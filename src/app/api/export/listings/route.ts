@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import * as XLSX from "xlsx"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rateLimit } from "@/lib/rate-limit"
 import type { Listing, ZoneMetrics } from "@/types/database"
 
 type ExportFormat = "excel" | "csv"
@@ -84,6 +85,17 @@ function buildRowsFromZoneMetrics(zones: ZoneMetrics[], filters: ExportFilters) 
 }
 
 export async function POST(req: NextRequest) {
+  // Auth check — only authenticated users can export
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Rate limit: 10 exports per hour per user
+  const limited = rateLimit(`export-listings:${user.id}`, 10, 3_600_000)
+  if (limited) return limited
+
   const body = await req.json().catch(() => ({})) as ExportBody
   const format: ExportFormat = body.format === "csv" ? "csv" : "excel"
   const filters: ExportFilters = body.filters ?? {}

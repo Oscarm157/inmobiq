@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server"
 import { jsPDF } from "jspdf"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
+import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rateLimit } from "@/lib/rate-limit"
 
 export async function POST() {
+  // Auth check
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Rate limit: 10 exports per hour per user
+  const limited = rateLimit(`export-risk:${user.id}`, 10, 3_600_000)
+  if (limited) return limited
+
   const riskData = await getZoneRiskMetrics()
   const sorted = [...riskData].sort((a, b) => a.risk_score - b.risk_score)
   const now = new Date()

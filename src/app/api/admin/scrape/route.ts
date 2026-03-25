@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { rateLimit } from "@/lib/rate-limit";
 import { fetchPage } from "@/scraper/universal/page-fetcher";
 import { extractFromPage } from "@/scraper/universal/extractor";
 import { normalizeToListing } from "@/scraper/universal/normalizer";
@@ -13,6 +14,10 @@ export async function POST(request: NextRequest) {
   if (!check.isAdmin) {
     return NextResponse.json({ error: check.error }, { status: check.status });
   }
+
+  // Rate limit: 5 scrapes per minute per admin
+  const limited = rateLimit(`admin-scrape:${check.userId}`, 5, 60_000);
+  if (limited) return limited;
 
   // Parse body
   let url: string;

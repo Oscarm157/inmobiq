@@ -3,8 +3,21 @@ import { jsPDF } from "jspdf"
 import { getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { formatCurrency, formatPercent } from "@/lib/utils"
 import { getZoneActivityLabel, getCityActivityLabel } from "@/lib/activity-labels"
+import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rateLimit } from "@/lib/rate-limit"
 
 export async function POST(req: NextRequest) {
+  // Auth check
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Rate limit: 10 exports per hour per user
+  const limited = rateLimit(`export-zone:${user.id}`, 10, 3_600_000)
+  if (limited) return limited
+
   const body = await req.json().catch(() => ({}))
   const { zone_slug } = body as { zone_slug?: string }
 

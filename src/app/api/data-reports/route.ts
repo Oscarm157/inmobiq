@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rateLimit } from "@/lib/rate-limit"
 import type { DataReportChartType, Database } from "@/types/database"
 
 type DataReportInsert = Database["public"]["Tables"]["data_reports"]["Insert"]
@@ -11,6 +12,10 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
+
+  // Rate limit: 10 reports per hour per user
+  const limited = rateLimit(`data-reports:${user.id}`, 10, 3_600_000)
+  if (limited) return limited
 
   let body: Record<string, unknown>
   try {
