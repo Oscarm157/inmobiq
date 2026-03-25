@@ -65,9 +65,17 @@ export async function generateMetadata({ params }: ZonePageProps) {
   const { slug } = await params
   const zone = await getZoneBySlug(slug)
   if (!zone) return {}
+  const title = `${zone.zone_name} — Análisis Inmobiliario`
+  const description = `Análisis estratégico del mercado inmobiliario en ${zone.zone_name}, Tijuana. Precio promedio: ${formatCurrency(zone.avg_price_per_m2)}/m².`
   return {
-    title: `${zone.zone_name} — Inmobiq`,
-    description: `Análisis estratégico del mercado inmobiliario en ${zone.zone_name}, Tijuana. Precio promedio: ${formatCurrency(zone.avg_price_per_m2)}/m².`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://inmobiq.com/zona/${slug}`,
+      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    },
   }
 }
 

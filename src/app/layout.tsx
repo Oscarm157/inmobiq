@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Analytics } from "@vercel/analytics/next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
 import { AuthProvider } from "@/contexts/auth-context"
@@ -11,7 +12,10 @@ const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=w
 const fontLoadScript = `(function(){function m(){document.documentElement.classList.add('fonts-loaded')}if(!document.fonts){m();return}document.fonts.ready.then(m);setTimeout(m,3000)})()`
 
 export const metadata: Metadata = {
-  title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
+  title: {
+    default: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
+    template: "%s | Inmobiq",
+  },
   description:
     "Dashboard de inteligencia de mercado inmobiliario. Precios por m², tendencias, y análisis por zona para desarrolladores, inversionistas y brokers en Tijuana.",
   keywords: [
@@ -22,6 +26,35 @@ export const metadata: Metadata = {
     "bienes raices",
     "mexico",
   ],
+  metadataBase: new URL("https://inmobiq.com"),
+  openGraph: {
+    type: "website",
+    locale: "es_MX",
+    siteName: "Inmobiq",
+    title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
+    description:
+      "Precios por m², tendencias, análisis de riesgo y comparador de zonas para el mercado inmobiliario de Tijuana.",
+    url: "https://inmobiq.com",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Inmobiq — Inteligencia Inmobiliaria de Tijuana",
+    description:
+      "Precios por m², tendencias, análisis de riesgo y comparador de zonas para el mercado inmobiliario de Tijuana.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 }
 
 export default function RootLayout({
@@ -61,6 +94,7 @@ export default function RootLayout({
             </AuthProvider>
           </CurrencyProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
