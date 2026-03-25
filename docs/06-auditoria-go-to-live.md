@@ -3,7 +3,7 @@
 **Fecha de auditoría inicial**: 25 de marzo de 2026
 **Última actualización**: 25 de marzo de 2026
 **Lanzamiento objetivo**: 27 de abril de 2026
-**Score Go-to-Live**: ~60% → **~82% (actualizado)**
+**Score Go-to-Live**: ~60% → ~82% → **~90% (actualizado semana 4)**
 
 ---
 
@@ -102,9 +102,24 @@ Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de d
 
 ---
 
-## Plan de Trabajo — Lo que falta (Semana 4 + Buffer)
+### Semana 4: Optimización, Branding y QA Prep
 
-### Semana 4 (Abr 16 – 22): QA y Launch Prep
+| Tarea | Estado | Para qué sirve |
+|-------|--------|-----------------|
+| Fix z-index leyenda de mapas | HECHO | La leyenda "Precio/m²" flotaba por encima del navbar al hacer scroll. Se aisló el stacking context del mapa. |
+| Rediseño sección "Inteligencia de Mercado" | HECHO | Fondo con gradiente azul/teal, iconos azules, cards semi-transparentes. Menos blanco, más vida visual. |
+| Diversificar colores de gráficos | HECHO | Los colores de tipos de propiedad eran muy similares (azul vs violeta). Ahora: azul, rosa, verde, naranja, violeta — mayor diferenciación. |
+| Placeholder assets (favicon, og-image, apple-touch-icon) | HECHO | Se generaron assets temporales para evitar 404s. Favicon SVG con "IQ", og-image 1200x630 con branding, apple-touch-icon 180x180. |
+| Optimizar fonts (next/font/google) | HECHO | Plus Jakarta Sans migrada de link externo a next/font/google. Elimina request render-blocking, mejora Performance en Lighthouse. |
+| Logo Bitcount Single + animación | HECHO | Font pixelada/tech para el wordmark "INMOBIQ" en sidebar. Animación typing que se repite cada 30s. |
+| Lighthouse audit | HECHO | Performance: 71, Accessibility: 94, Best Practices: 96, SEO: 100. Performance limitada por peso de Mapbox GL. |
+| Tests automatizados verificados | HECHO | 3 archivos, 110 tests, todos pasan. Cubren normalización de precios, filtros y zone insights. |
+
+---
+
+## Plan de Trabajo — Lo que falta (QA + Buffer)
+
+### QA y Launch Prep
 
 | Tarea | Quién | Para qué sirve |
 |-------|-------|-----------------|
@@ -151,8 +166,9 @@ Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de d
 | Open Graph tags | No existían | En root layout y páginas de zona |
 | Twitter Cards | No existían | Configuradas |
 | Login noindex | No tenía | Login oculto de Google |
-| og-image.png | No existe | **PENDIENTE OSCAR** |
-| favicon.ico | No existe | **PENDIENTE OSCAR** |
+| og-image.png | No existía | Placeholder generado (1200x630) — reemplazar con diseño final |
+| favicon | No existía | SVG placeholder con "IQ" — reemplazar con diseño final |
+| apple-touch-icon | No existía | PNG placeholder (180x180) — reemplazar con diseño final |
 
 ### Monitoreo
 | Item | Antes | Ahora |
@@ -173,6 +189,14 @@ Inmobiq es una plataforma funcionalmente completa con 14 páginas, pipeline de d
 | Password reset | No existía | Flujo completo implementado |
 | Skeleton loaders | No existían | Componentes reutilizables creados |
 | Export error feedback | Solo console.log | Mensajes visibles al usuario |
+| Z-index leyenda mapas | Flotaba sobre navbar | Aislado con `isolate` + z-10 |
+| Sección Inteligencia de Mercado | Fondo blanco plano | Gradiente azul/teal con cards translúcidas |
+| Colores de gráficos | Poco diferenciados | Paleta diversificada (azul, rosa, verde, naranja, violeta) |
+| Logo/branding sidebar | Texto simple | Font Bitcount Single con animación typing |
+| Fonts render-blocking | Link externo Google Fonts | next/font/google (self-hosted, no blocking) |
+| Lighthouse Accessibility | Sin medir | 94/100 |
+| Lighthouse SEO | Sin medir | 100/100 |
+| Lighthouse Best Practices | Sin medir | 96/100 |
 
 ---
 
@@ -203,4 +227,4 @@ Estos archivos contienen cambios a la base de datos que necesitan ejecutarse man
 ---
 
 *Documento generado el 25 de marzo de 2026 por Claude Code*
-*Última actualización: 25 de marzo de 2026 — refleja avance de semanas 1-3*
+*Última actualización: 25 de marzo de 2026 — refleja avance de semanas 1-4*

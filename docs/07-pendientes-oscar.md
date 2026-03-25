@@ -18,9 +18,9 @@ Cada tarea incluye una explicación de por qué es necesaria.
 
 | # | Tarea | Dónde | Por qué |
 |---|-------|-------|---------|
-| 3 | Crear `og-image.png` (1200x630px) | Poner en `/public/og-image.png` | Es la imagen de preview que aparece cuando compartes un link de Inmobiq en WhatsApp, Twitter, o LinkedIn. Sin ella, se ve un cuadro gris vacío — mala primera impresión para cualquier prospecto. Recomendación: un screenshot del dashboard con el logo encima. |
-| 4 | Crear `favicon.ico` | Poner en `/public/favicon.ico` | Es el iconito chiquito que sale en la pestaña del navegador, al lado del nombre de la página. Sin él, se ve un ícono genérico de Next.js. Cualquier generador online lo puede hacer a partir del logo. |
-| 5 | Crear `apple-touch-icon.png` (180x180px) | Poner en `/public/apple-touch-icon.png` | Cuando un usuario de iPhone agrega Inmobiq a su pantalla de inicio, este es el ícono que aparece. Sin él, iOS toma un screenshot feo y borroso de la página. |
+| 3 | ~~Crear `og-image.png`~~ | ~~`/public/og-image.png`~~ | **HECHO** — Placeholder generado (1200x630). Reemplazar con diseño final cuando esté listo. |
+| 4 | ~~Crear `favicon`~~ | ~~`/public/favicon.svg`~~ | **HECHO** — SVG placeholder con "IQ". Reemplazar con diseño final. |
+| 5 | ~~Crear `apple-touch-icon.png`~~ | ~~`/public/apple-touch-icon.png`~~ | **HECHO** — PNG placeholder (180x180). Reemplazar con diseño final. |
 | 6 | Configurar dominio custom | Vercel Dashboard → Settings → Domains | La plataforma vive en `inmobiq.vercel.app` — funciona pero se ve poco profesional y no posiciona bien en Google. Un dominio propio (`inmobiq.com` o `inmobiq.mx`) es necesario para el lanzamiento. |
 | 7 | Actualizar `BASE_URL` en código | `src/app/sitemap.ts` y `public/robots.txt` | Actualmente dicen `https://inmobiq.com`. Si el dominio final es diferente (ej: `inmobiq.mx`), hay que cambiarlo para que Google indexe correctamente. |
 | 8 | Configurar UptimeRobot | uptimerobot.com (gratis) | UptimeRobot revisa cada 5 minutos si tu sitio responde. Si se cae, te manda email o SMS al instante. Sin esto, podrías estar caído horas sin enterarte — tus usuarios se irían y no sabrías por qué. Monitorear: `https://tudominio.com/api/health` |
@@ -54,17 +54,17 @@ Cada tarea incluye una explicación de por qué es necesaria.
 
 ## Resumen rápido
 
-- **Total de pendientes**: 19
+- **Total de pendientes**: 16 (3 completados de 19)
 - **Semana 1**: 2 tareas (SQL)
-- **Semana 2**: 8 tareas (imagen, dominio, monitoreo)
+- **Semana 2**: 5 tareas pendientes (~~3 assets completados~~, dominio, monitoreo)
 - **Semana 3**: 4 tareas (auth config, Sentry)
 - **Semana 4**: 5 tareas (testing manual)
 
 **Prioridad #1** (bloquean funcionalidad):
-→ #1, #2 (migraciones SQL), #6 (dominio), #12 (redirect URLs)
+→ #1, #2 (migraciones SQL), #12 (redirect URLs)
 
 **Prioridad #2** (afectan imagen profesional):
-→ #3 (og-image), #4 (favicon), #9 (emails), #11 (email templates)
+→ ~~#3 (og-image)~~, ~~#4 (favicon)~~, #9 (emails), #11 (email templates)
 
 **Prioridad #3** (mejoran operación):
 → #8 (UptimeRobot), #10 (Analytics), #14 (Sentry)
