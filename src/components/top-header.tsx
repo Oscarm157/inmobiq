@@ -16,10 +16,12 @@ export function TopHeader() {
   const { collapsed } = useSidebar()
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const { resolvedTheme, toggleTheme } = useTheme()
   const { user, loading, signOut } = useAuth()
   const [alertCount, setAlertCount] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
+  const moreMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -32,17 +34,20 @@ export function TopHeader() {
       .catch(() => {})
   }, [user])
 
-  // Close dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
-    if (!menuOpen) return
+    if (!menuOpen && !moreMenuOpen) return
     const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuOpen && menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false)
+      }
+      if (moreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClick)
     return () => document.removeEventListener("mousedown", handleClick)
-  }, [menuOpen])
+  }, [menuOpen, moreMenuOpen])
 
   const handleSignOut = async () => {
     setMenuOpen(false)
@@ -76,7 +81,7 @@ export function TopHeader() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 md:gap-3">
           {/* Mobile search trigger */}
           <button
             className="flex md:hidden p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] items-center justify-center"
@@ -86,18 +91,18 @@ export function TopHeader() {
             <Icon name="search" />
           </button>
 
-          {/* Currency switcher */}
-          <CurrencySwitcher />
-
-          {/* Dark mode toggle */}
-          <button
-            className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            onClick={toggleTheme}
-            aria-label={resolvedTheme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-            title={resolvedTheme === "dark" ? "Modo claro" : "Modo oscuro"}
-          >
-            <Icon name={resolvedTheme === "dark" ? "light_mode" : "dark_mode"} />
-          </button>
+          {/* Desktop only: currency + theme */}
+          <div className="hidden md:flex items-center gap-3">
+            <CurrencySwitcher />
+            <button
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              onClick={toggleTheme}
+              aria-label={resolvedTheme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              title={resolvedTheme === "dark" ? "Modo claro" : "Modo oscuro"}
+            >
+              <Icon name={resolvedTheme === "dark" ? "light_mode" : "dark_mode"} />
+            </button>
+          </div>
 
           <Link
             href="/alertas"
@@ -130,10 +135,11 @@ export function TopHeader() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 text-white rounded-full text-xs font-bold hover:bg-slate-700 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-full text-xs font-bold hover:bg-slate-700 transition-colors"
                 >
                   <Icon name="login" className="text-sm" />
-                  Iniciar sesión
+                  <span className="hidden sm:inline">Iniciar sesión</span>
+                  <span className="sm:hidden">Entrar</span>
                 </Link>
               )}
 
@@ -165,6 +171,35 @@ export function TopHeader() {
               )}
             </div>
           )}
+
+          {/* Mobile overflow menu (⋮) */}
+          <div className="relative md:hidden" ref={moreMenuRef}>
+            <button
+              onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Más opciones"
+            >
+              <Icon name="more_vert" />
+            </button>
+
+            {moreMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-2 z-50">
+                {/* Theme toggle */}
+                <button
+                  onClick={() => { toggleTheme(); setMoreMenuOpen(false) }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  <Icon name={resolvedTheme === "dark" ? "light_mode" : "dark_mode"} className="text-base" />
+                  {resolvedTheme === "dark" ? "Modo claro" : "Modo oscuro"}
+                </button>
+
+                {/* Currency switcher inline */}
+                <div className="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1">
+                  <CurrencySwitcher inline />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
