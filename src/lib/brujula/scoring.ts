@@ -16,6 +16,7 @@ import type {
   ValuationVerdict,
   ValuationResult,
 } from "@/types/database"
+import { classifySocioeconomicProfile, getProfileColor } from "@/lib/data/demographics"
 import type { ZoneComparisonData } from "./zone-comparison"
 
 // ── Helpers ──
@@ -249,6 +250,26 @@ export function computeValuation(
     price_trend_pct: data.zone.price_trend_pct,
     demand_pressure: data.insights?.demand_pressure ?? 0,
     appreciation_potential: data.insights?.appreciation_potential ?? 0,
+
+    demographics: data.demographics
+      ? (() => {
+          const d = data.demographics
+          const profile = classifySocioeconomicProfile(d)
+          const peaRatio = d.population > 0
+            ? Math.round((d.economically_active / d.population) * 100)
+            : 0
+          return {
+            population: d.population,
+            households: d.households,
+            pea_ratio: peaRatio,
+            pct_internet: d.pct_internet,
+            pct_car: d.pct_car,
+            pct_social_security: d.pct_social_security,
+            nse_profile: profile,
+            nse_profile_color: getProfileColor(profile),
+          }
+        })()
+      : null,
 
     zone_price_distribution: buildPriceDistribution(
       data.zone_listings,

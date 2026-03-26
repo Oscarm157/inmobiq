@@ -7,7 +7,7 @@ const ACTOR_ID = "ecomscrape/inmuebles24-property-listings-scraper";
 
 // ─── Apify response types ───────────────────────────────────────────────────
 
-interface ApifyI24Listing {
+export interface ApifyI24Listing {
   posting_id: string;
   url: string;
   title: string;
@@ -109,7 +109,7 @@ function getFeatureValue(
   return null;
 }
 
-function mapToRawListing(item: ApifyI24Listing): RawListing {
+export function mapToRawListing(item: ApifyI24Listing): RawListing {
   const op = item.price_operation_types?.[0];
   const price = op?.prices?.[0];
   const isMxn = price?.currency === "MXN" || price?.currency === "MN";

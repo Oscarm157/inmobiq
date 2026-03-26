@@ -85,14 +85,16 @@ Veredicto: ${verdictLabel} (score ${r.score}/100)
 Razones: ${r.verdict_reasons.join(". ")}
 
 Instrucciones:
-- Escribe en español, tono profesional pero accesible
+- Escribe en español, tono profesional pero accesible, para inversionistas
 - NO uses emojis
-- Primer párrafo: resumen ejecutivo del veredicto y contexto de la zona
-- Segundo párrafo: análisis de precio comparativo con datos específicos
-- Tercer párrafo (opcional): factores de riesgo/oportunidad y recomendación
-- Sé directo y concreto. Usa los números del análisis.
+- Usa **negritas** (doble asterisco) para resaltar cifras clave y conceptos importantes
+- Primer párrafo: resumen ejecutivo del veredicto con cifras concretas
+- Segundo párrafo: análisis comparativo precio/m² y posición en el mercado
+- Tercer párrafo: factores de riesgo/oportunidad y contexto socioeconómico
+- Sé directo y concreto. Cada oración debe aportar un dato.
 - NO inventes datos que no estén arriba
-- Máximo 200 palabras total`
+- Separa párrafos con doble salto de línea
+- Máximo 180 palabras total`
 
   try {
     const response = await client.messages.create({

@@ -1,21 +1,35 @@
 "use client"
 
-import type { ValuationResult, PropertyType, ListingType } from "@/types/database"
-import { VerdictBanner } from "./verdict-banner"
-import { ComparisonKpis } from "./comparison-kpis"
+import type { ValuationResult, ValuationVerdict, PropertyType, ListingType } from "@/types/database"
+import { ScoreSlider } from "./score-slider"
 import { PricePositionChart } from "./price-position-chart"
+import { ZoneProfileCard } from "./zone-profile-card"
 import { Icon } from "@/components/icon"
-
-const TYPE_LABELS: Record<PropertyType, string> = {
-  casa: "Casa",
-  departamento: "Departamento",
-  terreno: "Terreno",
-  local: "Local comercial",
-  oficina: "Oficina",
-}
 
 function formatMxn(n: number): string {
   return `$${n.toLocaleString("es-MX", { maximumFractionDigits: 0 })}`
+}
+
+function formatMxnShort(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
+  return `$${n.toFixed(0)}`
+}
+
+const VERDICT_ACCENT: Record<ValuationVerdict, string> = {
+  muy_barata: "text-emerald-600 dark:text-emerald-400",
+  barata: "text-green-600 dark:text-green-400",
+  precio_justo: "text-amber-600 dark:text-amber-400",
+  cara: "text-orange-600 dark:text-orange-400",
+  muy_cara: "text-red-600 dark:text-red-400",
+}
+
+const VERDICT_BG: Record<ValuationVerdict, string> = {
+  muy_barata: "bg-emerald-50 dark:bg-emerald-950/30",
+  barata: "bg-green-50 dark:bg-green-950/30",
+  precio_justo: "bg-amber-50 dark:bg-amber-950/30",
+  cara: "bg-orange-50 dark:bg-orange-950/30",
+  muy_cara: "bg-red-50 dark:bg-red-950/30",
 }
 
 interface Props {
@@ -33,171 +47,143 @@ interface Props {
   }
 }
 
+/** Render markdown-lite: **bold** → <strong> */
+function renderNarrative(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-bold text-slate-800 dark:text-slate-100">
+          {part.slice(2, -2)}
+        </strong>
+      )
+    }
+    return <span key={i}>{part}</span>
+  })
+}
+
 export function ValuationReport({ result, narrative, property }: Props) {
   return (
-    <div className="space-y-6">
-      {/* 1. Verdict Banner */}
-      <VerdictBanner
-        verdict={result.verdict}
+    <div className="space-y-5">
+      {/* ── 1. Score Slider + Property Summary ── */}
+      <ScoreSlider
         score={result.score}
+        verdict={result.verdict}
         zoneName={result.zone_name}
+        pricePerM2={result.price_per_m2}
+        zoneAvgPerM2={result.zone_avg_price_per_m2}
+        property={property}
       />
 
-      {/* 2. Property Summary */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-          Propiedad analizada
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="text-slate-400 text-xs font-bold uppercase">Tipo</span>
-            <p className="font-bold text-slate-800 dark:text-slate-200">
-              {TYPE_LABELS[property.property_type]} en {property.listing_type}
-            </p>
+      {/* ── 2. Two-column layout: Price Analysis | Zone Profile ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* Left: Price Analysis (3/5) */}
+        <div className="lg:col-span-3 space-y-5">
+          {/* KPIs row */}
+          <div className="grid grid-cols-3 gap-3">
+            <KpiCompact
+              label="Precio/m²"
+              value={`${formatMxnShort(result.price_per_m2)}`}
+              delta={`${result.price_premium_pct > 0 ? "+" : ""}${result.price_premium_pct.toFixed(1)}%`}
+              deltaColor={result.price_premium_pct > 10 ? "text-red-500" : result.price_premium_pct < -10 ? "text-emerald-500" : "text-amber-500"}
+            />
+            <KpiCompact
+              label="Percentil"
+              value={`${result.price_percentile}`}
+              delta={`de 100`}
+            />
+            <KpiCompact
+              label="Tendencia"
+              value={`${result.price_trend_pct > 0 ? "+" : ""}${result.price_trend_pct.toFixed(1)}%`}
+              delta="semanal"
+              deltaColor={result.price_trend_pct > 0 ? "text-emerald-500" : result.price_trend_pct < 0 ? "text-red-500" : undefined}
+            />
           </div>
-          <div>
-            <span className="text-slate-400 text-xs font-bold uppercase">Precio</span>
-            <p className="font-bold text-slate-800 dark:text-slate-200">
-              {formatMxn(property.price_mxn)} MXN
-            </p>
+
+          {/* Comparison table */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700">
+                  <th className="text-left py-1.5 text-[10px] font-bold text-slate-400 uppercase"></th>
+                  <th className="text-right py-1.5 text-[10px] font-bold text-blue-500 uppercase">Propiedad</th>
+                  <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Zona</th>
+                  <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Dif.</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-700 dark:text-slate-300">
+                <tr className="border-b border-slate-50 dark:border-slate-800">
+                  <td className="py-1.5 font-medium text-xs">Precio/m²</td>
+                  <td className="py-1.5 text-right font-bold text-xs">{formatMxn(result.price_per_m2)}</td>
+                  <td className="py-1.5 text-right text-xs">{formatMxn(result.zone_avg_price_per_m2)}</td>
+                  <td className={`py-1.5 text-right font-bold text-xs ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                    {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
+                  </td>
+                </tr>
+                <tr className="border-b border-slate-50 dark:border-slate-800">
+                  <td className="py-1.5 font-medium text-xs">Precio total</td>
+                  <td className="py-1.5 text-right font-bold text-xs">{formatMxn(property.price_mxn)}</td>
+                  <td className="py-1.5 text-right text-xs">{formatMxn(result.zone_avg_ticket)}</td>
+                  <td className="py-1.5 text-right text-xs text-slate-400">—</td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 font-medium text-xs">Superficie</td>
+                  <td className="py-1.5 text-right font-bold text-xs">{property.area_m2} m²</td>
+                  <td className="py-1.5 text-right text-xs">—</td>
+                  <td className={`py-1.5 text-right font-bold text-xs ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div>
-            <span className="text-slate-400 text-xs font-bold uppercase">Superficie</span>
-            <p className="font-bold text-slate-800 dark:text-slate-200">
-              {property.area_m2.toLocaleString("es-MX")} m²
-            </p>
-          </div>
-          <div>
-            <span className="text-slate-400 text-xs font-bold uppercase">Precio/m²</span>
-            <p className="font-bold text-slate-800 dark:text-slate-200">
-              {formatMxn(result.price_per_m2)}/m²
-            </p>
-          </div>
-          {property.bedrooms !== null && (
-            <div>
-              <span className="text-slate-400 text-xs font-bold uppercase">Recámaras</span>
-              <p className="font-bold text-slate-800 dark:text-slate-200">{property.bedrooms}</p>
-            </div>
-          )}
-          {property.bathrooms !== null && (
-            <div>
-              <span className="text-slate-400 text-xs font-bold uppercase">Baños</span>
-              <p className="font-bold text-slate-800 dark:text-slate-200">{property.bathrooms}</p>
-            </div>
-          )}
-          {property.parking !== null && (
-            <div>
-              <span className="text-slate-400 text-xs font-bold uppercase">Estacionamiento</span>
-              <p className="font-bold text-slate-800 dark:text-slate-200">{property.parking}</p>
-            </div>
-          )}
-          {property.address && (
-            <div className="col-span-2">
-              <span className="text-slate-400 text-xs font-bold uppercase">Dirección</span>
-              <p className="font-bold text-slate-800 dark:text-slate-200">{property.address}</p>
-            </div>
-          )}
+
+          {/* Price distribution */}
+          <PricePositionChart distribution={result.zone_price_distribution} />
+        </div>
+
+        {/* Right: Zone Profile (2/5) */}
+        <div className="lg:col-span-2">
+          <ZoneProfileCard result={result} />
         </div>
       </div>
 
-      {/* 3. AI Narrative */}
+      {/* ── 3. Narrative ── */}
       {narrative && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2 mb-3">
-            <Icon name="auto_awesome" className="text-blue-500 text-lg" />
-            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">
-              Análisis
-            </h3>
-          </div>
-          <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-            {narrative}
+        <div className={`rounded-xl p-5 border ${VERDICT_BG[result.verdict]} border-slate-100 dark:border-slate-800`}>
+          <div className="flex items-start gap-3">
+            <Icon name="auto_awesome" className={`text-lg mt-0.5 flex-shrink-0 ${VERDICT_ACCENT[result.verdict]}`} />
+            <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
+              {narrative.split("\n\n").map((paragraph, i) => (
+                <p key={i}>{renderNarrative(paragraph)}</p>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* 4. Price Distribution Chart */}
-      <PricePositionChart distribution={result.zone_price_distribution} />
-
-      {/* 5. KPIs */}
-      <ComparisonKpis result={result} priceMxn={property.price_mxn} />
-
-      {/* 6. Comparison Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800 overflow-x-auto">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-          Comparativa
-        </h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-700">
-              <th className="text-left py-2 text-xs font-bold text-slate-400 uppercase">Métrica</th>
-              <th className="text-right py-2 text-xs font-bold text-blue-500 uppercase">Tu propiedad</th>
-              <th className="text-right py-2 text-xs font-bold text-slate-400 uppercase">Promedio zona</th>
-              <th className="text-right py-2 text-xs font-bold text-slate-400 uppercase">Diferencia</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-700 dark:text-slate-300">
-            <tr className="border-b border-slate-100 dark:border-slate-800">
-              <td className="py-2 font-medium">Precio/m²</td>
-              <td className="py-2 text-right font-bold">{formatMxn(result.price_per_m2)}</td>
-              <td className="py-2 text-right">{formatMxn(result.zone_avg_price_per_m2)}</td>
-              <td className={`py-2 text-right font-bold ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
-                {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
-              </td>
-            </tr>
-            <tr className="border-b border-slate-100 dark:border-slate-800">
-              <td className="py-2 font-medium">Precio total</td>
-              <td className="py-2 text-right font-bold">{formatMxn(property.price_mxn)}</td>
-              <td className="py-2 text-right">{formatMxn(result.zone_avg_ticket)}</td>
-              <td className="py-2 text-right">—</td>
-            </tr>
-            <tr className="border-b border-slate-100 dark:border-slate-800">
-              <td className="py-2 font-medium">Superficie</td>
-              <td className="py-2 text-right font-bold">{property.area_m2} m²</td>
-              <td className="py-2 text-right">—</td>
-              <td className={`py-2 text-right font-bold ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
-                {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* 7. Zone Context */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <ContextCard label="Riesgo" value={`${result.risk_score ?? 0}/100`} sub={result.risk_label ?? "—"} />
-        <ContextCard label="Volatilidad" value={`${(result.volatility ?? 0).toFixed(1)}%`} sub="Variación de precios" />
-        {result.cap_rate != null && (
-          <ContextCard label="Cap Rate" value={`${result.cap_rate.toFixed(1)}%`} sub="Tasa de capitalización" />
-        )}
-        <ContextCard label="NSE" value={result.nse_label ?? "—"} sub="Nivel socioeconómico" />
-        <ContextCard label="Asequibilidad" value={`${result.affordability_index ?? 0}/100`} sub="Precio vs nivel económico" />
-        <ContextCard label="Apreciación" value={`${result.appreciation_potential ?? 0}/100`} sub="Potencial de plusvalía" />
-      </div>
-
-      {/* 8. Verdict Reasons */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-          Factores del veredicto
-        </h3>
-        <ul className="space-y-2">
-          {result.verdict_reasons.map((reason, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <Icon name="check_circle" className="text-blue-500 text-base flex-shrink-0 mt-0.5" />
-              {reason}
-            </li>
-          ))}
-        </ul>
+      {/* ── 4. Verdict Factors (inline chips) ── */}
+      <div className="flex flex-wrap gap-2">
+        {result.verdict_reasons.map((reason, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300"
+          >
+            <Icon name="check_circle" className="text-blue-500 text-xs" />
+            {reason}
+          </span>
+        ))}
       </div>
     </div>
   )
 }
 
-function ContextCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function KpiCompact({ label, value, delta, deltaColor }: { label: string; value: string; delta: string; deltaColor?: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-lg font-black text-slate-800 dark:text-slate-100">{value}</p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{sub}</p>
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-3 card-shadow border border-slate-100 dark:border-slate-800">
+      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+      <p className="text-xl font-black text-slate-800 dark:text-slate-100 leading-tight">{value}</p>
+      <p className={`text-[10px] font-bold ${deltaColor ?? "text-slate-400"}`}>{delta}</p>
     </div>
   )
 }

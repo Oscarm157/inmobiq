@@ -307,6 +307,18 @@ export interface ValuationResult {
   demand_pressure: number;
   appreciation_potential: number;
 
+  // Demographics for display
+  demographics: {
+    population: number;
+    households: number;
+    pea_ratio: number;
+    pct_internet: number;
+    pct_car: number;
+    pct_social_security: number;
+    nse_profile: string;
+    nse_profile_color: string;
+  } | null;
+
   // Comparison data (for charts)
   zone_price_distribution: { range: string; count: number; has_property: boolean }[];
   comparable_listings: { price: number; area_m2: number; type: PropertyType; price_per_m2: number }[];
