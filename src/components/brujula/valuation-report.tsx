@@ -41,6 +41,8 @@ interface Props {
     listing_type: ListingType
     price_mxn: number
     area_m2: number
+    area_construccion_m2?: number | null
+    area_terreno_m2?: number | null
     bedrooms: number | null
     bathrooms: number | null
     parking: number | null
@@ -110,7 +112,7 @@ export function ValuationReport({ result, narrative, property }: Props) {
             </tr>
             <tr>
               <td className="py-2 font-medium text-xs">Superficie</td>
-              <td className="py-2 text-right font-bold text-xs">{property.area_m2} m²</td>
+              <td className="py-2 text-right font-bold text-xs">{property.property_type === "casa" && property.area_construccion_m2 && property.area_terreno_m2 && property.area_construccion_m2 !== property.area_terreno_m2 ? `${Math.round(property.area_construccion_m2)}m² constr. · ${Math.round(property.area_terreno_m2)}m² terr.` : `${property.area_m2} m²`}</td>
               <td className="py-2 text-right text-xs">{result.zone_avg_area > 0 ? `${result.zone_avg_area} m²` : "—"}</td>
               <td className={`py-2 text-right font-bold text-xs ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
                 {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%

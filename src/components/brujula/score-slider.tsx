@@ -52,6 +52,8 @@ interface Props {
     listing_type: ListingType
     price_mxn: number
     area_m2: number
+    area_construccion_m2?: number | null
+    area_terreno_m2?: number | null
     bedrooms: number | null
     bathrooms: number | null
   }
@@ -63,7 +65,9 @@ export function ScoreSlider({ score, verdict, zoneName, pricePerM2, zoneAvgPerM2
 
   const features = [
     { icon: "payments", value: formatMxn(property.price_mxn) },
-    { icon: "square_foot", value: `${property.area_m2} m²` },
+    { icon: "square_foot", value: property.property_type === "casa" && property.area_construccion_m2 && property.area_terreno_m2 && property.area_construccion_m2 !== property.area_terreno_m2
+      ? `${Math.round(property.area_construccion_m2)}m² constr. · ${Math.round(property.area_terreno_m2)}m² terr.`
+      : `${property.area_m2} m²` },
     ...(property.bedrooms != null ? [{ icon: "bed", value: `${property.bedrooms}` }] : []),
     ...(property.bathrooms != null ? [{ icon: "shower", value: `${property.bathrooms}` }] : []),
   ]

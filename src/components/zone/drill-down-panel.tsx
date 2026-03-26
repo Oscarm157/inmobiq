@@ -10,6 +10,8 @@ export interface DrillDownListing {
   listing_type: string
   price: number
   area_m2: number
+  area_construccion_m2?: number | null
+  area_terreno_m2?: number | null
   price_per_m2: number
   bedrooms: number | null
   bathrooms: number | null
@@ -149,7 +151,7 @@ export function DrillDownPanel({ listings, label, zoneSlug, chartType, onClose }
                 </td>
                 <td className="px-3 py-1.5 max-w-[180px] truncate">{l.title}</td>
                 <td className="px-3 py-1.5 text-right font-mono">{formatPrice(l.price)}</td>
-                <td className="px-3 py-1.5 text-right font-mono">{l.area_m2 > 0 ? `${Math.round(l.area_m2)}` : "—"}</td>
+                <td className="px-3 py-1.5 text-right font-mono" title={l.property_type === "casa" && l.area_construccion_m2 && l.area_terreno_m2 ? `Constr: ${Math.round(l.area_construccion_m2)}m² · Terr: ${Math.round(l.area_terreno_m2)}m²` : undefined}>{l.area_m2 > 0 ? `${Math.round(l.area_m2)}${l.property_type === "casa" && l.area_terreno_m2 && l.area_construccion_m2 && l.area_terreno_m2 !== l.area_construccion_m2 ? `/${Math.round(l.area_terreno_m2)}` : ""}` : "—"}</td>
                 <td className="px-3 py-1.5 text-right font-mono">{l.price_per_m2 > 0 ? formatPrice(Math.round(l.price_per_m2)) : "—"}</td>
                 <td className="px-3 py-1.5 text-center">{l.bedrooms ?? "—"}</td>
                 <td className="px-3 py-1.5">

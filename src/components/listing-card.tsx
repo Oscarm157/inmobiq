@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
-import { formatNumber } from "@/lib/utils"
+import { formatNumber, formatArea } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 import type { Listing } from "@/types/database"
 
@@ -80,7 +80,7 @@ export function ListingCard({ listing }: ListingCardProps) {
       <div className="flex flex-wrap gap-3 text-xs text-slate-600 font-medium border-t border-slate-100 pt-3">
         <span className="flex items-center gap-1">
           <Icon name="straighten" className="text-slate-400 text-xs" />
-          {formatNumber(listing.area_m2)} m²
+          {formatArea(listing.area_m2, listing.area_construccion_m2, listing.area_terreno_m2, listing.property_type)}
         </span>
         {listing.bedrooms != null && (
           <span className="flex items-center gap-1">

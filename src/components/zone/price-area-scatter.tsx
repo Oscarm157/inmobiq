@@ -49,6 +49,8 @@ export interface ScatterPoint {
   bathrooms?: number | null
   source?: string
   source_url?: string
+  area_construccion_m2?: number | null
+  area_terreno_m2?: number | null
 }
 
 interface PriceAreaScatterProps {
@@ -194,7 +196,7 @@ export function PriceAreaScatter({ data, availableTypes, devMode, zoneSlug }: Pr
               </span>
             </div>
             <div><span className="text-amber-600 font-bold">Precio:</span> {formatPrice(selected.price)}</div>
-            <div><span className="text-amber-600 font-bold">Área:</span> {selected.area}m²</div>
+            <div><span className="text-amber-600 font-bold">Área:</span> {selected.area}m²{selected.type === "casa" && selected.area_construccion_m2 && selected.area_terreno_m2 && selected.area_construccion_m2 !== selected.area_terreno_m2 ? ` (constr. ${Math.round(selected.area_construccion_m2)} · terr. ${Math.round(selected.area_terreno_m2)})` : ""}</div>
             <div><span className="text-amber-600 font-bold">$/m²:</span> {selected.price_per_m2 ? formatPrice(Math.round(selected.price_per_m2)) : "—"}</div>
             <div><span className="text-amber-600 font-bold">Rec:</span> {selected.bedrooms ?? "—"}</div>
             <div>

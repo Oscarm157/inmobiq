@@ -28,7 +28,7 @@ async function fetchListingsFromSupabase(
 ): Promise<Listing[] | null> {
   try {
     let q = supabase.from("listings").select(`
-      id, title, property_type, listing_type, price, area_m2, price_per_m2,
+      id, title, property_type, listing_type, price, area_m2, area_construccion_m2, area_terreno_m2, price_per_m2,
       bedrooms, bathrooms, source, source_url, scraped_at,
       zones!inner(name, slug)
     `)
@@ -119,6 +119,8 @@ export async function POST(req: NextRequest) {
       "Tipo de Operación": l.listing_type,
       "Precio (MXN)": l.price,
       "Área (m²)": l.area_m2,
+      "Área Construcción (m²)": (l as unknown as Record<string, number | null>).area_construccion_m2 ?? "",
+      "Área Terreno (m²)": (l as unknown as Record<string, number | null>).area_terreno_m2 ?? "",
       "Precio/m² (MXN)": l.price_per_m2,
       Recámaras: l.bedrooms ?? "",
       Baños: l.bathrooms ?? "",
