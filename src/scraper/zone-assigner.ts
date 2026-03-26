@@ -49,11 +49,27 @@ export function extractColonia(address: string | null): string | null {
   return parts.length >= 2 ? parts[parts.length - 1] : parts[0];
 }
 
+// ─── Colonia aliases ─────────────────────────────────────────────────────────
+// Maps colonia names (normalized) to zone slugs for colonias that don't
+// fuzzy-match any zone name. Prevents nearest-zone fallback mis-assignments.
+const COLONIA_ALIASES = new Map<string, string>([
+  ["calete", "cacho"],
+  ["madero", "cacho"],
+  ["gabilondo", "cacho"],
+  ["cumbres de juarez", "cacho"],
+  ["juarez", "cacho"],
+  ["morelos", "centro"],
+  ["revolucion", "centro"],
+  ["chula vista", "buena-vista"],
+  ["chulavista", "buena-vista"],
+]);
+
 // ─── Zone matching ──────────────────────────────────────────────────────────
 
 /**
  * Try to match a colonia name to an existing zone.
  * Uses normalized comparison with fuzzy containment:
+ * - Alias lookup (known colonias → zone slugs)
  * - Exact match (normalized)
  * - Zone name contained in colonia name (e.g. "Agua Caliente" matches "Residencial Agua Caliente")
  * - Colonia name contained in zone name
@@ -64,6 +80,13 @@ export function matchColoniaToZone(
 ): Zone | null {
   const normColonia = normalize(colonia);
   if (!normColonia) return null;
+
+  // Pass 0: alias lookup
+  const aliasSlug = COLONIA_ALIASES.get(normColonia);
+  if (aliasSlug) {
+    const aliasZone = zones.find((z) => z.slug === aliasSlug);
+    if (aliasZone) return aliasZone;
+  }
 
   // Pass 1: exact normalized match on zone name or slug
   for (const zone of zones) {

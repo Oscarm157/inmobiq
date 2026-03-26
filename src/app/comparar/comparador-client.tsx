@@ -40,7 +40,7 @@ const PRESET_COMPARISONS = [
   {
     label: "Alta Plusvalía",
     icon: "trending_up",
-    slugs: ["playas-de-tijuana", "cerro-colorado", "hipodromo-chapultepec"],
+    slugs: ["playas-de-tijuana", "cacho", "hipodromo"],
     description: "Zonas con mayor tendencia positiva de precios",
   },
   {
