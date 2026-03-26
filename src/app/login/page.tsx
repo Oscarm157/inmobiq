@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 
 function LoginForm() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectedFrom = searchParams.get("redirectedFrom") ?? "/"
   const urlError = searchParams.get("error")
@@ -46,8 +47,10 @@ function LoginForm() {
       if (error) {
         setError(error)
         setLoading(false)
+      } else {
+        router.push(redirectedFrom)
+        router.refresh()
       }
-      // On success, middleware/router handles redirect
     } else {
       const { error } = await signUpWithEmail(email, password)
       if (error) {
