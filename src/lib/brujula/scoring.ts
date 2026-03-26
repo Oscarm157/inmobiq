@@ -233,7 +233,11 @@ export function computeValuation(
     price_percentile: percentile,
     price_vs_type_avg_pct: Math.round(price_vs_type_avg_pct * 10) / 10,
 
+    zone_avg_area: Math.round(avgArea),
     area_vs_zone_avg_pct: Math.round(area_vs_zone_avg_pct * 10) / 10,
+    ticket_premium_pct: data.zone.avg_ticket > 0
+      ? Math.round(((property.price_mxn / data.zone.avg_ticket) - 1) * 1000) / 10
+      : 0,
 
     risk_score: data.risk?.risk_score ?? 0,
     risk_label: data.risk?.risk_label ?? "—",

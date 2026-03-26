@@ -288,7 +288,9 @@ export interface ValuationResult {
   price_vs_type_avg_pct: number;
 
   // Size analysis
+  zone_avg_area: number;
   area_vs_zone_avg_pct: number;
+  ticket_premium_pct: number;
 
   // Zone risk profile
   risk_score: number;
