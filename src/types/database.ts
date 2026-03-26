@@ -21,6 +21,8 @@ export interface Listing {
   listing_type: ListingType;
   price: number;
   area_m2: number;
+  area_construccion_m2?: number | null;
+  area_terreno_m2?: number | null;
   price_per_m2: number;
   bedrooms: number | null;
   bathrooms: number | null;
@@ -264,6 +266,8 @@ export interface ExtractedPropertyData {
   price: number | null;
   currency: "MXN" | "USD" | null;
   area_m2: number | null;
+  area_construccion_m2: number | null;
+  area_terreno_m2: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   parking: number | null;
@@ -343,6 +347,8 @@ export interface Valuation {
   listing_type: ListingType | null;
   price_mxn: number | null;
   area_m2: number | null;
+  area_construccion_m2: number | null;
+  area_terreno_m2: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   parking: number | null;

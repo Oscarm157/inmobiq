@@ -142,6 +142,8 @@ async function scrapePage(
         price_mxn: parsePrice(card.rawPrice),
         price_usd: null,
         area_m2: parseNumber(card.rawArea),
+        area_construccion_m2: propertyType !== "terreno" ? parseNumber(card.rawArea) : null,
+        area_terreno_m2: propertyType === "terreno" ? parseNumber(card.rawArea) : null,
         bedrooms: parseNumber(card.rawBeds),
         bathrooms: parseNumber(card.rawBaths),
         parking: null,

@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
     price_mxn: typeof raw.price_mxn === "number" ? raw.price_mxn : null,
     price_usd: typeof raw.price_usd === "number" ? raw.price_usd : null,
     area_m2: typeof raw.area_m2 === "number" ? raw.area_m2 : null,
+    area_construccion_m2: typeof raw.area_construccion_m2 === "number" ? raw.area_construccion_m2 : null,
+    area_terreno_m2: typeof raw.area_terreno_m2 === "number" ? raw.area_terreno_m2 : null,
     bedrooms: typeof raw.bedrooms === "number" ? raw.bedrooms : null,
     bathrooms: typeof raw.bathrooms === "number" ? raw.bathrooms : null,
     parking: typeof raw.parking === "number" ? raw.parking : null,

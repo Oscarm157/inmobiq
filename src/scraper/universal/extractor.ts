@@ -11,6 +11,8 @@ export interface ExtractedData {
   price_amount: number | null;
   currency: string | null; // MXN, USD, etc.
   area_m2: number | null;
+  area_construccion_m2: number | null;
+  area_terreno_m2: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   parking: number | null;
@@ -136,14 +138,27 @@ function processJsonLdItem(item: Record<string, unknown>, result: Partial<Extrac
     }
   }
 
-  // Floor size / area
-  if (!result.area_m2) {
+  // Floor size / area (construction)
+  if (!result.area_construccion_m2) {
     const fs = item.floorSize as Record<string, unknown> | undefined;
     if (fs?.value) {
-      result.area_m2 = parseFloat(String(fs.value)) || null;
+      result.area_construccion_m2 = parseFloat(String(fs.value)) || null;
     } else if (item.floorSize && typeof item.floorSize !== "object") {
-      result.area_m2 = parseFloat(String(item.floorSize)) || null;
+      result.area_construccion_m2 = parseFloat(String(item.floorSize)) || null;
     }
+  }
+  // Lot size / area (terrain)
+  if (!result.area_terreno_m2) {
+    const ls = (item as Record<string, unknown>).lotSize as Record<string, unknown> | undefined;
+    if (ls?.value) {
+      result.area_terreno_m2 = parseFloat(String(ls.value)) || null;
+    } else if ((item as Record<string, unknown>).lotSize && typeof (item as Record<string, unknown>).lotSize !== "object") {
+      result.area_terreno_m2 = parseFloat(String((item as Record<string, unknown>).lotSize)) || null;
+    }
+  }
+  // Keep area_m2 as effective area
+  if (!result.area_m2) {
+    result.area_m2 = result.area_construccion_m2 ?? result.area_terreno_m2;
   }
 
   // Rooms
@@ -459,6 +474,8 @@ Responde SOLO con JSON válido, sin texto adicional. Usa null para campos que no
   "price": number | null,
   "currency": "MXN" | "USD" | null,
   "area_m2": number | null,
+  "area_construccion_m2": number | null,
+  "area_terreno_m2": number | null,
   "bedrooms": number | null,
   "bathrooms": number | null,
   "parking": number | null,
@@ -490,6 +507,8 @@ ${cleanedHtml}`,
       price_amount: typeof parsed.price === "number" ? parsed.price : null,
       currency: parsed.currency as string | null,
       area_m2: typeof parsed.area_m2 === "number" ? parsed.area_m2 : null,
+      area_construccion_m2: typeof parsed.area_construccion_m2 === "number" ? parsed.area_construccion_m2 : null,
+      area_terreno_m2: typeof parsed.area_terreno_m2 === "number" ? parsed.area_terreno_m2 : null,
       bedrooms: typeof parsed.bedrooms === "number" ? parsed.bedrooms : null,
       bathrooms: typeof parsed.bathrooms === "number" ? parsed.bathrooms : null,
       parking: typeof parsed.parking === "number" ? parsed.parking : null,
@@ -530,6 +549,8 @@ export async function extractFromPage(
     price_amount: null,
     currency: null,
     area_m2: null,
+    area_construccion_m2: null,
+    area_terreno_m2: null,
     bedrooms: null,
     bathrooms: null,
     parking: null,

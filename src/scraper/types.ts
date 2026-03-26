@@ -11,6 +11,8 @@ export interface RawListing {
   price_mxn: number | null;
   price_usd: number | null;
   area_m2: number | null;
+  area_construccion_m2: number | null;
+  area_terreno_m2: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   parking: number | null;

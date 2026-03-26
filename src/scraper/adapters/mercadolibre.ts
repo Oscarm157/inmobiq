@@ -88,7 +88,8 @@ function extractFromPreloaded(
     // Attributes
     const attributes =
       (it.attributes as Record<string, unknown>[] | undefined) ?? [];
-    let area_m2: number | null = null;
+    let area_construccion_m2: number | null = null;
+    let area_terreno_m2: number | null = null;
     let bedrooms: number | null = null;
     let bathrooms: number | null = null;
     let parking: number | null = null;
@@ -96,8 +97,12 @@ function extractFromPreloaded(
     for (const attr of attributes) {
       const attrId = String(attr.id ?? "").toLowerCase();
       const val = String(attr.value_name ?? attr.value ?? "");
-      if (attrId.includes("m2") || attrId.includes("surface"))
-        area_m2 = parseNumber(val);
+      if (attrId.includes("construccion") || attrId.includes("covered"))
+        area_construccion_m2 = parseNumber(val);
+      else if (attrId.includes("terreno") || attrId.includes("total_area"))
+        area_terreno_m2 = parseNumber(val);
+      else if ((attrId.includes("m2") || attrId.includes("surface")) && !area_construccion_m2)
+        area_construccion_m2 = parseNumber(val);
       else if (attrId.includes("bedroom") || attrId.includes("room"))
         bedrooms = parseNumber(val);
       else if (attrId.includes("bathroom") || attrId.includes("bath"))
@@ -132,7 +137,9 @@ function extractFromPreloaded(
       listing_type: listingType,
       price_mxn,
       price_usd: null,
-      area_m2,
+      area_m2: area_construccion_m2 ?? area_terreno_m2,
+      area_construccion_m2: area_construccion_m2 ?? (propertyType !== "terreno" ? area_terreno_m2 : null),
+      area_terreno_m2: area_terreno_m2 ?? (propertyType === "terreno" ? area_construccion_m2 : null),
       bedrooms,
       bathrooms,
       parking,

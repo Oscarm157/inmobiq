@@ -88,6 +88,12 @@ async function scrapePage(
             area_m2: listing.floorSize
               ? parseNumber(String((listing.floorSize as Record<string, unknown>)?.value ?? listing.floorSize))
               : null,
+            area_construccion_m2: listing.floorSize
+              ? parseNumber(String((listing.floorSize as Record<string, unknown>)?.value ?? listing.floorSize))
+              : null,
+            area_terreno_m2: (listing as Record<string, unknown>).lotSize
+              ? parseNumber(String(((listing as Record<string, unknown>).lotSize as Record<string, unknown>)?.value ?? (listing as Record<string, unknown>).lotSize))
+              : null,
             bedrooms: listing.numberOfRooms ? parseNumber(String(listing.numberOfRooms)) : null,
             bathrooms: listing.numberOfBathroomsTotal
               ? parseNumber(String(listing.numberOfBathroomsTotal))
@@ -174,6 +180,8 @@ async function scrapePage(
         price_mxn: parsePrice(String(item.rawPrice ?? "")),
         price_usd: null,
         area_m2: parseNumber(item.rawArea as string),
+        area_construccion_m2: propertyType !== "terreno" ? parseNumber(item.rawArea as string) : null,
+        area_terreno_m2: propertyType === "terreno" ? parseNumber(item.rawArea as string) : null,
         bedrooms: parseNumber(item.rawBeds as string),
         bathrooms: parseNumber(item.rawBaths as string),
         parking: null,

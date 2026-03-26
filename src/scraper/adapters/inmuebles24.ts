@@ -129,13 +129,25 @@ export function mapToRawListing(item: ApifyI24Listing): RawListing {
       ?.map((p) => p.url730x532 || p.url360x266)
       .filter((url): url is string => !!url) ?? [];
 
-  const area =
-    getFeatureValue(
-      item.main_features,
-      "superficie construí",
-      "construida",
-      "terreno",
-    ) ?? getFeatureValue(item.main_features, "superficie");
+  const areaConstruccion = getFeatureValue(
+    item.main_features,
+    "superficie construí",
+    "construida",
+  );
+  const areaTerreno = getFeatureValue(
+    item.main_features,
+    "superficie del terreno",
+    "superficie terreno",
+  );
+  // Fallback: generic "superficie" or "terreno" label
+  const areaFallback = !areaConstruccion && !areaTerreno
+    ? (getFeatureValue(item.main_features, "terreno") ??
+       getFeatureValue(item.main_features, "superficie"))
+    : null;
+
+  const propType = mapPropertyType(item.real_estate_type?.name);
+  const ac = areaConstruccion ?? (propType !== "terreno" ? areaFallback : null);
+  const at = areaTerreno ?? (propType === "terreno" ? areaFallback : null);
 
   return {
     source_portal: PORTAL,
@@ -145,11 +157,13 @@ export function mapToRawListing(item: ApifyI24Listing): RawListing {
       : `https://www.inmuebles24.com${item.url}`,
     title: item.title ? item.title.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
     description: item.description_normalized ? item.description_normalized.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
-    property_type: mapPropertyType(item.real_estate_type?.name),
+    property_type: propType,
     listing_type: mapListingType(op?.operation_type?.name),
     price_mxn: priceMxn,
     price_usd: priceUsd,
-    area_m2: area,
+    area_m2: ac ?? at,
+    area_construccion_m2: ac,
+    area_terreno_m2: at,
     bedrooms: getFeatureValue(item.main_features, "recámara", "recamara"),
     bathrooms: getFeatureValue(item.main_features, "baño", "bano"),
     parking: getFeatureValue(item.main_features, "estacionamiento"),

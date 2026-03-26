@@ -14,6 +14,8 @@ interface ConfirmBody {
   listing_type: ListingType
   price_mxn: number
   area_m2: number
+  area_construccion_m2?: number | null
+  area_terreno_m2?: number | null
   bedrooms: number | null
   bathrooms: number | null
   parking: number | null
@@ -145,7 +147,8 @@ export async function POST(request: NextRequest) {
         property_type: body.property_type,
         listing_type: body.listing_type,
         price_mxn: body.price_mxn,
-        area_m2: body.area_m2,
+        area_construccion_m2: body.area_construccion_m2 ?? (body.property_type !== "terreno" ? body.area_m2 : null),
+        area_terreno_m2: body.area_terreno_m2 ?? (body.property_type === "terreno" ? body.area_m2 : null),
         bedrooms: body.bedrooms,
         bathrooms: body.bathrooms,
         parking: body.parking,

@@ -85,6 +85,8 @@ export function normalizeToListing(
     price_mxn: priceMxn,
     price_usd: priceUsd,
     area_m2: extracted.area_m2,
+    area_construccion_m2: extracted.area_construccion_m2 ?? (propertyType !== "terreno" ? extracted.area_m2 : null),
+    area_terreno_m2: extracted.area_terreno_m2 ?? (propertyType === "terreno" ? extracted.area_m2 : null),
     bedrooms: extracted.bedrooms,
     bathrooms: extracted.bathrooms,
     parking: extracted.parking,

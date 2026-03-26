@@ -175,6 +175,8 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
         listing_type: row.listing_type as Listing["listing_type"],
         price: priceMxn,
         area_m2: area,
+        area_construccion_m2: (row.area_construccion_m2 as number) ?? null,
+        area_terreno_m2: (row.area_terreno_m2 as number) ?? null,
         price_per_m2: area > 0 ? priceMxn / area : 0,
         bedrooms: (row.bedrooms as number) ?? null,
         bathrooms: (row.bathrooms as number) ?? null,
