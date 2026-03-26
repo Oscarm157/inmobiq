@@ -14,6 +14,8 @@ export interface ManualFormResult {
     listing_type: ListingType
     price_mxn: number
     area_m2: number
+    area_construccion_m2?: number | null
+    area_terreno_m2?: number | null
     bedrooms: number | null
     bathrooms: number | null
     parking: number | null
@@ -31,6 +33,7 @@ export function ManualForm({ onResult, disabled }: Props) {
   const [propertyType, setPropertyType] = useState<PropertyType>("casa")
   const [priceMxn, setPriceMxn] = useState("")
   const [areaM2, setAreaM2] = useState("")
+  const [areaTerrenoM2, setAreaTerrenoM2] = useState("")
   const [bedrooms, setBedrooms] = useState("")
   const [bathrooms, setBathrooms] = useState("")
   const [parking, setParking] = useState("")
@@ -68,6 +71,8 @@ export function ManualForm({ onResult, disabled }: Props) {
           listing_type: listingType,
           price_mxn: Number(priceMxn),
           area_m2: Number(areaM2),
+          area_construccion_m2: propertyType === "casa" ? Number(areaM2) : propertyType !== "terreno" ? Number(areaM2) : null,
+          area_terreno_m2: propertyType === "casa" && areaTerrenoM2 ? Number(areaTerrenoM2) : propertyType === "terreno" ? Number(areaM2) : null,
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           parking: parking ? Number(parking) : null,
@@ -90,6 +95,8 @@ export function ManualForm({ onResult, disabled }: Props) {
           listing_type: listingType,
           price_mxn: Number(priceMxn),
           area_m2: Number(areaM2),
+          area_construccion_m2: propertyType !== "terreno" ? Number(areaM2) : null,
+          area_terreno_m2: propertyType === "casa" && areaTerrenoM2 ? Number(areaTerrenoM2) : propertyType === "terreno" ? Number(areaM2) : null,
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           parking: parking ? Number(parking) : null,
@@ -170,19 +177,37 @@ export function ManualForm({ onResult, disabled }: Props) {
         </div>
         <div>
           <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
-            Superficie (m²) *
+            {propertyType === "casa" ? "Construcción (m²) *" : propertyType === "terreno" ? "Terreno (m²) *" : "Superficie (m²) *"}
           </label>
           <input
             type="number"
             value={areaM2}
             onChange={(e) => setAreaM2(e.target.value)}
-            placeholder="120"
+            placeholder={propertyType === "terreno" ? "400" : "120"}
             className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             min={0}
             required
           />
         </div>
       </div>
+
+      {/* Terreno area for casas */}
+      {propertyType === "casa" && (
+        <div>
+          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            Terreno (m²)
+          </label>
+          <input
+            type="number"
+            value={areaTerrenoM2}
+            onChange={(e) => setAreaTerrenoM2(e.target.value)}
+            placeholder="200"
+            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            min={0}
+          />
+          <p className="text-[10px] text-slate-400 mt-1">Opcional — superficie del lote/terreno</p>
+        </div>
+      )}
 
       {/* Bedrooms + Bathrooms + Parking */}
       <div className={`grid gap-4 ${showBedrooms && showBathrooms ? "grid-cols-3" : showBathrooms ? "grid-cols-2" : "grid-cols-1"}`}>

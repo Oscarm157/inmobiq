@@ -14,6 +14,8 @@ export interface ReviewResult {
     listing_type: ListingType
     price_mxn: number
     area_m2: number
+    area_construccion_m2?: number | null
+    area_terreno_m2?: number | null
     bedrooms: number | null
     bathrooms: number | null
     parking: number | null
@@ -36,7 +38,8 @@ export function ExtractionReview({ valuationId, extracted, onResult, onBack }: P
       ? String(extracted.currency === "USD" ? Math.round(extracted.price * 17.5) : extracted.price)
       : "",
   )
-  const [areaM2, setAreaM2] = useState(extracted.area_m2 ? String(extracted.area_m2) : "")
+  const [areaM2, setAreaM2] = useState(extracted.area_construccion_m2 ? String(extracted.area_construccion_m2) : extracted.area_m2 ? String(extracted.area_m2) : "")
+  const [areaTerrenoM2, setAreaTerrenoM2] = useState(extracted.area_terreno_m2 ? String(extracted.area_terreno_m2) : "")
   const [bedrooms, setBedrooms] = useState(extracted.bedrooms ? String(extracted.bedrooms) : "")
   const [bathrooms, setBathrooms] = useState(extracted.bathrooms ? String(extracted.bathrooms) : "")
   const [parking, setParking] = useState(extracted.parking ? String(extracted.parking) : "")
@@ -80,6 +83,8 @@ export function ExtractionReview({ valuationId, extracted, onResult, onBack }: P
           listing_type: listingType,
           price_mxn: Number(priceMxn),
           area_m2: Number(areaM2),
+          area_construccion_m2: propertyType !== "terreno" ? Number(areaM2) : null,
+          area_terreno_m2: propertyType === "casa" && areaTerrenoM2 ? Number(areaTerrenoM2) : propertyType === "terreno" ? Number(areaM2) : null,
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           parking: parking ? Number(parking) : null,
@@ -103,6 +108,8 @@ export function ExtractionReview({ valuationId, extracted, onResult, onBack }: P
           listing_type: listingType,
           price_mxn: Number(priceMxn),
           area_m2: Number(areaM2),
+          area_construccion_m2: propertyType !== "terreno" ? Number(areaM2) : null,
+          area_terreno_m2: propertyType === "casa" && areaTerrenoM2 ? Number(areaTerrenoM2) : propertyType === "terreno" ? Number(areaM2) : null,
           bedrooms: bedrooms ? Number(bedrooms) : null,
           bathrooms: bathrooms ? Number(bathrooms) : null,
           parking: parking ? Number(parking) : null,
@@ -213,7 +220,9 @@ export function ExtractionReview({ valuationId, extracted, onResult, onBack }: P
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Superficie (m²) *</label>
+            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+              {propertyType === "casa" ? "Construcción (m²) *" : propertyType === "terreno" ? "Terreno (m²) *" : "Superficie (m²) *"}
+            </label>
             <input
               type="number"
               value={areaM2}
@@ -223,6 +232,21 @@ export function ExtractionReview({ valuationId, extracted, onResult, onBack }: P
             />
           </div>
         </div>
+
+        {/* Terreno area for casas */}
+        {propertyType === "casa" && (
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Terreno (m²)</label>
+            <input
+              type="number"
+              value={areaTerrenoM2}
+              onChange={(e) => setAreaTerrenoM2(e.target.value)}
+              placeholder="200"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
+            <p className="text-[10px] text-slate-400 mt-1">Opcional — superficie del lote/terreno</p>
+          </div>
+        )}
 
         {/* Bedrooms, Bathrooms, Parking */}
         <div className="grid grid-cols-3 gap-4">
