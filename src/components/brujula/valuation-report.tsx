@@ -75,7 +75,10 @@ export function ValuationReport({ result, narrative, property }: Props) {
         property={property}
       />
 
-      {/* ── 2. Two-column layout: Price Analysis | Zone Profile ── */}
+      {/* ── 2. Narrative Analysis (right after slider) ── */}
+      {narrative && <NarrativeSection narrative={narrative} verdict={result.verdict} reasons={result.verdict_reasons} />}
+
+      {/* ── 3. Two-column layout: Price Analysis | Zone Profile ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Left: Price Analysis (3/5) */}
         <div className="lg:col-span-3 space-y-5">
@@ -148,32 +151,7 @@ export function ValuationReport({ result, narrative, property }: Props) {
         </div>
       </div>
 
-      {/* ── 3. Narrative ── */}
-      {narrative && (
-        <div className={`rounded-xl p-5 border ${VERDICT_BG[result.verdict]} border-slate-100 dark:border-slate-800`}>
-          <div className="flex items-start gap-3">
-            <Icon name="auto_awesome" className={`text-lg mt-0.5 flex-shrink-0 ${VERDICT_ACCENT[result.verdict]}`} />
-            <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
-              {narrative.split("\n\n").map((paragraph, i) => (
-                <p key={i}>{renderNarrative(paragraph)}</p>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── 4. Verdict Factors (inline chips) ── */}
-      <div className="flex flex-wrap gap-2">
-        {result.verdict_reasons.map((reason, i) => (
-          <span
-            key={i}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300"
-          >
-            <Icon name="check_circle" className="text-blue-500 text-xs" />
-            {reason}
-          </span>
-        ))}
-      </div>
+      {/* Verdict factors are now inside NarrativeSection as footer */}
     </div>
   )
 }
@@ -184,6 +162,60 @@ function KpiCompact({ label, value, delta, deltaColor }: { label: string; value:
       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
       <p className="text-xl font-black text-slate-800 dark:text-slate-100 leading-tight">{value}</p>
       <p className={`text-[10px] font-bold ${deltaColor ?? "text-slate-400"}`}>{delta}</p>
+    </div>
+  )
+}
+
+const PARAGRAPH_ICONS = ["summarize", "analytics", "lightbulb"] as const
+
+function NarrativeSection({ narrative, verdict, reasons }: { narrative: string; verdict: ValuationVerdict; reasons: string[] }) {
+  const paragraphs = narrative.split("\n\n").filter((p) => p.trim())
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-xl card-shadow border border-slate-100 dark:border-slate-800 overflow-hidden">
+      {/* Header */}
+      <div className={`px-5 py-3 ${VERDICT_BG[verdict]} border-b border-slate-100 dark:border-slate-800`}>
+        <div className="flex items-center gap-2">
+          <Icon name="auto_awesome" className={`text-base ${VERDICT_ACCENT[verdict]}`} />
+          <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            Analisis de Valuacion
+          </h3>
+        </div>
+      </div>
+
+      {/* Paragraphs as visual blocks */}
+      <div className="divide-y divide-slate-50 dark:divide-slate-800">
+        {paragraphs.map((paragraph, i) => (
+          <div key={i} className="flex gap-3 px-5 py-4">
+            <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Icon
+                name={PARAGRAPH_ICONS[i] ?? "article"}
+                className="text-sm text-slate-400"
+              />
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed flex-1">
+              {renderNarrative(paragraph)}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Factors as footer */}
+      {reasons.length > 0 && (
+        <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap gap-1.5">
+            {reasons.map((reason, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[10px] font-medium text-slate-500 dark:text-slate-400"
+              >
+                <Icon name="check" className={`text-[10px] ${VERDICT_ACCENT[verdict]}`} />
+                {reason}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

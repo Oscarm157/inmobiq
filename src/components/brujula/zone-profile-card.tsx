@@ -51,7 +51,7 @@ export function ZoneProfileCard({ result: r }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          Perfil de Zona
+          Perfil Socioeconomico
         </h4>
         {demo && (
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${demo.nse_profile_color}`}>
@@ -59,6 +59,7 @@ export function ZoneProfileCard({ result: r }: Props) {
           </span>
         )}
       </div>
+      <p className="text-xs text-slate-400 font-medium -mt-2">{r.zone_name}</p>
 
       {/* Demographics */}
       {demo && (
