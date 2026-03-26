@@ -85,16 +85,15 @@ Veredicto: ${verdictLabel} (score ${r.score}/100)
 Razones: ${r.verdict_reasons.join(". ")}
 
 Instrucciones:
-- Escribe en español, tono profesional pero accesible, para inversionistas
+- Escribe UN SOLO PARRAFO de 3-4 oraciones, tono de asesor inmobiliario para inversionistas
 - NO uses emojis
-- Usa **negritas** (doble asterisco) para resaltar cifras clave y conceptos importantes
-- Primer párrafo: resumen ejecutivo del veredicto con cifras concretas
-- Segundo párrafo: análisis comparativo precio/m² y posición en el mercado
-- Tercer párrafo: factores de riesgo/oportunidad y contexto socioeconómico
-- Sé directo y concreto. Cada oración debe aportar un dato.
-- NO inventes datos que no estén arriba
-- Separa párrafos con doble salto de línea
-- Máximo 180 palabras total`
+- Usa **negritas** (doble asterisco) para cifras clave y conceptos
+- NO repitas datos que ya se ven en el scorecard (precio/m², percentil, tendencia, riesgo, liquidez, cap rate)
+- En vez de eso, INTERPRETA: ¿qué significa para el inversionista? ¿Es buena compra? ¿Para qué perfil?
+- Da una recomendación concreta (comprar, negociar, descartar, renta vs venta)
+- Si aplica, menciona el horizonte de inversión recomendado
+- Máximo 60 palabras
+- NO separes en múltiples párrafos, todo en uno solo`
 
   try {
     const response = await client.messages.create({

@@ -75,36 +75,16 @@ export function ValuationReport({ result, narrative, property }: Props) {
         property={property}
       />
 
-      {/* ── 2. Narrative Analysis (right after slider) ── */}
-      {narrative && <NarrativeSection narrative={narrative} verdict={result.verdict} reasons={result.verdict_reasons} />}
+      {/* ── 2. Scorecard Analysis ── */}
+      <AnalysisScorecard result={result} narrative={narrative} property={property} />
 
-      {/* ── 3. Two-column layout: Price Analysis | Zone Profile ── */}
+      {/* ── 3. Two-column layout: Price Details | Zone Profile ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Left: Price Analysis (3/5) */}
+        {/* Left: Price Details (3/5) */}
         <div className="lg:col-span-3 space-y-5">
-          {/* KPIs row */}
-          <div className="grid grid-cols-3 gap-3">
-            <KpiCompact
-              label="Precio/m²"
-              value={`${formatMxnShort(result.price_per_m2)}`}
-              delta={`${result.price_premium_pct > 0 ? "+" : ""}${result.price_premium_pct.toFixed(1)}%`}
-              deltaColor={result.price_premium_pct > 10 ? "text-red-500" : result.price_premium_pct < -10 ? "text-emerald-500" : "text-amber-500"}
-            />
-            <KpiCompact
-              label="Percentil"
-              value={`${result.price_percentile}`}
-              delta={`de 100`}
-            />
-            <KpiCompact
-              label="Tendencia"
-              value={`${result.price_trend_pct > 0 ? "+" : ""}${result.price_trend_pct.toFixed(1)}%`}
-              delta="semanal"
-              deltaColor={result.price_trend_pct > 0 ? "text-emerald-500" : result.price_trend_pct < 0 ? "text-red-500" : undefined}
-            />
-          </div>
-
           {/* Comparison table */}
           <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Comparativa</h4>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700">
@@ -150,72 +130,114 @@ export function ValuationReport({ result, narrative, property }: Props) {
           <ZoneProfileCard result={result} />
         </div>
       </div>
-
-      {/* Verdict factors are now inside NarrativeSection as footer */}
     </div>
   )
 }
 
-function KpiCompact({ label, value, delta, deltaColor }: { label: string; value: string; delta: string; deltaColor?: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-3 card-shadow border border-slate-100 dark:border-slate-800">
-      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
-      <p className="text-xl font-black text-slate-800 dark:text-slate-100 leading-tight">{value}</p>
-      <p className={`text-[10px] font-bold ${deltaColor ?? "text-slate-400"}`}>{delta}</p>
-    </div>
-  )
+// ── Scorecard Analysis Component ──
+
+function dotColor(value: number, thresholds: [number, number]): string {
+  if (value >= thresholds[1]) return "bg-red-500"
+  if (value >= thresholds[0]) return "bg-amber-400"
+  return "bg-emerald-500"
 }
 
-const PARAGRAPH_ICONS = ["summarize", "analytics", "lightbulb"] as const
+function dotColorInverse(value: number, thresholds: [number, number]): string {
+  if (value <= thresholds[0]) return "bg-red-500"
+  if (value <= thresholds[1]) return "bg-amber-400"
+  return "bg-emerald-500"
+}
 
-function NarrativeSection({ narrative, verdict, reasons }: { narrative: string; verdict: ValuationVerdict; reasons: string[] }) {
-  const paragraphs = narrative.split("\n\n").filter((p) => p.trim())
+function AnalysisScorecard({ result: r, narrative, property }: { result: ValuationResult; narrative: string; property: Props["property"] }) {
+  const premiumDot = r.price_premium_pct > 15 ? "bg-red-500" : r.price_premium_pct > 5 ? "bg-amber-400" : r.price_premium_pct < -5 ? "bg-emerald-500" : "bg-amber-400"
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl card-shadow border border-slate-100 dark:border-slate-800 overflow-hidden">
       {/* Header */}
-      <div className={`px-5 py-3 ${VERDICT_BG[verdict]} border-b border-slate-100 dark:border-slate-800`}>
-        <div className="flex items-center gap-2">
-          <Icon name="auto_awesome" className={`text-base ${VERDICT_ACCENT[verdict]}`} />
-          <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-            Analisis de Valuacion
-          </h3>
+      <div className={`px-5 py-3 ${VERDICT_BG[r.verdict]} border-b border-slate-100 dark:border-slate-800`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon name="auto_awesome" className={`text-base ${VERDICT_ACCENT[r.verdict]}`} />
+            <h3 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+              Analisis de Valuacion
+            </h3>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">{r.zone_name}</span>
         </div>
       </div>
 
-      {/* Paragraphs as visual blocks */}
-      <div className="divide-y divide-slate-50 dark:divide-slate-800">
-        {paragraphs.map((paragraph, i) => (
-          <div key={i} className="flex gap-3 px-5 py-4">
-            <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Icon
-                name={PARAGRAPH_ICONS[i] ?? "article"}
-                className="text-sm text-slate-400"
-              />
-            </div>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed flex-1">
-              {renderNarrative(paragraph)}
-            </p>
-          </div>
-        ))}
+      {/* Scorecard row 1: Price metrics */}
+      <div className="grid grid-cols-4 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
+        <ScorecardCell
+          label="Precio/m²"
+          value={formatMxnShort(r.price_per_m2)}
+          sub={`${r.price_premium_pct > 0 ? "+" : ""}${r.price_premium_pct.toFixed(1)}%`}
+          dot={premiumDot}
+        />
+        <ScorecardCell
+          label="Percentil"
+          value={`${r.price_percentile}`}
+          sub="de 100"
+          dot={r.price_percentile >= 75 ? "bg-red-500" : r.price_percentile >= 50 ? "bg-amber-400" : "bg-emerald-500"}
+        />
+        <ScorecardCell
+          label="Inventario"
+          value={`${r.zone_total_listings}`}
+          sub={r.zone_total_listings < 20 ? "bajo" : r.zone_total_listings < 50 ? "medio" : "alto"}
+          dot={dotColorInverse(r.zone_total_listings, [15, 30])}
+        />
+        <ScorecardCell
+          label="Tendencia"
+          value={`${r.price_trend_pct > 0 ? "+" : ""}${r.price_trend_pct.toFixed(1)}%`}
+          sub="semanal"
+        />
       </div>
 
-      {/* Factors as footer */}
-      {reasons.length > 0 && (
-        <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap gap-1.5">
-            {reasons.map((reason, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[10px] font-medium text-slate-500 dark:text-slate-400"
-              >
-                <Icon name="check" className={`text-[10px] ${VERDICT_ACCENT[verdict]}`} />
-                {reason}
-              </span>
-            ))}
-          </div>
+      {/* Scorecard row 2: Risk/Return metrics */}
+      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
+        {r.cap_rate != null && (
+          <ScorecardCell
+            label="Cap Rate"
+            value={`${r.cap_rate.toFixed(1)}%`}
+            sub={r.cap_rate >= 7 ? "atractivo" : r.cap_rate >= 5 ? "moderado" : "bajo"}
+            dot={dotColorInverse(r.cap_rate, [5, 7])}
+          />
+        )}
+        <ScorecardCell
+          label="Riesgo"
+          value={`${r.risk_score ?? 0}`}
+          sub={r.risk_label ?? ""}
+          dot={dotColor(r.risk_score ?? 0, [40, 65])}
+        />
+        <ScorecardCell
+          label="Liquidez"
+          value={`${r.liquidity_score ?? 0}`}
+          sub={r.liquidity_score >= 70 ? "alta" : r.liquidity_score >= 40 ? "media" : "baja"}
+          dot={dotColorInverse(r.liquidity_score ?? 0, [30, 60])}
+        />
+      </div>
+
+      {/* AI Conclusion paragraph */}
+      {narrative && (
+        <div className="px-5 py-4">
+          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            {renderNarrative(narrative)}
+          </p>
         </div>
       )}
+    </div>
+  )
+}
+
+function ScorecardCell({ label, value, sub, dot }: { label: string; value: string; sub: string; dot?: string }) {
+  return (
+    <div className="px-4 py-3">
+      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+      <div className="flex items-center gap-2">
+        <span className="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">{value}</span>
+        {dot && <span className={`w-2 h-2 rounded-full ${dot} flex-shrink-0`} />}
+      </div>
+      <p className="text-[10px] text-slate-400 font-medium">{sub}</p>
     </div>
   )
 }
