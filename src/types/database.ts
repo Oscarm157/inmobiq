@@ -322,6 +322,7 @@ export interface ValuationResult {
   } | null;
 
   // Comparison data (for charts)
+  area_by_type: { type: string; typeKey: string; area: number; label: string }[];
   zone_price_distribution: { range: string; count: number; has_property: boolean }[];
   comparable_listings: { price: number; area_m2: number; type: PropertyType; price_per_m2: number }[];
 

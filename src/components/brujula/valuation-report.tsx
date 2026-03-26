@@ -4,6 +4,7 @@ import type { ValuationResult, ValuationVerdict, PropertyType, ListingType } fro
 import { ScoreSlider } from "./score-slider"
 import { PricePositionChart } from "./price-position-chart"
 import { ZoneProfileCard } from "./zone-profile-card"
+import { AreaByTypeChart } from "@/components/zone/area-by-type-chart"
 import { Icon } from "@/components/icon"
 
 function formatMxn(n: number): string {
@@ -122,8 +123,13 @@ export function ValuationReport({ result, narrative, property }: Props) {
       {/* ── 4. Zone Profile — full width, 3 columns ── */}
       <ZoneProfileCard result={result} />
 
-      {/* ── 5. Price distribution — full width ── */}
-      <PricePositionChart distribution={result.zone_price_distribution} />
+      {/* ── 5. Charts row ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <PricePositionChart distribution={result.zone_price_distribution} />
+        {result.area_by_type?.length > 0 && (
+          <AreaByTypeChart data={result.area_by_type} zoneName={result.zone_name} />
+        )}
+      </div>
     </div>
   )
 }

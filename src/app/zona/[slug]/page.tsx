@@ -22,6 +22,7 @@ import { getZoneDemographics } from "@/lib/data/demographics"
 import { computeZoneInsights } from "@/lib/data/zone-insights"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
+import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
@@ -196,6 +197,17 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       label: formatCurrency(Math.round(avgTicket)),
     }))
     .sort((a, b) => b.avgTicket - a.avgTicket)
+
+  // --- Area by type chart data ---
+  const areaByTypeData: AreaByTypeData[] = zoneAnalytics.typeComparison
+    .filter((t) => t.count > 0 && t.median_area > 0)
+    .map((t) => ({
+      type: PROPERTY_LABELS[t.type as PropertyType] ?? t.type,
+      typeKey: t.type,
+      area: t.median_area,
+      label: `${t.median_area.toLocaleString("es-MX")} m²`,
+    }))
+    .sort((a, b) => b.area - a.area)
 
   // --- ADN de la Zona data ---
   const typedListings = normalizedListings.filter(
@@ -395,6 +407,9 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           <PropertyCompositionChart data={compositionData} />
           {rawCat !== "terreno" && (
             <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
+          )}
+          {areaByTypeData.length > 0 && (
+            <AreaByTypeChart data={areaByTypeData} zoneName={zone.zone_name} />
           )}
           {zoneAnalytics.priceByBedrooms && rawCat !== "comercial" && rawCat !== "terreno" && (
             <BedroomDistributionChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />

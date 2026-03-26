@@ -220,6 +220,25 @@ export function computeValuation(
       price_per_m2: l.price_per_m2,
     }))
 
+  // ── Area by type ──
+  const TYPE_LABELS: Record<string, string> = {
+    casa: "Casa", departamento: "Depto", terreno: "Terreno", local: "Local", oficina: "Oficina",
+  }
+  const typeGroups = new Map<string, number[]>()
+  for (const l of data.zone_listings) {
+    if (l.area_m2 > 0) {
+      const arr = typeGroups.get(l.property_type) ?? []
+      arr.push(l.area_m2)
+      typeGroups.set(l.property_type, arr)
+    }
+  }
+  const area_by_type = Array.from(typeGroups.entries())
+    .map(([type, areas]) => {
+      const med = median(areas)
+      return { type: TYPE_LABELS[type] ?? type, typeKey: type, area: Math.round(med), label: `${Math.round(med).toLocaleString("es-MX")} m²` }
+    })
+    .sort((a, b) => b.area - a.area)
+
   // ── Build result ──
   return {
     zone_name: data.zone.zone_name,
@@ -275,6 +294,7 @@ export function computeValuation(
         })()
       : null,
 
+    area_by_type,
     zone_price_distribution: buildPriceDistribution(
       data.zone_listings,
       price_per_m2,
