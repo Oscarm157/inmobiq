@@ -77,7 +77,7 @@ export default function BrujulaPage() {
           </span>
         </div>
         <h2 className="text-4xl font-extrabold tracking-tight">
-          Brújula
+          Brújula Inmobiliaria
         </h2>
         <p className="text-slate-500 max-w-xl font-medium">
           Sube una propiedad y descubre si está a buen precio comparada con el mercado de su zona.
