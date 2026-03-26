@@ -15,40 +15,34 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string 
 ]
 
 export const ZONES = [
-  // Premium/Central
-  { slug: "zona-rio", name: "Zona Río" },
-  { slug: "cacho", name: "Cacho-Cumbres" },
-  { slug: "hipodromo-chapultepec", name: "Hipódromo-Chapultepec" },
   { slug: "agua-caliente", name: "Agua Caliente" },
-  { slug: "lomas-de-agua-caliente", name: "Lomas de Agua Caliente" },
-  // Frontera/Norte
-  { slug: "centro", name: "Centro" },
-  { slug: "libertad", name: "Libertad" },
-  { slug: "soler", name: "Mirador-Soler" },
-  // Costa
-  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
   { slug: "baja-malibu", name: "Baja Malibú" },
-  { slug: "real-del-mar", name: "Real del Mar" },
-  { slug: "san-antonio-del-mar", name: "San Antonio del Mar" },
-  { slug: "punta-bandera", name: "Punta Bandera" },
+  { slug: "cacho", name: "Cacho-Cumbres" },
+  { slug: "centro", name: "Centro" },
+  { slug: "cerro-colorado", name: "Cerro Colorado" },
+  { slug: "colinas-de-california", name: "Colinas de California" },
   { slug: "costa-coronado", name: "Costa Coronado" },
-  // Este
-  { slug: "otay", name: "Otay" },
+  { slug: "el-florido", name: "El Florido" },
+  { slug: "el-lago-cucapah", name: "El Lago-Cucapah" },
+  { slug: "hipodromo-chapultepec", name: "Hipódromo-Chapultepec" },
+  { slug: "insurgentes", name: "Insurgentes" },
   { slug: "la-mesa", name: "La Mesa" },
   { slug: "las-americas", name: "Las Américas" },
-  { slug: "zona-este", name: "Zona Este" },
-  { slug: "el-lago-cucapah", name: "El Lago-Cucapah" },
-  { slug: "otay-universidad", name: "Otay Universidad" },
-  // Sur/Residencial
-  { slug: "cerro-colorado", name: "Cerro Colorado" },
-  { slug: "santa-fe", name: "Santa Fe" },
-  { slug: "natura", name: "Natura" },
-  { slug: "colinas-de-california", name: "Colinas de California" },
+  { slug: "libertad", name: "Libertad" },
+  { slug: "lomas-de-agua-caliente", name: "Lomas de Agua Caliente" },
   { slug: "lomas-virreyes", name: "Lomas Virreyes" },
-  { slug: "insurgentes", name: "Insurgentes" },
-  // Periférico
-  { slug: "el-florido", name: "El Florido" },
+  { slug: "natura", name: "Natura" },
+  { slug: "otay", name: "Otay" },
+  { slug: "otay-universidad", name: "Otay Universidad" },
+  { slug: "playas-de-tijuana", name: "Playas de Tijuana" },
+  { slug: "punta-bandera", name: "Punta Bandera" },
+  { slug: "real-del-mar", name: "Real del Mar" },
+  { slug: "san-antonio-del-mar", name: "San Antonio del Mar" },
+  { slug: "santa-fe", name: "Santa Fe" },
+  { slug: "soler", name: "Mirador-Soler" },
   { slug: "terrazas-de-la-presa", name: "Terrazas de la Presa" },
+  { slug: "zona-este", name: "Zona Este" },
+  { slug: "zona-rio", name: "Zona Río" },
   // Catch-all
   { slug: "otros", name: "Otros" },
 ]
