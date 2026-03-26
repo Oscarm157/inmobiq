@@ -3,11 +3,11 @@
  * Compares a single property against zone-level data and produces a 0-100 score.
  *
  * Score interpretation:
- *   0-19  → Muy cara
- *  20-39  → Cara
+ *   0-19  → Muy caro
+ *  20-39  → Caro
  *  40-59  → Precio justo
- *  60-79  → Barata
- *  80-100 → Muy barata
+ *  60-79  → Barato
+ *  80-100 → Muy barato
  */
 
 import type {
@@ -49,11 +49,11 @@ function verdictFromScore(score: number): ValuationVerdict {
 
 function verdictLabel(v: ValuationVerdict): string {
   const map: Record<ValuationVerdict, string> = {
-    muy_barata: "Muy barata",
-    barata: "Barata",
+    muy_barata: "Muy barato",
+    barata: "Barato",
     precio_justo: "Precio justo",
-    cara: "Cara",
-    muy_cara: "Muy cara",
+    cara: "Caro",
+    muy_cara: "Muy caro",
   }
   return map[v]
 }

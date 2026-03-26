@@ -73,7 +73,7 @@ ${input.address ? `- Ubicación: ${input.address}` : ""}
 Zona: ${r.zone_name}
 - Precio promedio/m² de la zona: $${Math.round(r.zone_avg_price_per_m2).toLocaleString("es-MX")} MXN
 - Diferencia vs zona: ${r.price_premium_pct > 0 ? "+" : ""}${r.price_premium_pct.toFixed(1)}%
-- Percentil: ${r.price_percentile} (de 100 propiedades en la zona, ${r.price_percentile} son más baratas)
+- Percentil: ${r.price_percentile} (de 100 propiedades en la zona, ${r.price_percentile} son más baratos)
 - Inventario en zona: ${r.zone_total_listings} propiedades activas
 - Tendencia semanal: ${r.price_trend_pct > 0 ? "+" : ""}${r.price_trend_pct.toFixed(1)}%
 - Riesgo: ${r.risk_label} (${r.risk_score}/100)

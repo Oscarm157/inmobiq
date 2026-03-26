@@ -17,11 +17,11 @@ const VERDICT_COLORS: Record<ValuationVerdict, [number, number, number]> = {
 }
 
 const VERDICT_LABELS: Record<ValuationVerdict, string> = {
-  muy_barata: "MUY BARATA",
-  barata: "BARATA",
+  muy_barata: "MUY BARATO",
+  barata: "BARATO",
   precio_justo: "PRECIO JUSTO",
-  cara: "CARA",
-  muy_cara: "MUY CARA",
+  cara: "CARO",
+  muy_cara: "MUY CARO",
 }
 
 export async function POST(req: NextRequest) {

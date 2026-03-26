@@ -20,11 +20,11 @@ const VERDICT_ACCENT: Record<ValuationVerdict, string> = {
 }
 
 const VERDICT_LABEL: Record<ValuationVerdict, string> = {
-  muy_barata: "Muy barata",
-  barata: "Barata",
+  muy_barata: "Muy barato",
+  barata: "Barato",
   precio_justo: "Precio justo",
-  cara: "Cara",
-  muy_cara: "Muy cara",
+  cara: "Caro",
+  muy_cara: "Muy caro",
 }
 
 const TYPE_LABELS: Record<PropertyType, string> = {

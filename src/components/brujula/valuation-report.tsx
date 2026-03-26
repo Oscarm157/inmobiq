@@ -180,7 +180,7 @@ function AnalysisScorecard({ result: r, narrative, property }: { result: Valuati
         <ScorecardCell
           label="Percentil"
           value={`${r.price_percentile}`}
-          sub={`mas cara que ${r.price_percentile}%`}
+          sub={`más caro que ${r.price_percentile}%`}
           dot={r.price_percentile >= 75 ? "bg-red-500" : r.price_percentile >= 50 ? "bg-amber-400" : "bg-emerald-500"}
         />
         <ScorecardCell
