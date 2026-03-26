@@ -78,58 +78,50 @@ export function ValuationReport({ result, narrative, property }: Props) {
       {/* ── 2. Scorecard Analysis ── */}
       <AnalysisScorecard result={result} narrative={narrative} property={property} />
 
-      {/* ── 3. Two-column layout: Price Details | Zone Profile ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Left: Price Details (3/5) */}
-        <div className="lg:col-span-3 space-y-5">
-          {/* Comparison table */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Tu propiedad vs promedio de zona</h4>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="text-left py-1.5 text-[10px] font-bold text-slate-400 uppercase"></th>
-                  <th className="text-right py-1.5 text-[10px] font-bold text-blue-500 uppercase">Propiedad</th>
-                  <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Zona</th>
-                  <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Dif.</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-700 dark:text-slate-300">
-                <tr className="border-b border-slate-50 dark:border-slate-800">
-                  <td className="py-1.5 font-medium text-xs">Precio/m²</td>
-                  <td className="py-1.5 text-right font-bold text-xs">{formatMxn(result.price_per_m2)}</td>
-                  <td className="py-1.5 text-right text-xs">{formatMxn(result.zone_avg_price_per_m2)}</td>
-                  <td className={`py-1.5 text-right font-bold text-xs ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
-                    {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
-                  </td>
-                </tr>
-                <tr className="border-b border-slate-50 dark:border-slate-800">
-                  <td className="py-1.5 font-medium text-xs">Precio total</td>
-                  <td className="py-1.5 text-right font-bold text-xs">{formatMxn(property.price_mxn)}</td>
-                  <td className="py-1.5 text-right text-xs">{formatMxn(result.zone_avg_ticket)}</td>
-                  <td className="py-1.5 text-right text-xs text-slate-400">—</td>
-                </tr>
-                <tr>
-                  <td className="py-1.5 font-medium text-xs">Superficie</td>
-                  <td className="py-1.5 text-right font-bold text-xs">{property.area_m2} m²</td>
-                  <td className="py-1.5 text-right text-xs">—</td>
-                  <td className={`py-1.5 text-right font-bold text-xs ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
-                    {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Price distribution */}
-          <PricePositionChart distribution={result.zone_price_distribution} />
-        </div>
-
-        {/* Right: Zone Profile (2/5) */}
-        <div className="lg:col-span-2">
-          <ZoneProfileCard result={result} />
-        </div>
+      {/* ── 3. Comparison table — full width ── */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
+        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Tu propiedad vs promedio de zona</h4>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 dark:border-slate-700">
+              <th className="text-left py-1.5 text-[10px] font-bold text-slate-400 uppercase"></th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-blue-500 uppercase">Tu propiedad</th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Zona</th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Diferencia</th>
+            </tr>
+          </thead>
+          <tbody className="text-slate-700 dark:text-slate-300">
+            <tr className="border-b border-slate-50 dark:border-slate-800">
+              <td className="py-2 font-medium text-xs">Precio/m²</td>
+              <td className="py-2 text-right font-bold text-xs">{formatMxn(result.price_per_m2)}</td>
+              <td className="py-2 text-right text-xs">{formatMxn(result.zone_avg_price_per_m2)}</td>
+              <td className={`py-2 text-right font-bold text-xs ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
+              </td>
+            </tr>
+            <tr className="border-b border-slate-50 dark:border-slate-800">
+              <td className="py-2 font-medium text-xs">Precio total</td>
+              <td className="py-2 text-right font-bold text-xs">{formatMxn(property.price_mxn)}</td>
+              <td className="py-2 text-right text-xs">{formatMxn(result.zone_avg_ticket)}</td>
+              <td className="py-2 text-right text-xs text-slate-400">—</td>
+            </tr>
+            <tr>
+              <td className="py-2 font-medium text-xs">Superficie</td>
+              <td className="py-2 text-right font-bold text-xs">{property.area_m2} m²</td>
+              <td className="py-2 text-right text-xs">—</td>
+              <td className={`py-2 text-right font-bold text-xs ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
+                {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      {/* ── 4. Zone Profile — full width, 3 columns ── */}
+      <ZoneProfileCard result={result} />
+
+      {/* ── 5. Price distribution — full width ── */}
+      <PricePositionChart distribution={result.zone_price_distribution} />
     </div>
   )
 }
