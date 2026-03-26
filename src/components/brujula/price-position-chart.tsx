@@ -18,10 +18,10 @@ export function PricePositionChart({ distribution }: Props) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
       <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">
-        Distribucion de precios/m² en la zona
+        Donde esta tu propiedad vs el mercado
       </h3>
       <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-        La barra resaltada indica el rango donde se ubica tu propiedad
+        Distribucion de precios/m² en la zona — la barra <span className="text-blue-500 font-bold">azul</span> es tu rango
       </p>
 
       <ResponsiveContainer width="100%" height={200}>
@@ -39,8 +39,6 @@ export function PricePositionChart({ distribution }: Props) {
               <Cell
                 key={i}
                 fill={entry.has_property ? "#2563eb" : "#cbd5e1"}
-                stroke={entry.has_property ? "#1d4ed8" : "transparent"}
-                strokeWidth={entry.has_property ? 2 : 0}
               />
             ))}
             <LabelList

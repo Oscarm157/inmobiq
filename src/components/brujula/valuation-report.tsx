@@ -84,7 +84,7 @@ export function ValuationReport({ result, narrative, property }: Props) {
         <div className="lg:col-span-3 space-y-5">
           {/* Comparison table */}
           <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Comparativa</h4>
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Tu propiedad vs promedio de zona</h4>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700">
@@ -166,34 +166,40 @@ function AnalysisScorecard({ result: r, narrative, property }: { result: Valuati
         </div>
       </div>
 
-      {/* Scorecard row 1: Price metrics */}
+      {/* Scorecard row 1: Tu propiedad */}
+      <div className="px-4 pt-2 pb-0">
+        <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Tu propiedad</p>
+      </div>
       <div className="grid grid-cols-4 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
         <ScorecardCell
           label="Precio/m²"
           value={formatMxnShort(r.price_per_m2)}
-          sub={`${r.price_premium_pct > 0 ? "+" : ""}${r.price_premium_pct.toFixed(1)}%`}
+          sub={`${r.price_premium_pct > 0 ? "+" : ""}${r.price_premium_pct.toFixed(1)}% vs zona`}
           dot={premiumDot}
         />
         <ScorecardCell
           label="Percentil"
           value={`${r.price_percentile}`}
-          sub="de 100"
+          sub={`mas cara que ${r.price_percentile}%`}
           dot={r.price_percentile >= 75 ? "bg-red-500" : r.price_percentile >= 50 ? "bg-amber-400" : "bg-emerald-500"}
         />
         <ScorecardCell
-          label="Inventario"
+          label="Zona: inventario"
           value={`${r.zone_total_listings}`}
           sub={r.zone_total_listings < 20 ? "bajo" : r.zone_total_listings < 50 ? "medio" : "alto"}
           dot={dotColorInverse(r.zone_total_listings, [15, 30])}
         />
         <ScorecardCell
-          label="Tendencia"
+          label="Zona: tendencia"
           value={`${r.price_trend_pct > 0 ? "+" : ""}${r.price_trend_pct.toFixed(1)}%`}
           sub="semanal"
         />
       </div>
 
-      {/* Scorecard row 2: Risk/Return metrics */}
+      {/* Scorecard row 2: Zona — riesgo e inversion */}
+      <div className="px-4 pt-2 pb-0">
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Zona: riesgo e inversion</p>
+      </div>
       <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
         {r.cap_rate != null && (
           <ScorecardCell
@@ -205,14 +211,14 @@ function AnalysisScorecard({ result: r, narrative, property }: { result: Valuati
         )}
         <ScorecardCell
           label="Riesgo"
-          value={`${r.risk_score ?? 0}`}
+          value={`${r.risk_score ?? 0}/100`}
           sub={r.risk_label ?? ""}
           dot={dotColor(r.risk_score ?? 0, [40, 65])}
         />
         <ScorecardCell
           label="Liquidez"
-          value={`${r.liquidity_score ?? 0}`}
-          sub={r.liquidity_score >= 70 ? "alta" : r.liquidity_score >= 40 ? "media" : "baja"}
+          value={`${r.liquidity_score ?? 0}/100`}
+          sub={r.liquidity_score >= 70 ? "facil reventa" : r.liquidity_score >= 40 ? "reventa moderada" : "reventa lenta"}
           dot={dotColorInverse(r.liquidity_score ?? 0, [30, 60])}
         />
       </div>
