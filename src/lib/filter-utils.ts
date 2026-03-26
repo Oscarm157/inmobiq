@@ -17,6 +17,7 @@ export const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string 
 export const ZONES = [
   { slug: "agua-caliente", name: "Agua Caliente" },
   { slug: "baja-malibu", name: "Baja Malibú" },
+  { slug: "buena-vista", name: "Buena Vista" },
   { slug: "cacho", name: "Cacho-Cumbres" },
   { slug: "centro", name: "Centro" },
   { slug: "cerro-colorado", name: "Cerro Colorado" },
