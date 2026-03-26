@@ -5,14 +5,14 @@ import { Icon } from "@/components/icon"
 
 const VERDICT_CONFIG: Record<ValuationVerdict, { label: string; color: string; bg: string; border: string; icon: string }> = {
   muy_barata: {
-    label: "Muy barata",
+    label: "Muy barato",
     color: "text-emerald-700 dark:text-emerald-300",
     bg: "bg-emerald-50 dark:bg-emerald-950/40",
     border: "border-emerald-200 dark:border-emerald-800",
     icon: "trending_down",
   },
   barata: {
-    label: "Barata",
+    label: "Barato",
     color: "text-green-700 dark:text-green-300",
     bg: "bg-green-50 dark:bg-green-950/40",
     border: "border-green-200 dark:border-green-800",
@@ -26,14 +26,14 @@ const VERDICT_CONFIG: Record<ValuationVerdict, { label: string; color: string; b
     icon: "balance",
   },
   cara: {
-    label: "Cara",
+    label: "Caro",
     color: "text-orange-700 dark:text-orange-300",
     bg: "bg-orange-50 dark:bg-orange-950/40",
     border: "border-orange-200 dark:border-orange-800",
     icon: "trending_up",
   },
   muy_cara: {
-    label: "Muy cara",
+    label: "Muy caro",
     color: "text-red-700 dark:text-red-300",
     bg: "bg-red-50 dark:bg-red-950/40",
     border: "border-red-200 dark:border-red-800",

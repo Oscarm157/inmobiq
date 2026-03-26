@@ -19,11 +19,11 @@ interface HistoryItem {
 }
 
 const VERDICT_BADGES: Record<ValuationVerdict, { label: string; class: string }> = {
-  muy_barata: { label: "Muy barata", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
-  barata: { label: "Barata", class: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
+  muy_barata: { label: "Muy barato", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  barata: { label: "Barato", class: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
   precio_justo: { label: "Precio justo", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
-  cara: { label: "Cara", class: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
-  muy_cara: { label: "Muy cara", class: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
+  cara: { label: "Caro", class: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
+  muy_cara: { label: "Muy caro", class: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
 }
 
 const TYPE_ICONS: Record<PropertyType, string> = {
