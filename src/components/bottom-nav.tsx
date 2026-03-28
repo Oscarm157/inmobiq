@@ -8,7 +8,6 @@ const mobileNav = [
   { icon: "monitoring", label: "Precios", href: "/" },
   { icon: "explore", label: "Brújula", href: "/brujula" },
   { icon: "location_on", label: "Zonas", href: "/zonas" },
-  { icon: "map", label: "Mapa", href: "/mapa" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
 ]
 

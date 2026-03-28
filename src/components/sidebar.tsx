@@ -12,7 +12,6 @@ const navItems = [
   { icon: "monitoring", label: "Precios", href: "/" },
   { icon: "explore", label: "Brújula", href: "/brujula" },
   { icon: "location_on", label: "Zonas", href: "/zonas" },
-  { icon: "map", label: "Mapa", href: "/mapa" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
   { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
   { icon: "search", label: "Buscar", href: "/buscar" },
