@@ -138,8 +138,7 @@ export default async function HomePage({
               Mercado Inmobiliario: Tijuana
             </h2>
             <p className="text-slate-500 max-w-xl font-medium">
-              Panorama general del mercado. Datos agregados de los principales
-              portales inmobiliarios para Tijuana, B.C.
+              Panorama general del mercado inmobiliario de Tijuana, B.C.
             </p>
           </div>
           <div className="flex gap-3 items-start">
@@ -318,8 +317,8 @@ export default async function HomePage({
         <div className="max-w-2xl">
           <h3 className="text-2xl font-black mb-2">Explora el mercado</h3>
           <p className="text-slate-200 text-sm font-medium mb-6">
-            Datos actualizados semanalmente. Compara zonas, analiza riesgo, o busca
-            propiedades específicas para tomar mejores decisiones de inversión.
+            Compara zonas, analiza riesgo, o busca propiedades específicas
+            para tomar mejores decisiones de inversión.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

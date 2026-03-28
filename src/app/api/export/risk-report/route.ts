@@ -162,7 +162,7 @@ export async function POST() {
   doc.setFontSize(7)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(100, 116, 139)
-  doc.text("Inmobiq · Datos actualizados semanalmente · inmobiq.com", pageW / 2, pageH - 5, { align: "center" })
+  doc.text("Inmobiq · Inteligencia inmobiliaria · inmobiq.com", pageW / 2, pageH - 5, { align: "center" })
 
   const pdfBuffer = Buffer.from(doc.output("arraybuffer"))
   return new NextResponse(pdfBuffer, {

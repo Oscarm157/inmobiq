@@ -167,7 +167,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
       {/* Footer */}
       <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400 flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span>Datos actualizados semanalmente de portales inmobiliarios</span>
+          <span>Datos del mercado inmobiliario de Tijuana</span>
           <span className="font-mono">Mar 2026</span>
         </div>
         <span className="text-[10px] text-slate-300 dark:text-slate-600">

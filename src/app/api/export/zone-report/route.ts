@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
   doc.setFont("helvetica", "normal")
   doc.setTextColor(100, 116, 139)
   doc.text(
-    "Inmobiq · Datos actualizados semanalmente · inmobiq.com",
+    "Inmobiq · Inteligencia inmobiliaria · inmobiq.com",
     pageW / 2,
     pageH - 5,
     { align: "center" }

@@ -86,7 +86,7 @@ export default function PoliticaPrivacidadPage() {
           </h2>
           <p>
             Los datos inmobiliarios mostrados en la plataforma provienen de
-            fuentes públicas de internet (portales inmobiliarios) y del Censo de
+            fuentes públicas de internet y del Censo de
             Población y Vivienda 2020 del INEGI. Estos datos son de carácter
             estadístico y no constituyen datos personales.
           </p>

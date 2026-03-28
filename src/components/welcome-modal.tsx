@@ -9,7 +9,7 @@ const SLIDES = [
   {
     icon: "location_on",
     title: "Explora el mercado",
-    description: "Analiza precios, tendencias e inventario de más de 30 zonas inmobiliarias en Tijuana. Todo basado en datos reales de los principales portales.",
+    description: "Analiza precios, tendencias e inventario de más de 30 zonas inmobiliarias en Tijuana. Todo basado en datos reales del mercado.",
   },
   {
     icon: "compare_arrows",

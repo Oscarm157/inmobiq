@@ -181,7 +181,7 @@ export function DemoVideo({ pricePerM2, totalListings, totalZones, topZones }: D
 
           <div className={`transition-all duration-700 delay-[1200ms] ${showContent ? "opacity-100" : "opacity-0"}`}>
             <p className="text-sm text-slate-600 font-medium">
-              Datos agregados de los principales portales inmobiliarios
+              Inteligencia de mercado inmobiliario para Tijuana
             </p>
           </div>
         </div>

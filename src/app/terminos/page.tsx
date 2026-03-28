@@ -62,7 +62,7 @@ export default function TerminosPage() {
           <p>
             La información presentada en la Plataforma tiene carácter
             <strong> informativo y de referencia</strong>. Los datos provienen de
-            fuentes públicas disponibles en internet (portales inmobiliarios) y
+            fuentes públicas disponibles en internet y
             del Censo de Población y Vivienda 2020 del INEGI.
           </p>
           <p>

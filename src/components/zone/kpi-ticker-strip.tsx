@@ -56,7 +56,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       value: getZoneActivityLabel(zone.total_listings),
       sub: "",
       subColor: "text-slate-500",
-      tooltip: "Nivel cualitativo de actividad basado en la cantidad de propiedades activas en portales inmobiliarios. No mostramos conteos exactos.",
+      tooltip: "Nivel cualitativo de actividad basado en la cantidad de propiedades activas en el mercado. No mostramos conteos exactos.",
     },
     {
       icon: "trending_up",

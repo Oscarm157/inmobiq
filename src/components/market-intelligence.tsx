@@ -59,7 +59,7 @@ export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
       </div>
 
       <p className="text-[10px] text-slate-400 mt-3">
-        Demografía: INEGI Censo 2020 · Mercado: portales inmobiliarios · Riesgo: análisis de volatilidad semanal
+        Demografía: INEGI Censo 2020 · Mercado: datos del sector · Riesgo: análisis de volatilidad semanal
       </p>
     </section>
   )
