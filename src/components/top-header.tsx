@@ -102,6 +102,14 @@ export function TopHeader() {
             >
               <Icon name={resolvedTheme === "dark" ? "light_mode" : "dark_mode"} />
             </button>
+            <Link
+              href="/glosario"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Glosario y ayuda"
+              title="Glosario de términos"
+            >
+              <Icon name="help_outline" />
+            </Link>
           </div>
 
           <Link

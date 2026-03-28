@@ -6,6 +6,7 @@ import { SidebarShell } from "@/components/sidebar-shell"
 import { AuthProvider } from "@/contexts/auth-context"
 import { CurrencyProvider } from "@/contexts/currency-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { WelcomeModal } from "@/components/welcome-modal"
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -93,6 +94,7 @@ export default function RootLayout({
             <AuthProvider>
               <SidebarProvider>
                 <SidebarShell>{children}</SidebarShell>
+                <WelcomeModal />
               </SidebarProvider>
             </AuthProvider>
           </CurrencyProvider>
