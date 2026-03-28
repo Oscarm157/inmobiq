@@ -42,6 +42,7 @@ export function AreaByTypeChart({ data, zoneName }: Props) {
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
             Superficie Promedio por Tipo
           </h3>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Metros cuadrados promedio por tipo de propiedad</p>
           <InfoTooltip content="Mediana de metros cuadrados por tipo de propiedad en esta zona. Se calculan solo con listings activos que reportan superficie." />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">

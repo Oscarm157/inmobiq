@@ -47,6 +47,7 @@ export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
             Ticket Promedio por Tipo
           </h3>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Precio promedio de venta por tipo de propiedad</p>
           <InfoTooltip content="Precio promedio de venta por tipo de propiedad en esta zona. Se calculan solo con listings activos que pasaron validación de precio (se excluyen precios atípicos)." />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">

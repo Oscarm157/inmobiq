@@ -52,6 +52,7 @@ export function BedroomDistributionChart({ data, zoneName }: BedroomDistribution
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
             Distribución por Recámaras
           </h3>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Cuántas propiedades hay por número de recámaras</p>
           <InfoTooltip content="Cantidad de propiedades activas por número de recámaras. Muestra la composición del inventario para identificar la oferta dominante en la zona." />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">

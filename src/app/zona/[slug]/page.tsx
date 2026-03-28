@@ -24,6 +24,7 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
 import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
+import { ZoneTabs } from "@/components/zone/zone-tabs"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
 import { Breadcrumb } from "@/components/breadcrumb"
@@ -387,113 +388,116 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         </div>
       )}
 
-      {/* [B3] Zone Map — right after KPIs for immediate spatial context */}
-      <section id="demo-map">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
-          <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
-          </a>
-        </div>
-        <ZoneMapWrapper
-          zones={allZones}
-          focusZoneSlug={slug}
+      {/* [C] Tabbed Content */}
+      <Suspense fallback={<div className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+        <ZoneTabs
+          general={
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-8 space-y-6">
+                <div id="demo-editorial"><EditorialCard zoneName={zone.zone_name} mainText={mainText} quote={quote} /></div>
+                <div id="demo-charts"><PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} /></div>
+                <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
+              </div>
+              <div className="col-span-12 lg:col-span-4 space-y-6">
+                <ZoneDNACard
+                  dominantType={topTypeKey} dominantPct={topPct}
+                  avgTicket={zone.avg_ticket_by_type[topTypeKey] ?? zone.avg_ticket}
+                  avgArea={avgArea} avgBedrooms={avgBedrooms} avgBathrooms={avgBathrooms}
+                  avgPricePerM2={zone.avg_price_per_m2} totalListings={zone.total_listings}
+                  categoria={rawCat as PropertyCategory}
+                />
+                <ZoneComparisonEnhanced zone={zone} city={city} />
+                {/* CTA: Valuar propiedad */}
+                <a
+                  href={`/brujula?zone=${slug}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors"
+                >
+                  <Icon name="explore" className="text-base" />
+                  Valuar propiedad en esta zona
+                </a>
+              </div>
+            </div>
+          }
+          precios={
+            <div className="space-y-6">
+              <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
+              <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
+              {rawCat !== "terreno" && (
+                <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
+              )}
+              {zoneAnalytics.priceByBedrooms && rawCat !== "comercial" && rawCat !== "terreno" && (
+                <BedroomDistributionChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
+              )}
+            </div>
+          }
+          composicion={
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-8 space-y-6">
+                <PropertyCompositionChart data={compositionData} />
+                {areaByTypeData.length > 0 && (
+                  <AreaByTypeChart data={areaByTypeData} zoneName={zone.zone_name} />
+                )}
+              </div>
+              <div className="col-span-12 lg:col-span-4 space-y-6">
+                {rawCat !== "terreno" && (
+                  <TypeComparison data={zoneAnalytics.typeComparison} zoneName={zone.zone_name} categoria={rawCat} />
+                )}
+                {ventaRentaData.rentaCount > 0 && (
+                  <VentaRentaComparison data={ventaRentaData} />
+                )}
+              </div>
+            </div>
+          }
+          zona={
+            <div className="space-y-6">
+              <section id="demo-map">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
+                  <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+                    Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
+                  </a>
+                </div>
+                <ZoneMapWrapper zones={allZones} focusZoneSlug={slug} />
+              </section>
+              <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-6 space-y-6">
+                  <DemographicsCard slug={slug} zone={zone} allZones={allZones} />
+                </div>
+                <div className="col-span-12 lg:col-span-6 space-y-6">
+                  {(() => {
+                    const demo = getZoneDemographics(slug)
+                    const risk = riskMetrics.find((r) => r.zone_slug === slug) ?? null
+                    const insights = computeZoneInsights(demo, zone, risk, allZonesFiltered)
+                    return insights ? <ZoneInsightsCard insights={insights} /> : null
+                  })()}
+                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">
+                    <h4 className="text-sm font-black uppercase tracking-wider text-slate-400 mb-2">
+                      Perfil de Riesgo
+                    </h4>
+                    <p className="text-xs text-slate-400">
+                      Disponible cuando se acumulen 4+ semanas de datos históricos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {/* Pipeline */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-black tracking-tight">Proyectos en Pipeline</h3>
+                  <a href="/pipeline" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+                    Ver todos <Icon name="arrow_forward" className="text-sm" />
+                  </a>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {PIPELINE_PROJECTS.map((p) => (
+                    <PipelineCard key={p.name} project={p} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          }
         />
-      </section>
-
-      {/* [C] Main Content Grid */}
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left Column — Editorial + Charts */}
-        <div className="col-span-12 lg:col-span-8 space-y-6">
-          <div id="demo-editorial"><EditorialCard
-            zoneName={zone.zone_name}
-            mainText={mainText}
-            quote={quote}
-          /></div>
-          <div id="demo-charts"><PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} /></div>
-          <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
-          <PropertyCompositionChart data={compositionData} />
-          {rawCat !== "terreno" && (
-            <PriceByTypeChart data={priceByTypeData} zoneName={zone.zone_name} />
-          )}
-          {areaByTypeData.length > 0 && (
-            <AreaByTypeChart data={areaByTypeData} zoneName={zone.zone_name} />
-          )}
-          {zoneAnalytics.priceByBedrooms && rawCat !== "comercial" && rawCat !== "terreno" && (
-            <BedroomDistributionChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
-          )}
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          {/* ADN de la Zona */}
-          <ZoneDNACard
-            dominantType={topTypeKey}
-            dominantPct={topPct}
-            avgTicket={zone.avg_ticket_by_type[topTypeKey] ?? zone.avg_ticket}
-            avgArea={avgArea}
-            avgBedrooms={avgBedrooms}
-            avgBathrooms={avgBathrooms}
-            avgPricePerM2={zone.avg_price_per_m2}
-            totalListings={zone.total_listings}
-            categoria={rawCat as PropertyCategory}
-          />
-
-          {/* Type comparison: Casa vs Depto (residencial) / Local vs Oficina (comercial) */}
-          {rawCat !== "terreno" && (
-            <TypeComparison data={zoneAnalytics.typeComparison} zoneName={zone.zone_name} categoria={rawCat} />
-          )}
-
-          {/* Venta vs Renta — only show when renta listings exist */}
-          {ventaRentaData.rentaCount > 0 && (
-            <VentaRentaComparison data={ventaRentaData} />
-          )}
-
-          {/* Zone vs City Comparison */}
-          <ZoneComparisonEnhanced zone={zone} city={city} />
-
-          {/* Market Quality — hidden for now */}
-          {/* <MarketQualityCard data={marketQualityData} /> */}
-
-          {/* Demographics — Radiografía Socioeconómica */}
-          <DemographicsCard slug={slug} zone={zone} allZones={allZones} />
-
-          {/* Cross-referenced Insights — INEGI × Market */}
-          {(() => {
-            const demo = getZoneDemographics(slug)
-            const risk = riskMetrics.find((r) => r.zone_slug === slug) ?? null
-            const insights = computeZoneInsights(demo, zone, risk, allZonesFiltered)
-            return insights ? <ZoneInsightsCard insights={insights} /> : null
-          })()}
-
-          {/* Risk Profile — Próximamente (requires 4+ weeks of data) */}
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">
-            <h4 className="text-sm font-black uppercase tracking-wider text-slate-400 mb-2">
-              Perfil de Riesgo
-            </h4>
-            <p className="text-xs text-slate-400">
-              Disponible cuando se acumulen 4+ semanas de datos históricos. Incluye: score de riesgo, volatilidad, cap rate y liquidez.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* [E] Pipeline */}
-      <section className="mb-20">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-black tracking-tight">
-            Proyectos en Pipeline
-          </h3>
-          <a href="/pipeline" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver todos <Icon name="arrow_forward" className="text-sm" />
-          </a>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PIPELINE_PROJECTS.map((p) => (
-            <PipelineCard key={p.name} project={p} />
-          ))}
-        </div>
-      </section>
+      </Suspense>
     </div>
   )
 }

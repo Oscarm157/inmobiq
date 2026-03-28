@@ -49,6 +49,7 @@ export function PriceDistributionChart({ data, listingsByRange, zoneSlug }: Pric
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
             Distribución de Precios
           </h3>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Cuántas propiedades hay en cada rango de precio</p>
           <InfoTooltip content="Cantidad de propiedades en cada rango de precio. Se excluyen precios fuera de rango para evitar distorsiones. Las barras más altas indican los rangos de precio más comunes en la zona." />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">
