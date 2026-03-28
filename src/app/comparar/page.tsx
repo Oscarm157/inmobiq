@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { ComparadorClient } from "./comparador-client"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { getComparisonListings } from "@/lib/data/comparison-listings"
@@ -67,13 +68,16 @@ export default async function ComparadorPage({
   ])
 
   return (
-    <Suspense>
-      <ComparadorClient
+    <div className="space-y-6">
+      <Breadcrumb items={[{ label: "Comparar" }]} />
+      <Suspense>
+        <ComparadorClient
         allZones={allZones}
         initialSlugs={selectedSlugs}
         initialListings={listings}
         filters={filters}
       />
-    </Suspense>
+      </Suspense>
+    </div>
   )
 }

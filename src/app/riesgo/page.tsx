@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { ExportButton } from "@/components/export-button"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
@@ -16,6 +17,7 @@ export default async function RiesgoPage() {
   if (isMock) {
     return (
       <div className="space-y-10">
+        <Breadcrumb items={[{ label: "Riesgo" }]} />
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
@@ -44,6 +46,7 @@ export default async function RiesgoPage() {
 
   return (
     <div className="space-y-10">
+      <Breadcrumb items={[{ label: "Riesgo" }]} />
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">

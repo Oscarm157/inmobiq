@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
+import { Breadcrumb } from "@/components/breadcrumb"
 
 export default function PerfilPage() {
   const { user, loading, signOut } = useAuth()
@@ -44,6 +45,7 @@ export default function PerfilPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      <Breadcrumb items={[{ label: "Perfil" }]} />
       <h1 className="text-2xl font-bold text-slate-900">Mi Perfil</h1>
 
       {/* Avatar + info card */}

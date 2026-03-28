@@ -119,6 +119,8 @@ export function ExportButton({
       <button
         onClick={() => setOpen((o) => !o)}
         disabled={!!loading}
+        title="Descargar reporte en PDF, Excel o CSV"
+        aria-label="Exportar datos"
         className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (

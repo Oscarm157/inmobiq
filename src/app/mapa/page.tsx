@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { MapPageClient } from "./map-page-client"
 import type { ZoneMetrics } from "@/types/database"
@@ -13,6 +14,7 @@ export default async function MapaPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: "Mapa" }]} />
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full tracking-widest uppercase">

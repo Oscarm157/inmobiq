@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Icon } from "@/components/icon"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { ScreenshotUploader } from "@/components/brujula/screenshot-uploader"
 import { ManualForm, type ManualFormResult } from "@/components/brujula/manual-form"
 import { ExtractionReview, type ReviewResult } from "@/components/brujula/extraction-review"
@@ -69,6 +70,7 @@ export default function BrujulaPage() {
 
   return (
     <div className="space-y-10">
+      <Breadcrumb items={[{ label: "Brújula" }]} />
       {/* Page Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 mb-2">

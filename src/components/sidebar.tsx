@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/auth-context"
 const navItems = [
   { icon: "monitoring", label: "Precios", href: "/" },
   { icon: "explore", label: "Brújula", href: "/brujula" },
-  { icon: "location_on", label: "Zonas", href: "/zona" },
+  { icon: "location_on", label: "Zonas", href: "/zonas" },
   { icon: "map", label: "Mapa", href: "/mapa" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
   { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
@@ -39,6 +39,7 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/"
+    if (href === "/zonas") return pathname.startsWith("/zona")
     return pathname.startsWith(href)
   }
 

@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { getPortfolioPresets } from "@/lib/data/portfolio"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -53,6 +54,7 @@ export default async function PortafolioPage({
 
   return (
     <div className="space-y-10">
+      <Breadcrumb items={[{ label: "Portafolio" }]} />
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">

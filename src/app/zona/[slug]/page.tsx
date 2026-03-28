@@ -26,6 +26,7 @@ import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-
 import { TypeComparison } from "@/components/zone/type-comparison"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
@@ -337,6 +338,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   return (
     <div className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
+      <Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} />
       {/* [A] Page Header */}
       <div id="demo-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
