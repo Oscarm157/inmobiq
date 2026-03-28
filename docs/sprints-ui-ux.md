@@ -210,12 +210,12 @@ Documento vivo. Cada sprint tiene criterios de aceptacion y auditoria post-sprin
 5. Si todo pasa → merge + siguiente sprint
 6. Si algo no pasa → fix antes de avanzar
 
-### Prioridad de sprints
+### Estado de sprints (actualizado 2026-03-28)
 ```
-Sprint 1 (Credibilidad)     ← hacer ya, son quick wins
-Sprint 2 (Navegacion)       ← mejorar acceso
-Sprint 3 (Zona page)        ← el core del producto
-Sprint 4 (Filtros)          ← consistencia
-Sprint 5 (Onboarding)       ← nuevos usuarios
-Sprint 6 (Polish)           ← calidad final
+Sprint 1 (Credibilidad)     ✅ Completado — 366cb06
+Sprint 2 (Navegacion)       ✅ Completado — aff4f3d
+Sprint 3 (Zona page)        ✅ Completado — 41d7704
+Sprint 4 (Filtros)          ✅ Completado — b9af128
+Sprint 5 (Onboarding)       ✅ Completado — a8cd8d7
+Sprint 6 (Polish)           ✅ Completado — 4667625
 ```
