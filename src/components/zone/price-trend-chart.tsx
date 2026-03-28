@@ -38,7 +38,7 @@ export function PriceTrendChart({ data, var4w, var10w, momentum, realWeeks }: Pr
   return (
     <div className="space-y-4">
       {/* Trend KPIs */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">4 semanas</p>
           <p className={`text-lg font-black ${var4w >= 0 ? "text-emerald-600" : "text-red-600"}`}>

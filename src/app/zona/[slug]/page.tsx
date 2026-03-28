@@ -14,7 +14,7 @@ import { ZoneComparisonEnhanced } from "@/components/zone/zone-comparison-enhanc
 import { PriceDistributionChart } from "@/components/zone/price-distribution-chart"
 import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
 import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
-import { MarketQualityCard } from "@/components/zone/market-quality-card"
+
 import { DemographicsCard } from "@/components/zone/demographics-card"
 import { ZoneInsightsCard } from "@/components/zone/zone-insights-card"
 import { ZoneFilters } from "@/components/zone/zone-filters"
