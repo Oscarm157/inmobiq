@@ -11,7 +11,32 @@ export const metadata = {
 }
 
 export default async function RiesgoPage() {
-  const [riskData, zones] = await Promise.all([getZoneRiskMetrics(), getZoneMetrics()])
+  const [{ data: riskData, isMock }, zones] = await Promise.all([getZoneRiskMetrics(), getZoneMetrics()])
+
+  if (isMock) {
+    return (
+      <div className="space-y-10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
+              Risk Analysis
+            </span>
+          </div>
+          <h2 className="text-4xl font-extrabold tracking-tight">
+            Análisis de Riesgo de Inversión
+          </h2>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-8 text-center space-y-3">
+          <Icon name="hourglass_empty" className="text-4xl text-amber-500" />
+          <h3 className="text-lg font-bold text-amber-900 dark:text-amber-200">Datos insuficientes</h3>
+          <p className="text-amber-800 dark:text-amber-300 max-w-md mx-auto">
+            Se requieren al menos 4 semanas de datos históricos para calcular métricas de riesgo confiables. Esta sección estará disponible próximamente.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   const sortedByRisk = [...riskData].sort((a, b) => a.risk_score - b.risk_score)
   const avgRisk = Math.round(riskData.reduce((s, r) => s + r.risk_score, 0) / riskData.length)
   const avgCap = (riskData.reduce((s, r) => s + r.cap_rate, 0) / riskData.length).toFixed(1)

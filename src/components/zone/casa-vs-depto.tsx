@@ -2,6 +2,7 @@
 
 import { formatNumber } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
+import { EmptyState } from "@/components/empty-state"
 
 interface CasaVsDeptoData {
   type: string
@@ -41,7 +42,7 @@ function buildExample(casa: CasaVsDeptoData | undefined, depto: CasaVsDeptoData 
 
 export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
   const { formatPrice } = useCurrency()
-  if (!data.length) return null
+  if (!data.length) return <EmptyState description="No hay datos de casas o departamentos." />
 
   const casa = data.find((d) => d.type === "casa")
   const depto = data.find((d) => d.type === "departamento")
@@ -70,7 +71,7 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
       </div>
     )
   }
-  if (!hasCasa && !hasDepto) return null
+  if (!hasCasa && !hasDepto) return <EmptyState description="No hay datos de casas o departamentos." />
 
   const total = casa!.count + depto!.count
   const casaPct = Math.round((casa!.count / total) * 100)

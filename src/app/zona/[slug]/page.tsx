@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { DemoScroll } from "@/components/demo-scroll"
 import { Icon } from "@/components/icon"
 import { ExportButton } from "@/components/export-button"
@@ -24,7 +24,8 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
 import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
-import { getZoneMetrics, getZoneBySlug, getCityMetrics } from "@/lib/data/zones"
+import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
+import { UpdatedAt } from "@/components/updated-at"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
@@ -59,7 +60,7 @@ interface ZonePageProps {
 
 export async function generateStaticParams() {
   const zones = await getZoneMetrics()
-  return zones.map((zone) => ({ slug: zone.zone_slug }))
+  return zones.filter((z) => z.zone_slug !== "otros").map((zone) => ({ slug: zone.zone_slug }))
 }
 
 export async function generateMetadata({ params }: ZonePageProps) {
@@ -82,6 +83,7 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params, searchParams }: ZonePageProps) {
   const { slug } = await params
+  if (slug === "otros") redirect("/")
   const sp = await searchParams
 
   // Read persistent preferences from cookies (fallback: venta + residencial)
@@ -102,14 +104,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     categoria: rawCat !== "todas" ? (rawCat as PropertyCategory) : undefined,
   }
 
-  const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics] = await Promise.all([
+  const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics, lastUpdated] = await Promise.all([
     getZoneBySlug(slug, filters),
     getCityMetrics(filters),
     getZoneMetrics(),
     getZoneMetrics(filters),
     getListings(filters),
     getZoneListingsAnalytics(slug, filters),
-    getZoneRiskMetrics(),
+    getZoneRiskMetrics().then(r => r.data),
+    getLastSnapshotDate(),
   ])
   if (!zone) notFound()
 
@@ -352,9 +355,12 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           <h2 className="text-4xl font-extrabold tracking-tight">
             {zone.zone_name}
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl font-medium">
-            Análisis estratégico del mercado inmobiliario · Tijuana
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              Análisis estratégico del mercado inmobiliario · Tijuana
+            </p>
+            <UpdatedAt date={lastUpdated} />
+          </div>
         </div>
         <div className="flex gap-3">
           <ExportButton zoneSlug={slug} />

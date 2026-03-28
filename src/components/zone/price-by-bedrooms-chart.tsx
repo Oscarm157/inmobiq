@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart, XAxis, YAxis, LabelList } from "recharts"
+import { EmptyState } from "@/components/empty-state"
 import {
   ChartContainer,
   type ChartConfig,
@@ -26,7 +27,7 @@ interface BedroomDistributionChartProps {
 }
 
 export function BedroomDistributionChart({ data, zoneName }: BedroomDistributionChartProps) {
-  if (!data.length) return null
+  if (!data.length) return <EmptyState icon="bed" description="No hay datos de distribución por recámaras." />
 
   const hasDepto = data.some((d) => d.depto_count > 0)
 

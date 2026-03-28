@@ -401,3 +401,20 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     return TIJUANA_CITY_METRICS
   }
 }
+
+/** Returns the ISO date of the most recent snapshot (for "last updated" UI). */
+export async function getLastSnapshotDate(): Promise<string | null> {
+  if (useMock()) return null
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data } = await supabase
+      .from("snapshots")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single()
+    return (data as { created_at: string } | null)?.created_at ?? null
+  } catch {
+    return null
+  }
+}

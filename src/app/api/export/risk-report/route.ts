@@ -16,7 +16,7 @@ export async function POST() {
   const limited = await rateLimit(`export-risk:${user.id}`, 10, 3_600_000)
   if (limited) return limited
 
-  const riskData = await getZoneRiskMetrics()
+  const { data: riskData } = await getZoneRiskMetrics()
   const sorted = [...riskData].sort((a, b) => a.risk_score - b.risk_score)
   const now = new Date()
   const dateStr = now.toLocaleDateString("es-MX", {

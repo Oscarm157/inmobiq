@@ -6,6 +6,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { InfoTooltip } from "@/components/info-tooltip"
+import { EmptyState } from "@/components/empty-state"
 
 const COLORS: Record<string, string> = {
   departamento: "#7c3aed",
@@ -32,7 +33,7 @@ interface Props {
 }
 
 export function AreaByTypeChart({ data, zoneName }: Props) {
-  if (!data.length) return null
+  if (!data.length) return <EmptyState description="No hay datos de superficie por tipo de propiedad." />
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">

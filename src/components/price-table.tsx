@@ -31,7 +31,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
   const fmt = (value: number) => formatCurrency(value, currency, exchangeRate)
 
   // Build rows from VENTA zones (always), with renta lookup for comparison
-  const rows = ventaZones.map((zone) => {
+  const rows = ventaZones.filter((z) => z.zone_slug !== "otros").map((zone) => {
     const rentPerM2 = rentaRealLookup.get(zone.zone_slug) ?? rentaMockLookup.get(zone.zone_slug) ?? 0
     const yearlyRent = rentPerM2 * 12
     const yieldPct = zone.avg_price_per_m2 > 0 && yearlyRent > 0

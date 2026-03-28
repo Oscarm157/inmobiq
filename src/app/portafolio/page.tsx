@@ -44,7 +44,7 @@ export default async function PortafolioPage({
     recamaras: sp.rec ? sp.rec.split(",").map(Number) : undefined,
   }
 
-  const [presets, zones, riskData, { listings, total }] = await Promise.all([
+  const [presets, zones, { data: riskData }, { listings, total }] = await Promise.all([
     Promise.resolve(getPortfolioPresets()),
     getZoneMetrics(),
     getZoneRiskMetrics(),

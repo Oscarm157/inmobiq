@@ -17,7 +17,8 @@ import { PriceRangeChart } from "@/components/price-range-chart"
 import { TypeCompositionChart } from "@/components/type-composition-chart"
 import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
 import { MarketFilters } from "@/components/market-filters"
-import { getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
+import { getZoneMetrics, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
+import { UpdatedAt } from "@/components/updated-at"
 import { getPriceTrendData } from "@/lib/data/snapshots"
 import { getListingsAnalytics } from "@/lib/data/listings"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -88,7 +89,7 @@ export default async function HomePage({
       : undefined,
   }
 
-  const [zones, ventaZonesForTable, rentaZonesForTable, inventoryZones, city, priceTrend, analytics, riskData] = await Promise.all([
+  const [zones, ventaZonesForTable, rentaZonesForTable, inventoryZones, city, priceTrend, analytics, { data: riskData }, lastUpdated] = await Promise.all([
     getZoneMetrics(filters),
     getZoneMetrics({ ...filters, listing_type: "venta" }),
     getZoneMetrics({ ...filters, listing_type: "renta" }),
@@ -97,6 +98,7 @@ export default async function HomePage({
     getPriceTrendData(),
     getListingsAnalytics(filters),
     getZoneRiskMetrics(),
+    getLastSnapshotDate(),
   ])
 
   // Narrative helpers (guard empty zones from aggressive filtering)
@@ -130,6 +132,7 @@ export default async function HomePage({
               <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
                 Live Data
               </span>
+              <UpdatedAt date={lastUpdated} />
             </div>
             <h2 className="text-4xl font-extrabold tracking-tight">
               Mercado Inmobiliario: Tijuana
@@ -285,7 +288,7 @@ export default async function HomePage({
           </a>
         </div>
         {(() => {
-          const sorted = [...zones].sort((a, b) => b.total_listings - a.total_listings)
+          const sorted = [...zones].filter((z) => z.zone_slug !== "otros").sort((a, b) => b.total_listings - a.total_listings)
           const maxListings = sorted[0]?.total_listings ?? 1
 
           // Build filter params for zone links (only include non-default values)

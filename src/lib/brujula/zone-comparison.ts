@@ -46,7 +46,7 @@ export async function getZoneDataForValuation(
   }
 
   // Fetch all data sources in parallel
-  const [zone, allMetrics, riskArr, cityMetrics, listingsResult] = await Promise.all([
+  const [zone, allMetrics, { data: riskArr }, cityMetrics, listingsResult] = await Promise.all([
     getZoneBySlug(zoneSlug, { listing_type: listingType, categoria }),
     getZoneMetrics({ listing_type: listingType, categoria }),
     getZoneRiskMetrics(),

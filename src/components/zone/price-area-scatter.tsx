@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { EmptyState } from "@/components/empty-state"
 import {
   ScatterChart,
   Scatter,
@@ -65,7 +66,7 @@ export function PriceAreaScatter({ data, availableTypes, devMode, zoneSlug }: Pr
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set(availableTypes))
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
-  if (!data.length) return null
+  if (!data.length) return <EmptyState icon="scatter_plot" description="No hay propiedades con precio y superficie para graficar." />
 
   const filteredData = data.filter((d) => activeTypes.has(d.type))
 

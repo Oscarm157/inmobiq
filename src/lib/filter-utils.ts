@@ -48,9 +48,12 @@ export const ZONES = [
   { slug: "villa-fontana", name: "Villa Fontana" },
   { slug: "zona-este", name: "Zona Este" },
   { slug: "zona-rio", name: "Zona Río" },
-  // Catch-all
+  // Catch-all (internal only — not shown in UI)
   { slug: "otros", name: "Otros" },
 ]
+
+/** Zones visible to users — excludes "Otros" catch-all */
+export const PUBLIC_ZONES = ZONES.filter((z) => z.slug !== "otros")
 
 export const BEDROOMS = [1, 2, 3, 4] as const
 

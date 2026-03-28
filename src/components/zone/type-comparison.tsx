@@ -3,6 +3,7 @@
 import { formatNumber } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 import { InfoTooltip } from "@/components/info-tooltip"
+import { EmptyState } from "@/components/empty-state"
 
 interface TypeComparisonData {
   type: string
@@ -60,7 +61,7 @@ function buildExample(
 
 export function TypeComparison({ data, zoneName, categoria = "residencial" }: TypeComparisonProps) {
   const { formatPrice } = useCurrency()
-  if (!data.length) return null
+  if (!data.length) return <EmptyState description="No hay datos para comparar tipos de propiedad." />
 
   const config = CATEGORY_CONFIG[categoria] ?? CATEGORY_CONFIG.residencial
   const [typeA, typeB] = config.types
@@ -92,7 +93,7 @@ export function TypeComparison({ data, zoneName, categoria = "residencial" }: Ty
       </div>
     )
   }
-  if (!hasA && !hasB) return null
+  if (!hasA && !hasB) return <EmptyState description="No hay datos para comparar tipos de propiedad." />
 
   const total = a!.count + b!.count
   const pctA = Math.round((a!.count / total) * 100)

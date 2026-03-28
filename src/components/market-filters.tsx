@@ -6,6 +6,7 @@ import { Icon } from "@/components/icon"
 import { useCurrency } from "@/contexts/currency-context"
 import {
   PROPERTY_TYPES,
+  PUBLIC_ZONES,
   ZONES,
   BEDROOMS,
   buildMarketParams,
@@ -240,7 +241,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
               <div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Zona</p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                  {ZONES.map(({ slug, name }) => {
+                  {PUBLIC_ZONES.map(({ slug, name }) => {
                     const active = state.zonas.includes(slug)
                     return (
                       <label key={slug} className="flex items-center gap-2 cursor-pointer group">

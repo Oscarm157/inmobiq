@@ -17,8 +17,8 @@ type SnapshotRow = {
  * Real data: computed from snapshot history (volatility = price std dev over 4 weeks).
  * Falls back to mock when insufficient snapshot history exists.
  */
-export async function getZoneRiskMetrics(): Promise<ZoneRiskMetrics[]> {
-  if (useMock()) return ZONE_RISK_DATA
+export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; isMock: boolean }> {
+  if (useMock()) return { data: ZONE_RISK_DATA, isMock: true }
 
   try {
     const supabase = await createSupabaseServerClient()
@@ -32,7 +32,7 @@ export async function getZoneRiskMetrics(): Promise<ZoneRiskMetrics[]> {
 
     const weeks = weeksRes.data as Array<{ week_start: string }> | null
 
-    if (!weeks || weeks.length < 2) return ZONE_RISK_DATA
+    if (!weeks || weeks.length < 2) return { data: ZONE_RISK_DATA, isMock: true }
 
     const weekStarts = weeks.map((w) => w.week_start)
 
@@ -47,7 +47,7 @@ export async function getZoneRiskMetrics(): Promise<ZoneRiskMetrics[]> {
     const zones = zonesRes.data as Zone[] | null
     const snapshots = snapshotsRes.data as SnapshotRow[] | null
 
-    if (!zones?.length || !snapshots?.length) return ZONE_RISK_DATA
+    if (!zones?.length || !snapshots?.length) return { data: ZONE_RISK_DATA, isMock: true }
 
     const result: ZoneRiskMetrics[] = zones
       .map((zone) => {
@@ -119,8 +119,8 @@ export async function getZoneRiskMetrics(): Promise<ZoneRiskMetrics[]> {
       })
       .filter(Boolean) as ZoneRiskMetrics[]
 
-    return result.length >= 2 ? result : ZONE_RISK_DATA
+    return result.length >= 2 ? { data: result, isMock: false } : { data: ZONE_RISK_DATA, isMock: true }
   } catch {
-    return ZONE_RISK_DATA
+    return { data: ZONE_RISK_DATA, isMock: true }
   }
 }

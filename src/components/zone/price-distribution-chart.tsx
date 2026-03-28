@@ -9,6 +9,7 @@ import {
 import { useCurrency } from "@/contexts/currency-context"
 import { DrillDownPanel, type DrillDownListing } from "@/components/zone/drill-down-panel"
 import { InfoTooltip } from "@/components/info-tooltip"
+import { EmptyState } from "@/components/empty-state"
 
 const chartConfig = {
   count: { label: "Propiedades", color: "#2563eb" },
@@ -32,7 +33,7 @@ export function PriceDistributionChart({ data, listingsByRange, zoneSlug }: Pric
   const [selectedRange, setSelectedRange] = useState<string | null>(null)
   const devMode = !!listingsByRange
 
-  if (!data.length) return null
+  if (!data.length) return <EmptyState icon="bar_chart_off" description="No hay propiedades suficientes para mostrar la distribución de precios." />
 
   const handleBarClick = (entry: PriceDistributionData) => {
     if (!devMode) return

@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart, XAxis, YAxis, Cell, LabelList } from "recharts"
+import { EmptyState } from "@/components/empty-state"
 import {
   ChartContainer,
   type ChartConfig,
@@ -34,7 +35,7 @@ interface PriceByTypeChartProps {
 
 export function PriceByTypeChart({ data, zoneName }: PriceByTypeChartProps) {
   const { formatPrice } = useCurrency()
-  if (!data.length) return null
+  if (!data.length) return <EmptyState description="No hay datos de precio por tipo de propiedad." />
 
   // Re-format labels client-side to respect currency preference
   const chartData = data.map((d) => ({ ...d, label: formatPrice(d.avgTicket) }))

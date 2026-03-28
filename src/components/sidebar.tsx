@@ -202,11 +202,8 @@ export function Sidebar() {
 /* ── Animated logo wordmark ── */
 const LOGO_TEXT = "INMOBIQ"
 
-function getReplayDelay(playCount: number): number | null {
-  if (playCount >= 10) return null      // stop after 10 plays
-  if (playCount < 5) return 2_000       // first 5: quick pause
-  if (playCount < 7) return 30_000      // plays 6-7: 30s pause
-  return 60_000                         // plays 8-10: 1 min pause
+function getReplayDelay(_playCount: number): null {
+  return null // play once, then stay static
 }
 
 export function LogoTyping() {

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { useCurrency } from "@/contexts/currency-context"
 import type { PropertyType, ListingType } from "@/types/database"
-import { ZONES } from "@/lib/filter-utils"
+import { ZONES, PUBLIC_ZONES } from "@/lib/filter-utils"
 
 const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
   { value: "casa", label: "Casa", icon: "home" },
@@ -129,7 +129,7 @@ function FilterPanel({ state, onChange, onClear, total }: FilterPanelProps) {
       <div>
         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Zona</p>
         <div className="flex flex-col gap-1.5">
-          {ZONES.map(({ slug, name }) => {
+          {PUBLIC_ZONES.map(({ slug, name }) => {
             const active = state.zonas.includes(slug)
             return (
               <label key={slug} className="flex items-center gap-2 cursor-pointer group">
