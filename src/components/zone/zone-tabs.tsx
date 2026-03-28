@@ -4,12 +4,14 @@ import { useState, type ReactNode } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
 
-export type ZoneTab = "general" | "precios" | "composicion" | "zona"
+export type ZoneTab = "general" | "precios" | "composicion" | "inversion" | "tendencias" | "zona"
 
 const TABS: { id: ZoneTab; label: string; icon: string }[] = [
   { id: "general", label: "General", icon: "dashboard" },
   { id: "precios", label: "Precios", icon: "payments" },
   { id: "composicion", label: "Composición", icon: "donut_small" },
+  { id: "inversion", label: "Inversión", icon: "savings" },
+  { id: "tendencias", label: "Tendencias", icon: "show_chart" },
   { id: "zona", label: "Zona", icon: "location_on" },
 ]
 
@@ -18,10 +20,12 @@ interface ZoneTabsProps {
   general: ReactNode
   precios: ReactNode
   composicion: ReactNode
+  inversion: ReactNode
+  tendencias: ReactNode
   zona: ReactNode
 }
 
-export function ZoneTabs({ defaultTab = "general", general, precios, composicion, zona }: ZoneTabsProps) {
+export function ZoneTabs({ defaultTab = "general", general, precios, composicion, inversion, tendencias, zona }: ZoneTabsProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -41,12 +45,12 @@ export function ZoneTabs({ defaultTab = "general", general, precios, composicion
     router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false })
   }
 
-  const content: Record<ZoneTab, ReactNode> = { general, precios, composicion, zona }
+  const content: Record<ZoneTab, ReactNode> = { general, precios, composicion, inversion, tendencias, zona }
 
   return (
     <div className="space-y-6">
       {/* Tab bar */}
-      <div role="tablist" aria-label="Secciones de zona" className="flex gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto">
+      <div role="tablist" aria-label="Secciones de zona" className="flex gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto scrollbar-none">
         {TABS.map((tab) => (
           <button
             key={tab.id}

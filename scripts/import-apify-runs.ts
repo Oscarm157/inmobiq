@@ -26,10 +26,14 @@ import { calculateWeeklySnapshots } from "../src/scraper/snapshots"
 // ─── Run IDs to import ──────────────────────────────────────────────────────
 
 const RUN_IDS = [
-  "LoNXfD054q7aD61X2",
-  "V6Y4Qi74nrEUQDs3d",
-  "U7KxqZTHw1gCPtmEk",
-  "CWoWGUPo7vjWQapv9",
+  // Renta runs — 2026-03-28 (~390 listings)
+  "GgTgYNDoukQAwnsXL",  // 210 renta listings
+  "IMPOEmusIsbkbPDBV",  // 180 renta listings
+  // Previous venta runs (already imported)
+  // "LoNXfD054q7aD61X2",
+  // "V6Y4Qi74nrEUQDs3d",
+  // "U7KxqZTHw1gCPtmEk",
+  // "CWoWGUPo7vjWQapv9",
 ]
 
 // ─── Main ───────────────────────────────────────────────────────────────────

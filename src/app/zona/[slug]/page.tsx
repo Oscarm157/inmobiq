@@ -25,6 +25,12 @@ import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-ch
 import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
 import { ZoneTabs } from "@/components/zone/zone-tabs"
+import { PriceTrendChart } from "@/components/zone/price-trend-chart"
+import { InvestmentKPIs } from "@/components/zone/investment-kpis"
+import { InvestmentProfile } from "@/components/zone/investment-profile"
+import { YieldByTypeChart, type YieldByTypeData } from "@/components/zone/yield-by-type-chart"
+import { PricePercentile } from "@/components/zone/price-percentile"
+import { getZoneTrendData, computeTrendKPIs } from "@/lib/data/trend-data"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
 import { Breadcrumb } from "@/components/breadcrumb"
@@ -336,6 +342,67 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     totalListings: validListings.length,
   }
 
+  // --- Trend data (10 weeks, mock + real) ---
+  const trendData = await getZoneTrendData(slug, zone.avg_price_per_m2)
+  const trendKPIs = computeTrendKPIs(trendData)
+
+  // --- Investment data ---
+  const rentaListingsForYield = normalizedListings.filter((l) => l.listing_type === "renta")
+  const ventaListingsForYield = normalizedListings.filter((l) => l.listing_type === "venta")
+  const hasRentaData = rentaListingsForYield.length >= 3
+
+  // Compute yield by type
+  const TYPE_LABELS_SHORT: Record<string, string> = { casa: "Casa", departamento: "Depto", local: "Local", oficina: "Oficina" }
+  const yieldByType: YieldByTypeData[] = []
+
+  for (const type of ["casa", "departamento", "local", "oficina"]) {
+    const rentaOfType = rentaListingsForYield.filter((l) => l.property_type === type)
+    const ventaOfType = ventaListingsForYield.filter((l) => l.property_type === type)
+    if (rentaOfType.length >= 2 && ventaOfType.length >= 2) {
+      const avgRent = rentaOfType.reduce((s, l) => s + l.price, 0) / rentaOfType.length
+      const avgSale = ventaOfType.reduce((s, l) => s + l.price, 0) / ventaOfType.length
+      if (avgSale > 0 && avgRent > 0) {
+        yieldByType.push({
+          type,
+          typeLabel: TYPE_LABELS_SHORT[type] ?? type,
+          yieldPct: (avgRent * 12 / avgSale) * 100,
+          avgRent,
+          avgSalePrice: avgSale,
+        })
+      }
+    }
+  }
+
+  // Overall yield
+  const totalAvgRent = rentaListingsForYield.length > 0
+    ? rentaListingsForYield.reduce((s, l) => s + l.price, 0) / rentaListingsForYield.length
+    : 0
+  const totalAvgSale = ventaListingsForYield.length > 0
+    ? ventaListingsForYield.reduce((s, l) => s + l.price, 0) / ventaListingsForYield.length
+    : 0
+  const yieldPct = totalAvgSale > 0 && totalAvgRent > 0 ? (totalAvgRent * 12 / totalAvgSale) * 100 : null
+  const riskForZone = riskMetrics.find((r) => r.zone_slug === slug)
+  const capRate = riskForZone?.cap_rate ?? (yieldPct ? yieldPct * 0.85 : null) // rough adjustment
+  const paybackYears = yieldPct && yieldPct > 0 ? 100 / (yieldPct * 0.7) : null // 30% expenses
+
+  // Investment score (0-100)
+  const demo = getZoneDemographics(slug)
+  const insights = demo ? computeZoneInsights(demo, zone, riskForZone ?? null, allZonesFiltered) : null
+  const investmentScore = Math.min(100, Math.max(0, Math.round(
+    (insights?.appreciation_potential ?? 50) * 0.3 +
+    (riskForZone ? (100 - riskForZone.risk_score) : 50) * 0.2 +
+    (yieldPct ? Math.min(yieldPct * 10, 100) : 50) * 0.3 +
+    (riskForZone?.liquidity_score ?? 50) * 0.2
+  )))
+
+  // Price percentile data
+  const allZonePrices = allZones
+    .filter((z) => z.zone_slug !== "otros" && z.avg_price_per_m2 > 0)
+    .map((z) => ({ name: z.zone_name, price: z.avg_price_per_m2 }))
+
+  // NSE label for investment profile
+  const nseLabel = demo?.nse_label ?? null
+
   return (
     <div className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
@@ -420,6 +487,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           }
           precios={
             <div className="space-y-6">
+              <PricePercentile zonePrice={zone.avg_price_per_m2} allZonePrices={allZonePrices} zoneName={zone.zone_name} />
               <PriceDistributionChart data={priceDistData} listingsByRange={listingsByRange} zoneSlug={slug} />
               <PriceAreaScatter data={scatterData} availableTypes={scatterTypes} devMode={DEV_DRILLDOWN} zoneSlug={slug} />
               {rawCat !== "terreno" && (
@@ -429,6 +497,49 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                 <BedroomDistributionChart data={zoneAnalytics.priceByBedrooms} zoneName={zone.zone_name} />
               )}
             </div>
+          }
+          inversion={
+            <div className="space-y-6">
+              <InvestmentKPIs
+                yieldPct={yieldPct}
+                capRate={capRate}
+                investmentScore={investmentScore}
+                paybackYears={paybackYears}
+                hasRentaData={hasRentaData}
+              />
+              <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-7 space-y-6">
+                  <YieldByTypeChart data={yieldByType} />
+                  {!hasRentaData && (
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+                      <Icon name="info" className="text-amber-600 text-lg flex-shrink-0" />
+                      <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                        Datos de renta limitados en esta zona. Las métricas de yield se calcularán con mayor precisión conforme se acumulen más datos.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="col-span-12 lg:col-span-5">
+                  <InvestmentProfile
+                    zone={zone}
+                    cityAvg={cityAvg}
+                    yieldPct={yieldPct}
+                    capRate={capRate}
+                    investmentScore={investmentScore}
+                    nseLabel={nseLabel}
+                  />
+                </div>
+              </div>
+            </div>
+          }
+          tendencias={
+            <PriceTrendChart
+              data={trendData}
+              var4w={trendKPIs.var4w}
+              var10w={trendKPIs.var10w}
+              momentum={trendKPIs.momentum}
+              realWeeks={trendKPIs.realWeeks}
+            />
           }
           composicion={
             <div className="grid grid-cols-12 gap-6">
