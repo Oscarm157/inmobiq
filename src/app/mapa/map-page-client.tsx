@@ -32,9 +32,9 @@ export function MapPageClient({ zones }: MapPageClientProps) {
     .sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[400px] lg:h-[calc(100vh-200px)] lg:min-h-[500px]">
+    <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 h-[400px] lg:h-[calc(100vh-200px)] lg:min-h-[500px]">
       {/* Map — fills the full height */}
-      <div className="lg:col-span-3 h-full rounded-xl overflow-hidden">
+      <div className="lg:col-span-5 h-full rounded-xl overflow-hidden">
         <InteractiveMap
           zones={zones}
           height="100%"
@@ -93,18 +93,19 @@ export function MapPageClient({ zones }: MapPageClientProps) {
             Todas las zonas ({sortedZones.length})
           </p>
           <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-            {sortedZones.map((zone) => (
+            {sortedZones.map((zone, i) => (
               <button
                 key={zone.zone_id}
                 onClick={() => handleZoneClick(zone.zone_slug)}
-                className={`w-full flex justify-between items-center px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors ${
                   selectedZone?.zone_slug === zone.zone_slug
                     ? "bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800"
                     : "hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent"
                 }`}
               >
-                <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">{zone.zone_name}</span>
-                <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">{formatPrice(zone.avg_price_per_m2)}</span>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 w-4 text-right flex-shrink-0">{i + 1}</span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex-1">{zone.zone_name}</span>
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400">{formatPrice(zone.avg_price_per_m2)}</span>
               </button>
             ))}
           </div>
