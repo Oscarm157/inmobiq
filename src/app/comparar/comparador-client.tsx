@@ -195,11 +195,25 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
             </div>
           )}
         </div>
-        {selectedSlugs.length === 0 && (
-          <p className="text-sm text-slate-400 dark:text-slate-500">
-            Ninguna zona seleccionada. Elige una comparación sugerida o agrega zonas manualmente.
+        {/* Zone count indicator */}
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-semibold text-slate-400">
+            {selectedSlugs.length}/4 zonas seleccionadas
           </p>
-        )}
+          {/* Preset shortcuts — always visible */}
+          <div className="flex gap-2">
+            {PRESET_COMPARISONS.map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => selectPreset(preset.slugs)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-400 transition-colors"
+              >
+                <Icon name={preset.icon} className="text-xs" />
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {isPending ? (
