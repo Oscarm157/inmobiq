@@ -34,7 +34,8 @@ export function ModeTabs({ defaultMode = "venta" }: ModeTabsProps) {
       params.set("operacion", mode)
       const qs = params.toString()
       startTransition(() => {
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+        router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+        router.refresh()
       })
     },
     [currentMode, searchParams, router, pathname, startTransition],
