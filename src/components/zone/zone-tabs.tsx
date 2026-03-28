@@ -46,10 +46,12 @@ export function ZoneTabs({ defaultTab = "general", general, precios, composicion
   return (
     <div className="space-y-6">
       {/* Tab bar */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto">
+      <div role="tablist" aria-label="Secciones de zona" className="flex gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
             onClick={() => handleTabChange(tab.id)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === tab.id

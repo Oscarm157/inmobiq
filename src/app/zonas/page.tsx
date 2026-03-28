@@ -4,6 +4,8 @@ import { Breadcrumb } from "@/components/breadcrumb"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { ZonesGridClient } from "./zones-grid-client"
 
+export const revalidate = 3600 // ISR: revalidate every 1 hour
+
 export const metadata = {
   title: "Zonas — Inmobiq",
   description: "Explora todas las zonas inmobiliarias de Tijuana. Compara precios, tendencias e inventario.",
