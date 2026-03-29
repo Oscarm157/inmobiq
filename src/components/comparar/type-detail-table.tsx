@@ -17,9 +17,10 @@ const PROPERTY_TYPES: { value: PropertyType; label: string; icon: string }[] = [
 interface TypeDetailTableProps {
   zones: ZoneMetrics[]
   colors: string[]
+  embedded?: boolean
 }
 
-export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
+export function TypeDetailTable({ zones, colors, embedded }: TypeDetailTableProps) {
   const { formatPrice } = useCurrency()
   const [expanded, setExpanded] = useState(false)
 
@@ -34,15 +35,17 @@ export function TypeDetailTable({ zones, colors }: TypeDetailTableProps) {
   const visibleTypes = expanded ? typesWithTotal : typesWithTotal.slice(0, 3)
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div className={embedded ? "overflow-hidden" : "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"}>
+      <div className={`${embedded ? "pb-3" : "px-6 py-4 border-b border-slate-100 dark:border-slate-800"} flex items-center justify-between`}>
         <div>
-          <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
+          <h4 className={`font-bold ${embedded ? "text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500" : "text-base text-slate-800 dark:text-slate-100"}`}>
             Desglose por tipo de propiedad
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Inventario y ticket promedio por tipo
-          </p>
+          </h4>
+          {!embedded && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Inventario y ticket promedio por tipo
+            </p>
+          )}
         </div>
         {typesWithTotal.length > 3 && (
           <button

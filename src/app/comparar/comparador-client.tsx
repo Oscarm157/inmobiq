@@ -11,13 +11,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
+  AreaChart,
 } from "recharts"
 import { Icon } from "@/components/icon"
 import { getZoneComparisonData } from "@/lib/data/comparator"
-import { formatPercent } from "@/lib/utils"
-import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
-import { ZoneRadarChart } from "@/components/comparar/radar-chart"
+import { ComparisonVerdict } from "@/components/comparar/comparison-verdict"
+import { MetricBars } from "@/components/comparar/metric-bars"
+import { CollapsibleSection } from "@/components/comparar/collapsible-section"
 import { PriceAreaScatter } from "@/components/comparar/scatter-chart"
 import { TypeDetailTable } from "@/components/comparar/type-detail-table"
 import { VentaRentaZones } from "@/components/comparar/venta-renta-zones"
@@ -185,7 +187,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
   }
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="relative">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -236,12 +238,10 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
             <ZoneCombobox zones={availableToAdd} onSelect={addZone} />
           )}
         </div>
-        {/* Zone count indicator */}
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-semibold text-slate-400">
             {selectedSlugs.length}/4 zonas seleccionadas
           </p>
-          {/* Preset shortcuts — always visible */}
           <div className="flex gap-2">
             {PRESET_COMPARISONS.map((preset) => (
               <button
@@ -264,213 +264,150 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
         </div>
       ) : selectedZones.length > 0 ? (
         <>
-          {/* 1. Side-by-side metrics */}
-          <div className={`grid gap-4 ${selectedZones.length === 2 ? "grid-cols-2" : selectedZones.length === 3 ? "grid-cols-3" : "grid-cols-2 lg:grid-cols-4"}`}>
-            {selectedZones.map((zone, i) => (
-              <div
-                key={zone.zone_slug}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4 shadow-sm"
-              >
-                <div
-                  className="w-3 h-3 rounded-full mb-1"
-                  style={{ backgroundColor: ZONE_COLORS[i] }}
-                />
-                <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-100 leading-tight">
-                  {zone.zone_name}
-                </h3>
-
-                <div className="space-y-3">
-                  <MetricRow
-                    label="Precio/m²"
-                    value={formatPrice(zone.avg_price_per_m2)}
-                    sub={`Tendencia ${formatPercent(zone.price_trend_pct)}`}
-                    trendPositive={zone.price_trend_pct >= 0}
-                  />
-                  <MetricRow
-                    label="Inventario"
-                    value={getZoneActivityLabel(zone.total_listings)}
-                    sub="nivel de actividad"
-                  />
-                  <MetricRow
-                    label="Ticket promedio"
-                    value={formatPrice(zone.avg_ticket)}
-                    sub="por propiedad"
-                  />
-                </div>
-
-                {/* Property type breakdown */}
-                {zone.listings_by_type && Object.keys(zone.listings_by_type).length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">
-                      Distribución
-                    </p>
-                    <div className="space-y-1">
-                      {Object.entries(zone.listings_by_type)
-                        .filter(([, count]) => count > 0)
-                        .sort(([, a], [, b]) => b - a)
-                        .slice(0, 3)
-                        .map(([type, count]) => (
-                          <div key={type} className="flex items-center gap-2">
-                            <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                              <div
-                                className="h-full rounded-full"
-                                style={{
-                                  backgroundColor: ZONE_COLORS[i],
-                                  width: `${Math.min(100, (count / zone.total_listings) * 100)}%`,
-                                  opacity: 0.7,
-                                }}
-                              />
-                            </div>
-                            <span className="text-xs text-slate-500 dark:text-slate-400 w-24 text-right capitalize">
-                              {type} {Math.round((count / zone.total_listings) * 100)}%
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 2. Radar chart */}
-          <ZoneRadarChart zones={selectedZones} colors={ZONE_COLORS.slice(0, selectedZones.length)} />
-
-          {/* 3. Price trend chart */}
-          {loading && (
-            <div className="flex items-center gap-3 text-slate-400 py-8 justify-center">
-              <Icon name="progress_activity" className="animate-spin" />
-              <span className="text-sm">Cargando tendencia…</span>
-            </div>
-          )}
-          {!loading && compData?.trendSeries && compData.trendSeries.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 mb-5">
-                Evolución de precio/m² — últimas 12 semanas
-              </h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={compData.trendSeries} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(100,116,139,0.15)" />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 11, fill: "currentColor" }}
-                    className="text-slate-500 dark:text-slate-400"
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "currentColor" }}
-                    className="text-slate-500 dark:text-slate-400"
-                    tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [formatPrice(value), "$/m²"]}
-                    contentStyle={{
-                      backgroundColor: "var(--color-bg, white)",
-                      border: "1px solid rgba(100,116,139,0.2)",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: "12px" }} />
-                  {selectedSlugs.map((slug, i) => {
-                    const zone = allZones.find((z) => z.zone_slug === slug)
-                    return (
-                      <Line
-                        key={slug}
-                        type="monotone"
-                        dataKey={slug}
-                        name={zone?.zone_name ?? slug}
-                        stroke={ZONE_COLORS[i]}
-                        strokeWidth={2.5}
-                        dot={false}
-                        activeDot={{ r: 5 }}
-                      />
-                    )
-                  })}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {/* 4. Scatter plot */}
-          {listings.length > 0 && (
-            <PriceAreaScatter
-              listings={listings}
-              slugs={selectedSlugs}
-              colors={ZONE_COLORS.slice(0, selectedSlugs.length)}
-              zoneNames={zoneNames}
-            />
-          )}
-
-          {/* 5. Type detail table */}
-          <TypeDetailTable
+          {/* 1. Verdict hero */}
+          <ComparisonVerdict
             zones={selectedZones}
             colors={ZONE_COLORS.slice(0, selectedZones.length)}
           />
 
-          {/* 6. Demographic comparison */}
-          <DemographicComparison zones={selectedZones} colors={ZONE_COLORS.slice(0, selectedZones.length)} />
+          {/* 2. Metric bars */}
+          <MetricBars
+            zones={selectedZones}
+            colors={ZONE_COLORS.slice(0, selectedZones.length)}
+          />
 
-          {/* 7. Venta vs Renta */}
-          {listings.length > 0 && (
-            <VentaRentaZones
-              listings={listings}
+          {/* 3. Collapsible: Mercado */}
+          <CollapsibleSection
+            title="Evolución de Mercado"
+            subtitle="Tendencia de precio/m² y distribución precio vs superficie"
+            icon="show_chart"
+            defaultOpen
+          >
+            <div className="space-y-6">
+              {/* Price trend chart */}
+              {loading && (
+                <div className="flex items-center gap-3 text-slate-400 py-8 justify-center">
+                  <Icon name="progress_activity" className="animate-spin" />
+                  <span className="text-sm">Cargando tendencia…</span>
+                </div>
+              )}
+              {!loading && compData?.trendSeries && compData.trendSeries.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+                    Precio/m² — últimas 12 semanas
+                  </h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={compData.trendSeries} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                      <defs>
+                        {selectedSlugs.map((slug, i) => (
+                          <linearGradient key={slug} id={`grad-${slug}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={ZONE_COLORS[i]} stopOpacity={0.15} />
+                            <stop offset="95%" stopColor={ZONE_COLORS[i]} stopOpacity={0} />
+                          </linearGradient>
+                        ))}
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(100,116,139,0.1)" />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fontSize: 11, fill: "currentColor" }}
+                        className="text-slate-500 dark:text-slate-400"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "currentColor" }}
+                        className="text-slate-500 dark:text-slate-400"
+                        tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+                      />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null
+                          return (
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 shadow-lg">
+                              <p className="text-xs font-semibold text-slate-500 mb-2">{label}</p>
+                              {payload.map((p) => (
+                                <div key={p.dataKey} className="flex items-center justify-between gap-4 text-xs">
+                                  <span className="flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                                    <span className="text-slate-600 dark:text-slate-300">{p.name}</span>
+                                  </span>
+                                  <span className="font-bold text-slate-800 dark:text-slate-100">
+                                    {formatPrice(p.value as number)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: "12px" }} />
+                      {selectedSlugs.map((slug, i) => {
+                        const zone = allZones.find((z) => z.zone_slug === slug)
+                        return (
+                          <Area
+                            key={slug}
+                            type="monotone"
+                            dataKey={slug}
+                            name={zone?.zone_name ?? slug}
+                            stroke={ZONE_COLORS[i]}
+                            strokeWidth={2.5}
+                            fill={`url(#grad-${slug})`}
+                            dot={false}
+                            activeDot={{ r: 5, strokeWidth: 2, stroke: "white" }}
+                          />
+                        )
+                      })}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Scatter plot */}
+              {listings.length > 0 && (
+                <PriceAreaScatter
+                  listings={listings}
+                  slugs={selectedSlugs}
+                  colors={ZONE_COLORS.slice(0, selectedSlugs.length)}
+                  zoneNames={zoneNames}
+                  embedded
+                />
+              )}
+            </div>
+          </CollapsibleSection>
+
+          {/* 4. Collapsible: Tipos y Operación */}
+          <CollapsibleSection
+            title="Tipos de Propiedad y Operación"
+            subtitle="Desglose por tipo de inmueble y proporción venta vs renta"
+            icon="category"
+          >
+            <div className="space-y-6">
+              <TypeDetailTable
+                zones={selectedZones}
+                colors={ZONE_COLORS.slice(0, selectedZones.length)}
+                embedded
+              />
+              {listings.length > 0 && (
+                <VentaRentaZones
+                  listings={listings}
+                  zones={selectedZones}
+                  colors={ZONE_COLORS.slice(0, selectedZones.length)}
+                  embedded
+                />
+              )}
+            </div>
+          </CollapsibleSection>
+
+          {/* 5. Collapsible: Demografía */}
+          <CollapsibleSection
+            title="Perfil Demográfico"
+            subtitle="Indicadores socioeconómicos del Censo 2020"
+            icon="groups"
+          >
+            <DemographicComparison
               zones={selectedZones}
               colors={ZONE_COLORS.slice(0, selectedZones.length)}
+              embedded
             />
-          )}
-
-          {/* 7. Summary comparison table */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">
-                Tabla comparativa
-              </h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/50">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      Métrica
-                    </th>
-                    {selectedZones.map((z, i) => (
-                      <th
-                        key={z.zone_slug}
-                        className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wide"
-                        style={{ color: ZONE_COLORS[i] }}
-                      >
-                        {z.zone_name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  <TableRow
-                    label="Precio/m²"
-                    values={selectedZones.map((z) => formatPrice(z.avg_price_per_m2))}
-                    highlight={selectedZones.map((z) => z.avg_price_per_m2)}
-                  />
-                  <TableRow
-                    label="Tendencia"
-                    values={selectedZones.map((z) => z.price_trend_pct === 0 ? "Acumulando" : formatPercent(z.price_trend_pct))}
-                    highlight={selectedZones.map((z) => z.price_trend_pct)}
-                    higherIsBetter
-                  />
-                  <TableRow
-                    label="Inventario"
-                    values={selectedZones.map((z) => getZoneActivityLabel(z.total_listings))}
-                    highlight={selectedZones.map((z) => z.total_listings)}
-                    higherIsBetter
-                  />
-                  <TableRow
-                    label="Ticket promedio"
-                    values={selectedZones.map((z) => formatPrice(z.avg_ticket))}
-                    highlight={selectedZones.map((z) => z.avg_ticket)}
-                  />
-                </tbody>
-              </table>
-            </div>
-          </div>
+          </CollapsibleSection>
         </>
       ) : (
         selectedSlugs.length > 0 && (
@@ -521,76 +458,5 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
         </div>
       )}
     </div>
-  )
-}
-
-function MetricRow({
-  label,
-  value,
-  sub,
-  trendPositive,
-}: {
-  label: string
-  value: string
-  sub?: string
-  trendPositive?: boolean
-}) {
-  return (
-    <div>
-      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">
-        {label}
-      </p>
-      <p className="text-xl font-black text-slate-800 dark:text-slate-100 leading-tight mt-0.5">
-        {value}
-      </p>
-      {sub && (
-        <p
-          className={`text-xs mt-0.5 ${
-            trendPositive === undefined
-              ? "text-slate-400 dark:text-slate-500"
-              : trendPositive
-                ? "text-green-600 dark:text-green-400"
-                : "text-red-500 dark:text-red-400"
-          }`}
-        >
-          {sub}
-        </p>
-      )}
-    </div>
-  )
-}
-
-function TableRow({
-  label,
-  values,
-  highlight,
-  higherIsBetter = false,
-}: {
-  label: string
-  values: string[]
-  highlight: number[]
-  higherIsBetter?: boolean
-}) {
-  const best = higherIsBetter ? Math.max(...highlight) : Math.min(...highlight)
-
-  return (
-    <tr>
-      <td className="px-6 py-3.5 text-slate-600 dark:text-slate-300 font-medium">{label}</td>
-      {values.map((val, i) => (
-        <td
-          key={i}
-          className={`px-6 py-3.5 text-right font-semibold ${
-            highlight[i] === best
-              ? "text-blue-600 dark:text-blue-400"
-              : "text-slate-700 dark:text-slate-300"
-          }`}
-        >
-          {val}
-          {highlight[i] === best && (
-            <span className="ml-1 text-xs">★</span>
-          )}
-        </td>
-      ))}
-    </tr>
   )
 }

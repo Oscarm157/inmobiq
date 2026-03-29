@@ -10,6 +10,7 @@ interface VentaRentaZonesProps {
   listings: ComparisonListing[]
   zones: ZoneMetrics[]
   colors: string[]
+  embedded?: boolean
 }
 
 interface ZoneVRData {
@@ -26,7 +27,7 @@ function avg(arr: number[]): number {
   return arr.length > 0 ? arr.reduce((s, v) => s + v, 0) / arr.length : 0
 }
 
-export function VentaRentaZones({ listings, zones, colors }: VentaRentaZonesProps) {
+export function VentaRentaZones({ listings, zones, colors, embedded }: VentaRentaZonesProps) {
   if (zones.length === 0) return null
 
   const zoneData: ZoneVRData[] = zones.map((zone, i) => {
@@ -51,10 +52,10 @@ export function VentaRentaZones({ listings, zones, colors }: VentaRentaZonesProp
   })
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-      <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 mb-1">
+    <div className={embedded ? "" : "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm"}>
+      <h4 className={`font-bold ${embedded ? "text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500" : "text-base text-slate-800 dark:text-slate-100"} mb-1`}>
         Venta vs Renta por zona
-      </h3>
+      </h4>
       <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
         Proporción de operaciones y yield estimado
       </p>
