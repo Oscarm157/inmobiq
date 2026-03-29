@@ -23,6 +23,8 @@ interface CompRow {
 export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedProps) {
   const { formatPrice } = useCurrency()
 
+  const zoneLimitedData = zone.total_listings < 10
+
   const rows: CompRow[] = [
     {
       label: "Precio / m²",
@@ -33,9 +35,9 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
     },
     {
       label: "Ticket Promedio",
-      zoneValue: formatPrice(zone.avg_ticket),
+      zoneValue: zoneLimitedData ? "Muestra insuficiente" : formatPrice(zone.avg_ticket),
       cityValue: formatPrice(city.avg_ticket),
-      zoneRaw: zone.avg_ticket,
+      zoneRaw: zoneLimitedData ? 0 : zone.avg_ticket,
       cityRaw: city.avg_ticket,
     },
     {
@@ -89,11 +91,19 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
                 </span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-slate-700 rounded-full transition-all duration-500"
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      zoneLimitedData && row.label === "Ticket Promedio"
+                        ? "bg-slate-300 dark:bg-slate-700"
+                        : "bg-slate-700"
+                    }`}
                     style={{ width: `${zonePct}%` }}
                   />
                 </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 min-w-[80px] text-right">
+                <span className={`text-xs font-bold min-w-[80px] text-right ${
+                  zoneLimitedData && row.label === "Ticket Promedio"
+                    ? "text-slate-400 dark:text-slate-500 italic"
+                    : "text-slate-700 dark:text-slate-300"
+                }`}>
                   {row.zoneValue}
                 </span>
               </div>
