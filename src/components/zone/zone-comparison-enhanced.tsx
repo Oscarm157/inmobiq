@@ -108,7 +108,7 @@ export function ZoneComparisonEnhanced({ zone, city, allZones }: ZoneComparisonE
               {/* City bar */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-slate-400 w-7">
-                  Cd.
+                  Tijuana
                 </span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
