@@ -149,9 +149,9 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
                       .sort(([, a], [, b]) => b - a)
                       .slice(0, 4)
                       .map(([type, count]) => (
-                        <span key={type} className="text-[9px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <span key={type} className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1.5 font-medium">
                           <span
-                            className="w-1.5 h-1.5 rounded-full"
+                            className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: TYPE_COLORS[type] ?? "#94a3b8" }}
                           />
                           <span className="capitalize">{type === "departamento" ? "Depto" : type}</span>
