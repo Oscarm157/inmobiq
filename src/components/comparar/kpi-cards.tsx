@@ -49,36 +49,32 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
           <div
             key={zone.zone_slug}
             className="rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
-            style={{ backgroundColor: `${zoneColor}18` }}
+            style={{ borderTopColor: zoneColor }}
           >
             {/* Colored header */}
             <div
               className="px-6 pt-5 pb-4"
-              style={{ background: `linear-gradient(135deg, ${zoneColor}30, ${zoneColor}18)` }}
+              style={{ backgroundColor: zoneColor }}
             >
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-lg font-bold text-white">
                   {zone.zone_name}
                 </h3>
-                <div
-                  className="w-3 h-3 rounded-full ring-2 ring-white dark:ring-slate-800"
-                  style={{ backgroundColor: zoneColor }}
-                />
               </div>
               {/* Precio/m² — hero metric */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: zoneColor }}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-white/70">
                   Precio / m²
                 </p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+                  <span className="text-2xl font-extrabold text-white">
                     {formatPrice(zone.avg_price_per_m2)}
                   </span>
                   {zone.price_trend_pct !== 0 && (
                     <span className={`flex items-center text-xs font-bold px-1.5 py-0.5 rounded-md ${
                       zone.price_trend_pct >= 0
-                        ? "text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-950/40"
-                        : "text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-950/40"
+                        ? "text-green-100 bg-white/20"
+                        : "text-red-200 bg-white/20"
                     }`}>
                       <Icon
                         name={zone.price_trend_pct >= 0 ? "arrow_drop_up" : "arrow_drop_down"}
@@ -92,7 +88,7 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
             </div>
 
             {/* Body */}
-            <div className="px-6 pb-5 pt-4 space-y-5 bg-white/70 dark:bg-slate-900/70">
+            <div className="px-6 pb-5 pt-4 space-y-5">
               {/* Inventario + Ticket */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
