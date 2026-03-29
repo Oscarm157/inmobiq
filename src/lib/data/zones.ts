@@ -136,8 +136,17 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
       }
     }
 
+    // Unfiltered snapshot query for full type distribution (ignores listing_type & property_type filters)
+    let unfilteredSnapsQuery = supabase
+      .from("snapshots")
+      .select("zone_id, property_type, listing_type, count_active")
+      .eq("week_start", latestWeek)
+    if (filterZoneIds?.length) {
+      unfilteredSnapsQuery = unfilteredSnapsQuery.in("zone_id", filterZoneIds)
+    }
+
     // Fetch zones, snapshots, and individual listings in parallel
-    const [zonesRes, latestSnapsRes, prevSnapsRes, listingsRes] = await Promise.all([
+    const [zonesRes, latestSnapsRes, prevSnapsRes, listingsRes, unfilteredSnapsRes] = await Promise.all([
       supabase.from("zones").select("*"),
       latestSnapsQuery,
       prevWeek
@@ -147,12 +156,14 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
             .eq("week_start", prevWeek)
         : Promise.resolve({ data: [] }),
       listingsQuery,
+      unfilteredSnapsQuery,
     ])
 
     const zones = zonesRes.data as Zone[] | null
     const latestSnaps = latestSnapsRes.data as RealSnapshot[] | null
     const prevSnaps = prevSnapsRes.data as Array<{ zone_id: string; avg_price_per_m2: number; count_active: number }> | null
     const listingsDataRaw = listingsRes.data as Array<{ zone_id: string; price_mxn: number | null; price_usd: number | null; area_m2: number; property_type: PropertyType; listing_type: string }> | null
+    const unfilteredSnaps = unfilteredSnapsRes.data as Array<{ zone_id: string; property_type: string; listing_type: string; count_active: number }> | null
 
     // Add effective price (USD→MXN converted) and normalize
     const listingsData = listingsDataRaw?.map((l) => ({
@@ -249,18 +260,27 @@ export async function getZoneMetrics(filters?: ListingFilters): Promise<ZoneMetr
         })()
         const avgTicket = medianTicketByZone.get(zone.id) ?? Math.round(snapshotTicket)
 
-        // listings_by_type: aggregate count_active per property_type
+        // listings_by_type: aggregate from UNFILTERED snapshots (all types & operations)
+        // so the distribution always shows the full picture regardless of category/operacion filter
         const listingsByType: Record<string, number> = {}
+        const unfilteredZoneSnaps = unfilteredSnaps?.filter((s) => s.zone_id === zone.id) ?? []
+        for (const s of unfilteredZoneSnaps) {
+          listingsByType[s.property_type] = (listingsByType[s.property_type] ?? 0) + Number(s.count_active)
+        }
+        // Ticket by type still uses filtered snapshots (for pricing relevance)
         const snapshotTicketByType: Record<string, number> = {}
         for (const s of zoneSnaps) {
           const pt = s.property_type
-          listingsByType[pt] = (listingsByType[pt] ?? 0) + Number(s.count_active)
           const existing = snapshotTicketByType[pt] ?? 0
           snapshotTicketByType[pt] = existing + Number(s.avg_price) * Number(s.count_active)
         }
-        // Normalize snapshot ticket by type (used as fallback)
+        // Normalize snapshot ticket by type (used as fallback) — use filtered snap counts for ticket
+        const filteredCountByType: Record<string, number> = {}
+        for (const s of zoneSnaps) {
+          filteredCountByType[s.property_type] = (filteredCountByType[s.property_type] ?? 0) + Number(s.count_active)
+        }
         for (const pt of Object.keys(snapshotTicketByType)) {
-          const count = listingsByType[pt] ?? 1
+          const count = filteredCountByType[pt] ?? 1
           snapshotTicketByType[pt] = count > 0 ? snapshotTicketByType[pt] / count : 0
         }
         // Prefer validated listing median per type, fallback to snapshot
