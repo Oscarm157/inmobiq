@@ -49,7 +49,9 @@ import type { DrillDownListing } from "@/components/zone/drill-down-panel"
 import type { PropertyType, ListingType, ZoneMetrics, Listing } from "@/types/database"
 import type { PropertyCategory } from "@/lib/data/normalize"
 import { cookies } from "next/headers"
-import { COOKIE_CATEGORIA, COOKIE_OPERACION, parseCategoria, parseOperacion } from "@/lib/preference-cookies"
+import { COOKIE_CATEGORIA, COOKIE_OPERACION, COOKIE_PERFIL, parseCategoria, parseOperacion, parsePerfil } from "@/lib/preference-cookies"
+import { getPerfilConfig } from "@/lib/profiles"
+import { OnboardingModal } from "@/components/onboarding-modal"
 
 // Force dynamic rendering — page reads cookies() for user preferences
 export const dynamic = "force-dynamic"
@@ -100,12 +102,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   if (slug === "otros") redirect("/")
   const sp = await searchParams
 
-  // Read persistent preferences from cookies (fallback: venta + residencial)
+  // Read persistent preferences from cookies
   const cookieStore = await cookies()
+  const perfil = parsePerfil(cookieStore.get(COOKIE_PERFIL)?.value)
+  const perfilConfig = getPerfilConfig(perfil)
+
+  // Fallback chain: URL params → cookie → profile defaults → hardcoded defaults
   const cookieOp = parseOperacion(cookieStore.get(COOKIE_OPERACION)?.value)
   const cookieCat = parseCategoria(cookieStore.get(COOKIE_CATEGORIA)?.value)
 
-  // Parse filters — URL params override cookie, cookie overrides hardcoded defaults
   const VALID_OPS = new Set(["venta", "renta", "todas"])
   const VALID_CATS = new Set(["residencial", "comercial", "terreno", "todas"])
 
@@ -443,6 +448,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   return (
     <div className="space-y-8">
+      <OnboardingModal hasPerfil={perfil !== null} />
       <Suspense><DemoScroll /></Suspense>
       <Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} />
       {/* [A] Page Header */}
@@ -499,6 +505,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       {/* [C] Tabbed Content */}
       <Suspense fallback={<div className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
         <ZoneTabs
+          defaultTab={(perfilConfig?.defaultTab as "general" | "precios" | "composicion" | "inversion" | "tendencias" | "zona") ?? "general"}
           general={
             <div className="grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-8 space-y-6">

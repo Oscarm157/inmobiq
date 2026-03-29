@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { PERFIL_CONFIGS, PERFIL_KEYS, type PerfilType } from "@/lib/profiles"
+import { COOKIE_PERFIL, setPreferredPerfil, setPreferredOperacion, setPreferredCategoria } from "@/lib/preference-cookies"
 
 export default function PerfilPage() {
   const { user, loading, signOut } = useAuth()
@@ -56,6 +58,7 @@ export default function PerfilPage() {
     await signOut()
     router.push("/login")
   }
+
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -146,6 +149,9 @@ export default function PerfilPage() {
         </ul>
       </div>
 
+      {/* Market profile selector */}
+      <PerfilSelector />
+
       {/* Sign out */}
       <button
         onClick={handleSignOut}
@@ -154,6 +160,76 @@ export default function PerfilPage() {
         <Icon name="logout" className="text-base" />
         Cerrar sesión
       </button>
+    </div>
+  )
+}
+
+function PerfilSelector() {
+  const [current, setCurrent] = useState<PerfilType | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_PERFIL}=([^;]*)`))
+    setCurrent((match?.[1] as PerfilType) ?? null)
+  }, [])
+
+  const handleSelect = useCallback((perfil: PerfilType) => {
+    setCurrent(perfil)
+    const config = PERFIL_CONFIGS[perfil]
+    setPreferredPerfil(perfil)
+    setPreferredOperacion(config.defaultOperacion)
+    setPreferredCategoria(config.defaultCategoria)
+
+    fetch("/api/perfil", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ perfil }),
+    }).catch(() => {})
+
+    router.refresh()
+  }, [router])
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1 flex items-center gap-2">
+        <Icon name="tune" className="text-base" />
+        Mi Perfil de Mercado
+      </h3>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        Personaliza que datos e indicadores ves primero.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        {PERFIL_KEYS.map((key) => {
+          const config = PERFIL_CONFIGS[key]
+          const isActive = current === key
+          return (
+            <button
+              key={key}
+              onClick={() => handleSelect(key)}
+              className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                isActive
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+                  : "border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+              }`}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                isActive
+                  ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+              }`}>
+                <Icon name={config.icon} className="text-lg" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{config.label}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{config.description}</p>
+              </div>
+              {isActive && (
+                <Icon name="check_circle" className="text-blue-500 text-base ml-auto flex-shrink-0" />
+              )}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
