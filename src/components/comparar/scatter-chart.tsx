@@ -18,10 +18,9 @@ interface PriceAreaScatterProps {
   slugs: string[]
   colors: string[]
   zoneNames: Record<string, string>
-  embedded?: boolean
 }
 
-export function PriceAreaScatter({ listings, slugs, colors, zoneNames, embedded }: PriceAreaScatterProps) {
+export function PriceAreaScatter({ listings, slugs, colors, zoneNames }: PriceAreaScatterProps) {
   const { formatPrice } = useCurrency()
 
   if (listings.length === 0) return null
@@ -32,15 +31,11 @@ export function PriceAreaScatter({ listings, slugs, colors, zoneNames, embedded 
       .map((l) => ({ x: l.area_m2, y: l.price, type: l.property_type }))
   )
 
-  const Wrapper = embedded ? "div" : ({ children }: { children: React.ReactNode }) => (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">{children}</div>
-  )
-
   return (
-    <Wrapper>
-      <h4 className={`font-bold ${embedded ? "text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500" : "text-base text-slate-800 dark:text-slate-100"} mb-1`}>
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+      <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 mb-1">
         Precio vs Superficie
-      </h4>
+      </h3>
       <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
         Cada punto es una propiedad individual. Compara densidad y distribución.
       </p>
@@ -85,12 +80,12 @@ export function PriceAreaScatter({ listings, slugs, colors, zoneNames, embedded 
               name={zoneNames[slug] ?? slug}
               data={groupedByZone[i]}
               fill={colors[i]}
-              fillOpacity={0.45}
-              r={3.5}
+              fillOpacity={0.6}
+              r={4}
             />
           ))}
         </ScatterChart>
       </ResponsiveContainer>
-    </Wrapper>
+    </div>
   )
 }
