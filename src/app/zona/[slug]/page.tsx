@@ -476,7 +476,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                   avgPricePerM2={zone.avg_price_per_m2} totalListings={zone.total_listings}
                   categoria={rawCat as PropertyCategory}
                 />
-                <ZoneComparisonEnhanced zone={zone} city={city} />
+                <ZoneComparisonEnhanced zone={zone} city={city} allZones={allZones} />
                 {/* CTA: Valuar propiedad */}
                 <a
                   href={`/brujula?zone=${slug}`}

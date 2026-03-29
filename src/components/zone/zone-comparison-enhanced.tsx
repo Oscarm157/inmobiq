@@ -9,6 +9,7 @@ import { InfoTooltip } from "@/components/info-tooltip"
 interface ZoneComparisonEnhancedProps {
   zone: ZoneMetrics
   city: CityMetrics
+  allZones?: ZoneMetrics[]
 }
 
 interface CompRow {
@@ -19,8 +20,16 @@ interface CompRow {
   cityRaw: number
 }
 
-export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedProps) {
+export function ZoneComparisonEnhanced({ zone, city, allZones }: ZoneComparisonEnhancedProps) {
   const { formatPrice } = useCurrency()
+
+  // Compute real city avg ticket from all zones (weighted by listings)
+  const zonesForTicket = allZones?.filter((z) => z.zone_slug !== "otros" && z.avg_ticket > 0 && z.total_listings > 0) ?? []
+  const cityAvgTicket = zonesForTicket.length > 0
+    ? zonesForTicket.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
+      zonesForTicket.reduce((s, z) => s + z.total_listings, 0)
+    : city.avg_price_per_m2 * 95
+
   const rows: CompRow[] = [
     {
       label: "Precio / m²",
@@ -32,17 +41,9 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
     {
       label: "Ticket Promedio",
       zoneValue: formatPrice(zone.avg_ticket),
-      cityValue: formatPrice(
-        city.top_zones.length > 0
-          ? city.top_zones.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
-            Math.max(city.top_zones.reduce((s, z) => s + z.total_listings, 0), 1)
-          : city.avg_price_per_m2 * 95
-      ),
+      cityValue: formatPrice(cityAvgTicket),
       zoneRaw: zone.avg_ticket,
-      cityRaw: city.top_zones.length > 0
-        ? city.top_zones.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
-          Math.max(city.top_zones.reduce((s, z) => s + z.total_listings, 0), 1)
-        : city.avg_price_per_m2 * 95,
+      cityRaw: cityAvgTicket,
     },
     {
       label: "Inventario",
