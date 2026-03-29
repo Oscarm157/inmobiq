@@ -118,6 +118,7 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
               <SortHeader label="Tendencia" col="trend" />
               <SortHeader label="Actividad" col="activity" />
               <SortHeader label="Yield Anual" col="yield" tooltip="Rendimiento anual estimado: renta × 12 / precio de venta" />
+              <th className="px-4 py-3 w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -156,6 +157,11 @@ export function PriceTable({ ventaZones, rentaZones = [], riskData = [] }: Price
                     <span className={`${yieldPct >= 4 && yieldPct <= 15 ? "text-green-600 font-bold" : "text-slate-600 dark:text-slate-300"}`}>
                       {yieldStr}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/zona/${zone.zone_slug}`} className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                      <Icon name="arrow_forward" className="text-sm" />
+                    </Link>
                   </td>
                 </tr>
               )

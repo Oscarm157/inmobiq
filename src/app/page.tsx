@@ -195,27 +195,37 @@ export default async function HomePage({
         highlight={`${publicZoneCount} zonas monitoreadas · ${getCityActivityLabel(city.total_listings)}`}
       />
 
-      {/* ─── 5. Charts ─── */}
-      <div id="demo-charts" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ZonesBarChart data={analytics.pricePerM2ByZone} />
-        <PriceRangeChart data={analytics.priceDistribution} />
-      </div>
+      {/* ─── 5. Análisis de Precios ─── */}
+      <section id="demo-charts">
+        <div className="mb-4">
+          <h3 className="text-xl font-black tracking-tight">Análisis de Precios</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Distribución y comparación de precios por zona</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ZonesBarChart data={analytics.pricePerM2ByZone} />
+          <PriceRangeChart data={analytics.priceDistribution} />
+        </div>
+        {hasTrendHistory && <div className="mt-6"><PriceChart data={priceTrend} /></div>}
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
-        <OfferConcentrationChart data={analytics.offerConcentration} />
-      </div>
+      {/* ─── 6. Composición del Mercado ─── */}
+      <section>
+        <div className="mb-4">
+          <h3 className="text-xl font-black tracking-tight">Composición del Mercado</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Tipos de propiedad, inventario y concentración de oferta</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
+          <OfferConcentrationChart data={analytics.offerConcentration} />
+        </div>
+        <div className="mt-6"><InventoryTypeChart zones={inventoryZones} /></div>
+      </section>
 
-      {hasTrendHistory && <PriceChart data={priceTrend} />}
-      <InventoryTypeChart zones={inventoryZones} />
-
-      {/* ─── 6. Zonas Destacadas ─── */}
+      {/* ─── 7. Zonas Destacadas ─── */}
       <section id="demo-destacadas">
-        <div className="mb-6">
-          <h3 className="text-2xl font-black tracking-tight">Zonas Destacadas</h3>
-          <p className="text-sm text-slate-500 font-medium">
-            Las zonas más caras y más económicas en Tijuana
-          </p>
+        <div className="mb-4">
+          <h3 className="text-xl font-black tracking-tight">Zonas Destacadas</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Las zonas más caras y más accesibles de Tijuana</p>
         </div>
         <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
       </section>
@@ -264,14 +274,19 @@ export default async function HomePage({
           .filter(Boolean) as DensityBubble[]
 
         return (
-          <>
-            <MarketIntelligence insights={insights} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <OpportunityIndexChart data={opportunityData} />
-              <MarketDensityScatter data={densityData} />
+          <section>
+            <div className="mb-4">
+              <h3 className="text-xl font-black tracking-tight">Inteligencia de Mercado</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Análisis cruzado de datos demográficos × mercado inmobiliario</p>
             </div>
-          </>
+            <div className="space-y-6">
+              <MarketIntelligence insights={insights} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <OpportunityIndexChart data={opportunityData} />
+                <MarketDensityScatter data={densityData} />
+              </div>
+            </div>
+          </section>
         )
       })()}
 
@@ -286,8 +301,8 @@ export default async function HomePage({
               {publicZoneCount} zonas · {getCityActivityLabel(city.total_listings)}
             </p>
           </div>
-          <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver mapa <Icon name="arrow_forward" className="text-sm" />
+          <a href="/zonas" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
+            Ver todas <Icon name="arrow_forward" className="text-sm" />
           </a>
         </div>
         {(() => {
@@ -307,11 +322,20 @@ export default async function HomePage({
           const zoneFilterStr = zfp.toString()
 
           return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {sorted.map((zone, i) => (
-                <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} filterParams={zoneFilterStr} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {sorted.slice(0, 8).map((zone, i) => (
+                  <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} filterParams={zoneFilterStr} />
+                ))}
+              </div>
+              {sorted.length > 8 && (
+                <div className="text-center mt-4">
+                  <a href="/zonas" className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    Ver las {sorted.length} zonas <Icon name="arrow_forward" className="text-sm" />
+                  </a>
+                </div>
+              )}
+            </>
           )
         })()}
       </section>
