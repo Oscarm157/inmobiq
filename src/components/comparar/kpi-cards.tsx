@@ -3,6 +3,13 @@
 import { Icon } from "@/components/icon"
 import { formatPercent } from "@/lib/utils"
 import { getZoneActivityLabel } from "@/lib/activity-labels"
+
+const SHORT_ACTIVITY: Record<string, string> = {
+  "Alta actividad": "Alto",
+  "Actividad moderada": "Medio",
+  "Actividad baja": "Bajo",
+  "Datos limitados": "Limitado",
+}
 import { useCurrency } from "@/contexts/currency-context"
 import type { ZoneMetrics } from "@/types/database"
 
@@ -69,7 +76,7 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
                       ? "text-amber-600 bg-amber-50 dark:bg-amber-950/30"
                       : "text-red-600 bg-red-50 dark:bg-red-950/30"
                 }`}>
-                  {getZoneActivityLabel(zone.total_listings)}
+                  {SHORT_ACTIVITY[getZoneActivityLabel(zone.total_listings)] ?? getZoneActivityLabel(zone.total_listings)}
                 </span>
               </div>
               <div>
