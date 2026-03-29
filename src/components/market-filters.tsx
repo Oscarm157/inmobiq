@@ -163,84 +163,156 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
         <div className="absolute left-0 right-0 z-30 px-4 md:px-8 mt-3">
-          <div className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl transition-opacity duration-150 ${isPending ? "opacity-90" : "opacity-100"}`}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Categoría */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Categoría</p>
-                <div className="flex gap-2">
-                  {([
-                    { value: "" as const, label: "Todas" },
-                    { value: "residencial" as const, label: "Residencial" },
-                    { value: "comercial" as const, label: "Comercial" },
-                    { value: "terreno" as const, label: "Terreno" },
-                  ]).map(({ value, label }) => (
-                    <button
-                      key={value}
-                      onClick={() => handleChange({ ...state, categoria: value })}
-                      className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
-                        state.categoria === value
-                          ? "bg-slate-800 text-white shadow-sm"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl transition-opacity duration-150 overflow-hidden ${isPending ? "opacity-90" : "opacity-100"}`}>
 
-              {/* Tipo de propiedad */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Tipo de Propiedad</p>
-                <div className="flex flex-wrap gap-2">
-                  {PROPERTY_TYPES.map(({ value, label, icon }) => {
-                    const active = state.tipos.includes(value)
-                    return (
+            {/* ── Main content: left filters + right zones ── */}
+            <div className="flex divide-x divide-slate-100 dark:divide-slate-800">
+
+              {/* Left: all controls stacked */}
+              <div className="flex-1 p-5 space-y-5">
+
+                {/* Categoría */}
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Categoría</p>
+                  <div className="flex gap-2">
+                    {([
+                      { value: "" as const, label: "Todas" },
+                      { value: "residencial" as const, label: "Residencial" },
+                      { value: "comercial" as const, label: "Comercial" },
+                      { value: "terreno" as const, label: "Terreno" },
+                    ]).map(({ value, label }) => (
                       <button
                         key={value}
-                        onClick={() => handleChange({ ...state, tipos: toggle(state.tipos, value) })}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                          active
-                            ? "bg-slate-800 text-white"
-                            : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                        onClick={() => handleChange({ ...state, categoria: value })}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
+                          state.categoria === value
+                            ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                         }`}
                       >
-                        <Icon name={icon} className="text-xs" />
                         {label}
                       </button>
-                    )
-                  })}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tipo de propiedad */}
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Tipo de Propiedad</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PROPERTY_TYPES.map(({ value, label, icon }) => {
+                      const active = state.tipos.includes(value)
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => handleChange({ ...state, tipos: toggle(state.tipos, value) })}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                            active
+                              ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          }`}
+                        >
+                          <Icon name={icon} className="text-xs" />
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Recámaras */}
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Recámaras</p>
+                  <div className="flex gap-2">
+                    {BEDROOMS.map((r) => {
+                      const active = state.recamaras.includes(r)
+                      return (
+                        <button
+                          key={r}
+                          onClick={() => handleChange({ ...state, recamaras: toggle(state.recamaras, r) })}
+                          className={`w-10 py-2 rounded-lg text-xs font-bold transition-colors ${
+                            active
+                              ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          }`}
+                        >
+                          {r === 4 ? "4+" : r}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Precio + Superficie */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Precio */}
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Precio ({currency})</p>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Mín"
+                        aria-label="Precio mínimo"
+                        value={state.precio_min}
+                        onChange={(e) => handleInputChange({ ...state, precio_min: e.target.value })}
+                        onWheel={preventScrollChange}
+                        className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-slate-300 dark:text-slate-600 text-sm font-light shrink-0">—</span>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Máx"
+                        aria-label="Precio máximo"
+                        value={state.precio_max}
+                        onChange={(e) => handleInputChange({ ...state, precio_max: e.target.value })}
+                        onWheel={preventScrollChange}
+                        className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    {state.precio_min && state.precio_max && Number(state.precio_min) > Number(state.precio_max) && (
+                      <p className="text-[10px] text-red-500 font-bold mt-1">Mínimo mayor que máximo</p>
+                    )}
+                  </div>
+
+                  {/* Superficie */}
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Superficie (m²)</p>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Mín"
+                        aria-label="Superficie mínima"
+                        value={state.area_min}
+                        onChange={(e) => handleInputChange({ ...state, area_min: e.target.value })}
+                        onWheel={preventScrollChange}
+                        className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-slate-300 dark:text-slate-600 text-sm font-light shrink-0">—</span>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Máx"
+                        aria-label="Superficie máxima"
+                        value={state.area_max}
+                        onChange={(e) => handleInputChange({ ...state, area_max: e.target.value })}
+                        onWheel={preventScrollChange}
+                        className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    {state.area_min && state.area_max && Number(state.area_min) > Number(state.area_max) && (
+                      <p className="text-[10px] text-red-500 font-bold mt-1">Mínimo mayor que máximo</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Recámaras */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Recámaras</p>
-                <div className="flex gap-2">
-                  {BEDROOMS.map((r) => {
-                    const active = state.recamaras.includes(r)
-                    return (
-                      <button
-                        key={r}
-                        onClick={() => handleChange({ ...state, recamaras: toggle(state.recamaras, r) })}
-                        className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-colors ${
-                          active
-                            ? "bg-slate-800 text-white shadow-sm"
-                            : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                        }`}
-                      >
-                        {r === 4 ? "4+" : r}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Zonas */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Zona</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {/* Right: zones scrollable */}
+              <div className="w-72 p-5 shrink-0">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Zona</p>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 max-h-56 overflow-y-auto pr-1">
                   {PUBLIC_ZONES.map(({ slug, name }) => {
                     const active = state.zonas.includes(slug)
                     return (
@@ -249,9 +321,13 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                           type="checkbox"
                           checked={active}
                           onChange={() => handleChange({ ...state, zonas: toggle(state.zonas, slug) })}
-                          className="w-3.5 h-3.5 rounded accent-blue-700 shrink-0"
+                          className="w-3.5 h-3.5 rounded accent-blue-600 shrink-0"
                         />
-                        <span className={`text-xs font-medium transition-colors truncate ${active ? "text-slate-800 font-bold" : "text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`}>
+                        <span className={`text-xs truncate transition-colors ${
+                          active
+                            ? "text-slate-900 dark:text-slate-100 font-semibold"
+                            : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"
+                        }`}>
                           {name}
                         </span>
                       </label>
@@ -261,88 +337,9 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
               </div>
             </div>
 
-            {/* Second row: Price + Area */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5 pt-5 border-t border-slate-100 dark:border-slate-700">
-              {/* Rango de precio */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Rango de Precio ({currency})</p>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Mínimo"
-                    aria-label="Precio mínimo"
-                    value={state.precio_min}
-                    onChange={(e) => handleInputChange({ ...state, precio_min: e.target.value })}
-                    onWheel={preventScrollChange}
-                    className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="self-center text-slate-400 text-xs">—</span>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Máximo"
-                    aria-label="Precio máximo"
-                    value={state.precio_max}
-                    onChange={(e) => handleInputChange({ ...state, precio_max: e.target.value })}
-                    onWheel={preventScrollChange}
-                    className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                {(state.precio_min || state.precio_max) && (
-                  <p className={`text-[10px] mt-1.5 ${
-                    state.precio_min && state.precio_max && Number(state.precio_min) > Number(state.precio_max)
-                      ? "text-red-500 font-bold"
-                      : "text-slate-500"
-                  }`}>
-                    {state.precio_min && state.precio_max && Number(state.precio_min) > Number(state.precio_max)
-                      ? "Rango inválido: mínimo mayor que máximo"
-                      : <>
-                          {state.precio_min ? formatPrice(Number(state.precio_min)) : "Sin mínimo"} —{" "}
-                          {state.precio_max ? formatPrice(Number(state.precio_max)) : "Sin máximo"}
-                        </>
-                    }
-                  </p>
-                )}
-              </div>
-
-              {/* Superficie */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Superficie (m²)</p>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Mín m²"
-                    aria-label="Superficie mínima"
-                    value={state.area_min}
-                    onChange={(e) => handleInputChange({ ...state, area_min: e.target.value })}
-                    onWheel={preventScrollChange}
-                    className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="self-center text-slate-400 text-xs">—</span>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Máx m²"
-                    aria-label="Superficie máxima"
-                    value={state.area_max}
-                    onChange={(e) => handleInputChange({ ...state, area_max: e.target.value })}
-                    onWheel={preventScrollChange}
-                    className="flex-1 px-3 py-2.5 text-xs border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                {state.area_min && state.area_max && Number(state.area_min) > Number(state.area_max) && (
-                  <p className="text-[10px] text-red-500 font-bold mt-1.5">
-                    Rango inválido: mínimo mayor que máximo
-                  </p>
-                )}
-              </div>
-            </div>
-
             {/* Footer: active filter chips + clear */}
             {hasActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria }) && (
-              <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-slate-700">
+              <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                 <div className="flex flex-wrap gap-1.5">
                   {state.categoria && state.categoria !== defaultCategoria && (
                     <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: defaultCategoria as MarketFilterState["categoria"] })} />
@@ -365,7 +362,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                 </div>
                 <button
                   onClick={handleClear}
-                  className="text-xs font-bold text-red-600 hover:text-red-800 flex items-center gap-1 shrink-0 ml-3"
+                  className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1 shrink-0 ml-3"
                 >
                   <Icon name="close" className="text-xs" />
                   Limpiar todo
