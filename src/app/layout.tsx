@@ -6,7 +6,7 @@ import { SidebarShell } from "@/components/sidebar-shell"
 import { AuthProvider } from "@/contexts/auth-context"
 import { CurrencyProvider } from "@/contexts/currency-context"
 import { ThemeProvider } from "@/components/theme-provider"
-import { WelcomeModal } from "@/components/welcome-modal"
+import { GuidedTourWrapper } from "@/components/guided-tour-wrapper"
 import { ToastProvider } from "@/components/toast"
 import "./globals.css"
 
@@ -96,7 +96,7 @@ export default function RootLayout({
               <SidebarProvider>
                 <ToastProvider>
                   <SidebarShell>{children}</SidebarShell>
-                  <WelcomeModal />
+                  <GuidedTourWrapper />
                 </ToastProvider>
               </SidebarProvider>
             </AuthProvider>

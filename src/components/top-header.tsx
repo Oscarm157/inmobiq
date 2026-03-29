@@ -112,6 +112,16 @@ export function TopHeader() {
             </Link>
           </div>
 
+          {/* Tour replay button */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("inmobiq:replay-tour"))}
+            className="hidden md:flex p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] items-center justify-center"
+            aria-label="Repetir tour guiado"
+            title="Tour guiado"
+          >
+            <Icon name="rocket_launch" />
+          </button>
+
           <Link
             href="/alertas"
             className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"

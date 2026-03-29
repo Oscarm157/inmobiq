@@ -51,7 +51,6 @@ import type { PropertyCategory } from "@/lib/data/normalize"
 import { cookies } from "next/headers"
 import { COOKIE_CATEGORIA, COOKIE_OPERACION, COOKIE_PERFIL, parseCategoria, parseOperacion, parsePerfil } from "@/lib/preference-cookies"
 import { getPerfilConfig } from "@/lib/profiles"
-import { OnboardingModal } from "@/components/onboarding-modal"
 
 // Force dynamic rendering — page reads cookies() for user preferences
 export const dynamic = "force-dynamic"
@@ -448,7 +447,6 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
   return (
     <div className="space-y-8">
-      <OnboardingModal hasPerfil={perfil !== null} />
       <Suspense><DemoScroll /></Suspense>
       <Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} />
       {/* [A] Page Header */}

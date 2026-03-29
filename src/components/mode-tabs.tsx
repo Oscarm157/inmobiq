@@ -43,6 +43,7 @@ export function ModeTabs({ defaultMode = "venta" }: ModeTabsProps) {
 
   return (
     <div
+      data-tour="mode-tabs"
       className={`fixed top-16 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-all ${
         collapsed ? "md:ml-16" : "md:ml-64"
       } ${isPending ? "opacity-80" : ""}`}

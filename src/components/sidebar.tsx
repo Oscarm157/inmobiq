@@ -9,12 +9,12 @@ import { useSidebar } from "@/components/sidebar-provider"
 import { useAuth } from "@/contexts/auth-context"
 
 const navItems = [
-  { icon: "monitoring", label: "Precios", href: "/" },
-  { icon: "explore", label: "Brújula", href: "/brujula", subtitle: "Valuador de propiedades" },
-  { icon: "location_on", label: "Zonas", href: "/zonas" },
-  { icon: "compare", label: "Comparar", href: "/comparar" },
-  { icon: "query_stats", label: "Riesgo", href: "/riesgo" },
-  { icon: "search", label: "Buscar", href: "/buscar" },
+  { icon: "monitoring", label: "Precios", href: "/", tourId: "precios" },
+  { icon: "explore", label: "Brújula", href: "/brujula", subtitle: "Valuador de propiedades", tourId: "brujula" },
+  { icon: "location_on", label: "Zonas", href: "/zonas", tourId: "zonas" },
+  { icon: "compare", label: "Comparar", href: "/comparar", tourId: "comparar" },
+  { icon: "query_stats", label: "Riesgo", href: "/riesgo", tourId: "riesgo" },
+  { icon: "search", label: "Buscar", href: "/buscar", tourId: "buscar" },
 ]
 
 export function Sidebar() {
@@ -75,6 +75,7 @@ export function Sidebar() {
             <Link
               key={item.label}
               href={item.href === "/zona" ? "/zona/zona-rio" : item.href}
+              data-tour={item.tourId}
               title={collapsed ? item.label : ("subtitle" in item ? (item as { subtitle?: string }).subtitle : undefined)}
               className={`flex items-center gap-3 rounded-xl transition-all duration-200 ${
                 collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
