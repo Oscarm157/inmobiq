@@ -72,7 +72,15 @@ export function ValuationHistory() {
     )
   }
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return (
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 text-center">
+        <Icon name="explore" className="text-3xl text-slate-300 dark:text-slate-600 mb-2" />
+        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Sin valuaciones aún</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Usa el formulario de arriba para valuar tu primera propiedad.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-3">

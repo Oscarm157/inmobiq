@@ -132,6 +132,24 @@ export function ValuationReport({ result, narrative, property }: Props) {
           <AreaByTypeChart data={result.area_by_type} zoneName={result.zone_name} />
         )}
       </div>
+
+      {/* ── 6. Next steps CTAs ── */}
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          href={`/zona/${result.zone_slug}`}
+          className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 dark:bg-blue-600 text-white rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          <Icon name="location_on" className="text-sm" />
+          Ver análisis de {result.zone_name}
+        </a>
+        <a
+          href="/comparar"
+          className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-full text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+        >
+          <Icon name="compare_arrows" className="text-sm" />
+          Comparar zonas
+        </a>
+      </div>
     </div>
   )
 }

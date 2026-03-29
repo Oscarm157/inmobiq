@@ -120,6 +120,9 @@ export function ScreenshotUploader({ onExtracted, disabled }: Props) {
         <p className="text-xs text-slate-400 mt-1">
           JPEG, PNG o WebP. Máx 5MB por archivo.
         </p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 max-w-xs">
+          La IA extraerá automáticamente: precio, superficie, recámaras, tipo de propiedad y ubicación del anuncio.
+        </p>
       </div>
 
       {/* Thumbnails */}
