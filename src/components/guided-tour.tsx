@@ -20,63 +20,63 @@ const TOUR_STEPS: TourStep[] = [
   {
     targetSelector: null,
     title: "Bienvenido a Inmobiq",
-    description: "",
+    description: "Inteligencia inmobiliaria para Tijuana",
     position: "center",
     preview: null, // handled by profile selection UI
   },
   {
     targetSelector: '[data-tour="precios"]',
-    title: "Market Overview",
-    description: "El pulso del mercado de Tijuana. Precios promedio por m², tendencias de precio, inventario activo y composición por tipo de propiedad.",
+    title: "Precios del Mercado",
+    description: "Cuanto cuesta el m\u00B2 en Tijuana hoy? Aqui ves de un vistazo que zonas estan caras, cuales son mas accesibles, y hacia donde van los precios.",
     position: "right",
     preview: <MiniBarChart />,
   },
   {
     targetSelector: '[data-tour="brujula"]',
-    title: "Brújula Inmobiliaria",
-    description: "Valúa cualquier propiedad con datos reales del mercado. Ingresa la zona y características para obtener un estimado de precio justo.",
+    title: "Brujula Inmobiliaria",
+    description: "Tienes una propiedad y quieres saber cuanto vale? Ingresa la zona y te damos un estimado basado en lo que realmente se esta vendiendo ahi.",
     position: "right",
     preview: <MiniValuator />,
   },
   {
     targetSelector: '[data-tour="zonas"]',
-    title: "Análisis por Zona",
-    description: "Explora las 30 zonas de Tijuana a fondo. KPIs, distribución de precios, scatter de área vs precio, composición, inversión, tendencias y demographics.",
+    title: "Analisis por Zona",
+    description: "Ejemplo: quieres comprar en Playas. Aqui ves el precio tipico, cuantas propiedades hay, si los precios suben o bajan, y que tipo de propiedad domina la zona.",
     position: "right",
     preview: <MiniZoneCards />,
   },
   {
     targetSelector: '[data-tour="comparar"]',
     title: "Comparador de Zonas",
-    description: "Pon dos o más zonas lado a lado. Compara precio/m², riesgo, perfil demográfico, inventario y tendencia de cada una.",
+    description: "Zona Rio o Playas? Ponlas lado a lado y compara precios, oferta, riesgo y perfil de cada una para decidir mejor.",
     position: "right",
     preview: <MiniComparison />,
   },
   {
     targetSelector: '[data-tour="riesgo"]',
-    title: "Análisis de Riesgo",
-    description: "Volatilidad, liquidez, cap rate y score de riesgo para cada zona. Identifica oportunidades y zonas a evitar.",
+    title: "Analisis de Riesgo",
+    description: "Es seguro invertir en esta zona? Aqui ves que tan estables son los precios, que tan rapido se venden las propiedades, y un score general de riesgo.",
     position: "right",
     preview: <MiniGauge />,
   },
   {
     targetSelector: '[data-tour="mode-tabs"]',
-    title: "Compra-Venta vs Renta",
-    description: "Toda la plataforma se adapta. Cambia aquí y todas las métricas, gráficas y KPIs se recalculan para la operación seleccionada.",
+    title: "Compra-Venta o Renta",
+    description: "Buscas comprar o rentar? Cambia aqui y toda la informacion se ajusta: precios de venta o montos de renta, segun lo que necesites.",
     position: "bottom",
     preview: <MiniToggle />,
   },
   {
     targetSelector: "#demo-kpis",
-    title: "Métricas Clave",
-    description: "Los indicadores principales del mercado de un vistazo: precio promedio por m², ticket promedio, composición del inventario y tendencia.",
+    title: "Numeros que Importan",
+    description: "Cuanto cuesta el metro cuadrado en promedio, el precio tipico de una propiedad, y como se mueve el mercado esta semana. Todo de un vistazo.",
     position: "bottom",
     preview: <MiniKPIs />,
   },
   {
     targetSelector: null,
-    title: "Listo!",
-    description: "Explora el mercado inmobiliario de Tijuana con inteligencia. Toda la información que necesitas para tomar mejores decisiones.",
+    title: "Estas en la Beta Privada",
+    description: "",
     position: "center",
     preview: null,
   },
@@ -148,7 +148,7 @@ function TourTooltip({ step, rect, currentStep, totalSteps, onNext, onPrev, onSk
                   onClick={onNext}
                   className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors"
                 >
-                  Comenzar
+                  Explorar el mercado
                 </button>
               ) : (
                 <button onClick={onNext} className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-bold">
@@ -375,8 +375,21 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
           </>
         )}
         {!isProfileStep && step.targetSelector === null && currentStep === effectiveTotal - 1 && (
-          <div className="flex justify-center mt-4">
-            <Icon name="rocket_launch" className="text-4xl text-blue-500" />
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 rounded-full mb-2">
+              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Beta Privada</span>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Estas entre los primeros en usar Inmobiq. Estamos invirtiendo en investigacion y desarrollo para robustecer la plataforma con mas datos, mas zonas y mejores herramientas de analisis.
+            </p>
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lanzamiento publico</p>
+              <p className="text-lg font-black text-slate-800 dark:text-slate-100">27 de Abril, 2026</p>
+            </div>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Tu feedback es clave para mejorar. Cualquier cosa que notes, nos ayuda a construir una mejor herramienta.
+            </p>
           </div>
         )}
       </TourTooltip>
