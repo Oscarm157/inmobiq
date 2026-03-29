@@ -70,7 +70,9 @@ export function ZoneTabs({ defaultTab = "general", general, precios, composicion
       </div>
 
       {/* Tab content */}
-      {content[activeTab]}
+      <div role="tabpanel" aria-label={activeTab}>
+        {content[activeTab]}
+      </div>
     </div>
   )
 }
