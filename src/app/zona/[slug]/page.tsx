@@ -112,9 +112,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     categoria: rawCat !== "todas" ? (rawCat as PropertyCategory) : undefined,
   }
 
+  // City metrics should NOT be filtered by zone — only by operation/category
+  const cityFilters: ListingFilters = {
+    listing_type: filters.listing_type,
+    categoria: filters.categoria,
+  }
+
   const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics, lastUpdated] = await Promise.all([
     getZoneBySlug(slug, filters),
-    getCityMetrics(filters),
+    getCityMetrics(cityFilters),
     getZoneMetrics(),
     getZoneMetrics(filters),
     getListings(filters),
