@@ -75,12 +75,19 @@ export function ZoneComparisonEnhanced({ zone, city, allZones }: ZoneComparisonE
           const max = Math.max(row.zoneRaw, row.cityRaw, 1)
           const zonePct = Math.round((row.zoneRaw / max) * 100)
           const cityPct = Math.round((row.cityRaw / max) * 100)
+          const diffPct = row.cityRaw > 0 ? Math.abs((row.zoneRaw - row.cityRaw) / row.cityRaw) * 100 : 0
+          const isNearlyEqual = diffPct < 2
 
           return (
             <div key={row.label}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                {row.label}
-              </p>
+              <div className="flex items-center gap-2 mb-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  {row.label}
+                </p>
+                {isNearlyEqual && (
+                  <span className="text-[9px] font-semibold text-blue-500 dark:text-blue-400">≈ Promedio de la ciudad</span>
+                )}
+              </div>
 
               {/* Zone bar */}
               <div className="flex items-center gap-2 mb-1">
