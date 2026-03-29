@@ -9,6 +9,7 @@ const mobileNav = [
   { icon: "explore", label: "Brújula", href: "/brujula" },
   { icon: "location_on", label: "Zonas", href: "/zonas" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
+  { icon: "search", label: "Buscar", href: "/buscar" },
 ]
 
 export function BottomNav() {
