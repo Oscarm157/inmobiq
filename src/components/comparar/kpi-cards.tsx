@@ -49,12 +49,12 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
           <div
             key={zone.zone_slug}
             className="rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
-            style={{ backgroundColor: `${zoneColor}10` }}
+            style={{ backgroundColor: `${zoneColor}18` }}
           >
             {/* Colored header */}
             <div
               className="px-6 pt-5 pb-4"
-              style={{ background: `linear-gradient(135deg, ${zoneColor}20, ${zoneColor}0c)` }}
+              style={{ background: `linear-gradient(135deg, ${zoneColor}30, ${zoneColor}18)` }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -92,7 +92,7 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
             </div>
 
             {/* Body */}
-            <div className="px-6 pb-5 pt-4 space-y-5 bg-white/60 dark:bg-slate-900/60">
+            <div className="px-6 pb-5 pt-4 space-y-5 bg-white/70 dark:bg-slate-900/70">
               {/* Inventario + Ticket */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -127,7 +127,7 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
                   </p>
                   <div
                     className="flex h-2.5 w-full rounded-full overflow-hidden"
-                    style={{ backgroundColor: `${zoneColor}20` }}
+                    style={{ backgroundColor: `${zoneColor}30` }}
                   >
                     {Object.entries(zone.listings_by_type)
                       .filter(([, count]) => count > 0)
