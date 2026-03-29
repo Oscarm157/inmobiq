@@ -14,12 +14,18 @@ import { ZoneComparisonEnhanced } from "@/components/zone/zone-comparison-enhanc
 import { PriceDistributionChart } from "@/components/zone/price-distribution-chart"
 import { PriceAreaScatter } from "@/components/zone/price-area-scatter"
 import { VentaRentaComparison } from "@/components/zone/venta-renta-comparison"
+import { RentalMarketCard } from "@/components/zone/rental-market-card"
+import { ExpenseBreakdown } from "@/components/zone/expense-breakdown"
+import { RentalInsightsCard } from "@/components/zone/rental-insights-card"
 
 import { DemographicsCard } from "@/components/zone/demographics-card"
 import { ZoneInsightsCard } from "@/components/zone/zone-insights-card"
 import { ZoneFilters } from "@/components/zone/zone-filters"
 import { getZoneDemographics } from "@/lib/data/demographics"
-import { computeZoneInsights } from "@/lib/data/zone-insights"
+import { computeZoneInsights, computeRentalInsights } from "@/lib/data/zone-insights"
+import { extractRentalAttributesBatch, getZoneCurrencyMix } from "@/lib/data/rental-attributes"
+import { computeExpenseModel } from "@/lib/data/rental-expenses"
+import { segmentRentalMarket } from "@/lib/data/rental-segmentation"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
 import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
@@ -388,11 +394,37 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     : 0
   const yieldPct = totalAvgSale > 0 && totalAvgRent > 0 ? (totalAvgRent * 12 / totalAvgSale) * 100 : null
   const riskForZone = riskMetrics.find((r) => r.zone_slug === slug)
-  const capRate = riskForZone?.cap_rate ?? (yieldPct ? yieldPct * 0.85 : null) // rough adjustment
-  const paybackYears = yieldPct && yieldPct > 0 ? 100 / (yieldPct * 0.7) : null // 30% expenses
+
+  // --- Rental market analytics ---
+  const { stats: rentalStats } = hasRentaData
+    ? extractRentalAttributesBatch(rentaListingsForYield as Listing[])
+    : { stats: null }
+  const currencyMix = hasRentaData
+    ? getZoneCurrencyMix(rentaListingsForYield as Listing[])
+    : { pctMxn: 100, pctUsd: 0, avgUsdPremiumPct: null }
+  const segmentation = hasRentaData
+    ? segmentRentalMarket(rentaListingsForYield as Listing[], totalAvgSale > 0 ? totalAvgSale : undefined)
+    : null
+  const dominantPropertyType = rentaListingsForYield.length > 0
+    ? (rentaListingsForYield.reduce<Record<string, number>>((acc, l) => { acc[l.property_type] = (acc[l.property_type] ?? 0) + 1; return acc }, {}) as Record<string, number>)
+    : {}
+  const topRentalType = Object.entries(dominantPropertyType).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "departamento"
+
+  // Expense model & real cap rate
+  const expenseModel = hasRentaData && totalAvgRent > 0 && totalAvgSale > 0
+    ? computeExpenseModel(totalAvgRent, totalAvgSale, topRentalType as PropertyType, rentalStats)
+    : null
+
+  const capRate = expenseModel?.cap_rate_pct ?? riskForZone?.cap_rate ?? (yieldPct ? yieldPct * 0.85 : null)
+  const paybackYears = expenseModel?.payback_years ?? (yieldPct && yieldPct > 0 ? 100 / (yieldPct * 0.7) : null)
 
   // Investment score (0-100)
   const demo = getZoneDemographics(slug)
+
+  // Rental insights (needs demo, declared above)
+  const rentalInsights = hasRentaData
+    ? computeRentalInsights(rentaListingsForYield as Listing[], demo, rentalStats, currencyMix)
+    : null
   const insights = demo ? computeZoneInsights(demo, zone, riskForZone ?? null, allZonesFiltered) : null
   const investmentScore = Math.min(100, Math.max(0, Math.round(
     (insights?.appreciation_potential ?? 50) * 0.3 +
@@ -515,10 +547,16 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                 investmentScore={investmentScore}
                 paybackYears={paybackYears}
                 hasRentaData={hasRentaData}
+                netYieldPct={expenseModel?.net_yield_pct ?? null}
+                expenseRatioPct={expenseModel?.expense_ratio_pct ?? null}
+                rentalVelocityDays={rentalInsights?.avg_listing_duration_days ?? null}
               />
               <div className="grid grid-cols-12 gap-6">
                 <div className="col-span-12 lg:col-span-7 space-y-6">
                   <YieldByTypeChart data={yieldByType} />
+                  {expenseModel && (
+                    <ExpenseBreakdown model={expenseModel} avgMonthlyRent={totalAvgRent} />
+                  )}
                   {!hasRentaData && (
                     <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
                       <Icon name="info" className="text-amber-600 text-lg flex-shrink-0" />
@@ -528,7 +566,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                     </div>
                   )}
                 </div>
-                <div className="col-span-12 lg:col-span-5">
+                <div className="col-span-12 lg:col-span-5 space-y-6">
                   <InvestmentProfile
                     zone={zone}
                     cityAvg={cityAvg}
@@ -537,6 +575,22 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                     investmentScore={investmentScore}
                     nseLabel={nseLabel}
                   />
+                  {hasRentaData && rentalStats && segmentation && (
+                    <RentalMarketCard
+                      stats={rentalStats}
+                      currencyMix={currencyMix}
+                      segments={segmentation.segments}
+                      avgRent={totalAvgRent}
+                      avgRentPerM2={rentaListingsForYield.filter((l) => l.price_per_m2 > 0).length > 0
+                        ? rentaListingsForYield.filter((l) => l.price_per_m2 > 0).reduce((s, l) => s + l.price_per_m2, 0) / rentaListingsForYield.filter((l) => l.price_per_m2 > 0).length
+                        : 0}
+                      totalListings={validListings.length}
+                      rentaCount={rentaListingsForYield.length}
+                    />
+                  )}
+                  {rentalInsights && (
+                    <RentalInsightsCard insights={rentalInsights} />
+                  )}
                 </div>
               </div>
             </div>
