@@ -66,6 +66,11 @@ function renderNarrative(text: string) {
 }
 
 export function ValuationReport({ result, narrative, property }: Props) {
+  // Determine which area was used for $/m² calculation
+  const usedConstruccion = property.property_type !== "terreno" && !!property.area_construccion_m2
+  const effectiveArea = usedConstruccion ? property.area_construccion_m2! : property.area_m2
+  const areaTypeLabel = property.property_type === "terreno" ? "terreno" : usedConstruccion ? "construc." : "total"
+
   return (
     <div className="space-y-5">
       {/* ── 1. Score Slider + Property Summary ── */}
@@ -95,10 +100,15 @@ export function ValuationReport({ result, narrative, property }: Props) {
           </thead>
           <tbody className="text-slate-700 dark:text-slate-300">
             <tr className="border-b border-slate-50 dark:border-slate-800">
-              <td className="py-2 font-medium text-xs">Precio/m²</td>
-              <td className="py-2 text-right font-bold text-xs">{formatMxn(result.price_per_m2)}</td>
-              <td className="py-2 text-right text-xs">{formatMxn(result.zone_avg_price_per_m2)}</td>
-              <td className={`py-2 text-right font-bold text-xs ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
+              <td className="py-2">
+                <span className="font-medium text-xs">Precio/m²</span>
+                <div className="text-[10px] text-slate-400 font-normal">
+                  {formatMxn(property.price_mxn)} ÷ {Math.round(effectiveArea)}m² {areaTypeLabel}
+                </div>
+              </td>
+              <td className="py-2 text-right font-bold text-xs align-top pt-3">{formatMxn(result.price_per_m2)}</td>
+              <td className="py-2 text-right text-xs align-top pt-3">{formatMxn(result.zone_avg_price_per_m2)}</td>
+              <td className={`py-2 text-right font-bold text-xs align-top pt-3 ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
                 {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
               </td>
             </tr>
@@ -111,10 +121,17 @@ export function ValuationReport({ result, narrative, property }: Props) {
               </td>
             </tr>
             <tr>
-              <td className="py-2 font-medium text-xs">Superficie</td>
-              <td className="py-2 text-right font-bold text-xs">{property.property_type === "casa" && property.area_construccion_m2 && property.area_terreno_m2 && property.area_construccion_m2 !== property.area_terreno_m2 ? `${Math.round(property.area_construccion_m2)}m² constr. · ${Math.round(property.area_terreno_m2)}m² terr.` : `${property.area_m2} m²`}</td>
-              <td className="py-2 text-right text-xs">{result.zone_avg_area > 0 ? `${result.zone_avg_area} m²` : "—"}</td>
-              <td className={`py-2 text-right font-bold text-xs ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
+              <td className="py-2">
+                <span className="font-medium text-xs">Superficie</span>
+                {property.property_type === "casa" && property.area_construccion_m2 && property.area_terreno_m2 && property.area_construccion_m2 !== property.area_terreno_m2 && (
+                  <div className="text-[10px] text-slate-400 font-normal">
+                    {Math.round(property.area_construccion_m2)}m² construc. · {Math.round(property.area_terreno_m2)}m² terreno
+                  </div>
+                )}
+              </td>
+              <td className="py-2 text-right font-bold text-xs align-top pt-3">{Math.round(effectiveArea)} m²</td>
+              <td className="py-2 text-right text-xs align-top pt-3">{result.zone_avg_area > 0 ? `${result.zone_avg_area} m²` : "—"}</td>
+              <td className={`py-2 text-right font-bold text-xs align-top pt-3 ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
                 {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
               </td>
             </tr>
