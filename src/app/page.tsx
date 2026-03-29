@@ -274,17 +274,11 @@ export default async function HomePage({
           .filter(Boolean) as DensityBubble[]
 
         return (
-          <section>
-            <div className="mb-4">
-              <h3 className="text-xl font-black tracking-tight">Inteligencia de Mercado</h3>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Análisis cruzado de datos demográficos × mercado inmobiliario</p>
-            </div>
-            <div className="space-y-6">
-              <MarketIntelligence insights={insights} />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <OpportunityIndexChart data={opportunityData} />
-                <MarketDensityScatter data={densityData} />
-              </div>
+          <section className="space-y-6">
+            <MarketIntelligence insights={insights} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <OpportunityIndexChart data={opportunityData} />
+              <MarketDensityScatter data={densityData} />
             </div>
           </section>
         )

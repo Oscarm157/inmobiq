@@ -139,7 +139,7 @@ export function Sidebar() {
           }`}
         >
           <Icon name="help_outline" />
-          {!collapsed && <span>Narrativa360</span>}
+          {!collapsed && <span className="flex items-center gap-1.5">Narrativa360 <Icon name="open_in_new" className="text-[10px] opacity-50" /></span>}
         </a>
 
         {/* Auth section */}

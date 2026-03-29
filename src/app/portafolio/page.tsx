@@ -12,7 +12,7 @@ import { PortfolioMapWrapper } from "@/components/map/portfolio-map-wrapper"
 import type { PropertyType, ListingType, Listing } from "@/types/database"
 
 export const metadata = {
-  title: "Portfolio Explorer — Inmobiq",
+  title: "Explorador de Portafolios — Inmobiq",
   description: "Explora estrategias de inversión predefinidas y propiedades activas en Tijuana.",
 }
 
@@ -60,7 +60,7 @@ export default async function PortafolioPage({
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Portfolio Explorer
+              Explorador de Portafolios
             </span>
           </div>
           <h2 className="text-4xl font-extrabold tracking-tight">

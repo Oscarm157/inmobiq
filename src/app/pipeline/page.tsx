@@ -4,7 +4,7 @@ import { formatNumber } from "@/lib/utils"
 import type { ProjectStatus } from "@/types/database"
 
 export const metadata = {
-  title: "Development Pipeline — Inmobiq",
+  title: "Pipeline de Desarrollo — Inmobiq",
   description: "Pipeline de desarrollo inmobiliario en Tijuana.",
 }
 
@@ -43,7 +43,7 @@ export default function PipelinePage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-purple-100 text-purple-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Development Pipeline
+              Pipeline de Desarrollo
             </span>
             <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
               {projects.length} Proyectos
