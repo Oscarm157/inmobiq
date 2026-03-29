@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { createSupabaseAdminClient } from "@/lib/supabase-admin"
 import { rateLimit } from "@/lib/rate-limit"
 import type { PropertyType, ListingType } from "@/types/database"
 import { getZoneDataForValuation } from "@/lib/brujula/zone-comparison"
@@ -65,8 +66,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use admin client for DB writes (bypasses RLS — access control handled above)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any
+    const sb = createSupabaseAdminClient() as any
 
     // Get zone comparison data
     const zoneData = await getZoneDataForValuation(
