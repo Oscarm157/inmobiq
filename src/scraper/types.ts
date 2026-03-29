@@ -21,6 +21,16 @@ export interface RawListing {
   address: string | null;
   images: string[];
   raw_data: Record<string, unknown>;
+
+  // Rental-specific attributes (Phase 4)
+  is_furnished?: boolean | null;
+  maintenance_fee?: number | null;
+  deposit_months?: number | null;
+  lease_term_months?: number | null;
+  pets_allowed?: boolean | null;
+  is_short_term?: boolean | null;
+  utilities_included?: boolean | null;
+  amenities?: string[];
 }
 
 export interface ScraperConfig {

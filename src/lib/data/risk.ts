@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { ZONE_RISK_DATA } from "@/lib/mock-data"
 import { getZoneDemographics } from "@/lib/data/demographics"
+import { isValidListing, effectivePriceMxn } from "@/lib/data/normalize"
 import type { Zone, ZoneRiskMetrics } from "@/types/database"
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
@@ -10,6 +11,53 @@ type SnapshotRow = {
   week_start: string
   avg_price_per_m2: number
   total_listings: number
+}
+
+type RentalListingRow = {
+  zone_id: string
+  price_mxn: number | null
+  price_usd: number | null
+  area_m2: number | null
+  property_type: string
+}
+
+/** Compute avg rent per m² from actual rental listings, keyed by zone_id */
+async function computeRealRentPerM2(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  zoneIds: string[],
+): Promise<Map<string, number>> {
+  const result = new Map<string, number>()
+
+  const { data: rentals } = await supabase
+    .from("listings")
+    .select("zone_id, price_mxn, price_usd, area_m2, property_type")
+    .eq("listing_type", "renta")
+    .eq("is_active", true)
+    .in("zone_id", zoneIds)
+    .gt("area_m2", 0)
+
+  if (!rentals?.length) return result
+
+  // Group by zone and compute avg rent/m²
+  const byZone = new Map<string, number[]>()
+  for (const row of rentals as RentalListingRow[]) {
+    const price = effectivePriceMxn(row.price_mxn, row.price_usd)
+    if (!price || !row.area_m2 || row.area_m2 <= 0) continue
+    const validation = isValidListing(row.property_type as "casa", "renta", price, row.area_m2)
+    if (!validation.isValid) continue
+    const rentPerM2 = price / row.area_m2
+    const arr = byZone.get(row.zone_id) ?? []
+    arr.push(rentPerM2)
+    byZone.set(row.zone_id, arr)
+  }
+
+  for (const [zoneId, values] of byZone) {
+    if (values.length >= 3) {
+      result.set(zoneId, values.reduce((a, b) => a + b, 0) / values.length)
+    }
+  }
+
+  return result
 }
 
 /**
@@ -48,6 +96,9 @@ export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; i
     const snapshots = snapshotsRes.data as SnapshotRow[] | null
 
     if (!zones?.length || !snapshots?.length) return { data: ZONE_RISK_DATA, isMock: true }
+
+    // Compute real avg_rent_per_m2 from active rental listings
+    const realRentPerM2 = await computeRealRentPerM2(supabase, zones.map((z) => z.id))
 
     const result: ZoneRiskMetrics[] = zones
       .map((zone) => {
@@ -113,7 +164,7 @@ export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; i
           liquidity_score: liquidityScore,
           market_maturity:
             mockEntry?.market_maturity ?? "consolidado",
-          avg_rent_per_m2: mockEntry?.avg_rent_per_m2 ?? 150,
+          avg_rent_per_m2: realRentPerM2.get(zone.id) ?? mockEntry?.avg_rent_per_m2 ?? 150,
           risk_label,
         } satisfies ZoneRiskMetrics
       })

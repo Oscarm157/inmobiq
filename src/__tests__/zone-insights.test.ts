@@ -64,11 +64,15 @@ function makeMetrics(overrides: Partial<ZoneMetrics> = {}): ZoneMetrics {
 function makeRisk(overrides: Partial<ZoneRiskMetrics> = {}): ZoneRiskMetrics {
   return {
     zone_slug: "test-zone",
+    zone_name: "Test Zone",
     risk_score: 35,
     volatility: 5,
     cap_rate: 6,
     vacancy_rate: 8,
     liquidity_score: 70,
+    market_maturity: "consolidado",
+    avg_rent_per_m2: 150,
+    risk_label: "Bajo",
     ...overrides,
   }
 }

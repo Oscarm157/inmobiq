@@ -188,6 +188,156 @@ export async function calculateWeeklySnapshots(): Promise<{
   if (cErr) throw new Error(`Failed to upsert city snapshots: ${cErr.message}`);
   citySnapshots = 1;
 
-  console.log(`[snapshots] done: ${zoneSnapshots} zone, ${citySnapshots} city snapshots`);
+  // ── Rental snapshots ──────────────────────────────────────────
+  const rentalSnapshots = await calculateRentalSnapshots(sb, weekStart);
+
+  console.log(`[snapshots] done: ${zoneSnapshots} zone, ${citySnapshots} city, ${rentalSnapshots} rental snapshots`);
   return { zoneSnapshots, citySnapshots };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Rental-specific snapshots                                         */
+/* ------------------------------------------------------------------ */
+
+interface RentalListingRow {
+  zone_id: string;
+  price_mxn: number | null;
+  price_usd: number | null;
+  area_m2: number | null;
+  is_furnished: boolean | null;
+  maintenance_fee: number | null;
+  first_seen_at: string;
+  last_seen_at: string;
+}
+
+/**
+ * Calculate and upsert rental_snapshots for all zones with active rental listings.
+ */
+async function calculateRentalSnapshots(
+  sb: ReturnType<typeof createClient>,
+  weekStart: string,
+): Promise<number> {
+  const { data: rentals, error } = await sb
+    .from("listings")
+    .select("zone_id, price_mxn, price_usd, area_m2, is_furnished, maintenance_fee, first_seen_at, last_seen_at")
+    .eq("listing_type", "renta")
+    .eq("is_active", true)
+    .not("zone_id", "is", null);
+
+  if (error) {
+    console.error(`[snapshots] Failed to fetch rental listings: ${error.message}`);
+    return 0;
+  }
+  if (!rentals?.length) return 0;
+
+  // Group by zone
+  const byZone = new Map<string, RentalListingRow[]>();
+  for (const r of rentals as RentalListingRow[]) {
+    const group = byZone.get(r.zone_id) ?? [];
+    group.push(r);
+    byZone.set(r.zone_id, group);
+  }
+
+  const records = [];
+  const now = Date.now();
+
+  for (const [zone_id, listings] of byZone) {
+    // Price per m2
+    const rentsPerM2 = listings
+      .filter((l) => l.area_m2 && l.area_m2 > 0)
+      .map((l) => {
+        const price = effectivePriceMxn(l.price_mxn, l.price_usd);
+        return price && l.area_m2 ? price / l.area_m2 : null;
+      })
+      .filter((v): v is number => v !== null && v > 0);
+
+    const allPrices = listings
+      .map((l) => effectivePriceMxn(l.price_mxn, l.price_usd))
+      .filter((p): p is number => p !== null && p > 0);
+
+    // Furnished breakdown
+    const furnished = listings.filter((l) => l.is_furnished === true);
+    const unfurnished = listings.filter((l) => l.is_furnished === false);
+
+    // Furnished premium
+    let furnished_premium_pct: number | null = null;
+    if (furnished.length >= 2 && unfurnished.length >= 2) {
+      const furnPerM2 = furnished
+        .filter((l) => l.area_m2 && l.area_m2 > 0)
+        .map((l) => {
+          const p = effectivePriceMxn(l.price_mxn, l.price_usd);
+          return p && l.area_m2 ? p / l.area_m2 : null;
+        })
+        .filter((v): v is number => v !== null);
+      const unfurnPerM2 = unfurnished
+        .filter((l) => l.area_m2 && l.area_m2 > 0)
+        .map((l) => {
+          const p = effectivePriceMxn(l.price_mxn, l.price_usd);
+          return p && l.area_m2 ? p / l.area_m2 : null;
+        })
+        .filter((v): v is number => v !== null);
+
+      if (furnPerM2.length && unfurnPerM2.length) {
+        const avgFurn = furnPerM2.reduce((a, b) => a + b, 0) / furnPerM2.length;
+        const avgUnfurn = unfurnPerM2.reduce((a, b) => a + b, 0) / unfurnPerM2.length;
+        if (avgUnfurn > 0) {
+          furnished_premium_pct = Math.round(((avgFurn - avgUnfurn) / avgUnfurn) * 100);
+        }
+      }
+    }
+
+    // USD count
+    const usd_listings_count = listings.filter((l) => l.price_usd !== null && l.price_usd > 0).length;
+
+    // Average listing duration (days since first_seen)
+    const durations = listings
+      .filter((l) => l.first_seen_at)
+      .map((l) => {
+        const firstSeen = new Date(l.first_seen_at).getTime();
+        return (now - firstSeen) / (1000 * 60 * 60 * 24);
+      })
+      .filter((d) => d > 0 && d < 365);
+
+    const avg_listing_duration_days = durations.length
+      ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+      : null;
+
+    // Median maintenance fee
+    const maintFees = listings
+      .map((l) => l.maintenance_fee)
+      .filter((f): f is number => f !== null && f > 0)
+      .sort((a, b) => a - b);
+    const median_maintenance_fee = maintFees.length
+      ? maintFees[Math.floor(maintFees.length / 2)]
+      : null;
+
+    records.push({
+      zone_id,
+      week_start: weekStart,
+      avg_rent_per_m2: rentsPerM2.length ? Math.round(median(rentsPerM2)) : null,
+      median_rent: allPrices.length ? Math.round(median(allPrices)) : null,
+      total_rental_listings: listings.length,
+      furnished_count: furnished.length,
+      unfurnished_count: unfurnished.length,
+      furnished_premium_pct,
+      usd_listings_count,
+      avg_listing_duration_days,
+      median_maintenance_fee,
+    });
+  }
+
+  if (!records.length) return 0;
+
+  const { error: upsertErr } = await sb.from("rental_snapshots").upsert(records, {
+    onConflict: "zone_id,week_start",
+    ignoreDuplicates: false,
+  });
+
+  if (upsertErr) {
+    console.error(`[snapshots] Failed to upsert rental snapshots: ${upsertErr.message}`);
+    return 0;
+  }
+
+  console.log(`[snapshots] ${records.length} rental snapshots upserted`);
+  return records.length;
 }

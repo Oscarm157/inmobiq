@@ -4,7 +4,8 @@
  */
 
 import type { ZoneDemographics } from "./demographics"
-import type { ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
+import type { Listing, ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
+import type { RentalAttributeStats } from "./rental-attributes"
 
 export interface ZoneInsights {
   zone_slug: string
@@ -107,5 +108,83 @@ export function computeZoneInsights(
       "Potencial limitado",
       "Bajo potencial",
     ]),
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Rental-specific insights                                           */
+/* ------------------------------------------------------------------ */
+
+export interface RentalInsights {
+  /** 0-100 — higher = more rental demand */
+  rental_demand_score: number
+  rental_demand_label: string
+  /** % premium for furnished vs unfurnished (from extracted attributes) */
+  furnished_premium_pct: number | null
+  /** % of rental listings originally listed in USD */
+  usd_market_share_pct: number
+  /** Average days a rental listing stays active (proxy for demand) */
+  avg_listing_duration_days: number | null
+  /** Qualitative rental velocity */
+  rental_velocity: "alta" | "media" | "baja"
+}
+
+/**
+ * Compute rental-specific insights for a zone.
+ * Uses listing activity data and extracted rental attributes.
+ */
+export function computeRentalInsights(
+  rentaListings: Listing[],
+  demo: ZoneDemographics | null,
+  rentalStats: RentalAttributeStats | null,
+  currencyMix: { pctUsd: number },
+): RentalInsights | null {
+  if (rentaListings.length < 3) return null
+
+  // Average listing duration (days between scraped_at or created_at — proxy for how fast listings move)
+  const durations: number[] = []
+  const now = Date.now()
+  for (const l of rentaListings) {
+    const created = new Date(l.scraped_at || l.created_at).getTime()
+    if (created > 0) {
+      const daysActive = (now - created) / (1000 * 60 * 60 * 24)
+      if (daysActive > 0 && daysActive < 365) durations.push(daysActive)
+    }
+  }
+  const avgDuration = durations.length > 0
+    ? durations.reduce((a, b) => a + b, 0) / durations.length
+    : null
+
+  // Rental velocity
+  const velocity: RentalInsights["rental_velocity"] = avgDuration !== null
+    ? (avgDuration < 14 ? "alta" : avgDuration < 30 ? "media" : "baja")
+    : "media"
+
+  // Rental demand score: combine household ratio, duration, NSE internet (digital nomad appeal)
+  let demandScore = 50 // neutral default
+  if (demo && demo.ageb_count > 0) {
+    const householdToListingRatio = Math.min(demo.households / Math.max(rentaListings.length, 1), 500)
+    const ratioNorm = (householdToListingRatio / 500) * 100
+    const durationScore = avgDuration !== null
+      ? clamp(Math.round(100 - avgDuration * 2)) // shorter = higher score
+      : 50
+    const internetAppeal = demo.pct_internet // 0-100
+    demandScore = clamp(Math.round(ratioNorm * 0.35 + durationScore * 0.35 + internetAppeal * 0.30))
+  }
+
+  return {
+    rental_demand_score: demandScore,
+    rental_demand_label: labelFromScore(demandScore, [
+      "Demanda muy alta",
+      "Demanda alta",
+      "Demanda moderada",
+      "Demanda baja",
+    ]),
+    furnished_premium_pct: rentalStats?.furnishedPremiumPct !== null && rentalStats?.furnishedPremiumPct !== undefined
+      ? Math.round(rentalStats.furnishedPremiumPct * 10) / 10
+      : null,
+    usd_market_share_pct: currencyMix.pctUsd,
+    avg_listing_duration_days: avgDuration !== null ? Math.round(avgDuration) : null,
+    rental_velocity: velocity,
   }
 }
