@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import { Icon } from "@/components/icon"
+import { SearchInput } from "./search-input"
 import { Price } from "@/components/price"
 import type { Listing, ZoneMetrics } from "@/types/database"
 
@@ -206,13 +207,13 @@ export default async function BuscarPage({
         </h1>
       </div>
 
+      <SearchInput initialQuery={query} />
+
       {query.length < 3 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            <Icon name="search" className="text-slate-400 text-2xl" />
-          </div>
-          <p className="text-sm text-slate-400 max-w-xs">
-            Ingresa al menos 3 caracteres para buscar zonas y colonias en Tijuana.
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Icon name="travel_explore" className="text-4xl text-slate-300 dark:text-slate-600 mb-3" />
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+            Busca por nombre de zona, colonia o desarrollo inmobiliario.
           </p>
         </div>
       ) : (

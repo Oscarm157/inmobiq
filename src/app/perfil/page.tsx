@@ -19,13 +19,27 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-slate-500 text-sm">Cargando perfil...</div>
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Breadcrumb items={[{ label: "Perfil" }]} />
+        <div className="flex flex-col items-center justify-center min-h-48 gap-3">
+          <div className="w-5 h-5 border-2 border-slate-200 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-slate-400 dark:text-slate-500 text-sm">Cargando perfil...</p>
+        </div>
       </div>
     )
   }
 
-  if (!user) return null
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Breadcrumb items={[{ label: "Perfil" }]} />
+        <div className="flex flex-col items-center justify-center min-h-48 gap-3">
+          <Icon name="login" className="text-3xl text-slate-300 dark:text-slate-600" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">Redirigiendo al login...</p>
+        </div>
+      </div>
+    )
+  }
 
   const name =
     user.user_metadata?.full_name ??
