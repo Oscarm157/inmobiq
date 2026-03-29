@@ -135,7 +135,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     getZoneMetrics(filters),
     getListings(filters),
     getZoneListingsAnalytics(slug, filters),
-    getZoneRiskMetrics().then(r => r.data),
+    getZoneRiskMetrics({ categoria: filters.categoria, listing_type: filters.listing_type }).then(r => r.data),
     getLastSnapshotDate(),
   ])
   if (!zone) notFound()

@@ -352,12 +352,11 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     return TIJUANA_CITY_METRICS
   }
 
-  // Helper: median ticket from a zones array (same methodology as avg_price_per_m2)
-  // Weighted average was pulling city ticket up due to large commercial properties.
-  const medianTicket = (zs: typeof zones) => {
+  // Helpers: median from zones array (weighted by listing count, capped at 100 per zone)
+  const medianFromZones = (zs: typeof zones, getValue: (z: typeof zones[0]) => number) => {
     const prices = zs
-      .filter((z) => z.avg_ticket > 0 && z.total_listings > 0 && z.zone_slug !== "otros")
-      .flatMap((z) => Array(Math.min(z.total_listings, 100)).fill(z.avg_ticket) as number[])
+      .filter((z) => getValue(z) > 0 && z.total_listings > 0 && z.zone_slug !== "otros")
+      .flatMap((z) => Array(Math.min(z.total_listings, 100)).fill(getValue(z)) as number[])
       .sort((a, b) => a - b)
     const mid = Math.floor(prices.length / 2)
     return prices.length > 0
@@ -365,29 +364,27 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
       : 0
   }
 
+  // Weighted trend: zones with more listings have more influence
+  const weightedTrend = (zs: typeof zones) => {
+    const valid = zs.filter((z) => z.total_listings > 0 && z.zone_slug !== "otros")
+    const totalCount = valid.reduce((s, z) => s + z.total_listings, 0)
+    return totalCount > 0
+      ? Number((valid.reduce((s, z) => s + z.price_trend_pct * z.total_listings, 0) / totalCount).toFixed(1))
+      : 0
+  }
+
   // When filters are active, compute city metrics from filtered zones
   if (hasFilters) {
     const totalListings = zones.reduce((s, z) => s + z.total_listings, 0)
-    // Use median of zone prices (weighted by listing count) for robustness against outliers
-    const zonePrices = zones
-      .filter((z) => z.avg_price_per_m2 > 0 && z.total_listings > 0)
-      .flatMap((z) => Array(Math.min(z.total_listings, 100)).fill(z.avg_price_per_m2) as number[])
-      .sort((a, b) => a - b)
-    const mid = Math.floor(zonePrices.length / 2)
-    const avgPricePerM2 = zonePrices.length > 0
-      ? Math.round(zonePrices.length % 2 !== 0 ? zonePrices[mid] : (zonePrices[mid - 1] + zonePrices[mid]) / 2)
-      : 0
 
     const sortedByPrice = [...zones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
     const sortedByListings = [...zones].sort((a, b) => b.total_listings - a.total_listings)
 
     return {
       city: "Tijuana",
-      avg_price_per_m2: avgPricePerM2,
-      avg_ticket: medianTicket(zones),
-      price_trend_pct: zones.length > 0
-        ? Number((zones.reduce((s, z) => s + z.price_trend_pct, 0) / zones.length).toFixed(1))
-        : 0,
+      avg_price_per_m2: medianFromZones(zones, (z) => z.avg_price_per_m2),
+      avg_ticket: medianFromZones(zones, (z) => z.avg_ticket),
+      price_trend_pct: weightedTrend(zones),
       total_listings: totalListings,
       total_zones: zones.length,
       top_zones: sortedByPrice.slice(0, 4),
@@ -425,10 +422,12 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
       (a, b) => b.total_listings - a.total_listings
     )
 
+    // Use zone-based medians for price and ticket (consistent methodology)
+    // city_snapshots only used for total counts and trend
     return {
       city: latest.city ?? "Tijuana",
-      avg_price_per_m2: Number(latest.avg_price_per_m2),
-      avg_ticket: medianTicket(zones),
+      avg_price_per_m2: medianFromZones(zones, (z) => z.avg_price_per_m2),
+      avg_ticket: medianFromZones(zones, (z) => z.avg_ticket),
       price_trend_pct: Number(priceTrend.toFixed(1)),
       total_listings: latest.count_active ?? 0,
       total_zones: latest.total_zones ?? zones.length,

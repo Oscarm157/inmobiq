@@ -40,6 +40,18 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
       zoneRaw: zoneLimitedData ? 0 : zone.avg_ticket,
       cityRaw: city.avg_ticket,
     },
+    // Superficie Promedio: only show when both sides have valid ticket and price/m²
+    ...(zone.avg_ticket > 0 && zone.avg_price_per_m2 > 0 && city.avg_ticket > 0 && city.avg_price_per_m2 > 0
+      ? [{
+          label: "Superficie Promedio",
+          zoneValue: zoneLimitedData
+            ? "—"
+            : `${Math.round(zone.avg_ticket / zone.avg_price_per_m2)} m²`,
+          cityValue: `${Math.round(city.avg_ticket / city.avg_price_per_m2)} m²`,
+          zoneRaw: zoneLimitedData ? 0 : Math.round(zone.avg_ticket / zone.avg_price_per_m2),
+          cityRaw: Math.round(city.avg_ticket / city.avg_price_per_m2),
+        }]
+      : []),
     {
       label: "Inventario",
       zoneValue: getZoneActivityLabel(zone.total_listings),
@@ -92,7 +104,7 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      zoneLimitedData && row.label === "Ticket Promedio"
+                      zoneLimitedData && (row.label === "Ticket Promedio" || row.label === "Superficie Promedio")
                         ? "bg-slate-300 dark:bg-slate-700"
                         : "bg-slate-700"
                     }`}
@@ -100,7 +112,7 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
                   />
                 </div>
                 <span className={`text-xs font-bold min-w-[80px] text-right ${
-                  zoneLimitedData && row.label === "Ticket Promedio"
+                  zoneLimitedData && (row.label === "Ticket Promedio" || row.label === "Superficie Promedio")
                     ? "text-slate-400 dark:text-slate-500 italic"
                     : "text-slate-700 dark:text-slate-300"
                 }`}>

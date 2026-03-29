@@ -83,6 +83,15 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
   ]
 
   return (
+    <div className="space-y-3">
+      {zone.total_listings < 10 && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 dark:border-amber-800 dark:bg-amber-950/40">
+          <Icon name="info" className="text-base text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-800 dark:text-amber-300">
+            <span className="font-semibold">Datos limitados</span> — Esta zona tiene pocos datos ({zone.total_listings} propiedades activas). Las métricas pueden no ser representativas.
+          </p>
+        </div>
+      )}
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {cells.map((cell) => (
         <div
@@ -104,6 +113,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
           )}
         </div>
       ))}
+    </div>
     </div>
   )
 }

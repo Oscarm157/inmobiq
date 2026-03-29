@@ -234,34 +234,32 @@ Fuente: `src/app/page.tsx`
 
 ---
 
-## 10. Incoherencias conocidas y mitigaciones
+## 10. Incoherencias corregidas (2026-03-29)
 
 ### 10.1 $/m² vs Ticket apuntan en direcciones opuestas
 - **Causa**: Diferencia de tamaño promedio de propiedades entre zona y ciudad
-- **Fix aplicado**: Ambos usan mediana (commit c6f3e19)
-- **Mejora pendiente**: Mostrar "Superficie promedio implícita" para contexto
+- **Fix**: Ambos usan mediana + nueva fila "Superficie Promedio" en Zona vs Ciudad (`ticket / precio_m2 = m² implícitos`)
+- **Archivos**: `zone-comparison-enhanced.tsx`, `zones.ts`
 
-### 10.2 Risk/Yield no filtran por categoría
-- **Causa**: Se calculan sobre todo el mercado de la zona
-- **Impacto**: Un usuario en "residencial" ve riesgo influenciado por comercial
-- **Mitigación**: Riesgo global es aceptable como proxy; separar por categoría requeriría más data
+### 10.2 Risk ahora filtra por categoría y operación
+- **Antes**: Risk se calculaba sobre todo el mercado (residencial+comercial+terreno mezclado)
+- **Fix**: `getZoneRiskMetrics(filters)` acepta `categoria` y `listing_type`, filtra snapshots y listings de renta por tipo
+- **Archivos**: `risk.ts`, `zona/[slug]/page.tsx`
 
-### 10.3 Tendencia ciudad vs zona usan métodos diferentes
-- **Zona**: Week-over-week exacto desde snapshots
-- **Ciudad**: Promedio simple de tendencias de todas las zonas
-- **Impacto**: Bajo — ambos dan direccionalidad correcta
+### 10.3 Tendencia ciudad ahora usa promedio ponderado
+- **Antes**: Promedio simple de tendencias zonales (zona con 2 listings pesaba igual que zona con 200)
+- **Fix**: Ponderado por `total_listings` — zonas con más data tienen más peso
+- **Archivos**: `zones.ts` (helper `weightedTrend`)
 
-### 10.4 Path sin filtros usa fuentes mixtas
-- **`avg_price_per_m2`**: viene de `city_snapshots` (tabla separada)
-- **`avg_ticket`**: viene de mediana de zonas
-- **Cuándo ocurre**: Solo si operación="todas" Y categoría="todas"
-- **Impacto**: Raro en práctica, pero si ocurre puede causar incoherencia
+### 10.4 Path sin filtros unificado
+- **Antes**: `avg_price_per_m2` de `city_snapshots`, `avg_ticket` de mediana de zonas
+- **Fix**: Ambos usan `medianFromZones()` — misma metodología siempre
+- **Archivos**: `zones.ts`
 
-### 10.5 Zonas con poca data
-- **Umbral actual**: `<10 listings` → "Muestra insuficiente" para ticket
-- **Label de actividad**: `<5` → "Actividad muy baja"
-- **Problema**: Medianas con 2-3 listings no son confiables
-- **Mejora pendiente**: Badge más visible "Datos limitados"
+### 10.5 Badge "Datos limitados" visible
+- **Antes**: Solo "Muestra insuficiente" en el ticket (fácil de ignorar)
+- **Fix**: Banner amber arriba del KPI strip cuando `total_listings < 10`: "Datos limitados — Esta zona tiene pocos datos (N propiedades activas)"
+- **Archivos**: `kpi-ticker-strip.tsx`
 
 ---
 

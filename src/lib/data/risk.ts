@@ -1,8 +1,23 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { ZONE_RISK_DATA } from "@/lib/mock-data"
 import { getZoneDemographics } from "@/lib/data/demographics"
-import { isValidListing, effectivePriceMxn } from "@/lib/data/normalize"
-import type { Zone, ZoneRiskMetrics } from "@/types/database"
+import { isValidListing, effectivePriceMxn, RESIDENTIAL_TYPES, COMMERCIAL_TYPES, LAND_TYPES, type PropertyCategory } from "@/lib/data/normalize"
+import type { Zone, ZoneRiskMetrics, PropertyType, ListingType } from "@/types/database"
+
+export interface RiskFilters {
+  categoria?: PropertyCategory
+  listing_type?: ListingType
+}
+
+function resolveRiskTypes(filters?: RiskFilters): PropertyType[] | undefined {
+  if (!filters?.categoria) return undefined
+  const map: Record<PropertyCategory, PropertyType[]> = {
+    residencial: RESIDENTIAL_TYPES,
+    comercial: COMMERCIAL_TYPES,
+    terreno: LAND_TYPES,
+  }
+  return map[filters.categoria]
+}
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
@@ -25,16 +40,23 @@ type RentalListingRow = {
 async function computeRealRentPerM2(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   zoneIds: string[],
+  propertyTypes?: PropertyType[],
 ): Promise<Map<string, number>> {
   const result = new Map<string, number>()
 
-  const { data: rentals } = await supabase
+  let query = supabase
     .from("listings")
     .select("zone_id, price_mxn, price_usd, area_m2, property_type")
     .eq("listing_type", "renta")
     .eq("is_active", true)
     .in("zone_id", zoneIds)
     .gt("area_m2", 0)
+
+  if (propertyTypes?.length) {
+    query = query.in("property_type", propertyTypes)
+  }
+
+  const { data: rentals } = await query
 
   if (!rentals?.length) return result
 
@@ -65,7 +87,7 @@ async function computeRealRentPerM2(
  * Real data: computed from snapshot history (volatility = price std dev over 4 weeks).
  * Falls back to mock when insufficient snapshot history exists.
  */
-export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; isMock: boolean }> {
+export async function getZoneRiskMetrics(filters?: RiskFilters): Promise<{ data: ZoneRiskMetrics[]; isMock: boolean }> {
   if (useMock()) return { data: ZONE_RISK_DATA, isMock: true }
 
   try {
@@ -84,12 +106,23 @@ export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; i
 
     const weekStarts = weeks.map((w) => w.week_start)
 
+    // Build filtered snapshots query
+    let snapsQuery = supabase
+      .from("snapshots")
+      .select("zone_id, week_start, avg_price_per_m2, total_listings")
+      .in("week_start", weekStarts)
+
+    const effectiveTypes = resolveRiskTypes(filters)
+    if (effectiveTypes?.length) {
+      snapsQuery = snapsQuery.in("property_type", effectiveTypes)
+    }
+    if (filters?.listing_type) {
+      snapsQuery = snapsQuery.eq("listing_type", filters.listing_type)
+    }
+
     const [zonesRes, snapshotsRes] = await Promise.all([
       supabase.from("zones").select("*").eq("city", "Tijuana"),
-      supabase
-        .from("snapshots")
-        .select("zone_id, week_start, avg_price_per_m2, total_listings")
-        .in("week_start", weekStarts),
+      snapsQuery,
     ])
 
     const zones = zonesRes.data as Zone[] | null
@@ -98,7 +131,7 @@ export async function getZoneRiskMetrics(): Promise<{ data: ZoneRiskMetrics[]; i
     if (!zones?.length || !snapshots?.length) return { data: ZONE_RISK_DATA, isMock: true }
 
     // Compute real avg_rent_per_m2 from active rental listings
-    const realRentPerM2 = await computeRealRentPerM2(supabase, zones.map((z) => z.id))
+    const realRentPerM2 = await computeRealRentPerM2(supabase, zones.map((z) => z.id), effectiveTypes)
 
     const result: ZoneRiskMetrics[] = zones
       .map((zone) => {
