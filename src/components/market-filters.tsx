@@ -162,7 +162,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
 
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
-        <div className="absolute left-0 right-0 z-30 px-4 md:px-8 mt-3">
+        <div className="absolute left-0 right-0 z-30 mt-3">
           <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl transition-opacity duration-150 overflow-hidden ${isPending ? "opacity-90" : "opacity-100"}`}>
 
             {/* ── Main content: left filters + right zones ── */}
@@ -310,9 +310,9 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
               </div>
 
               {/* Right: zones scrollable */}
-              <div className="w-72 p-5 shrink-0">
+              <div className="w-80 lg:w-96 p-5 shrink-0">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Zona</p>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 max-h-56 overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 max-h-56 overflow-y-auto pr-1">
                   {PUBLIC_ZONES.map(({ slug, name }) => {
                     const active = state.zonas.includes(slug)
                     return (
