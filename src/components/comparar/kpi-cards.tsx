@@ -143,19 +143,19 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
                         />
                       ))}
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                  <div className="flex flex-wrap gap-1.5 mt-3">
                     {Object.entries(zone.listings_by_type)
                       .filter(([, count]) => count > 0)
                       .sort(([, a], [, b]) => b - a)
                       .slice(0, 4)
                       .map(([type, count]) => (
-                        <span key={type} className="text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 font-bold">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: TYPE_COLORS[type] ?? "#94a3b8" }}
-                          />
-                          <span className="capitalize">{type === "departamento" ? "Depto" : type}</span>
-                          <span className="text-slate-500 dark:text-slate-400 font-semibold">{Math.round((count / typeTotal) * 100)}%</span>
+                        <span
+                          key={type}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-white capitalize"
+                          style={{ backgroundColor: TYPE_COLORS[type] ?? "#94a3b8" }}
+                        >
+                          {type === "departamento" ? "Depto" : type}
+                          <span className="text-white/70">{Math.round((count / typeTotal) * 100)}%</span>
                         </span>
                       ))}
                   </div>
