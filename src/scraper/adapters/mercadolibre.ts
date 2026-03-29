@@ -94,6 +94,11 @@ function extractFromPreloaded(
     let bathrooms: number | null = null;
     let parking: number | null = null;
 
+    // Rental-specific attributes
+    let is_furnished: boolean | null = null;
+    let maintenance_fee: number | null = null;
+    let pets_allowed: boolean | null = null;
+
     for (const attr of attributes) {
       const attrId = String(attr.id ?? "").toLowerCase();
       const val = String(attr.value_name ?? attr.value ?? "");
@@ -109,6 +114,18 @@ function extractFromPreloaded(
         bathrooms = parseNumber(val);
       else if (attrId.includes("parking") || attrId.includes("garage"))
         parking = parseNumber(val);
+      else if (attrId.includes("furnished") || attrId.includes("amueblado")) {
+        const lv = val.toLowerCase();
+        is_furnished = lv !== "no" && lv !== "sin" && lv !== "" && lv !== "0";
+      }
+      else if (attrId.includes("maintenance") || attrId.includes("mantenimiento") || attrId.includes("expensas")) {
+        const n = parseNumber(val);
+        if (n && n > 0 && n < 50_000) maintenance_fee = n;
+      }
+      else if (attrId.includes("pets") || attrId.includes("mascota")) {
+        const lv = val.toLowerCase();
+        pets_allowed = lv !== "no" && lv !== "0" && lv !== "";
+      }
     }
 
     // Images — pictures array or thumbnail fallback
@@ -148,6 +165,12 @@ function extractFromPreloaded(
       address: String(address ?? "").trim() || null,
       images: pictures,
       raw_data: { source: "preloaded_state", raw: it },
+      // Rental attributes (only for renta listings)
+      ...(listingType === "renta" ? {
+        is_furnished,
+        maintenance_fee,
+        pets_allowed,
+      } : {}),
     });
   }
 

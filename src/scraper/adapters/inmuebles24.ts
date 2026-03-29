@@ -109,6 +109,126 @@ function getFeatureValue(
   return null;
 }
 
+/** Check if a feature label matches any keyword (case-insensitive) */
+function hasFeatureLabel(
+  features: Record<string, { label: string; value: string }> | undefined,
+  ...keywords: string[]
+): { found: boolean; value: string | null } {
+  if (!features) return { found: false, value: null };
+  for (const [, feat] of Object.entries(features)) {
+    const label = feat.label.toLowerCase();
+    if (keywords.some((kw) => label.includes(kw))) {
+      return { found: true, value: feat.value };
+    }
+  }
+  return { found: false, value: null };
+}
+
+/** Extract rental-specific attributes from Inmuebles24 main_features and description */
+function extractI24RentalAttrs(item: ApifyI24Listing): {
+  is_furnished: boolean | null;
+  maintenance_fee: number | null;
+  deposit_months: number | null;
+  pets_allowed: boolean | null;
+  is_short_term: boolean | null;
+  utilities_included: boolean | null;
+  amenities: string[];
+} {
+  const features = item.main_features;
+  const desc = (item.description_normalized ?? "").toLowerCase();
+  const title = (item.title ?? "").toLowerCase();
+
+  // Furnished
+  let is_furnished: boolean | null = null;
+  const furnishedFeat = hasFeatureLabel(features, "amueblado", "furnished", "equipado");
+  if (furnishedFeat.found) {
+    const val = (furnishedFeat.value ?? "").toLowerCase();
+    is_furnished = val !== "no" && val !== "sin" && val !== "0";
+  } else if (/amueblado|furnished|equipado/i.test(desc) || /amueblado|furnished/i.test(title)) {
+    is_furnished = !/sin\s+amueblar|no\s+amueblado|sin\s+muebles/i.test(desc);
+  }
+
+  // Maintenance fee
+  let maintenance_fee: number | null = null;
+  const maintFeat = hasFeatureLabel(features, "mantenimiento", "maintenance", "cuota");
+  if (maintFeat.found && maintFeat.value) {
+    const n = parseFloat(maintFeat.value.replace(/[^\d.]/g, ""));
+    if (!isNaN(n) && n > 0) maintenance_fee = n;
+  }
+  if (!maintenance_fee) {
+    const maintMatch = desc.match(/mantenimiento\s*(?:de\s*)?\$?\s*([\d,]+(?:\.\d+)?)/);
+    if (maintMatch) {
+      const n = parseFloat(maintMatch[1].replace(/,/g, ""));
+      if (!isNaN(n) && n > 0 && n < 50_000) maintenance_fee = n;
+    }
+  }
+
+  // Deposit
+  let deposit_months: number | null = null;
+  const depositMatch = desc.match(/dep[oó]sito?\s*(?:de\s*)?(\d+)\s*mes/i);
+  if (depositMatch) deposit_months = parseInt(depositMatch[1], 10);
+
+  // Pets
+  let pets_allowed: boolean | null = null;
+  const petsFeat = hasFeatureLabel(features, "mascota", "pets", "pet");
+  if (petsFeat.found) {
+    const val = (petsFeat.value ?? "").toLowerCase();
+    pets_allowed = val !== "no" && val !== "0";
+  } else if (/mascotas?\s*permitidas?|pet\s*friendly|se\s*aceptan\s*mascotas/i.test(desc) || /pet\s*friendly/i.test(title)) {
+    pets_allowed = true;
+  } else if (/no\s*mascotas|mascotas?\s*no\s*permitidas?|sin\s*mascotas/i.test(desc)) {
+    pets_allowed = false;
+  }
+
+  // Short-term
+  let is_short_term: boolean | null = null;
+  if (/temporal|corto\s*plazo|short\s*term|airbnb|por\s*noche|amueblado\s*temporal/i.test(desc) ||
+      /temporal|short\s*term|airbnb/i.test(title)) {
+    is_short_term = true;
+  }
+
+  // Utilities included
+  let utilities_included: boolean | null = null;
+  if (/servicios?\s*incluidos?|utilit(?:ies|y)\s*included/i.test(desc)) {
+    utilities_included = true;
+  }
+
+  // Amenities from features
+  const amenities: string[] = [];
+  const AMENITY_KEYWORDS: [string[], string][] = [
+    [["alberca", "piscina", "pool"], "Alberca"],
+    [["gimnas", "gym", "fitness"], "Gimnasio"],
+    [["elevador", "ascensor"], "Elevador"],
+    [["seguridad", "vigilancia", "guardia", "cctv"], "Seguridad 24/7"],
+    [["roof garden", "rooftop"], "Roof Garden"],
+    [["área común", "areas comunes", "salon de evento"], "Áreas Comunes"],
+    [["cowork", "co-work"], "Coworking"],
+    [["jardín", "jardin", "garden"], "Jardín"],
+    [["lavandería", "lavanderia", "laundry"], "Lavandería"],
+    [["bodega", "storage"], "Bodega"],
+  ];
+
+  const allText = `${desc} ${title}`;
+  for (const [keywords, canonical] of AMENITY_KEYWORDS) {
+    if (keywords.some((kw) => allText.includes(kw))) {
+      amenities.push(canonical);
+    }
+  }
+  // Also check features labels
+  if (features) {
+    for (const [, feat] of Object.entries(features)) {
+      const label = feat.label.toLowerCase();
+      for (const [keywords, canonical] of AMENITY_KEYWORDS) {
+        if (!amenities.includes(canonical) && keywords.some((kw) => label.includes(kw))) {
+          amenities.push(canonical);
+        }
+      }
+    }
+  }
+
+  return { is_furnished, maintenance_fee, deposit_months, pets_allowed, is_short_term, utilities_included, amenities };
+}
+
 export function mapToRawListing(item: ApifyI24Listing): RawListing {
   const op = item.price_operation_types?.[0];
   const price = op?.prices?.[0];
@@ -148,6 +268,10 @@ export function mapToRawListing(item: ApifyI24Listing): RawListing {
   const propType = mapPropertyType(item.real_estate_type?.name);
   const ac = areaConstruccion ?? (propType !== "terreno" ? areaFallback : null);
   const at = areaTerreno ?? (propType === "terreno" ? areaFallback : null);
+  const listingType = mapListingType(op?.operation_type?.name);
+
+  // Extract rental attributes for renta listings
+  const rentalAttrs = listingType === "renta" ? extractI24RentalAttrs(item) : null;
 
   return {
     source_portal: PORTAL,
@@ -158,7 +282,7 @@ export function mapToRawListing(item: ApifyI24Listing): RawListing {
     title: item.title ? item.title.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
     description: item.description_normalized ? item.description_normalized.replace(/&sup2;/g, '²').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"') : null,
     property_type: propType,
-    listing_type: mapListingType(op?.operation_type?.name),
+    listing_type: listingType,
     price_mxn: priceMxn,
     price_usd: priceUsd,
     area_m2: ac ?? at,
@@ -172,6 +296,16 @@ export function mapToRawListing(item: ApifyI24Listing): RawListing {
     address: address || null,
     images,
     raw_data: item as unknown as Record<string, unknown>,
+    // Rental attributes
+    ...(rentalAttrs ? {
+      is_furnished: rentalAttrs.is_furnished,
+      maintenance_fee: rentalAttrs.maintenance_fee,
+      deposit_months: rentalAttrs.deposit_months,
+      pets_allowed: rentalAttrs.pets_allowed,
+      is_short_term: rentalAttrs.is_short_term,
+      utilities_included: rentalAttrs.utilities_included,
+      amenities: rentalAttrs.amenities,
+    } : {}),
   };
 }
 

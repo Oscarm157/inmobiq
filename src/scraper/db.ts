@@ -194,6 +194,17 @@ export async function upsertListings(
       last_seen_at: now,
       is_active: true,
       first_seen_at: now,
+      // Rental-specific attributes (Phase 4)
+      ...(l.listing_type === "renta" ? {
+        is_furnished: l.is_furnished ?? null,
+        maintenance_fee: l.maintenance_fee ?? null,
+        deposit_months: l.deposit_months ?? null,
+        lease_term_months: l.lease_term_months ?? null,
+        pets_allowed: l.pets_allowed ?? null,
+        is_short_term: l.is_short_term ?? null,
+        utilities_included: l.utilities_included ?? null,
+        amenities: l.amenities ?? [],
+      } : {}),
     });
   }
 
