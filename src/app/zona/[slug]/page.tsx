@@ -171,16 +171,16 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   // Badges
   const badges: { label: string; color: string }[] = []
   if (zone.avg_price_per_m2 > cityAvg * 1.1) {
-    badges.push({ label: "Premium District", color: "bg-slate-100 text-slate-800 dark:bg-blue-950 dark:text-blue-300" })
+    badges.push({ label: "Zona Premium", color: "bg-slate-100 text-slate-800 dark:bg-blue-950 dark:text-blue-300" })
   }
   if (zone.price_trend_pct > 4) {
-    badges.push({ label: "High Demand", color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" })
+    badges.push({ label: "Alta Demanda", color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" })
   }
   if (zone.price_trend_pct < 0) {
-    badges.push({ label: "Price Correction", color: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300" })
+    badges.push({ label: "Corrección de Precio", color: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300" })
   }
   if (zone.total_listings > 200) {
-    badges.push({ label: "High Volume", color: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" })
+    badges.push({ label: "Alto Volumen", color: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" })
   }
 
   // --- Composition chart data (índice de concentración 0-10) ---
@@ -430,6 +430,9 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
               Análisis estratégico del mercado inmobiliario · Tijuana
             </p>
             <UpdatedAt date={lastUpdated} />
+            <span className="px-2.5 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 text-[10px] font-semibold rounded-full">
+              {rawOp === "renta" ? "Renta" : rawOp === "todas" ? "Todas" : "Venta"} · {rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1)) : "Todas"}
+            </span>
           </div>
         </div>
         <div className="flex gap-3">

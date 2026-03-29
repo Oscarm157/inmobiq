@@ -92,7 +92,7 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
         {/* Inventory bar + trend */}
         <div className="flex items-center justify-between text-[10px] font-bold">
           {zone.price_trend_pct === 0 ? (
-            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">Sin tendencia</span>
+            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center gap-0.5"><Icon name="hourglass_empty" className="text-[9px]" />Acumulando</span>
           ) : (
             <span className={`flex items-center gap-0.5 ${isPositive ? "text-green-600" : "text-red-600"}`}>
               <Icon name={isPositive ? "trending_up" : "trending_down"} className="text-xs" />

@@ -15,10 +15,11 @@ export function EditorialCard({ zoneName, mainText, quote }: EditorialCardProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <p
-            className="text-slate-800 leading-relaxed font-medium"
+            className="text-slate-800 dark:text-slate-200 leading-relaxed font-medium"
             style={{ textAlign: "justify" }}
           >
             <span
+              className="text-blue-700 dark:text-blue-400"
               style={{
                 float: "left",
                 fontSize: "4rem",
@@ -26,7 +27,6 @@ export function EditorialCard({ zoneName, mainText, quote }: EditorialCardProps)
                 paddingTop: 4,
                 paddingRight: 8,
                 fontWeight: 800,
-                color: "#1d4ed8",
               }}
             >
               {mainText.charAt(0)}

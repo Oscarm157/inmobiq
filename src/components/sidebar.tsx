@@ -120,13 +120,13 @@ export function Sidebar() {
         {collapsed ? (
           <button
             className="w-full flex justify-center py-3 text-slate-800 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors"
-            title="Download Report"
+            title="Descargar Reporte"
           >
             <Icon name="download" />
           </button>
         ) : (
           <button className="w-full bg-slate-800 text-white py-3 px-4 rounded-full text-xs font-bold shadow-md hover:opacity-90 transition-all mb-4">
-            Download Report
+            Descargar Reporte
           </button>
         )}
         <a

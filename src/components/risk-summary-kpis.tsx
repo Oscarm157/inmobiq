@@ -15,7 +15,7 @@ export function RiskSummaryKPIs({ riskData }: RiskSummaryKPIsProps) {
 
   const kpis = [
     {
-      label: "Risk Score Promedio",
+      label: "Riesgo Promedio",
       value: `${avgRisk}/100`,
       icon: "shield",
       color: riskColor,
@@ -31,7 +31,7 @@ export function RiskSummaryKPIs({ riskData }: RiskSummaryKPIsProps) {
       detail: "Rendimiento anual estimado",
     },
     {
-      label: "Vacancy Rate Promedio",
+      label: "Vacancia Promedio",
       value: `${avgVacancy}%`,
       icon: "domain_disabled",
       color: "text-purple-600",

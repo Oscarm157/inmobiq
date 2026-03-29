@@ -37,7 +37,7 @@ export function ZoneProfileCard({ result: r }: Props) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">{demo.population.toLocaleString("es-MX")}</p>
-                  <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Poblacion</p>
+                  <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Población</p>
                 </div>
                 <div>
                   <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">{demo.households.toLocaleString("es-MX")}</p>
@@ -46,11 +46,11 @@ export function ZoneProfileCard({ result: r }: Props) {
               </div>
               <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                 <span className="text-lg font-black text-slate-800 dark:text-white">{demo.pea_ratio}%</span>
-                <span className="text-[9px] text-slate-400 uppercase tracking-wider">Poblacion economicamente activa</span>
+                <span className="text-[9px] text-slate-400 uppercase tracking-wider">Población económicamente activa</span>
               </div>
             </div>
           ) : (
-            <p className="text-xs text-slate-400">Sin datos demograficos</p>
+            <p className="text-xs text-slate-400">Sin datos demográficos</p>
           )}
         </div>
 
@@ -59,7 +59,7 @@ export function ZoneProfileCard({ result: r }: Props) {
           {demo ? (
             <div className="space-y-3">
               <BarRow icon="wifi" label="Internet" value={demo.pct_internet} />
-              <BarRow icon="directions_car" label="Automovil" value={demo.pct_car} />
+              <BarRow icon="directions_car" label="Automóvil" value={demo.pct_car} />
               <BarRow icon="health_and_safety" label="Seguridad social" value={demo.pct_social_security} />
             </div>
           ) : (
@@ -75,7 +75,7 @@ export function ZoneProfileCard({ result: r }: Props) {
             <MetricRow label="Cap Rate" value={`${r.cap_rate.toFixed(1)}%`} dot={dotColorInv(r.cap_rate, [5, 7])} />
           )}
           <MetricRow label="Asequibilidad" value={`${r.affordability_index ?? 0}/100`} />
-          <MetricRow label="Plusvalia" value={`${r.appreciation_potential ?? 0}/100`} />
+          <MetricRow label="Plusvalía" value={`${r.appreciation_potential ?? 0}/100`} />
           <MetricRow label="Demanda" value={`${r.demand_pressure ?? 0}/100`} />
         </div>
       </div>

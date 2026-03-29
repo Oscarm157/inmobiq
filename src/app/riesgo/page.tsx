@@ -7,7 +7,7 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneMetrics } from "@/lib/data/zones"
 
 export const metadata = {
-  title: "Investment Risk — Inmobiq",
+  title: "Riesgo de Inversión — Inmobiq",
   description: "Análisis de riesgo de inversión inmobiliaria en Tijuana.",
 }
 
@@ -21,7 +21,7 @@ export default async function RiesgoPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Risk Analysis
+              Análisis de Riesgo
             </span>
           </div>
           <h2 className="text-4xl font-extrabold tracking-tight">
@@ -52,7 +52,7 @@ export default async function RiesgoPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Risk Analysis
+              Análisis de Riesgo
             </span>
             <span className="px-3 py-1 bg-slate-100 text-slate-800 text-[10px] font-bold rounded-full tracking-widest uppercase">
               {riskData.length} Zonas

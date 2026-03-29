@@ -161,7 +161,7 @@ function AnalysisScorecard({ result: r, narrative, property }: { result: Valuati
           <div className="flex items-center gap-2">
             <Icon name="auto_awesome" className={`text-base ${VERDICT_ACCENT[r.verdict]}`} />
             <h3 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-              Analisis de Valuacion
+              Análisis de Valuación
             </h3>
           </div>
           <span className="text-xs text-slate-400 font-medium">{r.zone_name}</span>

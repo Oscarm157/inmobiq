@@ -150,7 +150,7 @@ export function DemoVideo({ pricePerM2, totalListings, totalZones, topZones }: D
       {act === "kpis" && (
         <div className={`text-center max-w-4xl px-8 transition-all duration-700 ${showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400 mb-10">
-            Market Overview
+            Panorama del Mercado
           </p>
 
           <div className="grid grid-cols-3 gap-12 mb-12">

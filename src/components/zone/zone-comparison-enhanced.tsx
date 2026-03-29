@@ -32,9 +32,17 @@ export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedPro
     {
       label: "Ticket Promedio",
       zoneValue: formatPrice(zone.avg_ticket),
-      cityValue: formatPrice(city.avg_price_per_m2 * 80), // rough city avg ticket
+      cityValue: formatPrice(
+        city.top_zones.length > 0
+          ? city.top_zones.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
+            Math.max(city.top_zones.reduce((s, z) => s + z.total_listings, 0), 1)
+          : city.avg_price_per_m2 * 95
+      ),
       zoneRaw: zone.avg_ticket,
-      cityRaw: city.avg_price_per_m2 * 80,
+      cityRaw: city.top_zones.length > 0
+        ? city.top_zones.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
+          Math.max(city.top_zones.reduce((s, z) => s + z.total_listings, 0), 1)
+        : city.avg_price_per_m2 * 95,
     },
     {
       label: "Inventario",
