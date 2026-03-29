@@ -452,7 +452,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
                   />
                   <TableRow
                     label="Tendencia"
-                    values={selectedZones.map((z) => formatPercent(z.price_trend_pct))}
+                    values={selectedZones.map((z) => z.price_trend_pct === 0 ? "Acumulando" : formatPercent(z.price_trend_pct))}
                     highlight={selectedZones.map((z) => z.price_trend_pct)}
                     higherIsBetter
                   />

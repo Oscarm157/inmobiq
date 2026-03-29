@@ -3,8 +3,11 @@ import { Breadcrumb } from "@/components/breadcrumb"
 import { ComparadorClient } from "./comparador-client"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { getComparisonListings } from "@/lib/data/comparison-listings"
+import { cookies } from "next/headers"
+import { COOKIE_OPERACION, COOKIE_CATEGORIA, parseOperacion, parseCategoria } from "@/lib/preference-cookies"
 import type { PropertyType, ListingType } from "@/types/database"
 import type { ListingFilters } from "@/lib/data/listings"
+import type { PropertyCategory } from "@/lib/data/normalize"
 
 export const metadata = {
   title: "Comparador de Zonas — Inmobiq",
@@ -35,6 +38,10 @@ export default async function ComparadorPage({
     return !isNaN(n) && n >= 0 ? n : undefined
   }
 
+  const cookieStore = await cookies()
+  const cookieOp = parseOperacion(cookieStore.get(COOKIE_OPERACION)?.value)
+  const cookieCat = parseCategoria(cookieStore.get(COOKIE_CATEGORIA)?.value)
+
   const VALID_TYPES = new Set(["casa", "departamento", "terreno", "local", "oficina"])
   const VALID_OPS = new Set(["venta", "renta"])
 
@@ -44,7 +51,8 @@ export default async function ComparadorPage({
       : undefined,
     listing_type: sp.operacion && VALID_OPS.has(sp.operacion)
       ? (sp.operacion as ListingType)
-      : undefined,
+      : (cookieOp as ListingType),
+    categoria: (cookieCat as PropertyCategory),
     precio_min: safeNum(sp.precio_min),
     precio_max: safeNum(sp.precio_max),
     area_min: safeNum(sp.area_min),
