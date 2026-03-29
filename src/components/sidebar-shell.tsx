@@ -30,7 +30,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
           collapsed ? "md:ml-16" : "md:ml-64"
         }`}
       >
-        <div className="pt-[7.5rem] px-4 sm:px-8 max-w-7xl mx-auto">
+        <div className="pt-[7.5rem] px-4 sm:px-8 max-w-7xl mx-auto relative">
           {children}
         </div>
         <footer className="px-4 sm:px-8 max-w-7xl mx-auto py-8 mt-12 border-t border-slate-200 dark:border-slate-800">
