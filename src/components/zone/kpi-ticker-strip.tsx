@@ -45,8 +45,10 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       iconBg: "bg-violet-50 dark:bg-violet-950",
       iconColor: "text-violet-700 dark:text-violet-400",
       label: "Ticket Promedio",
-      value: formatPrice(zone.avg_ticket),
-      tooltip: "Precio promedio de una propiedad completa en esta zona (no por m²). Incluye todos los tipos de propiedad del filtro activo.",
+      value: zone.total_listings < 10 ? "Muestra insuficiente" : formatPrice(zone.avg_ticket),
+      tooltip: zone.total_listings < 10
+        ? "Con menos de 10 propiedades activas, el promedio no es representativo del mercado real."
+        : "Precio promedio de una propiedad completa en esta zona (no por m²). Incluye todos los tipos de propiedad del filtro activo.",
     },
     {
       icon: "inventory_2",
