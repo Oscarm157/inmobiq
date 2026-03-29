@@ -23,7 +23,7 @@ import type { ZoneComparisonData } from "@/lib/data/comparator"
 import type { ComparisonListing } from "@/lib/data/comparison-listings"
 import type { ListingFilters } from "@/lib/data/listings"
 
-const ZONE_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b"]
+const ZONE_COLORS = ["#4361ee", "#2a9d8f", "#e76f51", "#9b5de5"]
 
 interface ComparadorClientProps {
   allZones: ZoneMetrics[]

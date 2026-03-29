@@ -88,7 +88,7 @@ export function KpiCards({ zones, colors }: KpiCardsProps) {
             </div>
 
             {/* Body */}
-            <div className="px-6 pb-5 pt-4 space-y-5">
+            <div className="px-6 pb-5 pt-4 space-y-5 border-t-2 border-slate-100 dark:border-slate-700">
               {/* Inventario + Ticket */}
               <div className="grid grid-cols-2 gap-4">
                 <div>

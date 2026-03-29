@@ -4,7 +4,7 @@ import { Icon } from "@/components/icon"
 import { PRESET_COMPARISONS } from "./zone-selector"
 import type { ZoneMetrics } from "@/types/database"
 
-const ZONE_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b"]
+const ZONE_COLORS = ["#4361ee", "#2a9d8f", "#e76f51", "#9b5de5"]
 
 interface EmptyStateProps {
   allZones: ZoneMetrics[]

@@ -4,13 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Icon } from "@/components/icon"
 import type { ZoneMetrics } from "@/types/database"
 
-const ZONE_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b"]
-const ZONE_BG_COLORS = [
-  { bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-100 dark:border-blue-900", text: "text-blue-700 dark:text-blue-300" },
-  { bg: "bg-green-50 dark:bg-green-950/30", border: "border-green-100 dark:border-green-900", text: "text-green-700 dark:text-green-300" },
-  { bg: "bg-red-50 dark:bg-red-950/30", border: "border-red-100 dark:border-red-900", text: "text-red-700 dark:text-red-300" },
-  { bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-100 dark:border-amber-900", text: "text-amber-700 dark:text-amber-300" },
-]
+const ZONE_COLORS = ["#4361ee", "#2a9d8f", "#e76f51", "#9b5de5"]
 
 export const PRESET_COMPARISONS = [
   {
@@ -113,15 +107,20 @@ export function ZoneSelector({ allZones, selectedSlugs, onAddZone, onRemoveZone,
       <div className="flex flex-wrap items-center gap-3">
         {selectedSlugs.map((slug, i) => {
           const zone = allZones.find((z) => z.zone_slug === slug)
-          const style = ZONE_BG_COLORS[i] ?? ZONE_BG_COLORS[0]
+          const color = ZONE_COLORS[i]
           return (
             <div
               key={slug}
-              className={`flex items-center gap-2 px-3 py-1.5 ${style.bg} border ${style.border} rounded-full text-sm font-semibold ${style.text}`}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border"
+              style={{
+                backgroundColor: `${color}15`,
+                borderColor: `${color}30`,
+                color: color,
+              }}
             >
               <span
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: ZONE_COLORS[i] }}
+                style={{ backgroundColor: color }}
               />
               {zone?.zone_name ?? slug}
               <button
