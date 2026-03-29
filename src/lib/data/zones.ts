@@ -352,6 +352,15 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     return TIJUANA_CITY_METRICS
   }
 
+  // Helper: weighted avg ticket from a zones array
+  const weightedAvgTicket = (zs: typeof zones) => {
+    const valid = zs.filter((z) => z.avg_ticket > 0 && z.total_listings > 0 && z.zone_slug !== "otros")
+    const totalCount = valid.reduce((s, z) => s + z.total_listings, 0)
+    return totalCount > 0
+      ? Math.round(valid.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) / totalCount)
+      : 0
+  }
+
   // When filters are active, compute city metrics from filtered zones
   if (hasFilters) {
     const totalListings = zones.reduce((s, z) => s + z.total_listings, 0)
@@ -371,6 +380,7 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     return {
       city: "Tijuana",
       avg_price_per_m2: avgPricePerM2,
+      avg_ticket: weightedAvgTicket(zones),
       price_trend_pct: zones.length > 0
         ? Number((zones.reduce((s, z) => s + z.price_trend_pct, 0) / zones.length).toFixed(1))
         : 0,
@@ -414,6 +424,7 @@ export async function getCityMetrics(filters?: ListingFilters): Promise<CityMetr
     return {
       city: latest.city ?? "Tijuana",
       avg_price_per_m2: Number(latest.avg_price_per_m2),
+      avg_ticket: weightedAvgTicket(zones),
       price_trend_pct: Number(priceTrend.toFixed(1)),
       total_listings: latest.count_active ?? 0,
       total_zones: latest.total_zones ?? zones.length,

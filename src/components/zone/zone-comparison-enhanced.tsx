@@ -20,15 +20,8 @@ interface CompRow {
   cityRaw: number
 }
 
-export function ZoneComparisonEnhanced({ zone, city, allZones }: ZoneComparisonEnhancedProps) {
+export function ZoneComparisonEnhanced({ zone, city }: ZoneComparisonEnhancedProps) {
   const { formatPrice } = useCurrency()
-
-  // Compute real city avg ticket from all zones (weighted by listings)
-  const zonesForTicket = allZones?.filter((z) => z.zone_slug !== "otros" && z.avg_ticket > 0 && z.total_listings > 0) ?? []
-  const cityAvgTicket = zonesForTicket.length > 0
-    ? zonesForTicket.reduce((s, z) => s + z.avg_ticket * z.total_listings, 0) /
-      zonesForTicket.reduce((s, z) => s + z.total_listings, 0)
-    : city.avg_price_per_m2 * 95
 
   const rows: CompRow[] = [
     {
@@ -41,9 +34,9 @@ export function ZoneComparisonEnhanced({ zone, city, allZones }: ZoneComparisonE
     {
       label: "Ticket Promedio",
       zoneValue: formatPrice(zone.avg_ticket),
-      cityValue: formatPrice(cityAvgTicket),
+      cityValue: formatPrice(city.avg_ticket),
       zoneRaw: zone.avg_ticket,
-      cityRaw: cityAvgTicket,
+      cityRaw: city.avg_ticket,
     },
     {
       label: "Inventario",

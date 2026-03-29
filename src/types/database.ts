@@ -73,6 +73,7 @@ export interface ZoneMetrics {
 export interface CityMetrics {
   city: string;
   avg_price_per_m2: number;
+  avg_ticket: number;
   price_trend_pct: number;
   total_listings: number;
   total_zones: number;

@@ -391,10 +391,14 @@ const _totalListings = TIJUANA_ZONES.reduce((s, z) => s + z.total_listings, 0);
 const _weightedPrice = TIJUANA_ZONES.reduce(
   (s, z) => s + z.avg_price_per_m2 * z.total_listings, 0
 ) / _totalListings;
+const _weightedTicket = TIJUANA_ZONES.reduce(
+  (s, z) => s + z.avg_ticket * z.total_listings, 0
+) / _totalListings;
 
 export const TIJUANA_CITY_METRICS: CityMetrics = {
   city: "Tijuana",
   avg_price_per_m2: Math.round(_weightedPrice),
+  avg_ticket: Math.round(_weightedTicket),
   price_trend_pct: 3.1,
   total_listings: _totalListings,
   total_zones: TIJUANA_ZONES.length,
