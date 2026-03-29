@@ -45,15 +45,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        const { data } = await supabase
-          .from("user_profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single()
-        setIsAdmin((data as { role: string } | null)?.role === "admin")
+        try {
+          const { data } = await supabase
+            .from("user_profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single()
+          setIsAdmin((data as { role: string } | null)?.role === "admin")
+        } catch {
+          setIsAdmin(false)
+        }
       } else {
         setIsAdmin(false)
       }
+      setLoading(false)
+    }).catch(() => {
       setLoading(false)
     })
 
