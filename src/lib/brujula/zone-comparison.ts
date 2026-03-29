@@ -20,9 +20,9 @@ export interface ZoneComparisonData {
   demographics: ZoneDemographics | null
   insights: ZoneInsights | null
   /** All validated listings in the zone matching the filters — for percentile calculation */
-  zone_listings: { price: number; area_m2: number; price_per_m2: number; property_type: PropertyType }[]
+  zone_listings: { price: number; area_m2: number; area_construccion_m2?: number | null; price_per_m2: number; property_type: PropertyType }[]
   /** Same-type listings only */
-  type_listings: { price: number; area_m2: number; price_per_m2: number }[]
+  type_listings: { price: number; area_m2: number; area_construccion_m2?: number | null; price_per_m2: number }[]
 }
 
 /** Map property_type to category for filter purposes */
@@ -62,18 +62,25 @@ export async function getZoneDataForValuation(
   const insights = computeZoneInsights(demographics, zone, risk, allMetrics)
 
   // Prepare listings for percentile/distribution
+  // Recalculate price_per_m2 using area_construccion_m2 when available (apples-to-apples with subject property)
   const zone_listings = listingsResult.listings
     .filter((l) => l.area_m2 > 0 && l.price > 0)
-    .map((l) => ({
-      price: l.price,
-      area_m2: l.area_m2,
-      price_per_m2: l.price_per_m2,
-      property_type: l.property_type,
-    }))
+    .map((l) => {
+      const effArea = (l.property_type !== "terreno" && l.area_construccion_m2)
+        ? l.area_construccion_m2
+        : l.area_m2
+      return {
+        price: l.price,
+        area_m2: l.area_m2,
+        area_construccion_m2: l.area_construccion_m2 ?? null,
+        price_per_m2: effArea > 0 ? l.price / effArea : l.price_per_m2,
+        property_type: l.property_type,
+      }
+    })
 
   const type_listings = zone_listings
     .filter((l) => l.property_type === propertyType)
-    .map(({ price, area_m2, price_per_m2 }) => ({ price, area_m2, price_per_m2 }))
+    .map(({ price, area_m2, area_construccion_m2, price_per_m2 }) => ({ price, area_m2, area_construccion_m2, price_per_m2 }))
 
   return {
     zone,

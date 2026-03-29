@@ -108,6 +108,7 @@ function buildPriceDistribution(
 export interface PropertyInput {
   price_mxn: number
   area_m2: number
+  area_construccion_m2?: number | null
   property_type: PropertyType
   listing_type: ListingType
   bedrooms: number | null
@@ -118,8 +119,11 @@ export function computeValuation(
   property: PropertyInput,
   data: ZoneComparisonData,
 ): ValuationResult {
-  // Guard: area must be positive to avoid Infinity
-  const safeArea = property.area_m2 > 0 ? property.area_m2 : 1
+  // Prefer construccion area for non-terreno properties; fall back to area_m2
+  const effectiveArea = (property.property_type !== "terreno" && property.area_construccion_m2)
+    ? property.area_construccion_m2
+    : property.area_m2
+  const safeArea = effectiveArea > 0 ? effectiveArea : 1
   const price_per_m2 = property.price_mxn / safeArea
 
   // ── Price premium vs zone average ──

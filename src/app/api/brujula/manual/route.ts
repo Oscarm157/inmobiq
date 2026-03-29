@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       {
         price_mxn: body.price_mxn,
         area_m2: body.area_m2,
+        area_construccion_m2: body.area_construccion_m2,
         property_type: body.property_type,
         listing_type: body.listing_type,
         bedrooms: body.bedrooms,
