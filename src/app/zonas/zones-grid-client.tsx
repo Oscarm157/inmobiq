@@ -30,7 +30,7 @@ interface ZonesGridClientProps {
 
 export function ZonesGridClient({ zones }: ZonesGridClientProps) {
   const [search, setSearch] = useState("")
-  const [sortBy, setSortBy] = useState<SortKey>("inventario")
+  const [sortBy, setSortBy] = useState<SortKey>("precio")
   const [view, setView] = useState<ViewMode>("mapa")
   const [selectedZone, setSelectedZone] = useState<ZoneMetrics | null>(null)
   const { formatPrice } = useCurrency()
@@ -182,21 +182,39 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
             </div>
             {/* Zone list */}
             <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col min-h-0">
-              <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide px-4 pt-3 pb-2 flex-shrink-0">
-                Todas las zonas ({filtered.length})
-              </p>
+              <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0">
+                <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  {filtered.length} zonas
+                </p>
+                <div className="flex gap-0.5">
+                  {(["precio", "nombre"] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSortBy(s === "nombre" ? "nombre" : "precio")}
+                      className={`px-2 py-0.5 rounded text-[9px] font-bold transition-colors ${
+                        (s === "precio" && sortBy === "precio") || (s === "nombre" && sortBy === "nombre")
+                          ? "bg-slate-700 dark:bg-blue-600 text-white"
+                          : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                      }`}
+                    >
+                      {s === "precio" ? "Precio" : "A-Z"}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-                {filtered.map((zone) => (
+                {filtered.map((zone, i) => (
                   <button
                     key={zone.zone_id}
                     onClick={() => handleZoneClick(zone.zone_slug)}
-                    className={`w-full flex justify-between items-center px-2.5 py-2 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors ${
                       selectedZone?.zone_slug === zone.zone_slug
                         ? "bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800"
                         : "hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent"
                     }`}
                   >
-                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">{zone.zone_name}</span>
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 w-4 text-right flex-shrink-0">{i + 1}</span>
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex-1">{zone.zone_name}</span>
                     <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">{formatPrice(zone.avg_price_per_m2)}</span>
                   </button>
                 ))}
