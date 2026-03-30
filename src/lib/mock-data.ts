@@ -429,180 +429,180 @@ export const ZONE_RISK_DATA: ZoneRiskMetrics[] = [
   {
     zone_slug: "zona-rio", zone_name: "Zona Río",
     risk_score: 35, volatility: 3.2, cap_rate: 6.7, vacancy_rate: 6.1,
-    liquidity_score: 88, market_maturity: "consolidado", avg_rent_per_m2: 245, risk_label: "Bajo",
+    liquidity_score: 88, market_maturity: "consolidado", avg_rent_per_m2: 245, risk_label: "Bajo", smoothed_trend_pct: 1.2,
   },
   {
     zone_slug: "playas-de-tijuana", zone_name: "Playas de Tijuana",
     risk_score: 52, volatility: 6.5, cap_rate: 5.8, vacancy_rate: 8.4,
-    liquidity_score: 75, market_maturity: "en_desarrollo", avg_rent_per_m2: 310, risk_label: "Medio",
+    liquidity_score: 75, market_maturity: "en_desarrollo", avg_rent_per_m2: 310, risk_label: "Medio", smoothed_trend_pct: 2.5,
   },
   {
     zone_slug: "otay", zone_name: "Otay",
     risk_score: 28, volatility: 2.8, cap_rate: 8.5, vacancy_rate: 4.8,
-    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
+    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec",
     risk_score: 38, volatility: 4.1, cap_rate: 6.9, vacancy_rate: 7.2,
-    liquidity_score: 68, market_maturity: "maduro", avg_rent_per_m2: 220, risk_label: "Bajo",
+    liquidity_score: 68, market_maturity: "maduro", avg_rent_per_m2: 220, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "hipodromo-chapultepec", zone_name: "Hipódromo-Chapultepec",
     risk_score: 58, volatility: 7.2, cap_rate: 6.2, vacancy_rate: 11.3,
-    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 195, risk_label: "Medio",
+    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 195, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "centro", zone_name: "Centro",
     risk_score: 65, volatility: 6.8, cap_rate: 9.1, vacancy_rate: 14.6,
-    liquidity_score: 82, market_maturity: "maduro", avg_rent_per_m2: 120, risk_label: "Alto",
+    liquidity_score: 82, market_maturity: "maduro", avg_rent_per_m2: 120, risk_label: "Alto", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "cerro-colorado", zone_name: "Cerro Colorado",
     risk_score: 45, volatility: 5.5, cap_rate: 7.8, vacancy_rate: 5.5,
-    liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 175, risk_label: "Medio",
+    liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 175, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "la-mesa", zone_name: "La Mesa",
     risk_score: 32, volatility: 2.5, cap_rate: 8.2, vacancy_rate: 6.8,
-    liquidity_score: 65, market_maturity: "consolidado", avg_rent_per_m2: 130, risk_label: "Bajo",
+    liquidity_score: 65, market_maturity: "consolidado", avg_rent_per_m2: 130, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   // ─── Premium/Central ────────────────────────────────────────────────
   {
     zone_slug: "cacho", zone_name: "Cacho-Cumbres",
     risk_score: 33, volatility: 3.5, cap_rate: 6.5, vacancy_rate: 5.8,
-    liquidity_score: 82, market_maturity: "consolidado", avg_rent_per_m2: 235, risk_label: "Bajo",
+    liquidity_score: 82, market_maturity: "consolidado", avg_rent_per_m2: 235, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "agua-caliente", zone_name: "Agua Caliente",
     risk_score: 36, volatility: 3.8, cap_rate: 6.8, vacancy_rate: 6.5,
-    liquidity_score: 80, market_maturity: "consolidado", avg_rent_per_m2: 220, risk_label: "Bajo",
+    liquidity_score: 80, market_maturity: "consolidado", avg_rent_per_m2: 220, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "lomas-de-agua-caliente", zone_name: "Lomas de Agua Caliente",
     risk_score: 40, volatility: 4.3, cap_rate: 7.0, vacancy_rate: 6.0,
-    liquidity_score: 70, market_maturity: "maduro", avg_rent_per_m2: 200, risk_label: "Bajo",
+    liquidity_score: 70, market_maturity: "maduro", avg_rent_per_m2: 200, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   // ─── Frontera/Norte ─────────────────────────────────────────────────
   {
     zone_slug: "libertad", zone_name: "Libertad",
     risk_score: 60, volatility: 6.2, cap_rate: 9.0, vacancy_rate: 12.0,
-    liquidity_score: 78, market_maturity: "maduro", avg_rent_per_m2: 115, risk_label: "Medio",
+    liquidity_score: 78, market_maturity: "maduro", avg_rent_per_m2: 115, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "soler", zone_name: "Mirador-Soler",
     risk_score: 62, volatility: 6.5, cap_rate: 8.8, vacancy_rate: 13.5,
-    liquidity_score: 58, market_maturity: "maduro", avg_rent_per_m2: 105, risk_label: "Alto",
+    liquidity_score: 58, market_maturity: "maduro", avg_rent_per_m2: 105, risk_label: "Alto", smoothed_trend_pct: 0,
   },
   // Federal merged into Zona Río
   // ─── Costa ──────────────────────────────────────────────────────────
   {
     zone_slug: "baja-malibu", zone_name: "Baja Malibú",
     risk_score: 48, volatility: 5.8, cap_rate: 5.2, vacancy_rate: 7.5,
-    liquidity_score: 60, market_maturity: "en_desarrollo", avg_rent_per_m2: 380, risk_label: "Medio",
+    liquidity_score: 60, market_maturity: "en_desarrollo", avg_rent_per_m2: 380, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "real-del-mar", zone_name: "Real del Mar",
     risk_score: 44, volatility: 5.2, cap_rate: 5.5, vacancy_rate: 7.0,
-    liquidity_score: 62, market_maturity: "en_desarrollo", avg_rent_per_m2: 340, risk_label: "Medio",
+    liquidity_score: 62, market_maturity: "en_desarrollo", avg_rent_per_m2: 340, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "san-antonio-del-mar", zone_name: "San Antonio del Mar",
     risk_score: 55, volatility: 7.0, cap_rate: 5.0, vacancy_rate: 9.0,
-    liquidity_score: 48, market_maturity: "emergente", avg_rent_per_m2: 290, risk_label: "Medio",
+    liquidity_score: 48, market_maturity: "emergente", avg_rent_per_m2: 290, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "punta-bandera", zone_name: "Punta Bandera",
     risk_score: 58, volatility: 7.5, cap_rate: 5.3, vacancy_rate: 10.0,
-    liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 250, risk_label: "Medio",
+    liquidity_score: 42, market_maturity: "emergente", avg_rent_per_m2: 250, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "costa-coronado", zone_name: "Costa Coronado",
     risk_score: 50, volatility: 6.0, cap_rate: 5.4, vacancy_rate: 8.0,
-    liquidity_score: 52, market_maturity: "en_desarrollo", avg_rent_per_m2: 270, risk_label: "Medio",
+    liquidity_score: 52, market_maturity: "en_desarrollo", avg_rent_per_m2: 270, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   // ─── Este ───────────────────────────────────────────────────────────
   {
     zone_slug: "las-americas", zone_name: "Las Américas",
     risk_score: 34, volatility: 3.0, cap_rate: 8.0, vacancy_rate: 5.5,
-    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 150, risk_label: "Bajo",
+    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 150, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "zona-este", zone_name: "Zona Este",
     risk_score: 38, volatility: 3.2, cap_rate: 7.8, vacancy_rate: 6.2,
-    liquidity_score: 60, market_maturity: "consolidado", avg_rent_per_m2: 135, risk_label: "Bajo",
+    liquidity_score: 60, market_maturity: "consolidado", avg_rent_per_m2: 135, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "el-lago-cucapah", zone_name: "El Lago-Cucapah",
     risk_score: 36, volatility: 3.0, cap_rate: 7.5, vacancy_rate: 5.8,
-    liquidity_score: 62, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo",
+    liquidity_score: 62, market_maturity: "consolidado", avg_rent_per_m2: 145, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "otay-universidad", zone_name: "Otay Universidad",
     risk_score: 30, volatility: 2.8, cap_rate: 8.5, vacancy_rate: 4.5,
-    liquidity_score: 75, market_maturity: "consolidado", avg_rent_per_m2: 160, risk_label: "Bajo",
+    liquidity_score: 75, market_maturity: "consolidado", avg_rent_per_m2: 160, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   // ─── Sur/Residencial ───────────────────────────────────────────────
   {
     zone_slug: "santa-fe", zone_name: "Santa Fe",
     risk_score: 42, volatility: 4.0, cap_rate: 7.5, vacancy_rate: 7.0,
-    liquidity_score: 58, market_maturity: "en_desarrollo", avg_rent_per_m2: 125, risk_label: "Medio",
+    liquidity_score: 58, market_maturity: "en_desarrollo", avg_rent_per_m2: 125, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "natura", zone_name: "Natura",
     risk_score: 50, volatility: 5.5, cap_rate: 7.2, vacancy_rate: 8.5,
-    liquidity_score: 45, market_maturity: "emergente", avg_rent_per_m2: 110, risk_label: "Medio",
+    liquidity_score: 45, market_maturity: "emergente", avg_rent_per_m2: 110, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "colinas-de-california", zone_name: "Colinas de California",
     risk_score: 40, volatility: 3.8, cap_rate: 7.8, vacancy_rate: 6.5,
-    liquidity_score: 55, market_maturity: "en_desarrollo", avg_rent_per_m2: 130, risk_label: "Bajo",
+    liquidity_score: 55, market_maturity: "en_desarrollo", avg_rent_per_m2: 130, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "lomas-virreyes", zone_name: "Lomas Virreyes",
     risk_score: 44, volatility: 4.2, cap_rate: 7.3, vacancy_rate: 7.5,
-    liquidity_score: 50, market_maturity: "en_desarrollo", avg_rent_per_m2: 135, risk_label: "Medio",
+    liquidity_score: 50, market_maturity: "en_desarrollo", avg_rent_per_m2: 135, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "insurgentes", zone_name: "Insurgentes",
     risk_score: 56, volatility: 5.8, cap_rate: 8.5, vacancy_rate: 10.5,
-    liquidity_score: 62, market_maturity: "maduro", avg_rent_per_m2: 108, risk_label: "Medio",
+    liquidity_score: 62, market_maturity: "maduro", avg_rent_per_m2: 108, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   // ─── Nuevas zonas (DB) ──────────────────────────────────────────────
   {
     zone_slug: "buena-vista", zone_name: "Buena Vista",
     risk_score: 48, volatility: 4.5, cap_rate: 7.8, vacancy_rate: 8.0,
-    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 130, risk_label: "Medio",
+    liquidity_score: 55, market_maturity: "maduro", avg_rent_per_m2: 130, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "chapultepec", zone_name: "Chapultepec",
     risk_score: 36, volatility: 3.8, cap_rate: 6.8, vacancy_rate: 6.5,
-    liquidity_score: 70, market_maturity: "consolidado", avg_rent_per_m2: 210, risk_label: "Bajo",
+    liquidity_score: 70, market_maturity: "consolidado", avg_rent_per_m2: 210, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "hipodromo", zone_name: "Hipódromo",
     risk_score: 34, volatility: 3.5, cap_rate: 7.0, vacancy_rate: 6.0,
-    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 225, risk_label: "Bajo",
+    liquidity_score: 72, market_maturity: "consolidado", avg_rent_per_m2: 225, risk_label: "Bajo", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "residencial-del-bosque", zone_name: "Residencial del Bosque",
     risk_score: 42, volatility: 4.0, cap_rate: 7.5, vacancy_rate: 7.5,
-    liquidity_score: 50, market_maturity: "en_desarrollo", avg_rent_per_m2: 120, risk_label: "Medio",
+    liquidity_score: 50, market_maturity: "en_desarrollo", avg_rent_per_m2: 120, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "villa-fontana", zone_name: "Villa Fontana",
     risk_score: 55, volatility: 5.5, cap_rate: 8.5, vacancy_rate: 10.0,
-    liquidity_score: 52, market_maturity: "emergente", avg_rent_per_m2: 100, risk_label: "Medio",
+    liquidity_score: 52, market_maturity: "emergente", avg_rent_per_m2: 100, risk_label: "Medio", smoothed_trend_pct: 0,
   },
   // ─── Periférico ────────────────────────────────────────────────────
   {
     zone_slug: "el-florido", zone_name: "El Florido",
     risk_score: 68, volatility: 7.5, cap_rate: 9.5, vacancy_rate: 15.0,
-    liquidity_score: 70, market_maturity: "emergente", avg_rent_per_m2: 85, risk_label: "Alto",
+    liquidity_score: 70, market_maturity: "emergente", avg_rent_per_m2: 85, risk_label: "Alto", smoothed_trend_pct: 0,
   },
   {
     zone_slug: "terrazas-de-la-presa", zone_name: "Terrazas de la Presa",
     risk_score: 62, volatility: 6.5, cap_rate: 9.0, vacancy_rate: 12.5,
-    liquidity_score: 48, market_maturity: "emergente", avg_rent_per_m2: 95, risk_label: "Alto",
+    liquidity_score: 48, market_maturity: "emergente", avg_rent_per_m2: 95, risk_label: "Alto", smoothed_trend_pct: 0,
   },
 ];
 

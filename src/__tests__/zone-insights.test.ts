@@ -73,6 +73,7 @@ function makeRisk(overrides: Partial<ZoneRiskMetrics> = {}): ZoneRiskMetrics {
     market_maturity: "consolidado",
     avg_rent_per_m2: 150,
     risk_label: "Bajo",
+    smoothed_trend_pct: 0,
     ...overrides,
   }
 }

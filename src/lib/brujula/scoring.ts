@@ -1,6 +1,13 @@
 /**
- * Brújula — Scoring algorithm.
+ * Brújula — Scoring algorithm v2.
  * Compares a single property against zone-level data and produces a 0-100 score.
+ *
+ * v2 improvements:
+ *   - Separate formulas for venta vs renta
+ *   - Incorporates demand_pressure, appreciation_potential, affordability_index
+ *   - Calibrated price multiplier per property type
+ *   - Statistical confidence adjustment (small sample → score trends to 50)
+ *   - Uses smoothed trend (4-week weighted) instead of raw week-over-week
  *
  * Score interpretation:
  *   0-19  → Muy caro
@@ -47,15 +54,13 @@ function verdictFromScore(score: number): ValuationVerdict {
   return "muy_cara"
 }
 
-function verdictLabel(v: ValuationVerdict): string {
-  const map: Record<ValuationVerdict, string> = {
-    muy_barata: "Muy barato",
-    barata: "Barato",
-    precio_justo: "Precio justo",
-    cara: "Caro",
-    muy_cara: "Muy caro",
-  }
-  return map[v]
+// ── Price multiplier per property type (calibrated to natural price dispersion) ──
+const PRICE_MULTIPLIER: Record<PropertyType, number> = {
+  departamento: 2.0,  // Low dispersion → more sensitive
+  casa: 1.5,          // Medium dispersion (baseline)
+  terreno: 1.0,       // High dispersion → less sensitive
+  local: 1.2,         // Medium-high dispersion
+  oficina: 1.2,       // Medium-high dispersion
 }
 
 // ── Price distribution for chart ──
@@ -147,35 +152,83 @@ export function computeValuation(
   const area_vs_zone_avg_pct =
     avgArea > 0 ? ((property.area_m2 / avgArea) - 1) * 100 : 0
 
-  // ── Score calculation ──
-  // Factor 1 (60%): Price discount vs zone median — inverted so cheaper = higher score
-  // premium_pct = -20 → property is 20% cheaper → good
-  // premium_pct = +20 → property is 20% more expensive → bad
-  const priceScore = clamp(50 - premium_pct * 1.5, 0, 100)
+  // ── Score factors ──
+  const mult = PRICE_MULTIPLIER[property.property_type]
 
-  // Factor 2 (15%): vs same type — inverted
-  const typeScore = clamp(50 - price_vs_type_avg_pct * 1.5, 0, 100)
+  // Price score: blended zone avg + type median comparison (inverted: cheaper = higher)
+  const zoneDiscount = clamp(50 - premium_pct * mult, 0, 100)
+  const typeDiscount = clamp(50 - price_vs_type_avg_pct * mult, 0, 100)
+  const priceScore = zoneDiscount * 0.65 + typeDiscount * 0.35
 
-  // Factor 3 (10%): Market trend — positive trend means current price may appreciate
-  const trend = data.zone.price_trend_pct
-  const trendScore = clamp(50 + trend * 5, 0, 100)
+  // Smoothed trend (4-week weighted avg, or fallback to raw trend)
+  const smoothedTrend = data.risk?.smoothed_trend_pct ?? data.zone.price_trend_pct
+  const trendScore = clamp(50 + smoothedTrend * 5, 0, 100)
 
-  // Factor 4 (10%): Liquidity — higher liquidity = easier to sell = less risk
-  const liquidityScore = data.risk?.liquidity_score ?? 50
-
-  // Factor 5 (5%): Volatility — lower volatility = more stable = better
+  // Volatility inverse (lower volatility = better)
   const volatility = data.risk?.volatility ?? 10
   const volatilityScore = clamp(100 - volatility * 5, 0, 100)
 
-  const score = Math.round(
-    priceScore * 0.60 +
-    typeScore * 0.15 +
-    trendScore * 0.10 +
-    liquidityScore * 0.10 +
-    volatilityScore * 0.05,
-  )
+  // Liquidity (from risk metrics)
+  const liquidityScore = data.risk?.liquidity_score ?? 50
 
-  const finalScore = clamp(score, 0, 100)
+  // Market score: blended trend + stability + liquidity
+  const marketScore = trendScore * 0.40 + volatilityScore * 0.30 + liquidityScore * 0.30
+
+  let rawScore: number
+
+  if (property.listing_type === "venta") {
+    // Context score: percentile + affordability + area comparison
+    const percentileScore = clamp(100 - percentile, 0, 100) // lower percentile = cheaper = better
+    const affordabilityScore = data.insights?.affordability_index ?? 50
+    const areaScore = clamp(50 + area_vs_zone_avg_pct * 0.5, 0, 100) // bigger than avg = slight bonus
+    const contextScore = percentileScore * 0.40 + affordabilityScore * 0.30 + areaScore * 0.30
+
+    // Fundamentals score: appreciation potential + NSE + demand
+    const appreciationScore = data.insights?.appreciation_potential ?? 50
+    const nseScore = data.demographics?.nse_score ?? 50
+    const demandScore = data.insights?.demand_pressure ?? 50
+    const fundamentalsScore = appreciationScore * 0.50 + nseScore * 0.25 + demandScore * 0.25
+
+    // VENTA formula: price 40% + context 20% + fundamentals 20% + market 20%
+    rawScore = Math.round(
+      priceScore * 0.40 +
+      contextScore * 0.20 +
+      fundamentalsScore * 0.20 +
+      marketScore * 0.20,
+    )
+  } else {
+    // RENTA formula
+    // Yield score: cap rate + rental velocity
+    const capRate = data.risk?.cap_rate ?? 6
+    const capRateScore = clamp((capRate - 3) * (100 / 9), 0, 100) // 3% → 0, 12% → 100
+    const rentalVelocityScore = data.rental_insights
+      ? (data.rental_insights.rental_velocity === "alta" ? 85
+        : data.rental_insights.rental_velocity === "media" ? 55 : 25)
+      : 50
+    const yieldScore = capRateScore * 0.60 + rentalVelocityScore * 0.40
+
+    // Demand score: rental demand + general demand pressure + internet (digital nomad appeal)
+    const rentalDemand = data.rental_insights?.rental_demand_score ?? 50
+    const generalDemand = data.insights?.demand_pressure ?? 50
+    const internetScore = data.demographics?.pct_internet ?? 50
+    const demandScore = rentalDemand * 0.50 + generalDemand * 0.30 + internetScore * 0.20
+
+    // RENTA formula: price 35% + yield 25% + demand 20% + market 20%
+    rawScore = Math.round(
+      priceScore * 0.35 +
+      yieldScore * 0.25 +
+      demandScore * 0.20 +
+      marketScore * 0.20,
+    )
+  }
+
+  // ── Confidence adjustment ──
+  // With fewer than 15 comparable listings, pull score toward 50 (uncertain)
+  const sampleSize = data.zone_listings.length
+  const confidence = Math.min(1, sampleSize / 15)
+  const adjustedScore = Math.round(rawScore * confidence + 50 * (1 - confidence))
+
+  const finalScore = clamp(adjustedScore, 0, 100)
   const verdict = verdictFromScore(finalScore)
 
   // ── Verdict reasons ──
@@ -197,10 +250,10 @@ export function computeValuation(
     reasons.push(`Percentil ${percentile} en la distribución de precios de la zona`)
   }
 
-  if (trend > 3) {
-    reasons.push(`Zona con tendencia alcista (+${trend.toFixed(1)}%) — el precio actual podría apreciarse`)
-  } else if (trend < -3) {
-    reasons.push(`Zona con tendencia bajista (${trend.toFixed(1)}%) — considerar negociar`)
+  if (smoothedTrend > 3) {
+    reasons.push(`Zona con tendencia alcista (+${smoothedTrend.toFixed(1)}%) — el precio actual podría apreciarse`)
+  } else if (smoothedTrend < -3) {
+    reasons.push(`Zona con tendencia bajista (${smoothedTrend.toFixed(1)}%) — considerar negociar`)
   }
 
   if (liquidityScore > 70) {
@@ -209,8 +262,29 @@ export function computeValuation(
     reasons.push("Baja liquidez — reventa podría ser más lenta")
   }
 
-  if (data.zone_listings.length < 5) {
-    reasons.push("Pocos datos comparativos en esta zona — resultado orientativo")
+  // New v2 reasons
+  if (data.insights) {
+    if (data.insights.demand_pressure >= 70) {
+      reasons.push("Alta presión de demanda en la zona — favorable para inversión")
+    } else if (data.insights.demand_pressure <= 30) {
+      reasons.push("Baja presión de demanda — mercado con poca competencia de compradores")
+    }
+
+    if (property.listing_type === "venta" && data.insights.appreciation_potential >= 70) {
+      reasons.push("Fundamentales demográficos fuertes — alto potencial de apreciación")
+    }
+  }
+
+  if (property.listing_type === "renta" && data.rental_insights) {
+    if (data.rental_insights.rental_velocity === "alta") {
+      reasons.push("Alta velocidad de renta — las propiedades se ocupan rápidamente")
+    } else if (data.rental_insights.rental_velocity === "baja") {
+      reasons.push("Velocidad de renta baja — podría tardar en encontrar inquilino")
+    }
+  }
+
+  if (sampleSize < 15) {
+    reasons.push(`Pocos datos comparativos (${sampleSize} listings) — resultado orientativo`)
   }
 
   // ── Comparables (top 10 closest in price/m²) ──

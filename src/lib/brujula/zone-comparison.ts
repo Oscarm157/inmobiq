@@ -3,14 +3,15 @@
  * Reuses existing data layer functions (zones, risk, demographics, insights, listings).
  */
 
-import type { PropertyType, ListingType, ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
+import type { PropertyType, ListingType, Listing, ZoneMetrics, ZoneRiskMetrics } from "@/types/database"
 import type { ZoneDemographics } from "@/lib/data/demographics"
-import type { ZoneInsights } from "@/lib/data/zone-insights"
+import type { ZoneInsights, RentalInsights } from "@/lib/data/zone-insights"
 import { getZoneBySlug, getZoneMetrics, getCityMetrics } from "@/lib/data/zones"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneDemographics } from "@/lib/data/demographics"
-import { computeZoneInsights } from "@/lib/data/zone-insights"
+import { computeZoneInsights, computeRentalInsights } from "@/lib/data/zone-insights"
 import { getListings, type ListingFilters } from "@/lib/data/listings"
+import { extractRentalAttributesBatch, getZoneCurrencyMix } from "@/lib/data/rental-attributes"
 import type { PropertyCategory } from "@/lib/data/normalize"
 
 export interface ZoneComparisonData {
@@ -23,6 +24,8 @@ export interface ZoneComparisonData {
   zone_listings: { price: number; area_m2: number; area_construccion_m2?: number | null; price_per_m2: number; property_type: PropertyType }[]
   /** Same-type listings only */
   type_listings: { price: number; area_m2: number; area_construccion_m2?: number | null; price_per_m2: number }[]
+  /** Rental-specific insights (only populated when listing_type === "renta") */
+  rental_insights: RentalInsights | null
 }
 
 /** Map property_type to category for filter purposes */
@@ -82,6 +85,20 @@ export async function getZoneDataForValuation(
     .filter((l) => l.property_type === propertyType)
     .map(({ price, area_m2, area_construccion_m2, price_per_m2 }) => ({ price, area_m2, area_construccion_m2, price_per_m2 }))
 
+  // Rental insights (only when evaluating a rental property)
+  let rental_insights: RentalInsights | null = null
+  if (listingType === "renta" && listingsResult.listings.length >= 3) {
+    const rentaListings = listingsResult.listings as Listing[]
+    const { stats: rentalStats } = extractRentalAttributesBatch(rentaListings)
+    const currencyMix = getZoneCurrencyMix(rentaListings)
+    rental_insights = computeRentalInsights(
+      rentaListings,
+      demographics,
+      rentalStats,
+      { pctUsd: currencyMix.pctUsd },
+    )
+  }
+
   return {
     zone,
     city_avg_price_per_m2: cityMetrics.avg_price_per_m2,
@@ -90,5 +107,6 @@ export async function getZoneDataForValuation(
     insights,
     zone_listings,
     type_listings,
+    rental_insights,
   }
 }
