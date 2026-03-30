@@ -87,15 +87,15 @@ export function ValuationReport({ result, narrative, property }: Props) {
       <AnalysisScorecard result={result} narrative={narrative} property={property} />
 
       {/* ── 3. Comparison table — full width ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800 overflow-x-auto">
         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Tu propiedad vs promedio de zona</h4>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ minWidth: 360 }}>
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700">
-              <th className="text-left py-1.5 text-[10px] font-bold text-slate-400 uppercase"></th>
-              <th className="text-right py-1.5 text-[10px] font-bold text-blue-500 uppercase">Tu propiedad</th>
-              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Zona</th>
-              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase">Diferencia</th>
+              <th className="text-left py-1.5 text-[10px] font-bold text-slate-400 uppercase w-[30%]"></th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-blue-500 uppercase w-[25%] whitespace-nowrap">Tu propiedad</th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase w-[22%] whitespace-nowrap pl-2">Zona</th>
+              <th className="text-right py-1.5 text-[10px] font-bold text-slate-400 uppercase w-[23%] whitespace-nowrap pl-2">Diferencia</th>
             </tr>
           </thead>
           <tbody className="text-slate-700 dark:text-slate-300">
@@ -106,17 +106,17 @@ export function ValuationReport({ result, narrative, property }: Props) {
                   {formatMxn(property.price_mxn)} ÷ {Math.round(effectiveArea)}m² {areaTypeLabel}
                 </div>
               </td>
-              <td className="py-2 text-right font-bold text-xs align-top pt-3">{formatMxn(result.price_per_m2)}</td>
-              <td className="py-2 text-right text-xs align-top pt-3">{formatMxn(result.zone_avg_price_per_m2)}</td>
-              <td className={`py-2 text-right font-bold text-xs align-top pt-3 ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
+              <td className="py-2 text-right font-bold text-xs align-top pt-3 whitespace-nowrap">{formatMxn(result.price_per_m2)}</td>
+              <td className="py-2 text-right text-xs align-top pt-3 whitespace-nowrap pl-2">{formatMxn(result.zone_avg_price_per_m2)}</td>
+              <td className={`py-2 text-right font-bold text-xs align-top pt-3 whitespace-nowrap pl-2 ${result.price_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
                 {result.price_premium_pct > 0 ? "+" : ""}{result.price_premium_pct.toFixed(1)}%
               </td>
             </tr>
             <tr className="border-b border-slate-50 dark:border-slate-800">
               <td className="py-2 font-medium text-xs">Precio total</td>
-              <td className="py-2 text-right font-bold text-xs">{formatMxn(property.price_mxn)}</td>
-              <td className="py-2 text-right text-xs">{formatMxn(result.zone_avg_ticket)}</td>
-              <td className={`py-2 text-right font-bold text-xs ${result.ticket_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
+              <td className="py-2 text-right font-bold text-xs whitespace-nowrap">{formatMxn(property.price_mxn)}</td>
+              <td className="py-2 text-right text-xs whitespace-nowrap pl-2">{formatMxn(result.zone_avg_ticket)}</td>
+              <td className={`py-2 text-right font-bold text-xs whitespace-nowrap pl-2 ${result.ticket_premium_pct > 0 ? "text-red-500" : "text-emerald-500"}`}>
                 {result.ticket_premium_pct > 0 ? "+" : ""}{result.ticket_premium_pct.toFixed(1)}%
               </td>
             </tr>
@@ -129,9 +129,9 @@ export function ValuationReport({ result, narrative, property }: Props) {
                   </div>
                 )}
               </td>
-              <td className="py-2 text-right font-bold text-xs align-top pt-3">{Math.round(effectiveArea)} m²</td>
-              <td className="py-2 text-right text-xs align-top pt-3">{result.zone_avg_area > 0 ? `${result.zone_avg_area} m²` : "—"}</td>
-              <td className={`py-2 text-right font-bold text-xs align-top pt-3 ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
+              <td className="py-2 text-right font-bold text-xs align-top pt-3 whitespace-nowrap">{Math.round(effectiveArea)} m²</td>
+              <td className="py-2 text-right text-xs align-top pt-3 whitespace-nowrap pl-2">{result.zone_avg_area > 0 ? `${result.zone_avg_area} m²` : "—"}</td>
+              <td className={`py-2 text-right font-bold text-xs align-top pt-3 whitespace-nowrap pl-2 ${result.area_vs_zone_avg_pct > 0 ? "text-emerald-500" : "text-red-500"}`}>
                 {result.area_vs_zone_avg_pct > 0 ? "+" : ""}{result.area_vs_zone_avg_pct.toFixed(1)}%
               </td>
             </tr>
