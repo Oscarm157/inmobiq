@@ -93,6 +93,8 @@ export interface ZoneRiskMetrics {
   market_maturity: "emergente" | "en_desarrollo" | "consolidado" | "maduro";
   avg_rent_per_m2: number;
   risk_label: "Bajo" | "Medio" | "Alto";
+  /** Weighted average trend over last 4 weeks (week1×0.4 + week2×0.3 + week3×0.2 + week4×0.1) */
+  smoothed_trend_pct: number;
 }
 
 // Portfolio presets

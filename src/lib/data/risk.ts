@@ -158,6 +158,25 @@ export async function getZoneRiskMetrics(filters?: RiskFilters): Promise<{ data:
             Number(prev.avg_price_per_m2)) *
           100
 
+        // Smoothed trend: weighted average of week-over-week changes (recent weeks weighted more)
+        const weeklyTrends: number[] = []
+        for (let i = 0; i < zoneSnaps.length - 1; i++) {
+          const curr = Number(zoneSnaps[i].avg_price_per_m2)
+          const previous = Number(zoneSnaps[i + 1].avg_price_per_m2)
+          if (previous > 0) weeklyTrends.push(((curr - previous) / previous) * 100)
+        }
+        const trendWeights = [0.4, 0.3, 0.2, 0.1]
+        let smoothedTrend = priceTrend
+        if (weeklyTrends.length >= 2) {
+          let weightedSum = 0
+          let weightSum = 0
+          for (let i = 0; i < weeklyTrends.length && i < trendWeights.length; i++) {
+            weightedSum += weeklyTrends[i] * trendWeights[i]
+            weightSum += trendWeights[i]
+          }
+          smoothedTrend = weightedSum / weightSum
+        }
+
         // Derive risk score from snapshot data + demographic factors
         const vacancyProxy = Math.max(0, 10 - priceTrend) * 1.5
 
@@ -199,6 +218,7 @@ export async function getZoneRiskMetrics(filters?: RiskFilters): Promise<{ data:
             mockEntry?.market_maturity ?? "consolidado",
           avg_rent_per_m2: realRentPerM2.get(zone.id) ?? mockEntry?.avg_rent_per_m2 ?? 150,
           risk_label,
+          smoothed_trend_pct: Number(smoothedTrend.toFixed(2)),
         } satisfies ZoneRiskMetrics
       })
       .filter(Boolean) as ZoneRiskMetrics[]

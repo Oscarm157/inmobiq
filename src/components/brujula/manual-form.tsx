@@ -44,6 +44,12 @@ export function ManualForm({ onResult, disabled }: Props) {
   const showBedrooms = propertyType === "casa" || propertyType === "departamento"
   const showBathrooms = propertyType !== "terreno"
 
+  /** Format a numeric string with commas (e.g. "3500000" → "3,500,000") */
+  const formatWithCommas = (val: string) => {
+    const digits = val.replace(/\D/g, "")
+    return digits ? Number(digits).toLocaleString("en-US") : ""
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -166,12 +172,12 @@ export function ManualForm({ onResult, disabled }: Props) {
             Precio (MXN) *
           </label>
           <input
-            type="number"
-            value={priceMxn}
-            onChange={(e) => setPriceMxn(e.target.value)}
+            type="text"
+            inputMode="numeric"
+            value={formatWithCommas(priceMxn)}
+            onChange={(e) => setPriceMxn(e.target.value.replace(/\D/g, ""))}
             placeholder={listingType === "venta" ? "3,500,000" : "15,000"}
             className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            min={0}
             required
           />
         </div>
