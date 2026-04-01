@@ -3,6 +3,7 @@
 import { Icon } from "@/components/icon"
 import { formatNumber, formatArea } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
+import { SpringCard } from "@/components/motion-wrappers"
 import type { Listing } from "@/types/database"
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
@@ -44,16 +45,17 @@ export function ListingCard({ listing }: ListingCardProps) {
   const zoneName = ZONE_NAMES[listing.zone_id] ?? "Tijuana"
 
   return (
-    <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-0.5 transition-transform duration-200 flex flex-col gap-3">
+    <SpringCard>
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-slate-50 rounded-lg">
             <Icon name={typeIcon} className="text-slate-800 text-sm" />
           </div>
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{typeLabel}</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{typeLabel}</span>
         </div>
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${
+        <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wide ${
           isRenta ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
         }`}>
           {isRenta ? "Renta" : "Venta"}
@@ -100,5 +102,6 @@ export function ListingCard({ listing }: ListingCardProps) {
         </span>
       </div>
     </div>
+    </SpringCard>
   )
 }

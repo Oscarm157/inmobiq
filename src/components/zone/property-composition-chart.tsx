@@ -32,7 +32,7 @@ interface PropertyCompositionChartProps {
 
 export function PropertyCompositionChart({ data }: PropertyCompositionChartProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">

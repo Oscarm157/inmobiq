@@ -96,7 +96,7 @@ export function KPITickerStrip({ zone, city, absorptionPct }: KPITickerStripProp
       {cells.map((cell) => (
         <div
           key={cell.label}
-          className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow border border-slate-100 dark:border-slate-800"
+          className="bg-white dark:bg-slate-900 rounded-xl p-4 card-shadow"
         >
           <div className="flex items-center gap-2 mb-2">
             <div className={`p-1.5 rounded-lg ${cell.iconBg}`}>

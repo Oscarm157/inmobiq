@@ -46,7 +46,7 @@ export function BedroomDistributionChart({ data, zoneName }: BedroomDistribution
   const dominantPct = totalAll > 0 ? Math.round((dominant.total / totalAll) * 100) : 0
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="mb-3">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">

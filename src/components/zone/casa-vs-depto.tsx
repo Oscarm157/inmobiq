@@ -53,7 +53,7 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
   // Only one type available
   if (hasCasa && !hasDepto) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2">
           Casa vs Departamento
         </h4>
@@ -63,7 +63,7 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
   }
   if (!hasCasa && hasDepto) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2">
           Casa vs Departamento
         </h4>
@@ -80,7 +80,7 @@ export function CasaVsDepto({ data, zoneName }: CasaVsDeptoProps) {
   const example = buildExample(casa, depto)
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="mb-4">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
           Casa vs Departamento

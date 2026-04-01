@@ -1,5 +1,6 @@
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { ExportButton } from "@/components/export-button"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
@@ -76,10 +77,10 @@ export default async function RiesgoPage() {
   const avgVacancy = (riskData.reduce((s, r) => s + r.vacancy_rate, 0) / riskData.length).toFixed(1)
 
   return (
-    <div className="space-y-10">
-      <Breadcrumb items={[{ label: "Riesgo" }]} />
+    <StaggerContainer className="space-y-10">
+      <FadeInUp><Breadcrumb items={[{ label: "Riesgo" }]} /></FadeInUp>
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <FadeInUp><div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
@@ -103,10 +104,10 @@ export default async function RiesgoPage() {
           </button>
           <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
         </div>
-      </div>
+      </div></FadeInUp>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <FadeInUp><div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl p-5 card-shadow">
           <div className="flex justify-between items-start mb-2">
             <div className="p-2 bg-slate-50 rounded-lg">
@@ -146,13 +147,13 @@ export default async function RiesgoPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div></FadeInUp>
 
       {/* Risk Matrix */}
-      <RiskMatrix riskData={riskData} zones={zones} />
+      <FadeInUp><RiskMatrix riskData={riskData} zones={zones} /></FadeInUp>
 
       {/* Zone Risk Cards */}
-      <section>
+      <FadeInUp><section>
         <h3 className="text-2xl font-black tracking-tight mb-6">
           Perfil de Riesgo por Zona
         </h3>
@@ -161,10 +162,10 @@ export default async function RiesgoPage() {
             <RiskZoneCard key={risk.zone_slug} risk={risk} />
           ))}
         </div>
-      </section>
+      </section></FadeInUp>
 
       {/* Risk Note */}
-      <div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
+      <FadeInUp><div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 mb-6">
           Nota Metodológica
         </h3>
@@ -190,7 +191,7 @@ export default async function RiesgoPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div></FadeInUp>
+    </StaggerContainer>
   )
 }

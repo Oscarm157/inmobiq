@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { notFound, redirect } from "next/navigation"
+import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { DemoScroll } from "@/components/demo-scroll"
 import { Icon } from "@/components/icon"
 import { ExportButton } from "@/components/export-button"
@@ -446,11 +447,11 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   const nseLabel = demo?.nse_label ?? null
 
   return (
-    <div className="space-y-8">
+    <StaggerContainer className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
-      <Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} />
+      <FadeInUp><Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} /></FadeInUp>
       {/* [A] Page Header */}
-      <div id="demo-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <FadeInUp><div id="demo-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           {badges.length > 0 && (
             <div className="flex items-center gap-2 mb-2">
@@ -480,15 +481,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         <div className="flex gap-3">
           <ExportButton zoneSlug={slug} />
         </div>
-      </div>
+      </div></FadeInUp>
 
       {/* [A2] Zone Filters */}
-      <Suspense fallback={<div className="h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+      <FadeInUp><Suspense fallback={<div className="h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
         <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
-      </Suspense>
+      </Suspense></FadeInUp>
 
       {/* [B] KPI Ticker Strip */}
-      <div id="demo-kpis"><KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} /></div>
+      <FadeInUp><div id="demo-kpis"><KPITickerStrip zone={zone} city={city} absorptionPct={absorptionPct} /></div></FadeInUp>
 
       {/* [B2] Low listings warning */}
       {zone.total_listings < 3 && (
@@ -501,7 +502,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       )}
 
       {/* [C] Tabbed Content */}
-      <Suspense fallback={<div className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+      <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
         <ZoneTabs
           defaultTab={(perfilConfig?.defaultTab as "general" | "precios" | "composicion" | "inversion" | "tendencias" | "zona") ?? "general"}
           general={
@@ -676,8 +677,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
             </div>
           }
         />
-      </Suspense>
-    </div>
+      </Suspense></FadeInUp>
+    </StaggerContainer>
   )
 }
 

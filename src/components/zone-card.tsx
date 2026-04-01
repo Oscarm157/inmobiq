@@ -6,6 +6,7 @@ import { formatPercent } from "@/lib/utils"
 import { getZoneActivityLabel } from "@/lib/activity-labels"
 import { useCurrency } from "@/contexts/currency-context"
 import { getPriceColor } from "@/lib/geo-data"
+import { SpringCard } from "@/components/motion-wrappers"
 import type { ZoneMetrics } from "@/types/database"
 
 interface ZoneCardProps {
@@ -41,7 +42,7 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
 
   return (
     <Link href={`/zona/${zone.zone_slug}${filterParams ? `?${filterParams}` : ""}`} className="group">
-      <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300 border border-slate-100">
+      <SpringCard><div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
         {/* Header */}
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -90,9 +91,9 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
         )}
 
         {/* Inventory bar + trend */}
-        <div className="flex items-center justify-between text-[10px] font-bold">
+        <div className="flex items-center justify-between text-xs font-bold">
           {zone.price_trend_pct === 0 ? (
-            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center gap-0.5"><Icon name="hourglass_empty" className="text-[9px]" />Acumulando</span>
+            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center gap-0.5"><Icon name="hourglass_empty" className="text-xs" />Acumulando</span>
           ) : (
             <span className={`flex items-center gap-0.5 ${isPositive ? "text-green-600" : "text-red-600"}`}>
               <Icon name={isPositive ? "trending_up" : "trending_down"} className="text-xs" />
@@ -108,14 +109,14 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
                     style={{ width: `${inventoryPct}%`, backgroundColor: priceColor }}
                   />
                 </div>
-                <span className="text-slate-400 text-[9px]">{getZoneActivityLabel(zone.total_listings)}</span>
+                <span className="text-slate-400 text-xs">{getZoneActivityLabel(zone.total_listings)}</span>
               </div>
             ) : (
-              <span className="text-slate-400 text-[9px]">{getZoneActivityLabel(zone.total_listings)}</span>
+              <span className="text-slate-400 text-xs">{getZoneActivityLabel(zone.total_listings)}</span>
             )}
           </div>
         </div>
-      </div>
+      </div></SpringCard>
     </Link>
   )
 }

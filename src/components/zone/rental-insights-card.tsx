@@ -27,7 +27,7 @@ export function RentalInsightsCard({ insights }: RentalInsightsCardProps) {
   const vel = velocityIcon(insights.rental_velocity)
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
           Insights de Renta

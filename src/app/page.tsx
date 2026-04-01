@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { DemoScroll } from "@/components/demo-scroll"
 import { DemoVideo } from "@/components/demo-video"
 import { Icon } from "@/components/icon"
@@ -110,7 +111,7 @@ export default async function HomePage({
   const hasTrendHistory = priceTrend.length > 1
 
   return (
-    <div className="space-y-10">
+    <StaggerContainer className="space-y-10">
       <Suspense><DemoScroll /></Suspense>
       <DemoVideo
         pricePerM2={city.avg_price_per_m2}
@@ -123,7 +124,7 @@ export default async function HomePage({
         }))}
       />
       {/* ─── 1. Header ─── */}
-      <div id="demo-header" className="relative">
+      <FadeInUp><div id="demo-header" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
@@ -160,10 +161,10 @@ export default async function HomePage({
             </button>
           </div>
         </div>
-      </div>
+      </div></FadeInUp>
 
       {/* ─── 2. City KPIs ─── */}
-      <div id="demo-kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <FadeInUp><div id="demo-kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <KPIPrecio
           pricePerM2={city.avg_price_per_m2}
           trendPct={city.price_trend_pct}
@@ -177,26 +178,26 @@ export default async function HomePage({
           composition={analytics.compositionByType}
           totalListings={analytics.totalListings}
         />
-      </div>
+      </div></FadeInUp>
 
       {/* ─── 2b. Mini Map ─── */}
-      <MiniMapWrapper zones={zones} />
+      <FadeInUp><MiniMapWrapper zones={zones} /></FadeInUp>
 
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
-      <div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div>
+      <FadeInUp><div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div></FadeInUp>
 
       {/* ─── 4. Resumen Ejecutivo ─── */}
-      <NarrativeInsight
+      <FadeInUp><NarrativeInsight
         title="Resumen del mercado"
         body={topZone && mostActive
           ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${describeActivity(mostActive.total_listings)}. El mercado de Tijuana monitorea ${publicZoneCount} zonas clave.`
           : `No se encontraron resultados con los filtros seleccionados. Intenta ajustar los filtros para ver datos del mercado.`
         }
         highlight={`${publicZoneCount} zonas monitoreadas · ${getCityActivityLabel(city.total_listings)}`}
-      />
+      /></FadeInUp>
 
       {/* ─── 5. Análisis de Precios ─── */}
-      <section id="demo-charts">
+      <FadeInUp><section id="demo-charts">
         <div className="mb-4">
           <h3 className="text-xl font-black tracking-tight">Análisis de Precios</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Distribución y comparación de precios por zona</p>
@@ -206,10 +207,10 @@ export default async function HomePage({
           <PriceRangeChart data={analytics.priceDistribution} />
         </div>
         {hasTrendHistory && <div className="mt-6"><PriceChart data={priceTrend} /></div>}
-      </section>
+      </section></FadeInUp>
 
       {/* ─── 6. Composición del Mercado ─── */}
-      <section>
+      <FadeInUp><section>
         <div className="mb-4">
           <h3 className="text-xl font-black tracking-tight">Composición del Mercado</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Tipos de propiedad, inventario y concentración de oferta</p>
@@ -219,16 +220,16 @@ export default async function HomePage({
           <OfferConcentrationChart data={analytics.offerConcentration} />
         </div>
         <div className="mt-6"><InventoryTypeChart zones={inventoryZones} /></div>
-      </section>
+      </section></FadeInUp>
 
       {/* ─── 7. Zonas Destacadas ─── */}
-      <section id="demo-destacadas">
+      <FadeInUp><section id="demo-destacadas">
         <div className="mb-4">
           <h3 className="text-xl font-black tracking-tight">Zonas Destacadas</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Las zonas más caras y más accesibles de Tijuana</p>
         </div>
         <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
-      </section>
+      </section></FadeInUp>
 
       {/* ─── 6b. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
       {(() => {
@@ -285,7 +286,7 @@ export default async function HomePage({
       })()}
 
       {/* ─── 7. Zones Grid + Map ─── */}
-      <section id="demo-zonas">
+      <FadeInUp><section id="demo-zonas">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-2xl font-black tracking-tight">
@@ -332,10 +333,10 @@ export default async function HomePage({
             </>
           )
         })()}
-      </section>
+      </section></FadeInUp>
 
       {/* ─── 8. CTA de cierre ─── */}
-      <section className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl p-8 md:p-10 text-white">
+      <FadeInUp><section className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl p-8 md:p-10 text-white">
         <div className="max-w-2xl">
           <h3 className="text-2xl font-black mb-2">Explora el mercado</h3>
           <p className="text-slate-200 text-sm font-medium mb-6">
@@ -366,7 +367,7 @@ export default async function HomePage({
             </Link>
           </div>
         </div>
-      </section>
-    </div>
+      </section></FadeInUp>
+    </StaggerContainer>
   )
 }

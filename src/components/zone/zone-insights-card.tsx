@@ -38,7 +38,7 @@ export function ZoneInsightsCard({ insights }: ZoneInsightsCardProps) {
   ]
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
           Indicadores Cruzados
@@ -69,12 +69,12 @@ export function ZoneInsightsCard({ insights }: ZoneInsightsCardProps) {
                 }}
               />
             </div>
-            <p className="text-[10px] text-slate-400">{ind.description}</p>
+            <p className="text-xs text-slate-400">{ind.description}</p>
           </div>
         ))}
       </div>
 
-      <p className="text-[10px] text-slate-400 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <p className="text-xs text-slate-400 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
         Combina datos demográficos INEGI con métricas de mercado en tiempo real
       </p>
     </div>

@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { ZonesGridClient } from "./zones-grid-client"
 
@@ -16,9 +17,9 @@ export default async function ZonasPage() {
   const publicZones = zones.filter((z) => z.zone_slug !== "otros")
 
   return (
-    <div className="space-y-6">
-      <Breadcrumb items={[{ label: "Zonas" }]} />
-      <div className="space-y-1">
+    <StaggerContainer className="space-y-6">
+      <FadeInUp><Breadcrumb items={[{ label: "Zonas" }]} /></FadeInUp>
+      <FadeInUp><div className="space-y-1">
         <div className="flex items-center gap-2 mb-2">
           <span className="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold rounded-full tracking-widest uppercase">
             Zonas
@@ -33,11 +34,11 @@ export default async function ZonasPage() {
         <p className="text-slate-500 dark:text-slate-400 max-w-xl font-medium">
           Explora el mercado inmobiliario por zona. Haz clic en una zona para ver su análisis completo.
         </p>
-      </div>
+      </div></FadeInUp>
 
-      <Suspense fallback={<div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />}>
+      <FadeInUp><Suspense fallback={<div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />}>
         <ZonesGridClient zones={publicZones} />
-      </Suspense>
-    </div>
+      </Suspense></FadeInUp>
+    </StaggerContainer>
   )
 }

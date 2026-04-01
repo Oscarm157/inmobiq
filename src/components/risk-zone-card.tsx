@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon"
+import { SpringCard } from "@/components/motion-wrappers"
 import type { ZoneRiskMetrics } from "@/types/database"
 
 interface RiskZoneCardProps {
@@ -22,11 +23,12 @@ export function RiskZoneCard({ risk }: RiskZoneCardProps) {
   const colors = riskColors[risk.risk_label]
 
   return (
-    <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300">
+    <SpringCard>
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h4 className="font-bold text-sm">{risk.zone_name}</h4>
-          <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+          <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
             {maturityLabels[risk.market_maturity]}
           </p>
         </div>
@@ -37,7 +39,7 @@ export function RiskZoneCard({ risk }: RiskZoneCardProps) {
 
       {/* Risk Score Bar */}
       <div className="mb-4">
-        <div className="flex justify-between text-[10px] font-bold mb-1">
+        <div className="flex justify-between text-xs font-bold mb-1">
           <span>Risk Score</span>
           <span>{risk.risk_score}/100</span>
         </div>
@@ -54,32 +56,33 @@ export function RiskZoneCard({ risk }: RiskZoneCardProps) {
         <div className="flex items-center gap-2">
           <Icon name="percent" className="text-slate-400 text-sm" />
           <div>
-            <p className="text-[10px] text-slate-500 font-semibold">Cap Rate</p>
+            <p className="text-xs text-slate-500 font-semibold">Cap Rate</p>
             <p className="text-sm font-black">{risk.cap_rate}%</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Icon name="home_work" className="text-slate-400 text-sm" />
           <div>
-            <p className="text-[10px] text-slate-500 font-semibold">Vacancia</p>
+            <p className="text-xs text-slate-500 font-semibold">Vacancia</p>
             <p className="text-sm font-black">{risk.vacancy_rate}%</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Icon name="speed" className="text-slate-400 text-sm" />
           <div>
-            <p className="text-[10px] text-slate-500 font-semibold">Liquidez</p>
+            <p className="text-xs text-slate-500 font-semibold">Liquidez</p>
             <p className="text-sm font-black">{risk.liquidity_score}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Icon name="payments" className="text-slate-400 text-sm" />
           <div>
-            <p className="text-[10px] text-slate-500 font-semibold">Renta/m²</p>
+            <p className="text-xs text-slate-500 font-semibold">Renta/m²</p>
             <p className="text-sm font-black">${risk.avg_rent_per_m2}</p>
           </div>
         </div>
       </div>
     </div>
+    </SpringCard>
   )
 }

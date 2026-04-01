@@ -3,6 +3,7 @@
 import { Icon } from "@/components/icon"
 import { formatPercent } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
+import { SpringCard } from "@/components/motion-wrappers"
 
 interface KPIPrecioProps {
   pricePerM2: number
@@ -15,13 +16,14 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
   const bars = [4, 5, 4.5, 6, 5.5, 7, 6.5, 8, 7.5, 10]
 
   return (
-    <div className="bg-white rounded-xl p-5 card-shadow hover:-translate-y-1 transition-all duration-300">
+    <SpringCard>
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
       <div className="flex justify-between items-start mb-4">
         <div className="p-2 bg-slate-50 rounded-lg">
           <Icon name="payments" className="text-slate-800" />
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
+          <p className="text-xs font-black uppercase text-slate-500 tracking-widest">
             Precio Promedio / m²
           </p>
           <h4 className="text-2xl font-black">
@@ -41,7 +43,7 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
           />
         ))}
       </div>
-      <div className="mt-4 flex items-center justify-between text-[10px] font-bold">
+      <div className="mt-4 flex items-center justify-between text-xs font-bold">
         {trendPct === 0 ? (
           <span className="text-slate-400">Acumulando datos</span>
         ) : (
@@ -52,5 +54,6 @@ export function KPIPrecio({ pricePerM2, trendPct }: KPIPrecioProps) {
         <span className="text-slate-400">Actualizado: Hoy</span>
       </div>
     </div>
+    </SpringCard>
   )
 }

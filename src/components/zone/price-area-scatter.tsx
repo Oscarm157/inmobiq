@@ -91,7 +91,7 @@ export function PriceAreaScatter({ data, availableTypes, devMode, zoneSlug }: Pr
   const selected = selectedIdx !== null ? filteredData[selectedIdx] : null
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 card-shadow">
       <div className="mb-3">
         <div className="flex items-center gap-1.5">
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Precio vs Superficie</h3>

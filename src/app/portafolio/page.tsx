@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { getPortfolioPresets } from "@/lib/data/portfolio"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
@@ -53,10 +54,10 @@ export default async function PortafolioPage({
   ])
 
   return (
-    <div className="space-y-10">
-      <Breadcrumb items={[{ label: "Portafolio" }]} />
+    <StaggerContainer className="space-y-10">
+      <FadeInUp><Breadcrumb items={[{ label: "Portafolio" }]} /></FadeInUp>
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <FadeInUp><div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
@@ -71,12 +72,12 @@ export default async function PortafolioPage({
           </p>
         </div>
         <ExportButton formats={["listings-excel", "listings-csv"]} />
-      </div>
+      </div></FadeInUp>
 
-      <PortafolioClient presets={presets} zones={zones} riskData={riskData} />
+      <FadeInUp><PortafolioClient presets={presets} zones={zones} riskData={riskData} /></FadeInUp>
 
       {/* Propiedades Section */}
-      <section>
+      <FadeInUp><section>
         <div className="mb-6">
           <h3 className="text-2xl font-black tracking-tight">Propiedades</h3>
           <p className="text-sm text-slate-500 font-medium">
@@ -124,7 +125,7 @@ export default async function PortafolioPage({
             )}
           </div>
         </div>
-      </section>
-    </div>
+      </section></FadeInUp>
+    </StaggerContainer>
   )
 }

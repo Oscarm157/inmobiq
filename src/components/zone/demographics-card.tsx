@@ -47,7 +47,7 @@ export function DemographicsCard({ slug, zone, allZones }: DemographicsCardProps
   ]
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800 space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
