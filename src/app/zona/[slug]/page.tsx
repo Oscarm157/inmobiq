@@ -41,8 +41,8 @@ import { getZoneTrendData, computeTrendKPIs } from "@/lib/data/trend-data"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
 import { Breadcrumb } from "@/components/breadcrumb"
-import { PageHeader } from "@/components/page-header"
-import type { PageHeaderBadge } from "@/components/page-header"
+import { HeroHeader, HeroStat } from "@/components/hero-header"
+import type { HeroHeaderBadge } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
@@ -189,7 +189,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   const quote = generateQuote(zone)
 
   // Badges
-  const badges: PageHeaderBadge[] = []
+  const badges: HeroHeaderBadge[] = []
   if (zone.avg_price_per_m2 > cityAvg * 1.1) {
     badges.push({ label: "Zona Premium", variant: "blue" })
   }
@@ -453,22 +453,29 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     <StaggerContainer className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
       <FadeInUp><Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} /></FadeInUp>
-      {/* [A] Page Header */}
+      {/* [A] Hero Header */}
       <FadeInUp><div id="demo-header">
-        <PageHeader
+        <HeroHeader
+          badge={zone.zone_name}
+          badgeIcon="location_on"
           title={zone.zone_name}
           subtitle="Análisis estratégico del mercado inmobiliario · Tijuana"
+          accent="blue"
           badges={badges}
           meta={
             <>
               <UpdatedAt date={lastUpdated} />
-              <span className="px-2.5 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-semibold rounded-full">
+              <span className="px-2.5 py-1 bg-white/[0.07] text-slate-300 text-[10px] font-semibold rounded-full backdrop-blur-sm border border-white/[0.04]">
                 {rawOp === "renta" ? "Renta" : rawOp === "todas" ? "Todas" : "Venta"} · {rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1)) : "Todas"}
               </span>
             </>
           }
           actions={<ExportButton zoneSlug={slug} />}
-        />
+        >
+          <HeroStat icon="payments" label="Precio/m²" value={formatCurrency(zone.avg_price_per_m2)} color="blue" />
+          <HeroStat icon="trending_up" label="Tendencia" value={`${zone.price_trend_pct > 0 ? "+" : ""}${zone.price_trend_pct.toFixed(1)}%`} color={zone.price_trend_pct >= 0 ? "emerald" : "red"} />
+          <HeroStat icon="compare_arrows" label="vs Ciudad" value={`${((zone.avg_price_per_m2 - cityAvg) / cityAvg * 100) > 0 ? "+" : ""}${((zone.avg_price_per_m2 - cityAvg) / cityAvg * 100).toFixed(0)}%`} color={zone.avg_price_per_m2 > cityAvg ? "amber" : "teal"} />
+        </HeroHeader>
       </div></FadeInUp>
 
       {/* [A2] Zone Filters */}

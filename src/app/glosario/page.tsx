@@ -1,4 +1,5 @@
 import { Breadcrumb } from "@/components/breadcrumb"
+import { HeroHeader } from "@/components/hero-header"
 import { Icon } from "@/components/icon"
 
 export const metadata = {
@@ -37,17 +38,14 @@ export default function GlosarioPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <Breadcrumb items={[{ label: "Glosario" }]} />
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-3 py-1 bg-badge-neutral-bg text-badge-neutral-text text-[10px] font-bold rounded-full tracking-widest uppercase">
-            Referencia
-          </span>
-        </div>
-        <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Glosario</h2>
-        <p className="text-muted-foreground font-medium">
-          Términos y métricas usadas en la plataforma.
-        </p>
-      </div>
+      <HeroHeader
+        badge="Referencia"
+        badgeIcon="menu_book"
+        title="Glosario"
+        subtitle="Términos y métricas usadas en la plataforma."
+        accent="blue"
+        compact
+      />
 
       <div className="space-y-4">
         {TERMS.map((t) => (

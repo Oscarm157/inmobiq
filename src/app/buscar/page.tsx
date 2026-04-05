@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { HeroHeader } from "@/components/hero-header"
 import { SearchInput } from "./search-input"
 import { Price } from "@/components/price"
 import type { Listing, ZoneMetrics } from "@/types/database"
@@ -191,13 +192,15 @@ export default async function BuscarPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <Breadcrumb items={[{ label: "Búsqueda" }]} />
-        <h1 className="text-2xl font-bold text-foreground mt-2">
-          {query ? `Resultados: ${query}` : "Buscar zonas"}
-        </h1>
-      </div>
+      <Breadcrumb items={[{ label: "Búsqueda" }]} />
+      <HeroHeader
+        badge="Búsqueda"
+        badgeIcon="search"
+        title={query ? `Resultados: ${query}` : "Buscar zonas"}
+        subtitle="Busca por nombre de zona, colonia o desarrollo inmobiliario."
+        accent="blue"
+        compact
+      />
 
       <SearchInput initialQuery={query} />
 

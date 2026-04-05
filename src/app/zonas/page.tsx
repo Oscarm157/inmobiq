@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
-import { PageHeader } from "@/components/page-header"
+import { HeroHeader } from "@/components/hero-header"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { ZonesGridClient } from "./zones-grid-client"
 
@@ -20,13 +20,14 @@ export default async function ZonasPage() {
     <StaggerContainer className="space-y-6">
       <FadeInUp><Breadcrumb items={[{ label: "Zonas" }]} /></FadeInUp>
       <FadeInUp>
-        <PageHeader
+        <HeroHeader
+          badge="Zonas"
+          badgeIcon="location_on"
           title="Zonas de Tijuana"
           subtitle="Explora el mercado inmobiliario por zona. Haz clic en una zona para ver su análisis completo."
-          badges={[
-            { label: "Zonas", variant: "blue" },
-            { label: `${publicZones.length} zonas`, variant: "neutral" },
-          ]}
+          accent="teal"
+          badges={[{ label: `${publicZones.length} zonas`, variant: "neutral" }]}
+          compact
         />
       </FadeInUp>
 

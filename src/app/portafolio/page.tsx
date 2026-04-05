@@ -7,7 +7,7 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getListings } from "@/lib/data/listings"
 import { PortafolioClient } from "./portafolio-client"
 import { ExportButton } from "@/components/export-button"
-import { PageHeader } from "@/components/page-header"
+import { HeroHeader, HeroFeature } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 import { ListingCard } from "@/components/listing-card"
 import { ListingsFilters } from "@/components/listings-filters"
@@ -58,14 +58,20 @@ export default async function PortafolioPage({
   return (
     <StaggerContainer className="space-y-10">
       <FadeInUp><Breadcrumb items={[{ label: "Portafolio" }]} /></FadeInUp>
-      {/* Page Header */}
+      {/* Hero Header */}
       <FadeInUp>
-        <PageHeader
+        <HeroHeader
+          badge="Explorador de Portafolios"
+          badgeIcon="account_balance"
           title="Explorador de Portafolios"
           subtitle="Explora estrategias de inversión predefinidas y analiza la composición óptima para tu perfil de riesgo."
-          badges={[{ label: "Explorador de Portafolios", variant: "blue" }]}
+          accent="blue"
           actions={<ExportButton formats={["listings-excel", "listings-csv"]} />}
-        />
+        >
+          <HeroFeature icon="strategy" label="Presets de inversión" desc="Estrategias predefinidas por perfil de riesgo" color="blue" />
+          <HeroFeature icon="map" label="Mapa de listings" desc="Visualiza propiedades geolocalizadas" color="emerald" />
+          <HeroFeature icon="filter_alt" label="Filtros avanzados" desc="Tipo, zona, precio, área, recámaras" color="violet" />
+        </HeroHeader>
       </FadeInUp>
 
       <FadeInUp><PortafolioClient presets={presets} zones={zones} riskData={riskData} /></FadeInUp>

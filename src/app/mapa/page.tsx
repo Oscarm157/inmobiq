@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { HeroHeader } from "@/components/hero-header"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { MapPageClient } from "./map-page-client"
 import { ZoneFilters } from "@/components/zone/zone-filters"
@@ -40,24 +41,19 @@ export default async function MapaPage({
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Mapa" }]} />
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Mapa Interactivo
-            </span>
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
-            Tijuana — Mapa de Precios
-          </h2>
-          <p className="text-muted-foreground max-w-xl font-medium text-sm">
-            Zonas coloreadas por precio promedio/m². Haz clic en una zona para ver su análisis.
-          </p>
-        </div>
-        <Suspense fallback={<div className="h-10 w-64 bg-surface-inset rounded-lg animate-pulse" />}>
-          <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
-        </Suspense>
-      </div>
+      <HeroHeader
+        badge="Mapa Interactivo"
+        badgeIcon="map"
+        title="Tijuana — Mapa de Precios"
+        subtitle="Zonas coloreadas por precio promedio/m². Haz clic en una zona para ver su análisis."
+        accent="teal"
+        compact
+        actions={
+          <Suspense fallback={<div className="h-10 w-64 bg-white/[0.06] rounded-lg animate-pulse" />}>
+            <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
+          </Suspense>
+        }
+      />
 
       <Suspense
         fallback={

@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { HeroHeader } from "@/components/hero-header"
 import { PERFIL_CONFIGS, PERFIL_KEYS, type PerfilType } from "@/lib/profiles"
 import { COOKIE_PERFIL, setPreferredPerfil, setPreferredOperacion, setPreferredCategoria } from "@/lib/preference-cookies"
 
@@ -63,34 +64,20 @@ export default function PerfilPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <Breadcrumb items={[{ label: "Perfil" }]} />
-      <h1 className="text-2xl font-bold text-foreground">Mi Perfil</h1>
-
-      {/* Avatar + info card */}
-      <div className="bg-surface rounded-2xl border border-border/50 p-6 card-shadow">
-        <div className="flex items-center gap-5">
-          {avatar ? (
-            <Image
-              src={avatar}
-              alt={name}
-              width={72}
-              height={72}
-              className="rounded-full ring-2 ring-primary/20"
-            />
-          ) : (
-            <div className="w-18 h-18 rounded-full bg-kpi-icon-blue flex items-center justify-center">
-              <Icon name="person" className="text-4xl text-blue-600 dark:text-blue-400" />
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold text-foreground">{name}</h2>
-            <p className="text-muted-foreground text-sm">{user.email}</p>
-            <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-badge-blue-text bg-badge-blue-bg px-2 py-0.5 rounded-full capitalize">
-              <Icon name={provider === "google" ? "account_circle" : "mail"} className="text-sm" />
-              {provider}
-            </span>
-          </div>
-        </div>
-      </div>
+      <HeroHeader
+        badge="Mi Perfil"
+        badgeIcon="person"
+        title={name}
+        subtitle={user.email ?? ""}
+        accent="blue"
+        compact
+        meta={
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/[0.07] text-blue-300 text-[10px] font-bold rounded-full backdrop-blur-sm border border-white/[0.04] capitalize">
+            <Icon name={provider === "google" ? "account_circle" : "mail"} className="text-xs" />
+            {provider}
+          </span>
+        }
+      />
 
       {/* Account details */}
       <div className="bg-surface rounded-2xl border border-border/50 card-shadow divide-y divide-border">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Icon } from "@/components/icon"
+import { HeroHeader } from "@/components/hero-header"
 import { getZoneComparisonData } from "@/lib/data/comparator"
 import { useCurrency } from "@/contexts/currency-context"
 import { ZoneSelector } from "@/components/comparar/zone-selector"
@@ -93,29 +94,29 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Comparador
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Análisis comparativo de variables inmobiliarias por zona en Tijuana.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <MarketFilters />
-          {selectedSlugs.length > 1 && (
-            <button
-              onClick={copyShareUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium text-sm"
-            >
-              <Icon name="share" className="text-lg" />
-              Compartir
-            </button>
-          )}
-        </div>
-      </section>
+      {/* Hero Header */}
+      <HeroHeader
+        badge="Comparador"
+        badgeIcon="compare_arrows"
+        title="Comparador de Zonas"
+        subtitle="Análisis comparativo de variables inmobiliarias por zona en Tijuana."
+        accent="blue"
+        compact
+        actions={
+          <div className="flex items-center gap-3">
+            <MarketFilters />
+            {selectedSlugs.length > 1 && (
+              <button
+                onClick={copyShareUrl}
+                className="flex items-center gap-2 px-4 py-2 bg-white/[0.08] backdrop-blur-sm text-white rounded-lg hover:bg-white/[0.14] transition-colors font-medium text-sm border border-white/[0.06]"
+              >
+                <Icon name="share" className="text-lg" />
+                Compartir
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {/* Zone selector */}
       <ZoneSelector

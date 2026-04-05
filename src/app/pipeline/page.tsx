@@ -1,7 +1,6 @@
 import { Icon } from "@/components/icon"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
-import { PageHeader } from "@/components/page-header"
-import { MetricCard } from "@/components/metric-card"
+import { HeroHeader, HeroStat } from "@/components/hero-header"
 import { getPipelineProjects } from "@/lib/data/pipeline"
 import { formatNumber } from "@/lib/utils"
 import type { ProjectStatus } from "@/types/database"
@@ -41,37 +40,33 @@ export default function PipelinePage() {
 
   return (
     <StaggerContainer className="space-y-10">
-      {/* Page Header */}
+      {/* Hero Header */}
       <FadeInUp>
-        <PageHeader
+        <HeroHeader
+          badge="Pipeline de Desarrollo"
+          badgeIcon="construction"
           title="Pipeline de Desarrollo"
           subtitle="Proyectos inmobiliarios en desarrollo activo en Tijuana. Desde planificación hasta entrega."
-          badges={[
-            { label: "Pipeline de Desarrollo", variant: "blue" },
-            { label: `${projects.length} Proyectos`, variant: "green" },
-          ]}
+          accent="violet"
+          badges={[{ label: `${projects.length} Proyectos`, variant: "green" }]}
           actions={
             <>
-              <button className="flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full text-sm font-bold shadow-sm hover:bg-surface-elevated transition-all text-foreground">
+              <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
                 <Icon name="filter_list" className="text-sm" />
                 Filtrar
               </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-bold shadow-lg shadow-foreground/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
                 <Icon name="ios_share" className="text-sm" />
                 Exportar
               </button>
             </>
           }
-        />
+        >
+          <HeroStat icon="apartment" label="Proyectos" value={projects.length} color="violet" />
+          <HeroStat icon="grid_view" label="Unidades" value={formatNumber(totalUnits)} color="blue" />
+          <HeroStat icon="trending_up" label="Absorción" value={`${avgSoldPct}%`} color="emerald" />
+        </HeroHeader>
       </FadeInUp>
-
-      {/* Summary KPIs */}
-      <FadeInUp><div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <MetricCard icon="apartment" iconColor="blue" label="Total Proyectos" value={projects.length} />
-        <MetricCard icon="grid_view" iconColor="indigo" label="Total Unidades" value={formatNumber(totalUnits)} />
-        <MetricCard icon="check_circle" iconColor="green" label="Unidades Vendidas" value={formatNumber(totalSold)} />
-        <MetricCard icon="trending_up" iconColor="amber" label="Absorción Promedio" value={`${avgSoldPct}%`} />
-      </div></FadeInUp>
 
       {/* Zone Distribution */}
       <FadeInUp><div className="bg-surface rounded-xl p-6 card-shadow">

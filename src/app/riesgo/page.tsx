@@ -4,9 +4,8 @@ import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { ExportButton } from "@/components/export-button"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
-import { PageHeader } from "@/components/page-header"
+import { HeroHeader, HeroStat } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
-import { MetricCard } from "@/components/metric-card"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneMetrics } from "@/lib/data/zones"
 
@@ -22,9 +21,12 @@ export default async function RiesgoPage() {
     return (
       <div className="space-y-10">
         <Breadcrumb items={[{ label: "Riesgo" }]} />
-        <PageHeader
+        <HeroHeader
+          badge="Análisis de Riesgo"
+          badgeIcon="shield"
           title="Análisis de Riesgo de Inversión"
-          badges={[{ label: "Análisis de Riesgo", variant: "red" }]}
+          accent="red"
+          compact
         />
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center space-y-2">
           <Icon name="hourglass_empty" className="text-3xl text-amber-500" />
@@ -77,48 +79,30 @@ export default async function RiesgoPage() {
     <StaggerContainer className="space-y-10">
       <FadeInUp><Breadcrumb items={[{ label: "Riesgo" }]} /></FadeInUp>
 
-      {/* Page Header */}
+      {/* Hero Header */}
       <FadeInUp>
-        <PageHeader
-          title="Análisis de Riesgo de Inversión"
+        <HeroHeader
+          badge="Análisis de Riesgo"
+          badgeIcon="shield"
+          title="Riesgo de Inversión"
           subtitle="Evaluación de riesgo, volatilidad, y rendimiento esperado para cada zona de Tijuana."
-          badges={[
-            { label: "Análisis de Riesgo", variant: "red" },
-            { label: `${riskData.length} Zonas`, variant: "neutral" },
-          ]}
+          accent="red"
+          badges={[{ label: `${riskData.length} Zonas`, variant: "neutral" }]}
           actions={
             <>
-              <button className="flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full text-sm font-bold shadow-sm hover:bg-surface-elevated transition-all text-foreground">
+              <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
                 <Icon name="tune" className="text-sm" />
                 Parámetros
               </button>
               <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
             </>
           }
-        />
+        >
+          <HeroStat icon="shield" label="Risk Score" value={<>{avgRisk}<span className="text-xs font-medium text-slate-400">/100</span></>} color="red" />
+          <HeroStat icon="percent" label="Cap Rate" value={`${avgCap}%`} color="emerald" />
+          <HeroStat icon="home_work" label="Vacancia" value={`${avgVacancy}%`} color="amber" />
+        </HeroHeader>
       </FadeInUp>
-
-      {/* Summary KPIs */}
-      <FadeInUp><div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <MetricCard
-          icon="shield"
-          iconColor="default"
-          label="Risk Score Promedio"
-          value={<>{avgRisk}<span className="text-sm font-medium text-muted-foreground">/100</span></>}
-        />
-        <MetricCard
-          icon="percent"
-          iconColor="green"
-          label="Cap Rate Promedio"
-          value={`${avgCap}%`}
-        />
-        <MetricCard
-          icon="home_work"
-          iconColor="amber"
-          label="Vacancia Promedio"
-          value={`${avgVacancy}%`}
-        />
-      </div></FadeInUp>
 
       {/* Risk Matrix */}
       <FadeInUp><RiskMatrix riskData={riskData} zones={zones} /></FadeInUp>
