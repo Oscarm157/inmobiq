@@ -47,7 +47,7 @@ export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
   })
 
   return (
-    <div className="bg-white rounded-xl p-6 card-shadow">
+    <div className="bg-surface rounded-xl p-6 card-shadow">
       <h3 className="text-xl font-bold mb-1">Matriz Riesgo vs Retorno</h3>
       <p className="text-xs text-slate-500 font-medium mb-6">
         Posicionamiento de cada zona según su perfil de riesgo y crecimiento

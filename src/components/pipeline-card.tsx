@@ -46,7 +46,7 @@ export function PipelineCard({ project }: PipelineCardProps) {
   const shades = ["bg-slate-200", "bg-slate-300", "bg-slate-400"]
 
   return (
-    <div className="group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100">
+    <div className="group relative bg-surface rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-border/50">
       <div className="aspect-video w-full overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

@@ -11,7 +11,7 @@ interface ComparisonTableProps {
 
 export function ComparisonTable({ zoneName, rows }: ComparisonTableProps) {
   return (
-    <div className="bg-white rounded-xl card-shadow p-6">
+    <div className="bg-surface rounded-xl card-shadow p-6">
       <h4 className="text-sm font-black uppercase mb-4 tracking-tighter">
         Rendimiento vs Crecimiento
       </h4>

@@ -45,7 +45,7 @@ export function PriceRangeChart({ data }: PriceRangeChartProps) {
     : "Distribución de propiedades por rango de precio"
 
   return (
-    <div className="bg-white rounded-xl p-5 card-shadow">
+    <div className="bg-surface rounded-xl p-5 card-shadow">
       <div className="mb-3">
         <h3 className="text-sm font-bold text-slate-800">
           Distribución de precios

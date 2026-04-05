@@ -78,7 +78,7 @@ export function TypeCompositionChart({
     : "Composición por tipo de propiedad"
 
   return (
-    <div className="bg-white rounded-xl p-5 card-shadow">
+    <div className="bg-surface rounded-xl p-5 card-shadow">
       <div className="mb-3">
         <h3 className="text-sm font-bold text-slate-800">
           Composición del mercado

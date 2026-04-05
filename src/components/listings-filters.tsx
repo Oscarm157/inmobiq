@@ -301,7 +301,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
     <>
       {/* Desktop sidebar */}
       <div className={`hidden md:flex flex-col transition-all duration-300 ${sidebarOpen ? "w-64" : "w-10"}`}>
-        <div className={`bg-white rounded-xl card-shadow sticky top-6 ${sidebarOpen ? "p-5" : "p-2"}`}>
+        <div className={`bg-surface rounded-xl card-shadow sticky top-6 ${sidebarOpen ? "p-5" : "p-2"}`}>
           <div className="flex items-center justify-between mb-4">
             {sidebarOpen && (
               <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
         </p>
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-bold shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full text-xs font-bold shadow-sm"
         >
           <Icon name="tune" className="text-sm" />
           Filtros
@@ -361,7 +361,7 @@ export function ListingsFilters({ total }: ListingsFiltersProps) {
             onClick={() => setMobileOpen(false)}
           />
           {/* Sheet */}
-          <div className="relative bg-white rounded-t-2xl p-5 pb-10 max-h-[85vh] overflow-y-auto">
+          <div className="relative bg-surface rounded-t-2xl p-5 pb-10 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-black">Filtros</h3>
               <button

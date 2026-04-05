@@ -16,7 +16,7 @@ export function HeatmapCard({ zoneName, pricePerM2, trendPct }: HeatmapCardProps
   const [view, setView] = useState("VENTA")
 
   return (
-    <div className="bg-white rounded-xl p-6 card-shadow overflow-hidden">
+    <div className="bg-surface rounded-xl p-6 card-shadow overflow-hidden">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl font-bold">Mapa de Densidad de Precios</h3>
