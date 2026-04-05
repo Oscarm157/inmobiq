@@ -60,6 +60,44 @@ export function FadeInUp({
   )
 }
 
+/**
+ * Full-page wrapper that combines StaggerContainer + consistent entrance rhythm.
+ * Use this to wrap page content so individual sections don't need manual FadeInUp.
+ */
+export function PageTransition({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <motion.div
+      variants={staggerVariants}
+      initial="hidden"
+      animate="visible"
+      className={className ?? "space-y-10"}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/** Wrap each section inside PageTransition with this for automatic stagger */
+export function Section({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <motion.div variants={fadeUpVariants} className={className}>
+      {children}
+    </motion.div>
+  )
+}
+
 export function SpringCard({
   children,
   className,

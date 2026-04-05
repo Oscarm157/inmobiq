@@ -30,6 +30,8 @@ import { MarketIntelligence } from "@/components/market-intelligence"
 import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
 import { MarketDensityScatter } from "@/components/market-density-scatter"
 import type { DensityBubble } from "@/components/market-density-scatter"
+import { PageHeader } from "@/components/page-header"
+import { SectionHeading } from "@/components/section-heading"
 import { cookies } from "next/headers"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"
@@ -123,44 +125,41 @@ export default async function HomePage({
           trend: z.price_trend_pct,
         }))}
       />
+
       {/* ─── 1. Header ─── */}
-      <FadeInUp><div id="demo-header" className="relative">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 bg-slate-100 text-slate-800 text-[10px] font-bold rounded-full tracking-widest uppercase">
-                Panorama del Mercado
-              </span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-                Datos en Vivo
-              </span>
+      <FadeInUp><div id="demo-header">
+        <PageHeader
+          title="Mercado Inmobiliario: Tijuana"
+          subtitle="Panorama general del mercado inmobiliario de Tijuana, B.C."
+          badges={[
+            { label: "Panorama del Mercado", variant: "neutral" },
+            { label: "Datos en Vivo", variant: "green" },
+          ]}
+          meta={
+            <>
               <UpdatedAt date={lastUpdated} />
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 text-[10px] font-semibold rounded-full">
+              <span className="px-2.5 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-semibold rounded-full">
                 {filters.listing_type === "renta" ? "Renta" : "Venta"} · {filters.categoria ? (filters.categoria.charAt(0).toUpperCase() + filters.categoria.slice(1)) : "Todas"}
               </span>
-            </div>
-            <h2 className="text-4xl font-extrabold tracking-tight">
-              Mercado Inmobiliario: Tijuana
-            </h2>
-            <p className="text-slate-500 max-w-xl font-medium">
-              Panorama general del mercado inmobiliario de Tijuana, B.C.
-            </p>
-          </div>
-          <div className="flex gap-3 items-start">
-            <Suspense fallback={
-              <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-bold shadow-sm">
-                <Icon name="filter_list" className="text-sm" />
-                Filtros
+            </>
+          }
+          actions={
+            <>
+              <Suspense fallback={
+                <button className="flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full text-sm font-bold shadow-sm">
+                  <Icon name="filter_list" className="text-sm" />
+                  Filtros
+                </button>
+              }>
+                <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
+              </Suspense>
+              <button className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-bold shadow-lg shadow-foreground/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <Icon name="ios_share" className="text-sm" />
+                Exportar
               </button>
-            }>
-              <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
-            </Suspense>
-            <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-full text-sm font-bold shadow-lg shadow-slate-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-              <Icon name="ios_share" className="text-sm" />
-              Exportar
-            </button>
-          </div>
-        </div>
+            </>
+          }
+        />
       </div></FadeInUp>
 
       {/* ─── 2. City KPIs ─── */}
@@ -198,11 +197,11 @@ export default async function HomePage({
 
       {/* ─── 5. Análisis de Precios ─── */}
       <FadeInUp><section id="demo-charts">
-        <div className="mb-4">
-          <h3 className="text-xl font-black tracking-tight">Análisis de Precios</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Distribución y comparación de precios por zona</p>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SectionHeading
+          title="Análisis de Precios"
+          subtitle="Distribución y comparación de precios por zona"
+        />
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
           <ZonesBarChart data={analytics.pricePerM2ByZone} />
           <PriceRangeChart data={analytics.priceDistribution} />
         </div>
@@ -211,10 +210,10 @@ export default async function HomePage({
 
       {/* ─── 6. Composición del Mercado ─── */}
       <FadeInUp><section>
-        <div className="mb-4">
-          <h3 className="text-xl font-black tracking-tight">Composición del Mercado</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Tipos de propiedad, inventario y concentración de oferta</p>
-        </div>
+        <SectionHeading
+          title="Composición del Mercado"
+          subtitle="Tipos de propiedad, inventario y concentración de oferta"
+        />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
           <OfferConcentrationChart data={analytics.offerConcentration} />
@@ -224,14 +223,14 @@ export default async function HomePage({
 
       {/* ─── 7. Zonas Destacadas ─── */}
       <FadeInUp><section id="demo-destacadas">
-        <div className="mb-4">
-          <h3 className="text-xl font-black tracking-tight">Zonas Destacadas</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Las zonas más caras y más accesibles de Tijuana</p>
-        </div>
+        <SectionHeading
+          title="Zonas Destacadas"
+          subtitle="Las zonas más caras y más accesibles de Tijuana"
+        />
         <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
       </section></FadeInUp>
 
-      {/* ─── 6b. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
+      {/* ─── 8. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
       {(() => {
         const allDemo = getAllDemographics().filter((d) => d.ageb_count > 0)
         if (allDemo.length === 0) return null
@@ -275,31 +274,32 @@ export default async function HomePage({
           .filter(Boolean) as DensityBubble[]
 
         return (
-          <section className="space-y-6">
+          <FadeInUp><section className="space-y-6">
+            <SectionHeading
+              title="Inteligencia de Mercado"
+              subtitle="Datos censales cruzados con métricas inmobiliarias"
+            />
             <MarketIntelligence insights={insights} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <OpportunityIndexChart data={opportunityData} />
               <MarketDensityScatter data={densityData} />
             </div>
-          </section>
+          </section></FadeInUp>
         )
       })()}
 
-      {/* ─── 7. Zones Grid + Map ─── */}
+      {/* ─── 9. Zones Grid ─── */}
       <FadeInUp><section id="demo-zonas">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-2xl font-black tracking-tight">
-              Zonas Monitoreadas
-            </h3>
-            <p className="text-sm text-slate-500 font-medium">
-              {publicZoneCount} zonas · {getCityActivityLabel(city.total_listings)}
-            </p>
-          </div>
-          <a href="/zonas" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-            Ver todas <Icon name="arrow_forward" className="text-sm" />
-          </a>
-        </div>
+        <SectionHeading
+          title="Zonas Monitoreadas"
+          subtitle={`${publicZoneCount} zonas · ${getCityActivityLabel(city.total_listings)}`}
+          size="lg"
+          action={
+            <a href="/zonas" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+              Ver todas <Icon name="arrow_forward" className="text-sm" />
+            </a>
+          }
+        />
         {(() => {
           const sorted = [...zones].filter((z) => z.zone_slug !== "otros").sort((a, b) => b.total_listings - a.total_listings)
           const maxListings = sorted[0]?.total_listings ?? 1
@@ -324,8 +324,8 @@ export default async function HomePage({
                 ))}
               </div>
               {sorted.length > 8 && (
-                <div className="text-center mt-4">
-                  <a href="/zonas" className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <div className="text-center mt-6">
+                  <a href="/zonas" className="inline-flex items-center gap-1.5 px-6 py-3 bg-surface-muted text-foreground rounded-full text-sm font-bold hover:bg-surface-elevated transition-colors">
                     Ver las {sorted.length} zonas <Icon name="arrow_forward" className="text-sm" />
                   </a>
                 </div>
@@ -335,32 +335,40 @@ export default async function HomePage({
         })()}
       </section></FadeInUp>
 
-      {/* ─── 8. CTA de cierre ─── */}
-      <FadeInUp><section className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl p-8 md:p-10 text-white">
-        <div className="max-w-2xl">
-          <h3 className="text-2xl font-black mb-2">Explora el mercado</h3>
-          <p className="text-slate-200 text-sm font-medium mb-6">
+      {/* ─── 10. CTA de cierre ─── */}
+      <FadeInUp><section className="relative overflow-hidden rounded-2xl p-8 md:p-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-blue-950/80 dark:via-slate-900 dark:to-slate-950">
+        {/* Subtle mesh decorations */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/[0.07] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/[0.05] rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500/[0.04] rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        </div>
+        <div className="relative max-w-2xl">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">
+            Explora el mercado
+          </h3>
+          <p className="text-slate-300 text-sm md:text-base font-medium mb-8 leading-relaxed">
             Compara zonas, analiza riesgo, o busca propiedades específicas
             para tomar mejores decisiones de inversión.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/comparar"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-slate-800 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-white/10"
             >
               <Icon name="compare_arrows" className="text-sm" />
               Comparar Zonas
             </Link>
             <Link
               href="/riesgo"
-              className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-white/[0.08] text-white border border-white/[0.15] rounded-full text-sm font-bold hover:bg-white/[0.14] backdrop-blur-sm transition-all"
             >
               <Icon name="query_stats" className="text-sm" />
               Análisis de Riesgo
             </Link>
             <Link
               href="/buscar"
-              className="flex items-center gap-2 px-6 py-3 bg-white/15 text-white border border-white/30 rounded-full text-sm font-bold hover:bg-white/25 transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-white/[0.08] text-white border border-white/[0.15] rounded-full text-sm font-bold hover:bg-white/[0.14] backdrop-blur-sm transition-all"
             >
               <Icon name="search" className="text-sm" />
               Buscar Zonas

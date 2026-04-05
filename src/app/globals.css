@@ -31,6 +31,45 @@
   --chart-3: #10b981;
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
+
+  /* Semantic surface tokens */
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-inset: #f1f5f9;
+
+  /* KPI icon backgrounds */
+  --kpi-icon-bg: #f8fafc;
+  --kpi-icon-bg-blue: #eff6ff;
+  --kpi-icon-bg-green: #ecfdf5;
+  --kpi-icon-bg-amber: #fffbeb;
+  --kpi-icon-bg-red: #fef2f2;
+  --kpi-icon-bg-indigo: #eef2ff;
+  --kpi-icon-bg-violet: #f5f3ff;
+
+  /* Risk semantic colors */
+  --risk-low: #22c55e;
+  --risk-low-bg: #f0fdf4;
+  --risk-low-text: #15803d;
+  --risk-medium: #f59e0b;
+  --risk-medium-bg: #fffbeb;
+  --risk-medium-text: #a16207;
+  --risk-high: #ef4444;
+  --risk-high-bg: #fef2f2;
+  --risk-high-text: #b91c1c;
+
+  /* Badge colors */
+  --badge-neutral-bg: #f1f5f9;
+  --badge-neutral-text: #1e293b;
+  --badge-green-bg: #dcfce7;
+  --badge-green-text: #15803d;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #b91c1c;
+  --badge-blue-bg: #dbeafe;
+  --badge-blue-text: #1d4ed8;
+  --badge-amber-bg: #fef3c7;
+  --badge-amber-text: #a16207;
+
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
   --sidebar-primary: #1e293b;
@@ -65,6 +104,45 @@
   --chart-3: #34d399;
   --chart-4: #fbbf24;
   --chart-5: #f87171;
+
+  /* Semantic surface tokens */
+  --surface: #1e1e2e;
+  --surface-elevated: #252538;
+  --surface-muted: #16161f;
+  --surface-inset: #12121a;
+
+  /* KPI icon backgrounds */
+  --kpi-icon-bg: #1a1a2e;
+  --kpi-icon-bg-blue: rgba(59, 130, 246, 0.12);
+  --kpi-icon-bg-green: rgba(16, 185, 129, 0.12);
+  --kpi-icon-bg-amber: rgba(245, 158, 11, 0.12);
+  --kpi-icon-bg-red: rgba(239, 68, 68, 0.12);
+  --kpi-icon-bg-indigo: rgba(99, 102, 241, 0.12);
+  --kpi-icon-bg-violet: rgba(139, 92, 246, 0.12);
+
+  /* Risk semantic colors */
+  --risk-low: #34d399;
+  --risk-low-bg: rgba(16, 185, 129, 0.1);
+  --risk-low-text: #6ee7b7;
+  --risk-medium: #fbbf24;
+  --risk-medium-bg: rgba(245, 158, 11, 0.1);
+  --risk-medium-text: #fde68a;
+  --risk-high: #f87171;
+  --risk-high-bg: rgba(239, 68, 68, 0.1);
+  --risk-high-text: #fca5a5;
+
+  /* Badge colors */
+  --badge-neutral-bg: #1a1a2e;
+  --badge-neutral-text: #e0e0e0;
+  --badge-green-bg: rgba(16, 185, 129, 0.15);
+  --badge-green-text: #6ee7b7;
+  --badge-red-bg: rgba(239, 68, 68, 0.15);
+  --badge-red-text: #fca5a5;
+  --badge-blue-bg: rgba(59, 130, 246, 0.15);
+  --badge-blue-text: #93c5fd;
+  --badge-amber-bg: rgba(245, 158, 11, 0.15);
+  --badge-amber-text: #fde68a;
+
   --sidebar: #0f0f1a;
   --sidebar-foreground: #e0e0e0;
   --sidebar-primary: #3b82f6;
@@ -108,6 +186,45 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+
+  /* Semantic surfaces */
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-inset: var(--surface-inset);
+
+  /* KPI icon backgrounds */
+  --color-kpi-icon: var(--kpi-icon-bg);
+  --color-kpi-icon-blue: var(--kpi-icon-bg-blue);
+  --color-kpi-icon-green: var(--kpi-icon-bg-green);
+  --color-kpi-icon-amber: var(--kpi-icon-bg-amber);
+  --color-kpi-icon-red: var(--kpi-icon-bg-red);
+  --color-kpi-icon-indigo: var(--kpi-icon-bg-indigo);
+  --color-kpi-icon-violet: var(--kpi-icon-bg-violet);
+
+  /* Risk colors */
+  --color-risk-low: var(--risk-low);
+  --color-risk-low-bg: var(--risk-low-bg);
+  --color-risk-low-text: var(--risk-low-text);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-medium-bg: var(--risk-medium-bg);
+  --color-risk-medium-text: var(--risk-medium-text);
+  --color-risk-high: var(--risk-high);
+  --color-risk-high-bg: var(--risk-high-bg);
+  --color-risk-high-text: var(--risk-high-text);
+
+  /* Badge colors */
+  --color-badge-neutral-bg: var(--badge-neutral-bg);
+  --color-badge-neutral-text: var(--badge-neutral-text);
+  --color-badge-green-bg: var(--badge-green-bg);
+  --color-badge-green-text: var(--badge-green-text);
+  --color-badge-red-bg: var(--badge-red-bg);
+  --color-badge-red-text: var(--badge-red-text);
+  --color-badge-blue-bg: var(--badge-blue-bg);
+  --color-badge-blue-text: var(--badge-blue-text);
+  --color-badge-amber-bg: var(--badge-amber-bg);
+  --color-badge-amber-text: var(--badge-amber-text);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
