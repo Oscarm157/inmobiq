@@ -4,6 +4,9 @@ import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { ExportButton } from "@/components/export-button"
 import { RiskMatrix } from "@/components/risk-matrix"
 import { RiskZoneCard } from "@/components/risk-zone-card"
+import { PageHeader } from "@/components/page-header"
+import { SectionHeading } from "@/components/section-heading"
+import { MetricCard } from "@/components/metric-card"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneMetrics } from "@/lib/data/zones"
 
@@ -19,16 +22,10 @@ export default async function RiesgoPage() {
     return (
       <div className="space-y-10">
         <Breadcrumb items={[{ label: "Riesgo" }]} />
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Análisis de Riesgo
-            </span>
-          </div>
-          <h2 className="text-4xl font-extrabold tracking-tight">
-            Análisis de Riesgo de Inversión
-          </h2>
-        </div>
+        <PageHeader
+          title="Análisis de Riesgo de Inversión"
+          badges={[{ label: "Análisis de Riesgo", variant: "red" }]}
+        />
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center space-y-2">
           <Icon name="hourglass_empty" className="text-3xl text-amber-500" />
           <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">Acumulando datos históricos</h3>
@@ -39,29 +36,29 @@ export default async function RiesgoPage() {
 
         {/* Preview de lo que verás */}
         <div className="space-y-4">
-          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Preview — así se verá esta sección:</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Preview — así se verá esta sección:</p>
           <div className="relative rounded-2xl overflow-hidden">
             <div className="blur-[2px] opacity-50 pointer-events-none select-none">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Riesgo Promedio</p>
-                  <p className="text-2xl font-black">42<span className="text-sm font-medium text-slate-500">/100</span></p>
+                <div className="bg-surface rounded-xl p-5 card-shadow">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Riesgo Promedio</p>
+                  <p className="text-2xl font-black text-foreground">42<span className="text-sm font-medium text-muted-foreground">/100</span></p>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Cap Rate Promedio</p>
-                  <p className="text-2xl font-black">5.8%</p>
+                <div className="bg-surface rounded-xl p-5 card-shadow">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Cap Rate Promedio</p>
+                  <p className="text-2xl font-black text-foreground">5.8%</p>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow">
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Vacancia Promedio</p>
-                  <p className="text-2xl font-black">12.3%</p>
+                <div className="bg-surface rounded-xl p-5 card-shadow">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Vacancia Promedio</p>
+                  <p className="text-2xl font-black text-foreground">12.3%</p>
                 </div>
               </div>
-              <div className="mt-6 bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow h-64 flex items-center justify-center">
-                <p className="text-slate-400">Matriz de Riesgo vs Retorno</p>
+              <div className="mt-6 bg-surface rounded-xl p-5 card-shadow h-64 flex items-center justify-center">
+                <p className="text-muted-foreground">Matriz de Riesgo vs Retorno</p>
               </div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="px-4 py-2 bg-slate-800 dark:bg-blue-600 text-white text-xs font-bold rounded-full shadow-lg">
+              <span className="px-4 py-2 bg-foreground text-background text-xs font-bold rounded-full shadow-lg">
                 Disponible próximamente
               </span>
             </div>
@@ -79,74 +76,48 @@ export default async function RiesgoPage() {
   return (
     <StaggerContainer className="space-y-10">
       <FadeInUp><Breadcrumb items={[{ label: "Riesgo" }]} /></FadeInUp>
+
       {/* Page Header */}
-      <FadeInUp><div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Análisis de Riesgo
-            </span>
-            <span className="px-3 py-1 bg-slate-100 text-slate-800 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              {riskData.length} Zonas
-            </span>
-          </div>
-          <h2 className="text-4xl font-extrabold tracking-tight">
-            Análisis de Riesgo de Inversión
-          </h2>
-          <p className="text-slate-500 max-w-xl font-medium">
-            Evaluación de riesgo, volatilidad, y rendimiento esperado para cada zona de Tijuana.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-full text-sm font-bold shadow-sm hover:bg-slate-50 transition-all">
-            <Icon name="tune" className="text-sm" />
-            Parámetros
-          </button>
-          <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
-        </div>
-      </div></FadeInUp>
+      <FadeInUp>
+        <PageHeader
+          title="Análisis de Riesgo de Inversión"
+          subtitle="Evaluación de riesgo, volatilidad, y rendimiento esperado para cada zona de Tijuana."
+          badges={[
+            { label: "Análisis de Riesgo", variant: "red" },
+            { label: `${riskData.length} Zonas`, variant: "neutral" },
+          ]}
+          actions={
+            <>
+              <button className="flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full text-sm font-bold shadow-sm hover:bg-surface-elevated transition-all text-foreground">
+                <Icon name="tune" className="text-sm" />
+                Parámetros
+              </button>
+              <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
+            </>
+          }
+        />
+      </FadeInUp>
 
       {/* Summary KPIs */}
       <FadeInUp><div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl p-5 card-shadow">
-          <div className="flex justify-between items-start mb-2">
-            <div className="p-2 bg-slate-50 rounded-lg">
-              <Icon name="shield" className="text-slate-800" />
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                Risk Score Promedio
-              </p>
-              <h4 className="text-2xl font-black">{avgRisk}<span className="text-sm font-medium text-slate-500">/100</span></h4>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 card-shadow">
-          <div className="flex justify-between items-start mb-2">
-            <div className="p-2 bg-green-50 rounded-lg">
-              <Icon name="percent" className="text-green-700" />
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                Cap Rate Promedio
-              </p>
-              <h4 className="text-2xl font-black">{avgCap}%</h4>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 card-shadow">
-          <div className="flex justify-between items-start mb-2">
-            <div className="p-2 bg-amber-50 rounded-lg">
-              <Icon name="home_work" className="text-amber-700" />
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                Vacancia Promedio
-              </p>
-              <h4 className="text-2xl font-black">{avgVacancy}%</h4>
-            </div>
-          </div>
-        </div>
+        <MetricCard
+          icon="shield"
+          iconColor="default"
+          label="Risk Score Promedio"
+          value={<>{avgRisk}<span className="text-sm font-medium text-muted-foreground">/100</span></>}
+        />
+        <MetricCard
+          icon="percent"
+          iconColor="green"
+          label="Cap Rate Promedio"
+          value={`${avgCap}%`}
+        />
+        <MetricCard
+          icon="home_work"
+          iconColor="amber"
+          label="Vacancia Promedio"
+          value={`${avgVacancy}%`}
+        />
       </div></FadeInUp>
 
       {/* Risk Matrix */}
@@ -154,9 +125,7 @@ export default async function RiesgoPage() {
 
       {/* Zone Risk Cards */}
       <FadeInUp><section>
-        <h3 className="text-2xl font-black tracking-tight mb-6">
-          Perfil de Riesgo por Zona
-        </h3>
+        <SectionHeading title="Perfil de Riesgo por Zona" size="lg" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {sortedByRisk.map((risk) => (
             <RiskZoneCard key={risk.zone_slug} risk={risk} />
@@ -165,28 +134,28 @@ export default async function RiesgoPage() {
       </section></FadeInUp>
 
       {/* Risk Note */}
-      <FadeInUp><div className="bg-slate-50 rounded-xl p-8 border border-slate-200/60">
-        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 mb-6">
+      <FadeInUp><div className="bg-surface-muted rounded-xl p-8 border border-border/60">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground mb-6">
           Nota Metodológica
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <p className="text-slate-800 leading-relaxed font-medium" style={{ textAlign: "justify" }}>
+          <p className="text-foreground leading-relaxed font-medium" style={{ textAlign: "justify" }}>
             <span style={{ float: "left", fontSize: "4rem", lineHeight: 0.8, paddingTop: 4, paddingRight: 8, fontWeight: 800, color: "#1d4ed8" }}>
               E
             </span>
             l índice de riesgo Inmobiq combina múltiples factores: volatilidad histórica de precios, tasa de capitalización, vacancia, liquidez de mercado (velocidad de venta), y madurez del mercado local. Las zonas con puntajes más bajos representan inversiones más estables con retornos predecibles, mientras que puntajes altos indican mayor potencial pero con volatilidad significativa.
           </p>
           <div className="space-y-4">
-            <p className="text-slate-600 text-sm leading-relaxed italic border-l-2 border-blue-300 pl-4">
+            <p className="text-muted-foreground text-sm leading-relaxed italic border-l-2 border-blue-400 dark:border-blue-500 pl-4">
               &ldquo;En mercados fronterizos como Tijuana, la diversificación geográfica dentro de la misma ciudad puede reducir el riesgo de portafolio hasta un 30% sin sacrificar retorno.&rdquo;
             </p>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center">
-                <Icon name="analytics" className="text-slate-800" />
+              <div className="h-10 w-10 rounded-full bg-surface-inset flex items-center justify-center">
+                <Icon name="analytics" className="text-foreground" />
               </div>
               <div>
-                <p className="text-xs font-bold">Modelo de Riesgo Inmobiq</p>
-                <p className="text-[10px] text-slate-500">v2.1 · Actualizado Septiembre 2025</p>
+                <p className="text-xs font-bold text-foreground">Modelo de Riesgo Inmobiq</p>
+                <p className="text-[10px] text-muted-foreground">v2.1 · Actualizado Septiembre 2025</p>
               </div>
             </div>
           </div>

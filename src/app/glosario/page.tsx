@@ -39,12 +39,12 @@ export default function GlosarioPage() {
       <Breadcrumb items={[{ label: "Glosario" }]} />
       <div className="space-y-1">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-3 py-1 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] font-bold rounded-full tracking-widest uppercase">
+          <span className="px-3 py-1 bg-badge-neutral-bg text-badge-neutral-text text-[10px] font-bold rounded-full tracking-widest uppercase">
             Referencia
           </span>
         </div>
-        <h2 className="text-3xl font-extrabold tracking-tight">Glosario</h2>
-        <p className="text-slate-500 dark:text-slate-400 font-medium">
+        <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Glosario</h2>
+        <p className="text-muted-foreground font-medium">
           Términos y métricas usadas en la plataforma.
         </p>
       </div>
@@ -54,15 +54,15 @@ export default function GlosarioPage() {
           <div
             key={t.id}
             id={t.id}
-            className="bg-white dark:bg-slate-900 rounded-xl p-5 card-shadow border border-slate-100 dark:border-slate-800 scroll-mt-20"
+            className="bg-surface rounded-xl p-5 card-shadow border border-border/50 scroll-mt-20"
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg flex-shrink-0">
-                <Icon name={t.icon} className="text-lg text-slate-600 dark:text-slate-400" />
+              <div className="p-2 bg-surface-inset rounded-lg flex-shrink-0">
+                <Icon name={t.icon} className="text-lg text-muted-foreground" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">{t.term}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">{t.definition}</p>
+                <h3 className="text-sm font-bold text-foreground">{t.term}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-1">{t.definition}</p>
               </div>
             </div>
           </div>

@@ -43,26 +43,26 @@ export default async function MapaPage({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold rounded-full tracking-widest uppercase">
+            <span className="px-3 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-bold rounded-full tracking-widest uppercase">
               Mapa Interactivo
             </span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight">
+          <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
             Tijuana — Mapa de Precios
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl font-medium text-sm">
+          <p className="text-muted-foreground max-w-xl font-medium text-sm">
             Zonas coloreadas por precio promedio/m². Haz clic en una zona para ver su análisis.
           </p>
         </div>
-        <Suspense fallback={<div className="h-10 w-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />}>
+        <Suspense fallback={<div className="h-10 w-64 bg-surface-inset rounded-lg animate-pulse" />}>
           <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
         </Suspense>
       </div>
 
       <Suspense
         fallback={
-          <div className="h-[600px] bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
-            <div className="text-slate-400 text-sm font-medium">Cargando mapa…</div>
+          <div className="h-[600px] bg-surface-inset rounded-xl flex items-center justify-center">
+            <div className="text-muted-foreground text-sm font-medium">Cargando mapa…</div>
           </div>
         }
       >

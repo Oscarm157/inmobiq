@@ -63,10 +63,10 @@ export default function PerfilPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <Breadcrumb items={[{ label: "Perfil" }]} />
-      <h1 className="text-2xl font-bold text-slate-900">Mi Perfil</h1>
+      <h1 className="text-2xl font-bold text-foreground">Mi Perfil</h1>
 
       {/* Avatar + info card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+      <div className="bg-surface rounded-2xl border border-border/50 p-6 card-shadow">
         <div className="flex items-center gap-5">
           {avatar ? (
             <Image
@@ -74,17 +74,17 @@ export default function PerfilPage() {
               alt={name}
               width={72}
               height={72}
-              className="rounded-full ring-2 ring-blue-100"
+              className="rounded-full ring-2 ring-primary/20"
             />
           ) : (
-            <div className="w-18 h-18 rounded-full bg-blue-100 flex items-center justify-center">
-              <Icon name="person" className="text-4xl text-blue-600" />
+            <div className="w-18 h-18 rounded-full bg-kpi-icon-blue flex items-center justify-center">
+              <Icon name="person" className="text-4xl text-blue-600 dark:text-blue-400" />
             </div>
           )}
           <div>
-            <h2 className="text-xl font-bold text-slate-900">{name}</h2>
-            <p className="text-slate-500 text-sm">{user.email}</p>
-            <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full capitalize">
+            <h2 className="text-xl font-bold text-foreground">{name}</h2>
+            <p className="text-muted-foreground text-sm">{user.email}</p>
+            <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-badge-blue-text bg-badge-blue-bg px-2 py-0.5 rounded-full capitalize">
               <Icon name={provider === "google" ? "account_circle" : "mail"} className="text-sm" />
               {provider}
             </span>
@@ -93,22 +93,22 @@ export default function PerfilPage() {
       </div>
 
       {/* Account details */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100">
+      <div className="bg-surface rounded-2xl border border-border/50 card-shadow divide-y divide-border">
         <div className="px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-0.5">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
               Correo electrónico
             </p>
-            <p className="text-sm text-slate-900 font-medium">{user.email}</p>
+            <p className="text-sm text-foreground font-medium">{user.email}</p>
           </div>
-          <Icon name="email" className="text-slate-300 text-xl" />
+          <Icon name="email" className="text-muted-foreground/40 text-xl" />
         </div>
         <div className="px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-0.5">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
               Miembro desde
             </p>
-            <p className="text-sm text-slate-900 font-medium">
+            <p className="text-sm text-foreground font-medium">
               {new Date(user.created_at).toLocaleDateString("es-MX", {
                 year: "numeric",
                 month: "long",
@@ -116,22 +116,22 @@ export default function PerfilPage() {
               })}
             </p>
           </div>
-          <Icon name="calendar_today" className="text-slate-300 text-xl" />
+          <Icon name="calendar_today" className="text-muted-foreground/40 text-xl" />
         </div>
         <div className="px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-0.5">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
               Plan
             </p>
-            <p className="text-sm text-slate-900 font-medium">Gratuito</p>
+            <p className="text-sm text-foreground font-medium">Gratuito</p>
           </div>
-          <Icon name="workspace_premium" className="text-slate-300 text-xl" />
+          <Icon name="workspace_premium" className="text-muted-foreground/40 text-xl" />
         </div>
       </div>
 
       {/* Features unlocked */}
-      <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-        <h3 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+      <div className="bg-kpi-icon-blue rounded-2xl border border-primary/10 p-6">
+        <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
           <Icon name="lock_open" className="text-base" />
           Funciones desbloqueadas
         </h3>
@@ -141,8 +141,8 @@ export default function PerfilPage() {
             "Configurar alertas de precio",
             "Exportar reportes PDF/Excel",
           ].map((feat) => (
-            <li key={feat} className="flex items-center gap-2 text-sm text-blue-800">
-              <Icon name="check_circle" className="text-green-500 text-base" />
+            <li key={feat} className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
+              <Icon name="check_circle" className="text-green-500 dark:text-green-400 text-base" />
               {feat}
             </li>
           ))}
@@ -155,7 +155,7 @@ export default function PerfilPage() {
       {/* Sign out */}
       <button
         onClick={handleSignOut}
-        className="w-full flex items-center justify-center gap-2 border border-red-200 text-red-600 hover:bg-red-50 font-semibold py-3 px-4 rounded-xl transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-destructive/30 text-destructive hover:bg-destructive/10 font-semibold py-3 px-4 rounded-xl transition-colors"
       >
         <Icon name="logout" className="text-base" />
         Cerrar sesión

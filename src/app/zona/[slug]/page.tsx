@@ -41,6 +41,9 @@ import { getZoneTrendData, computeTrendKPIs } from "@/lib/data/trend-data"
 import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { PageHeader } from "@/components/page-header"
+import type { PageHeaderBadge } from "@/components/page-header"
+import { SectionHeading } from "@/components/section-heading"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
 import type { ListingFilters } from "@/lib/data/listings"
 import { formatCurrency } from "@/lib/utils"
@@ -186,18 +189,18 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   const quote = generateQuote(zone)
 
   // Badges
-  const badges: { label: string; color: string }[] = []
+  const badges: PageHeaderBadge[] = []
   if (zone.avg_price_per_m2 > cityAvg * 1.1) {
-    badges.push({ label: "Zona Premium", color: "bg-slate-100 text-slate-800 dark:bg-blue-950 dark:text-blue-300" })
+    badges.push({ label: "Zona Premium", variant: "blue" })
   }
   if (zone.price_trend_pct > 4) {
-    badges.push({ label: "Alta Demanda", color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" })
+    badges.push({ label: "Alta Demanda", variant: "red" })
   }
   if (zone.price_trend_pct < 0) {
-    badges.push({ label: "Corrección de Precio", color: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300" })
+    badges.push({ label: "Corrección de Precio", variant: "amber" })
   }
   if (zone.total_listings > 200) {
-    badges.push({ label: "Alto Volumen", color: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" })
+    badges.push({ label: "Alto Volumen", variant: "green" })
   }
 
   // --- Composition chart data (índice de concentración 0-10) ---
@@ -451,40 +454,25 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       <Suspense><DemoScroll /></Suspense>
       <FadeInUp><Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} /></FadeInUp>
       {/* [A] Page Header */}
-      <FadeInUp><div id="demo-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          {badges.length > 0 && (
-            <div className="flex items-center gap-2 mb-2">
-              {badges.map((b) => (
-                <span
-                  key={b.label}
-                  className={`px-3 py-1 ${b.color} text-[10px] font-bold rounded-full tracking-widest uppercase`}
-                >
-                  {b.label}
-                </span>
-              ))}
-            </div>
-          )}
-          <h2 className="text-4xl font-extrabold tracking-tight">
-            {zone.zone_name}
-          </h2>
-          <div className="flex items-center gap-3">
-            <p className="text-slate-500 dark:text-slate-400 font-medium">
-              Análisis estratégico del mercado inmobiliario · Tijuana
-            </p>
-            <UpdatedAt date={lastUpdated} />
-            <span className="px-2.5 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 text-[10px] font-semibold rounded-full">
-              {rawOp === "renta" ? "Renta" : rawOp === "todas" ? "Todas" : "Venta"} · {rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1)) : "Todas"}
-            </span>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <ExportButton zoneSlug={slug} />
-        </div>
+      <FadeInUp><div id="demo-header">
+        <PageHeader
+          title={zone.zone_name}
+          subtitle="Análisis estratégico del mercado inmobiliario · Tijuana"
+          badges={badges}
+          meta={
+            <>
+              <UpdatedAt date={lastUpdated} />
+              <span className="px-2.5 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-semibold rounded-full">
+                {rawOp === "renta" ? "Renta" : rawOp === "todas" ? "Todas" : "Venta"} · {rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1)) : "Todas"}
+              </span>
+            </>
+          }
+          actions={<ExportButton zoneSlug={slug} />}
+        />
       </div></FadeInUp>
 
       {/* [A2] Zone Filters */}
-      <FadeInUp><Suspense fallback={<div className="h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+      <FadeInUp><Suspense fallback={<div className="h-10 rounded-xl bg-surface-inset animate-pulse" />}>
         <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
       </Suspense></FadeInUp>
 
@@ -502,7 +490,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       )}
 
       {/* [C] Tabbed Content */}
-      <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+      <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-surface-inset animate-pulse" />}>
         <ZoneTabs
           defaultTab={(perfilConfig?.defaultTab as "general" | "precios" | "composicion" | "inversion" | "tendencias" | "zona") ?? "general"}
           general={
@@ -524,7 +512,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                 {/* CTA: Valuar propiedad */}
                 <a
                   href={`/brujula?zone=${slug}`}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-bold transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Icon name="explore" className="text-base" />
                   Valuar propiedad en esta zona
@@ -631,12 +619,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           zona={
             <div className="space-y-6">
               <section id="demo-map">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-black tracking-tight">Mapa de la Zona</h3>
-                  <a href="/mapa" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-                    Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
-                  </a>
-                </div>
+                <SectionHeading
+                  title="Mapa de la Zona"
+                  size="lg"
+                  action={
+                    <a href="/mapa" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                      Ver mapa completo <Icon name="arrow_forward" className="text-sm" />
+                    </a>
+                  }
+                />
                 <ZoneMapWrapper zones={allZones} focusZoneSlug={slug} />
               </section>
               <div className="grid grid-cols-12 gap-6">
@@ -650,11 +641,11 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                     const insights = computeZoneInsights(demo, zone, risk, allZonesFiltered)
                     return insights ? <ZoneInsightsCard insights={insights} /> : null
                   })()}
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700">
-                    <h4 className="text-sm font-black uppercase tracking-wider text-slate-400 mb-2">
+                  <div className="bg-surface-muted rounded-xl p-5 border border-dashed border-border">
+                    <h4 className="text-sm font-black uppercase tracking-wider text-muted-foreground mb-2">
                       Perfil de Riesgo
                     </h4>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Disponible cuando se acumulen 4+ semanas de datos históricos.
                     </p>
                   </div>
@@ -662,12 +653,15 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
               </div>
               {/* Pipeline */}
               <section>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-black tracking-tight">Proyectos en Pipeline</h3>
-                  <a href="/pipeline" className="text-slate-800 dark:text-blue-400 text-sm font-bold flex items-center gap-1 hover:underline">
-                    Ver todos <Icon name="arrow_forward" className="text-sm" />
-                  </a>
-                </div>
+                <SectionHeading
+                  title="Proyectos en Pipeline"
+                  size="lg"
+                  action={
+                    <a href="/pipeline" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                      Ver todos <Icon name="arrow_forward" className="text-sm" />
+                    </a>
+                  }
+                />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {PIPELINE_PROJECTS.map((p) => (
                     <PipelineCard key={p.name} project={p} />

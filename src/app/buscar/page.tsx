@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import { Icon } from "@/components/icon"
+import { Breadcrumb } from "@/components/breadcrumb"
 import { SearchInput } from "./search-input"
 import { Price } from "@/components/price"
 import type { Listing, ZoneMetrics } from "@/types/database"
@@ -98,11 +99,11 @@ async function SearchContent({ q }: { q: string }) {
   if (total === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-          <Icon name="search_off" className="text-slate-400 text-2xl" />
+        <div className="w-16 h-16 rounded-2xl bg-surface-inset flex items-center justify-center mb-4">
+          <Icon name="search_off" className="text-muted-foreground text-2xl" />
         </div>
-        <h2 className="text-lg font-semibold text-slate-700 mb-2">Sin resultados</h2>
-        <p className="text-sm text-slate-400 max-w-xs">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Sin resultados</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
           No encontramos nada para &ldquo;{q}&rdquo;. Intenta con otro término, zona o tipo de propiedad.
         </p>
       </div>
@@ -111,14 +112,14 @@ async function SearchContent({ q }: { q: string }) {
 
   return (
     <div className="space-y-8">
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         {total} resultado{total !== 1 ? "s" : ""} para &ldquo;{q}&rdquo;
       </p>
 
       {/* Zonas */}
       {zonas.length > 0 && (
         <section>
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
             Zonas ({zonas.length})
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -126,18 +127,18 @@ async function SearchContent({ q }: { q: string }) {
               <Link
                 key={zona.zone_id}
                 href={`/zona/${zona.zone_slug}`}
-                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group"
+                className="flex items-center gap-3 p-4 bg-surface rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-md transition-all group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
-                  <Icon name="location_on" className="text-blue-600 text-base" />
+                <div className="w-10 h-10 rounded-xl bg-kpi-icon-blue flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Icon name="location_on" className="text-blue-600 dark:text-blue-400 text-base" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{zona.zone_name}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{zona.zone_name}</p>
                   {zona.total_listings > 0 && (
-                    <p className="text-xs text-slate-400">{zona.total_listings} propiedades</p>
+                    <p className="text-xs text-muted-foreground">{zona.total_listings} propiedades</p>
                   )}
                 </div>
-                <Icon name="chevron_right" className="text-slate-300 text-sm ml-auto flex-shrink-0 group-hover:text-blue-400 transition-colors" />
+                <Icon name="chevron_right" className="text-muted-foreground/50 text-sm ml-auto flex-shrink-0 group-hover:text-primary transition-colors" />
               </Link>
             ))}
           </div>
@@ -147,22 +148,22 @@ async function SearchContent({ q }: { q: string }) {
       {/* Propiedades */}
       {propiedades.length > 0 && (
         <section>
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
             Propiedades ({propiedades.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {propiedades.map((listing) => (
               <div
                 key={listing.id}
-                className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all"
+                className="flex items-start gap-3 p-4 bg-surface rounded-2xl border border-border/50 hover:border-border hover:shadow-sm transition-all"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Icon name="home" className="text-slate-500 text-base" />
+                <div className="w-10 h-10 rounded-xl bg-surface-inset flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Icon name="home" className="text-muted-foreground text-base" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-800 leading-snug mb-1">{listing.title}</p>
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-400">
-                    <Price value={listing.price} className="font-semibold text-slate-700" />
+                  <p className="text-sm font-medium text-foreground leading-snug mb-1">{listing.title}</p>
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <Price value={listing.price} className="font-semibold text-foreground" />
                     <span>·</span>
                     <span>{listing.area_m2}m²</span>
                     <span>·</span>
@@ -192,17 +193,8 @@ export default async function BuscarPage({
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Link
-            href="/"
-            className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            Inicio
-          </Link>
-          <Icon name="chevron_right" className="text-slate-300 text-xs" />
-          <span className="text-sm text-slate-600">Búsqueda</span>
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <Breadcrumb items={[{ label: "Búsqueda" }]} />
+        <h1 className="text-2xl font-bold text-foreground mt-2">
           {query ? `Resultados: ${query}` : "Buscar zonas"}
         </h1>
       </div>
@@ -211,8 +203,8 @@ export default async function BuscarPage({
 
       {query.length < 3 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Icon name="travel_explore" className="text-4xl text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+          <Icon name="travel_explore" className="text-4xl text-muted-foreground/40 mb-3" />
+          <p className="text-sm text-muted-foreground max-w-xs">
             Busca por nombre de zona, colonia o desarrollo inmobiliario.
           </p>
         </div>
@@ -220,8 +212,8 @@ export default async function BuscarPage({
         <Suspense
           fallback={
             <div className="flex items-center gap-3 py-12">
-              <span className="w-5 h-5 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
-              <span className="text-sm text-slate-400">Buscando...</span>
+              <span className="w-5 h-5 border-2 border-border border-t-primary rounded-full animate-spin" />
+              <span className="text-sm text-muted-foreground">Buscando...</span>
             </div>
           }
         >
