@@ -81,27 +81,49 @@ export default async function RiesgoPage() {
 
       {/* Hero Header */}
       <FadeInUp>
-        <HeroHeader
-          badge="Análisis de Riesgo"
-          badgeIcon="shield"
-          title="Riesgo de Inversión"
-          subtitle="Evaluación de riesgo, volatilidad, y rendimiento esperado para cada zona de Tijuana."
-          accent="red"
-          badges={[{ label: `${riskData.length} Zonas`, variant: "neutral" }]}
-          actions={
-            <>
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
-                <Icon name="tune" className="text-sm" />
-                Parámetros
-              </button>
-              <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
-            </>
-          }
-        >
-          <HeroStat icon="shield" label="Risk Score" value={<>{avgRisk}<span className="text-xs font-medium text-slate-400">/100</span></>} color="red" />
-          <HeroStat icon="percent" label="Cap Rate" value={`${avgCap}%`} color="emerald" />
-          <HeroStat icon="home_work" label="Vacancia" value={`${avgVacancy}%`} color="amber" />
-        </HeroHeader>
+        {(() => {
+          const safestZone = sortedByRisk[0]
+          const riskiestZone = sortedByRisk[sortedByRisk.length - 1]
+          const riskLevel = avgRisk < 35 ? "bajo" : avgRisk < 60 ? "moderado" : "elevado"
+
+          return (
+            <HeroHeader
+              badge={`${riskData.length} zonas analizadas`}
+              badgeIcon="verified_user"
+              title={<>Riesgo de<br /><span className="bg-gradient-to-r from-red-400 to-amber-300 bg-clip-text text-transparent">Inversión</span></>}
+              subtitle={`Riesgo promedio ${riskLevel} (${avgRisk}/100). Zona más segura: ${safestZone.zone_name} (${safestZone.risk_score}). Mayor riesgo: ${riskiestZone.zone_name} (${riskiestZone.risk_score}).`}
+              accent="red"
+              actions={
+                <>
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
+                    <Icon name="tune" className="text-sm" />
+                    Parámetros
+                  </button>
+                  <ExportButton formats={["risk-pdf", "listings-excel", "listings-csv"]} />
+                </>
+              }
+            >
+              <HeroStat
+                icon="shield"
+                label={`Riesgo ${riskLevel}`}
+                value={<>{avgRisk}<span className="text-sm font-medium text-slate-500">/100</span></>}
+                color="red"
+              />
+              <HeroStat
+                icon="percent"
+                label="Cap Rate promedio"
+                value={`${avgCap}%`}
+                color="emerald"
+              />
+              <HeroStat
+                icon="lock"
+                label={`Más segura: ${safestZone.zone_name}`}
+                value={`${safestZone.risk_score}/100`}
+                color="teal"
+              />
+            </HeroHeader>
+          )
+        })()}
       </FadeInUp>
 
       {/* Risk Matrix */}
