@@ -7,6 +7,8 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getListings } from "@/lib/data/listings"
 import { PortafolioClient } from "./portafolio-client"
 import { ExportButton } from "@/components/export-button"
+import { PageHeader } from "@/components/page-header"
+import { SectionHeading } from "@/components/section-heading"
 import { ListingCard } from "@/components/listing-card"
 import { ListingsFilters } from "@/components/listings-filters"
 import { PortfolioMapWrapper } from "@/components/map/portfolio-map-wrapper"
@@ -57,33 +59,24 @@ export default async function PortafolioPage({
     <StaggerContainer className="space-y-10">
       <FadeInUp><Breadcrumb items={[{ label: "Portafolio" }]} /></FadeInUp>
       {/* Page Header */}
-      <FadeInUp><div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full tracking-widest uppercase">
-              Explorador de Portafolios
-            </span>
-          </div>
-          <h2 className="text-4xl font-extrabold tracking-tight">
-            Explorador de Portafolios
-          </h2>
-          <p className="text-slate-500 max-w-xl font-medium">
-            Explora estrategias de inversión predefinidas y analiza la composición óptima para tu perfil de riesgo.
-          </p>
-        </div>
-        <ExportButton formats={["listings-excel", "listings-csv"]} />
-      </div></FadeInUp>
+      <FadeInUp>
+        <PageHeader
+          title="Explorador de Portafolios"
+          subtitle="Explora estrategias de inversión predefinidas y analiza la composición óptima para tu perfil de riesgo."
+          badges={[{ label: "Explorador de Portafolios", variant: "blue" }]}
+          actions={<ExportButton formats={["listings-excel", "listings-csv"]} />}
+        />
+      </FadeInUp>
 
       <FadeInUp><PortafolioClient presets={presets} zones={zones} riskData={riskData} /></FadeInUp>
 
       {/* Propiedades Section */}
       <FadeInUp><section>
-        <div className="mb-6">
-          <h3 className="text-2xl font-black tracking-tight">Propiedades</h3>
-          <p className="text-sm text-slate-500 font-medium">
-            Filtra el inventario activo por tipo, zona, precio y más
-          </p>
-        </div>
+        <SectionHeading
+          title="Propiedades"
+          subtitle="Filtra el inventario activo por tipo, zona, precio y más"
+          size="lg"
+        />
 
         {/* Map view of filtered listings */}
         <div className="mb-6">
@@ -94,8 +87,8 @@ export default async function PortafolioPage({
           {/* Filter Sidebar (desktop) + Bottom Sheet trigger (mobile) */}
           <Suspense fallback={
             <div className="w-60 shrink-0 hidden md:block space-y-4">
-              <div className="h-8 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
-              <div className="h-64 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div className="h-8 rounded-lg bg-surface-inset animate-pulse" />
+              <div className="h-64 rounded-xl bg-surface-inset animate-pulse" />
             </div>
           }>
             <ListingsFilters total={total} />
@@ -104,16 +97,16 @@ export default async function PortafolioPage({
           {/* Listings grid */}
           <div className="flex-1 min-w-0">
             {listings.length === 0 ? (
-              <div className="bg-white rounded-xl card-shadow p-12 text-center">
+              <div className="bg-surface rounded-xl card-shadow p-12 text-center">
                 <p className="text-2xl mb-2">🏠</p>
-                <p className="text-slate-600 font-semibold">Sin resultados</p>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-foreground font-semibold">Sin resultados</p>
+                <p className="text-muted-foreground text-sm mt-1">
                   Ajusta los filtros para ver más propiedades
                 </p>
               </div>
             ) : (
               <>
-                <p className="text-sm font-bold text-slate-500 mb-4 md:hidden">
+                <p className="text-sm font-bold text-muted-foreground mb-4 md:hidden">
                   Propiedades encontradas
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
