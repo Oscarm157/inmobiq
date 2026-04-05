@@ -455,27 +455,52 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       <FadeInUp><Breadcrumb items={[{ label: "Zonas", href: "/zonas" }, { label: zone.zone_name }]} /></FadeInUp>
       {/* [A] Hero Header */}
       <FadeInUp><div id="demo-header">
-        <HeroHeader
-          badge={zone.zone_name}
-          badgeIcon="location_on"
-          title={zone.zone_name}
-          subtitle="Análisis estratégico del mercado inmobiliario · Tijuana"
-          accent="blue"
-          badges={badges}
-          meta={
-            <>
-              <UpdatedAt date={lastUpdated} />
-              <span className="px-2.5 py-1 bg-white/[0.07] text-slate-300 text-[10px] font-semibold rounded-full backdrop-blur-sm border border-white/[0.04]">
-                {rawOp === "renta" ? "Renta" : rawOp === "todas" ? "Todas" : "Venta"} · {rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1)) : "Todas"}
-              </span>
-            </>
-          }
-          actions={<ExportButton zoneSlug={slug} />}
-        >
-          <HeroStat icon="payments" label="Precio/m²" value={formatCurrency(zone.avg_price_per_m2)} color="blue" />
-          <HeroStat icon="trending_up" label="Tendencia" value={`${zone.price_trend_pct > 0 ? "+" : ""}${zone.price_trend_pct.toFixed(1)}%`} color={zone.price_trend_pct >= 0 ? "emerald" : "red"} />
-          <HeroStat icon="compare_arrows" label="vs Ciudad" value={`${((zone.avg_price_per_m2 - cityAvg) / cityAvg * 100) > 0 ? "+" : ""}${((zone.avg_price_per_m2 - cityAvg) / cityAvg * 100).toFixed(0)}%`} color={zone.avg_price_per_m2 > cityAvg ? "amber" : "teal"} />
-        </HeroHeader>
+        {(() => {
+          // Dynamic accent based on zone character
+          const diffPct = ((zone.avg_price_per_m2 - cityAvg) / cityAvg) * 100
+          const heroAccent = zone.price_trend_pct > 4 ? "amber" as const
+            : zone.price_trend_pct < 0 ? "red" as const
+            : diffPct > 15 ? "blue" as const
+            : "teal" as const
+
+          // Dynamic subtitle from real data
+          const opLabel = rawOp === "renta" ? "renta" : "venta"
+          const heroSubtitle = zone.total_listings > 0
+            ? `${formatCurrency(zone.avg_price_per_m2)}/m² promedio en ${opLabel} · ${topPct}% ${topLabel} · Absorción ${absorptionPct}%`
+            : "Análisis estratégico del mercado inmobiliario · Tijuana"
+
+          return (
+            <HeroHeader
+              badge={rawOp === "renta" ? "Mercado de Renta" : rawOp === "todas" ? "Mercado General" : "Mercado de Venta"}
+              badgeIcon="location_on"
+              title={<>{zone.zone_name}<br /><span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent text-2xl sm:text-3xl">Tijuana, B.C.</span></>}
+              subtitle={heroSubtitle}
+              accent={heroAccent}
+              badges={badges}
+              meta={<UpdatedAt date={lastUpdated} />}
+              actions={<ExportButton zoneSlug={slug} />}
+            >
+              <HeroStat
+                icon="payments"
+                label="Precio / m²"
+                value={formatCurrency(zone.avg_price_per_m2)}
+                color="blue"
+              />
+              <HeroStat
+                icon={zone.price_trend_pct >= 0 ? "trending_up" : "trending_down"}
+                label="Tendencia semanal"
+                value={`${zone.price_trend_pct > 0 ? "+" : ""}${zone.price_trend_pct.toFixed(1)}%`}
+                color={zone.price_trend_pct >= 0 ? "emerald" : "red"}
+              />
+              <HeroStat
+                icon="compare_arrows"
+                label={diffPct > 0 ? "Sobre promedio ciudad" : "Bajo promedio ciudad"}
+                value={`${diffPct > 0 ? "+" : ""}${diffPct.toFixed(0)}%`}
+                color={diffPct > 0 ? "amber" : "teal"}
+              />
+            </HeroHeader>
+          )
+        })()}
       </div></FadeInUp>
 
       {/* [A2] Zone Filters */}
