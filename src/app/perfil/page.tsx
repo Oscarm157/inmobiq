@@ -64,20 +64,25 @@ export default function PerfilPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <Breadcrumb items={[{ label: "Perfil" }]} />
-      <HeroHeader
-        badge="Mi Perfil"
-        badgeIcon="person"
-        title={name}
-        subtitle={user.email ?? ""}
-        accent="blue"
-        compact
-        meta={
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/[0.07] text-blue-300 text-[10px] font-bold rounded-full backdrop-blur-sm border border-white/[0.04] capitalize">
-            <Icon name={provider === "google" ? "account_circle" : "mail"} className="text-xs" />
-            {provider}
-          </span>
-        }
-      />
+      {(() => {
+        const joinDate = new Date(user.created_at).toLocaleDateString("es-MX", { month: "long", year: "numeric" })
+        return (
+          <HeroHeader
+            badge="Cuenta personal"
+            badgeIcon="verified_user"
+            title={<>{name}<br /><span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent text-2xl sm:text-3xl">{user.email}</span></>}
+            subtitle={`Miembro desde ${joinDate} · Plan gratuito`}
+            accent="blue"
+            compact
+            meta={
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/[0.07] text-blue-300 text-[10px] font-bold rounded-full backdrop-blur-sm border border-white/[0.04] capitalize">
+                <Icon name={provider === "google" ? "account_circle" : "mail"} className="text-xs" />
+                {provider}
+              </span>
+            }
+          />
+        )
+      })()}
 
       {/* Account details */}
       <div className="bg-surface rounded-2xl border border-border/50 card-shadow divide-y divide-border">

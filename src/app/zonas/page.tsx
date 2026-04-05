@@ -20,15 +20,22 @@ export default async function ZonasPage() {
     <StaggerContainer className="space-y-6">
       <FadeInUp><Breadcrumb items={[{ label: "Zonas" }]} /></FadeInUp>
       <FadeInUp>
-        <HeroHeader
-          badge="Zonas"
-          badgeIcon="location_on"
-          title="Zonas de Tijuana"
-          subtitle="Explora el mercado inmobiliario por zona. Haz clic en una zona para ver su análisis completo."
-          accent="teal"
-          badges={[{ label: `${publicZones.length} zonas`, variant: "neutral" }]}
-          compact
-        />
+        {(() => {
+          const sorted = [...publicZones].sort((a, b) => b.avg_price_per_m2 - a.avg_price_per_m2)
+          const topZone = sorted[0]
+          const totalListings = publicZones.reduce((s, z) => s + z.total_listings, 0)
+
+          return (
+            <HeroHeader
+              badge={`${publicZones.length} zonas monitoreadas`}
+              badgeIcon="location_on"
+              title={<>Zonas de<br /><span className="bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">Tijuana</span></>}
+              subtitle={topZone ? `Desde $${Math.round(sorted[sorted.length - 1].avg_price_per_m2 / 1000)}K hasta $${Math.round(topZone.avg_price_per_m2 / 1000)}K por m². Selecciona una zona para su análisis completo.` : "Explora el mercado inmobiliario por zona."}
+              accent="teal"
+              compact
+            />
+          )
+        })()}
       </FadeInUp>
 
       <FadeInUp><Suspense fallback={<div className="h-10 bg-surface-inset rounded-lg animate-pulse" />}>

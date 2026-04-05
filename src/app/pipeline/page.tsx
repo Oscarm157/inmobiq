@@ -42,30 +42,37 @@ export default function PipelinePage() {
     <StaggerContainer className="space-y-10">
       {/* Hero Header */}
       <FadeInUp>
-        <HeroHeader
-          badge="Pipeline de Desarrollo"
-          badgeIcon="construction"
-          title="Pipeline de Desarrollo"
-          subtitle="Proyectos inmobiliarios en desarrollo activo en Tijuana. Desde planificación hasta entrega."
-          accent="violet"
-          badges={[{ label: `${projects.length} Proyectos`, variant: "green" }]}
-          actions={
-            <>
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
-                <Icon name="filter_list" className="text-sm" />
-                Filtrar
-              </button>
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <Icon name="ios_share" className="text-sm" />
-                Exportar
-              </button>
-            </>
-          }
-        >
-          <HeroStat icon="apartment" label="Proyectos" value={projects.length} color="violet" />
-          <HeroStat icon="grid_view" label="Unidades" value={formatNumber(totalUnits)} color="blue" />
-          <HeroStat icon="trending_up" label="Absorción" value={`${avgSoldPct}%`} color="emerald" />
-        </HeroHeader>
+        {(() => {
+          const topZone = zoneDist[0]
+          const enConstruccion = grouped.construccion?.length ?? 0
+          const enPreventa = grouped.preventa?.length ?? 0
+
+          return (
+            <HeroHeader
+              badge={`${projects.length} proyectos activos`}
+              badgeIcon="construction"
+              title={<>Pipeline de<br /><span className="bg-gradient-to-r from-violet-400 to-indigo-300 bg-clip-text text-transparent">Desarrollo</span></>}
+              subtitle={`${formatNumber(totalSold)} de ${formatNumber(totalUnits)} unidades vendidas (${avgSoldPct}% absorción). ${enConstruccion > 0 ? `${enConstruccion} en construcción` : ""}${enConstruccion > 0 && enPreventa > 0 ? ", " : ""}${enPreventa > 0 ? `${enPreventa} en preventa` : ""}${topZone ? `. Mayor actividad: ${topZone[0]}` : ""}.`}
+              accent="violet"
+              actions={
+                <>
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] backdrop-blur-sm text-white rounded-full text-sm font-bold hover:bg-white/[0.14] transition-all border border-white/[0.06]">
+                    <Icon name="filter_list" className="text-sm" />
+                    Filtrar
+                  </button>
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <Icon name="ios_share" className="text-sm" />
+                    Exportar
+                  </button>
+                </>
+              }
+            >
+              <HeroStat icon="apartment" label="Total proyectos" value={projects.length} color="violet" />
+              <HeroStat icon="grid_view" label={`${formatNumber(totalSold)} vendidas`} value={formatNumber(totalUnits)} color="blue" />
+              <HeroStat icon="speed" label="Absorción promedio" value={`${avgSoldPct}%`} color={avgSoldPct > 60 ? "emerald" : "amber"} />
+            </HeroHeader>
+          )
+        })()}
       </FadeInUp>
 
       {/* Zone Distribution */}

@@ -194,10 +194,10 @@ export default async function BuscarPage({
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Búsqueda" }]} />
       <HeroHeader
-        badge="Búsqueda"
-        badgeIcon="search"
-        title={query ? `Resultados: ${query}` : "Buscar zonas"}
-        subtitle="Busca por nombre de zona, colonia o desarrollo inmobiliario."
+        badge="Explorar"
+        badgeIcon="travel_explore"
+        title={query ? <>{`Resultados: `}<span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">{query}</span></> : <><span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Buscar</span>{` zonas`}</>}
+        subtitle="Zonas, colonias, desarrollos inmobiliarios — encuentra lo que necesitas."
         accent="blue"
         compact
       />
@@ -206,9 +206,9 @@ export default async function BuscarPage({
 
       {query.length < 3 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Icon name="travel_explore" className="text-4xl text-muted-foreground/40 mb-3" />
+          <Icon name="search" className="text-4xl text-muted-foreground/40 mb-3" />
           <p className="text-sm text-muted-foreground max-w-xs">
-            Busca por nombre de zona, colonia o desarrollo inmobiliario.
+            Escribe al menos 3 caracteres para buscar.
           </p>
         </div>
       ) : (

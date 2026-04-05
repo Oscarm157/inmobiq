@@ -41,19 +41,26 @@ export default async function MapaPage({
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Mapa" }]} />
-      <HeroHeader
-        badge="Mapa Interactivo"
-        badgeIcon="map"
-        title="Tijuana — Mapa de Precios"
-        subtitle="Zonas coloreadas por precio promedio/m². Haz clic en una zona para ver su análisis."
-        accent="teal"
-        compact
-        actions={
-          <Suspense fallback={<div className="h-10 w-64 bg-white/[0.06] rounded-lg animate-pulse" />}>
-            <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
-          </Suspense>
-        }
-      />
+      {(() => {
+        const activeZones = zones.filter(z => z.zone_slug !== "otros" && z.total_listings > 0)
+        const opLabel = rawOp === "renta" ? "renta" : rawOp === "todas" ? "venta y renta" : "venta"
+
+        return (
+          <HeroHeader
+            badge={`${activeZones.length} zonas activas`}
+            badgeIcon="satellite_alt"
+            title={<>Mapa de<br /><span className="bg-gradient-to-r from-teal-400 to-sky-300 bg-clip-text text-transparent">Precios</span></>}
+            subtitle={`Visualización geográfica del mercado de ${opLabel} en Tijuana. Cada zona coloreada por precio promedio/m².`}
+            accent="teal"
+            compact
+            actions={
+              <Suspense fallback={<div className="h-10 w-64 bg-white/[0.06] rounded-lg animate-pulse" />}>
+                <ZoneFilters defaultOperacion={rawOp === "todas" ? "" : rawOp} defaultCategoria={rawCat === "todas" ? "" : rawCat} />
+              </Suspense>
+            }
+          />
+        )
+      })()}
 
       <Suspense
         fallback={

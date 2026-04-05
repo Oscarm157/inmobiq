@@ -96,10 +96,13 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
     <div className="space-y-6 pb-20">
       {/* Hero Header */}
       <HeroHeader
-        badge="Comparador"
+        badge={selectedSlugs.length > 0 ? `${selectedSlugs.length} zona${selectedSlugs.length > 1 ? "s" : ""} seleccionada${selectedSlugs.length > 1 ? "s" : ""}` : "Selecciona zonas"}
         badgeIcon="compare_arrows"
-        title="Comparador de Zonas"
-        subtitle="Análisis comparativo de variables inmobiliarias por zona en Tijuana."
+        title={<>Comparador de<br /><span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Zonas</span></>}
+        subtitle={selectedSlugs.length > 1
+          ? `Comparando: ${selectedSlugs.map(s => zoneNames[s] ?? s).join(" vs ")}`
+          : `Selecciona hasta 4 zonas de ${allZones.length} disponibles para análisis lado a lado.`
+        }
         accent="blue"
         compact
         actions={

@@ -61,16 +61,16 @@ export default async function PortafolioPage({
       {/* Hero Header */}
       <FadeInUp>
         <HeroHeader
-          badge="Explorador de Portafolios"
+          badge={`${total} propiedades activas`}
           badgeIcon="account_balance"
-          title="Explorador de Portafolios"
-          subtitle="Explora estrategias de inversión predefinidas y analiza la composición óptima para tu perfil de riesgo."
+          title={<>Explorador de<br /><span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Portafolios</span></>}
+          subtitle={`Analiza ${zones.filter(z => z.zone_slug !== "otros").length} zonas con ${presets.length} estrategias predefinidas. Filtra por tipo, precio, superficie y más.`}
           accent="blue"
           actions={<ExportButton formats={["listings-excel", "listings-csv"]} />}
         >
-          <HeroFeature icon="strategy" label="Presets de inversión" desc="Estrategias predefinidas por perfil de riesgo" color="blue" />
-          <HeroFeature icon="map" label="Mapa de listings" desc="Visualiza propiedades geolocalizadas" color="emerald" />
-          <HeroFeature icon="filter_alt" label="Filtros avanzados" desc="Tipo, zona, precio, área, recámaras" color="violet" />
+          <HeroFeature icon="psychology" label="Estrategias inteligentes" desc="Presets por perfil de riesgo e inversión" color="blue" />
+          <HeroFeature icon="pin_drop" label="Mapa en tiempo real" desc="Propiedades geolocalizadas por zona" color="emerald" />
+          <HeroFeature icon="tune" label="Filtros quirúrgicos" desc="Precio, m², recámaras, zona, tipo" color="violet" />
         </HeroHeader>
       </FadeInUp>
 

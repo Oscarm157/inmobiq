@@ -39,10 +39,10 @@ export default function GlosarioPage() {
     <div className="space-y-8 max-w-3xl">
       <Breadcrumb items={[{ label: "Glosario" }]} />
       <HeroHeader
-        badge="Referencia"
+        badge={`${TERMS.length} términos`}
         badgeIcon="menu_book"
-        title="Glosario"
-        subtitle="Términos y métricas usadas en la plataforma."
+        title={<>Glosario<br /><span className="bg-gradient-to-r from-blue-400 to-slate-300 bg-clip-text text-transparent text-2xl sm:text-3xl">Inmobiliario</span></>}
+        subtitle="Cada métrica, índice y concepto que encontrarás en la plataforma, explicado en lenguaje claro."
         accent="blue"
         compact
       />
