@@ -23,7 +23,7 @@ import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
 import { getAllDemographics, getMarketIntelligenceInsights, computeOpportunityScore } from "@/lib/data/demographics"
 import { AuthGatedSection } from "@/components/auth-gated-section"
 import type { DensityBubble } from "@/components/market-density-scatter"
-import { PageHeader } from "@/components/page-header"
+import { HeroHeader } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 
 // Lazy-load heavy chart components (Recharts ~450KB) — they're all inside AuthGatedSections
@@ -131,18 +131,20 @@ export default async function HomePage({
       />
 
       {/* ─── 1. Header ─── */}
-      <FadeInUp><div id="demo-header">
-        <PageHeader
+      <div id="demo-header">
+        <HeroHeader
+          badge="Panorama del Mercado"
+          badgeIcon="monitoring"
           title="Mercado Inmobiliario: Tijuana"
           subtitle="Panorama general del mercado inmobiliario de Tijuana, B.C."
+          accent="blue"
           badges={[
-            { label: "Panorama del Mercado", variant: "neutral" },
             { label: "Datos en Vivo", variant: "green" },
           ]}
           meta={
             <>
               <UpdatedAt date={lastUpdated} />
-              <span className="px-2.5 py-1 bg-badge-blue-bg text-badge-blue-text text-[10px] font-semibold rounded-full">
+              <span className="inline-flex px-2.5 py-1 bg-white/[0.07] text-blue-300 text-[10px] font-semibold rounded-full backdrop-blur-sm border border-white/[0.04]">
                 {filters.listing_type === "renta" ? "Renta" : "Venta"} · {filters.categoria ? (filters.categoria.charAt(0).toUpperCase() + filters.categoria.slice(1)) : "Todas"}
               </span>
             </>
@@ -150,21 +152,21 @@ export default async function HomePage({
           actions={
             <>
               <Suspense fallback={
-                <button className="flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full text-sm font-bold shadow-sm">
+                <button className="flex items-center gap-2 px-6 py-3 bg-white/[0.08] border border-white/[0.1] text-white rounded-full text-sm font-bold">
                   <Icon name="filter_list" className="text-sm" />
                   Filtros
                 </button>
               }>
                 <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
               </Suspense>
-              <button className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-bold shadow-lg shadow-foreground/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
                 <Icon name="ios_share" className="text-sm" />
                 Exportar
               </button>
             </>
           }
         />
-      </div></FadeInUp>
+      </div>
 
       {/* ─── 2. City KPIs ─── */}
       <FadeInUp><div id="demo-kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

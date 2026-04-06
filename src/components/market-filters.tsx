@@ -147,7 +147,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
         className={`flex items-center gap-2 px-6 py-3 border rounded-full text-sm font-bold shadow-sm transition-all ${
           open || activeCount > 0
             ? "bg-slate-800 text-white border-blue-700"
-            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+            : "bg-white/[0.08] backdrop-blur-sm border-white/[0.12] text-white hover:bg-white/[0.14]"
         }`}
       >
         <Icon name="filter_list" className="text-sm" />
