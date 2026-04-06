@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { AuthGate } from "@/components/auth-gate"
 import { ScreenshotUploader } from "@/components/brujula/screenshot-uploader"
 import { ManualForm, type ManualFormResult } from "@/components/brujula/manual-form"
 import { ExtractionReview, type ReviewResult } from "@/components/brujula/extraction-review"
@@ -202,6 +203,7 @@ export default function BrujulaPage() {
       </div>
 
       {/* ─── Step Content ─── */}
+      <AuthGate message="Regístrate gratis para usar Brújula (3 valuaciones/mes)">
       <AnimatePresence mode="wait">
         {step === "input" && (
           <motion.div
@@ -281,6 +283,7 @@ export default function BrujulaPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </AuthGate>
     </div>
   )
 }

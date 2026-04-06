@@ -3,6 +3,7 @@ import * as XLSX from "xlsx"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { rateLimit } from "@/lib/rate-limit"
+import { getUserPlan, PLAN_LIMITS } from "@/lib/user-plan"
 import type { Listing, ZoneMetrics } from "@/types/database"
 
 type ExportFormat = "excel" | "csv"
@@ -87,16 +88,18 @@ function buildRowsFromZoneMetrics(zones: ZoneMetrics[], filters: ExportFilters) 
 }
 
 export async function POST(req: NextRequest) {
-  // Auth check — only authenticated users can export
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const planInfo = await getUserPlan()
+  if (!planInfo) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  // Rate limit: 10 exports per hour per user
-  const limited = await rateLimit(`export-listings:${user.id}`, 10, 3_600_000)
+  const { plan, userId } = planInfo
+  const limit = PLAN_LIMITS[plan].exports_per_month
+  const limited = await rateLimit(`export:${userId}`, limit, 30 * 86_400_000)
   if (limited) return limited
+
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const body = await req.json().catch(() => ({})) as ExportBody
   const format: ExportFormat = body.format === "csv" ? "csv" : "excel"

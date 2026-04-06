@@ -8,6 +8,7 @@ import { HeroHeader, HeroStat } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneMetrics } from "@/lib/data/zones"
+import { AuthGateServer } from "@/components/auth-gate-server"
 
 export const metadata = {
   title: "Riesgo de Inversión — Inmobiq",
@@ -129,6 +130,8 @@ export default async function RiesgoPage() {
       {/* Risk Matrix */}
       <FadeInUp><RiskMatrix riskData={riskData} zones={zones} /></FadeInUp>
 
+      <AuthGateServer message="Regístrate gratis para ver el análisis de riesgo completo">
+
       {/* Zone Risk Cards */}
       <FadeInUp><section>
         <SectionHeading title="Perfil de Riesgo por Zona" size="lg" />
@@ -167,6 +170,8 @@ export default async function RiesgoPage() {
           </div>
         </div>
       </div></FadeInUp>
+
+      </AuthGateServer>
     </StaggerContainer>
   )
 }

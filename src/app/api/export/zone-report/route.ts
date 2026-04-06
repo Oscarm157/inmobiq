@@ -5,17 +5,16 @@ import { formatCurrency, formatPercent } from "@/lib/utils"
 import { getZoneActivityLabel, getCityActivityLabel } from "@/lib/activity-labels"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { rateLimit } from "@/lib/rate-limit"
+import { getUserPlan, PLAN_LIMITS } from "@/lib/user-plan"
 
 export async function POST(req: NextRequest) {
-  // Auth check
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const planInfo = await getUserPlan()
+  if (!planInfo) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  // Rate limit: 10 exports per hour per user
-  const limited = await rateLimit(`export-zone:${user.id}`, 10, 3_600_000)
+  const limit = PLAN_LIMITS[planInfo.plan].exports_per_month
+  const limited = await rateLimit(`export:${planInfo.userId}`, limit, 30 * 86_400_000)
   if (limited) return limited
 
   const body = await req.json().catch(() => ({}))

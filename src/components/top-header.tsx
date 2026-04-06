@@ -8,7 +8,6 @@ import { useSidebar } from "@/components/sidebar-provider"
 import { GlobalSearch } from "@/components/global-search"
 import { useTheme } from "@/components/theme-provider"
 import { useAuth } from "@/contexts/auth-context"
-import { getActiveAlertCount } from "@/lib/data/alerts"
 import { CurrencySwitcher } from "@/components/currency-switcher"
 import { LogoTyping } from "@/components/sidebar"
 
@@ -19,20 +18,9 @@ export function TopHeader() {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const { resolvedTheme, toggleTheme } = useTheme()
   const { user, loading, signOut } = useAuth()
-  const [alertCount, setAlertCount] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-
-  useEffect(() => {
-    if (!user) {
-      setAlertCount(0)
-      return
-    }
-    getActiveAlertCount(user.id)
-      .then(setAlertCount)
-      .catch(() => {})
-  }, [user])
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -122,18 +110,6 @@ export function TopHeader() {
             <Icon name="rocket_launch" />
           </button>
 
-          <Link
-            href="/alertas"
-            className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Mis alertas"
-          >
-            <Icon name="notifications" />
-            {alertCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-slate-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none">
-                {alertCount > 9 ? "9+" : alertCount}
-              </span>
-            )}
-          </Link>
 
           {/* User avatar + dropdown */}
           {!loading && (

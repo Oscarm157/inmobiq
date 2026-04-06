@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { AuthGateServer } from "@/components/auth-gate-server"
 import { ComparadorClient } from "./comparador-client"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { getComparisonListings } from "@/lib/data/comparison-listings"
@@ -78,14 +79,16 @@ export default async function ComparadorPage({
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Comparar" }]} />
-      <Suspense>
-        <ComparadorClient
-        allZones={allZones}
-        initialSlugs={selectedSlugs}
-        initialListings={listings}
-        filters={filters}
-      />
-      </Suspense>
+      <AuthGateServer message="Regístrate gratis para comparar zonas">
+        <Suspense>
+          <ComparadorClient
+            allZones={allZones}
+            initialSlugs={selectedSlugs}
+            initialListings={listings}
+            filters={filters}
+          />
+        </Suspense>
+      </AuthGateServer>
     </div>
   )
 }

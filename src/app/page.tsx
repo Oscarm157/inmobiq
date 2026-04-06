@@ -28,6 +28,7 @@ import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
 import { getAllDemographics, getMarketIntelligenceInsights, computeOpportunityScore } from "@/lib/data/demographics"
 import { MarketIntelligence } from "@/components/market-intelligence"
 import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
+import { AuthGateServer } from "@/components/auth-gate-server"
 import { MarketDensityScatter } from "@/components/market-density-scatter"
 import type { DensityBubble } from "@/components/market-density-scatter"
 import { PageHeader } from "@/components/page-header"
@@ -182,6 +183,9 @@ export default async function HomePage({
       {/* ─── 2b. Mini Map ─── */}
       <FadeInUp><MiniMapWrapper zones={zones} /></FadeInUp>
 
+      {/* ─── Auth Gate: anonymous users see up to here, rest is gated ─── */}
+      <AuthGateServer>
+
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
       <FadeInUp><div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div></FadeInUp>
 
@@ -334,6 +338,8 @@ export default async function HomePage({
           )
         })()}
       </section></FadeInUp>
+
+      </AuthGateServer>
 
       {/* ─── 10. CTA de cierre ─── */}
       <FadeInUp><section className="relative overflow-hidden rounded-2xl p-8 md:p-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-blue-950/80 dark:via-slate-900 dark:to-slate-950">

@@ -130,7 +130,6 @@ export default function PerfilPage() {
         <ul className="space-y-2">
           {[
             "Guardar presets de portafolio",
-            "Configurar alertas de precio",
             "Exportar reportes PDF/Excel",
           ].map((feat) => (
             <li key={feat} className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">

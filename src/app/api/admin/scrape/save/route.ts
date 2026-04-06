@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { rateLimit } from "@/lib/rate-limit";
 import { getSupabaseClient, getZones, upsertListings } from "@/scraper/db";
 import type { RawListing } from "@/scraper/types";
 import type { PropertyType, ListingType, SourcePortal } from "@/types/database";
@@ -14,6 +15,9 @@ export async function POST(request: NextRequest) {
   if (!check.isAdmin) {
     return NextResponse.json({ error: check.error }, { status: check.status });
   }
+
+  const limited = await rateLimit(`admin-scrape-save:${check.userId}`, 30, 60_000);
+  if (limited) return limited;
 
   let body: { jobId: string; listing: Record<string, unknown> };
   try {

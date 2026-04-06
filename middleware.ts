@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ["/perfil", "/exportar", "/alertas", "/admin"]
+const PROTECTED_ROUTES = ["/perfil", "/exportar", "/admin"]
 
 // Routes that require admin role (subset of protected)
 const ADMIN_ROUTES = ["/admin"]
@@ -49,18 +49,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Admin-only routes: check role
+  // Fetch profile for role + active checks (only if user is logged in and on protected/admin route)
   const isAdminRoute = ADMIN_ROUTES.some((route) =>
     pathname.startsWith(route)
   )
-  if (isAdminRoute && user) {
+  if (user && (isProtected || isAdminRoute)) {
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("role")
+      .select("role, is_active")
       .eq("id", user.id)
       .single()
 
-    if (profile?.role !== "admin") {
+    // Block deactivated users
+    if (profile && profile.is_active === false) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = "/login"
+      loginUrl.searchParams.set("error", "account_disabled")
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Admin-only routes: check role
+    if (isAdminRoute && profile?.role !== "admin") {
       const homeUrl = request.nextUrl.clone()
       homeUrl.pathname = "/"
       return NextResponse.redirect(homeUrl)

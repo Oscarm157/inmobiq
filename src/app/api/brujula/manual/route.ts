@@ -1,13 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin"
 import { rateLimit } from "@/lib/rate-limit"
+import { getUserPlan, PLAN_LIMITS } from "@/lib/user-plan"
 import type { PropertyType, ListingType } from "@/types/database"
 import { getZoneDataForValuation } from "@/lib/brujula/zone-comparison"
 import { computeValuation } from "@/lib/brujula/scoring"
 import { generateNarrative } from "@/lib/brujula/narrative"
 
 export const maxDuration = 60
+
+const MONTH_MS = 30 * 86_400_000
 
 interface ManualBody {
   property_type: PropertyType
@@ -24,27 +26,21 @@ interface ManualBody {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const planInfo = await getUserPlan()
 
-    // Rate limit
-    const limitKey = user
-      ? `brujula:${user.id}`
-      : `brujula-anon:${request.headers.get("x-forwarded-for") ?? "unknown"}`
-    const limitCount = user ? 10 : 1
-    const limited = await rateLimit(limitKey, limitCount, 86_400_000)
-    if (limited) return limited
-
-    // Anonymous free-use check
-    if (!user) {
-      const freeUsed = request.cookies.get("brujula_free_used")
-      if (freeUsed) {
-        return NextResponse.json(
-          { error: "Crea una cuenta gratuita para seguir usando Brújula" },
-          { status: 401 },
-        )
-      }
+    if (!planInfo) {
+      return NextResponse.json(
+        { error: "Regístrate gratis para usar Brújula" },
+        { status: 401 },
+      )
     }
+
+    const { plan, userId } = planInfo
+    const user = { id: userId }
+    const limit = PLAN_LIMITS[plan].brujula_per_month
+
+    const limited = await rateLimit(`brujula:${userId}`, limit, MONTH_MS)
+    if (limited) return limited
 
     const body = await request.json().catch(() => null) as ManualBody | null
     if (!body) {
@@ -151,22 +147,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Error guardando valuación" }, { status: 500 })
     }
 
-    // Set free-use cookie for anonymous users
-    const response = NextResponse.json({
+    return NextResponse.json({
       valuationId: valuation.id,
       result: valuationResult,
       narrative: narrativeResult.text,
     })
-
-    if (!user) {
-      response.cookies.set("brujula_free_used", "1", {
-        maxAge: 30 * 24 * 60 * 60,
-        httpOnly: true,
-        sameSite: "lax",
-      })
-    }
-
-    return response
   } catch (err) {
     console.error("[brujula/manual] Error:", err)
     return NextResponse.json(

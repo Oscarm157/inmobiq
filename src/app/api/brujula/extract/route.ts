@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { rateLimit } from "@/lib/rate-limit"
+import { getUserPlan, PLAN_LIMITS } from "@/lib/user-plan"
 import { extractFromScreenshots } from "@/lib/brujula/vision-extractor"
 
 export const maxDuration = 60
@@ -8,30 +9,29 @@ export const maxDuration = 60
 const MAX_FILES = 5
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
+const MONTH_MS = 30 * 86_400_000
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const planInfo = await getUserPlan()
 
-    // Rate limit: 10/day for logged in, 1/day for anonymous (by IP)
-    const limitKey = user
-      ? `brujula:${user.id}`
-      : `brujula-anon:${request.headers.get("x-forwarded-for") ?? "unknown"}`
-    const limitCount = user ? 10 : 1
-    const limited = await rateLimit(limitKey, limitCount, 86_400_000)
+    // Must be authenticated
+    if (!planInfo) {
+      return NextResponse.json(
+        { error: "Regístrate gratis para usar Brújula" },
+        { status: 401 },
+      )
+    }
+
+    const { plan, userId } = planInfo
+    const limit = PLAN_LIMITS[plan].brujula_per_month
+
+    // Monthly rate limit based on plan
+    const limited = await rateLimit(`brujula:${userId}`, limit, MONTH_MS)
     if (limited) return limited
 
-    // If anonymous and cookie already used, block
-    if (!user) {
-      const freeUsed = request.cookies.get("brujula_free_used")
-      if (freeUsed) {
-        return NextResponse.json(
-          { error: "Crea una cuenta gratuita para seguir usando Brújula" },
-          { status: 401 },
-        )
-      }
-    }
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Parse multipart form data
     const formData = await request.formData()
@@ -128,21 +128,10 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", valuationId)
 
-    // Set free-use cookie for anonymous users
-    const response = NextResponse.json({
+    return NextResponse.json({
       valuationId,
       extracted: result.data,
     })
-
-    if (!user) {
-      response.cookies.set("brujula_free_used", "1", {
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-        httpOnly: true,
-        sameSite: "lax",
-      })
-    }
-
-    return response
   } catch (err) {
     console.error("[brujula/extract] Error:", err)
     return NextResponse.json(

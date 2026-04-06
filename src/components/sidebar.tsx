@@ -96,21 +96,53 @@ export function Sidebar() {
 
       {/* Admin section */}
       {isAdmin && (
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
           <Link
-            href="/admin/scraper"
-            title={collapsed ? "Admin" : undefined}
+            href="/admin/analytics"
+            title={collapsed ? "Analytics" : undefined}
             className={`flex items-center gap-3 rounded-xl transition-all duration-200 ${
               collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
             } ${
-              isActive("/admin")
+              pathname === "/admin/analytics"
+                ? "bg-slate-700 text-white shadow-lg shadow-slate-500/20"
+                : "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+            }`}
+          >
+            <Icon name="monitoring" />
+            {!collapsed && (
+              <span className="text-sm font-semibold">Analytics</span>
+            )}
+          </Link>
+          <Link
+            href="/admin/usuarios"
+            title={collapsed ? "Usuarios" : undefined}
+            className={`flex items-center gap-3 rounded-xl transition-all duration-200 ${
+              collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
+            } ${
+              pathname === "/admin/usuarios"
+                ? "bg-slate-700 text-white shadow-lg shadow-slate-500/20"
+                : "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+            }`}
+          >
+            <Icon name="group" />
+            {!collapsed && (
+              <span className="text-sm font-semibold">Usuarios</span>
+            )}
+          </Link>
+          <Link
+            href="/admin/scraper"
+            title={collapsed ? "Scraper" : undefined}
+            className={`flex items-center gap-3 rounded-xl transition-all duration-200 ${
+              collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
+            } ${
+              pathname === "/admin/scraper"
                 ? "bg-slate-700 text-white shadow-lg shadow-slate-500/20"
                 : "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
             }`}
           >
             <Icon name="admin_panel_settings" />
             {!collapsed && (
-              <span className="text-sm font-semibold">Admin</span>
+              <span className="text-sm font-semibold">Scraper</span>
             )}
           </Link>
         </div>
@@ -130,6 +162,16 @@ export function Sidebar() {
             Descargar Reporte
           </button>
         )}
+        <Link
+          href="/precios"
+          title={collapsed ? "Planes" : undefined}
+          className={`flex items-center gap-3 py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-blue-400 transition-colors ${
+            collapsed ? "justify-center" : "px-4"
+          }`}
+        >
+          <Icon name="sell" />
+          {!collapsed && <span>Planes</span>}
+        </Link>
         <a
           href="https://narrativa360.vercel.app"
           target="_blank"

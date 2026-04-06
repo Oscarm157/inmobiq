@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { verifyAdmin } from "@/lib/admin-auth"
+import { rateLimit } from "@/lib/rate-limit"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import {
   isValidListing,
@@ -79,6 +80,9 @@ export async function GET() {
   if (!check.isAdmin) {
     return NextResponse.json({ error: check.error }, { status: check.status })
   }
+
+  const limited = await rateLimit(`admin-audit:${check.userId}`, 5, 60_000)
+  if (limited) return limited
 
   const supabase = await createSupabaseServerClient()
 

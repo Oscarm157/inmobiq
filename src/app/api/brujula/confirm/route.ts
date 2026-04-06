@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin"
+import { rateLimit } from "@/lib/rate-limit"
 import type { PropertyType, ListingType } from "@/types/database"
 import { getZoneDataForValuation } from "@/lib/brujula/zone-comparison"
 import { computeValuation } from "@/lib/brujula/scoring"
@@ -28,6 +29,10 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
+
+    const rateLimitKey = user ? `brujula-confirm:${user.id}` : `brujula-confirm:anon`
+    const limited = await rateLimit(rateLimitKey, 20, 3_600_000)
+    if (limited) return limited
 
     const body = await request.json().catch(() => null) as ConfirmBody | null
     if (!body) {

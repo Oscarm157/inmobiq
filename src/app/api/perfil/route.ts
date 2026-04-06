@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rateLimit } from "@/lib/rate-limit"
 import { PERFIL_KEYS, type PerfilType } from "@/lib/profiles"
 
 const VALID_PERFILES = new Set<string>(PERFIL_KEYS)
@@ -18,6 +19,9 @@ export async function PATCH(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
+
+    const limited = await rateLimit(`perfil:${user.id}`, 10, 3_600_000)
+    if (limited) return limited
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from("user_profiles") as any)

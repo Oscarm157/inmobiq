@@ -8,6 +8,7 @@ import { CurrencyProvider } from "@/contexts/currency-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { GuidedTourWrapper } from "@/components/guided-tour-wrapper"
 import { ToastProvider } from "@/components/toast"
+import { AnalyticsTracker } from "@/components/analytics-tracker"
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -97,6 +98,7 @@ export default function RootLayout({
                 <ToastProvider>
                   <SidebarShell>{children}</SidebarShell>
                   <GuidedTourWrapper />
+                  <AnalyticsTracker />
                 </ToastProvider>
               </SidebarProvider>
             </AuthProvider>

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Icon } from "@/components/icon"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { HeroHeader, HeroStat } from "@/components/hero-header"
@@ -17,8 +18,8 @@ const statusConfig: Record<ProjectStatus, { label: string; color: string; darkCo
   entregado: { label: "Entregado", color: "bg-badge-neutral-bg text-badge-neutral-text", darkColor: "", icon: "check_circle" },
 }
 
-export default function PipelinePage() {
-  const projects = getPipelineProjects()
+export default async function PipelinePage() {
+  const projects = await getPipelineProjects()
 
   const totalUnits = projects.reduce((s, p) => s + p.units_total, 0)
   const totalSold = projects.reduce((s, p) => s + p.units_sold, 0)
@@ -106,12 +107,13 @@ export default function PipelinePage() {
                   key={project.id}
                   className="group bg-surface rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-border/50"
                 >
-                  <div className="aspect-video w-full overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="aspect-video w-full overflow-hidden relative">
+                    <Image
                       src={project.img}
                       alt={project.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <div className="p-5">

@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
+import { AuthGateServer } from "@/components/auth-gate-server"
 import { HeroHeader } from "@/components/hero-header"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { MapPageClient } from "./map-page-client"
@@ -62,15 +63,17 @@ export default async function MapaPage({
         )
       })()}
 
-      <Suspense
-        fallback={
-          <div className="h-[600px] bg-surface-inset rounded-xl flex items-center justify-center">
-            <div className="text-muted-foreground text-sm font-medium">Cargando mapa…</div>
-          </div>
-        }
-      >
-        <MapPageClient zones={zones as ZoneMetrics[]} />
-      </Suspense>
+      <AuthGateServer message="Regístrate gratis para explorar el mapa interactivo">
+        <Suspense
+          fallback={
+            <div className="h-[600px] bg-surface-inset rounded-xl flex items-center justify-center">
+              <div className="text-muted-foreground text-sm font-medium">Cargando mapa…</div>
+            </div>
+          }
+        >
+          <MapPageClient zones={zones as ZoneMetrics[]} />
+        </Suspense>
+      </AuthGateServer>
     </div>
   )
 }
