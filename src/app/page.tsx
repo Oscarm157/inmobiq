@@ -291,8 +291,13 @@ export default async function HomePage({
 
         return (
           <FadeInUp><section className="space-y-6">
-            <AuthGatedSection>
-              <MarketIntelligence insights={insights} />
+            <AuthGatedSection title={
+              <SectionHeading
+                title="Inteligencia de Mercado"
+                subtitle="Datos censales cruzados con métricas inmobiliarias"
+              />
+            }>
+              <MarketIntelligence insights={insights} hideHeader />
             </AuthGatedSection>
             <AuthGatedSection title={
               <SectionHeading
