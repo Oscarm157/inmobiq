@@ -93,6 +93,10 @@ export function Sidebar() {
             </Link>
           )
         })}
+        {/* Narrativa Promo */}
+        <div className="pt-2 mt-1">
+          <NarrativaPromo />
+        </div>
       </nav>
 
       {/* Admin section */}
@@ -151,9 +155,6 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-1">
-        {/* Narrativa Promo */}
-        <NarrativaPromo />
-
         {/* Planes */}
         {collapsed ? (
           <Link
