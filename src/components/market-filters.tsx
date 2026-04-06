@@ -25,6 +25,18 @@ function preventScrollChange(e: React.WheelEvent<HTMLInputElement>) {
   (e.target as HTMLInputElement).blur()
 }
 
+/** Format a numeric string with commas: "4000000" → "4,000,000" */
+function formatWithCommas(value: string): string {
+  const num = value.replace(/[^0-9]/g, "")
+  if (!num) return ""
+  return Number(num).toLocaleString("en-US")
+}
+
+/** Strip commas to get raw number: "4,000,000" → "4000000" */
+function stripCommas(value: string): string {
+  return value.replace(/[^0-9]/g, "")
+}
+
 interface MarketFiltersProps {
   defaultOperacion?: string
   defaultCategoria?: string
@@ -163,7 +175,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
         <div className="absolute left-0 right-0 z-50 mt-3">
-          <div className="bg-white dark:bg-slate-900 border-2 border-blue-500/40 dark:border-blue-500/30 rounded-2xl shadow-xl shadow-blue-500/10 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border-[3px] border-blue-500/40 dark:border-blue-500/30 rounded-2xl shadow-xl shadow-blue-500/10 overflow-hidden">
 
             {/* ── Main content: left filters + right zones ── */}
             <div className="flex divide-x divide-slate-100 dark:divide-slate-800">
@@ -250,24 +262,22 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Precio ({currency})</p>
                     <div className="flex gap-2 items-center">
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
                         placeholder="Mín"
                         aria-label="Precio mínimo"
-                        value={state.precio_min}
-                        onChange={(e) => handleInputChange({ ...state, precio_min: e.target.value })}
-                        onWheel={preventScrollChange}
+                        value={formatWithCommas(state.precio_min)}
+                        onChange={(e) => handleInputChange({ ...state, precio_min: stripCommas(e.target.value) })}
                         className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="text-slate-300 dark:text-slate-600 text-sm font-light shrink-0">—</span>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
                         placeholder="Máx"
                         aria-label="Precio máximo"
-                        value={state.precio_max}
-                        onChange={(e) => handleInputChange({ ...state, precio_max: e.target.value })}
-                        onWheel={preventScrollChange}
+                        value={formatWithCommas(state.precio_max)}
+                        onChange={(e) => handleInputChange({ ...state, precio_max: stripCommas(e.target.value) })}
                         className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -323,7 +333,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
                           onChange={() => handleChange({ ...state, zonas: toggle(state.zonas, slug) })}
                           className="w-3.5 h-3.5 rounded accent-blue-600 shrink-0"
                         />
-                        <span className={`text-xs truncate transition-colors ${
+                        <span className={`text-sm truncate transition-colors ${
                           active
                             ? "text-slate-900 dark:text-slate-100 font-semibold"
                             : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"
@@ -337,38 +347,47 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
               </div>
             </div>
 
-            {/* Footer: active filter chips + clear */}
-            {hasActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria }) && (
-              <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                <div className="flex flex-wrap gap-1.5">
-                  {state.categoria && state.categoria !== defaultCategoria && (
-                    <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: defaultCategoria as MarketFilterState["categoria"] })} />
-                  )}
-                  {state.tipos.map((t) => (
-                    <FilterChip key={t} label={PROPERTY_TYPES.find((p) => p.value === t)?.label ?? t} onRemove={() => handleChange({ ...state, tipos: state.tipos.filter((x) => x !== t) })} />
-                  ))}
-                  {state.zonas.map((z) => (
-                    <FilterChip key={z} label={ZONES.find((zn) => zn.slug === z)?.name ?? z} onRemove={() => handleChange({ ...state, zonas: state.zonas.filter((x) => x !== z) })} />
-                  ))}
-                  {(state.precio_min || state.precio_max) && (
-                    <FilterChip label={`Precio: ${state.precio_min || "0"} — ${state.precio_max || "∞"}`} onRemove={() => handleChange({ ...state, precio_min: "", precio_max: "" })} />
-                  )}
-                  {(state.area_min || state.area_max) && (
-                    <FilterChip label={`Área: ${state.area_min || "0"} — ${state.area_max || "∞"} m²`} onRemove={() => handleChange({ ...state, area_min: "", area_max: "" })} />
-                  )}
-                  {state.recamaras.map((r) => (
-                    <FilterChip key={r} label={`${r === 4 ? "4+" : r} rec`} onRemove={() => handleChange({ ...state, recamaras: state.recamaras.filter((x) => x !== r) })} />
-                  ))}
-                </div>
+            {/* Footer: active filter chips + clear + apply */}
+            <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+              <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                {state.categoria && state.categoria !== defaultCategoria && (
+                  <FilterChip label={state.categoria === "residencial" ? "Residencial" : state.categoria === "comercial" ? "Comercial" : "Terreno"} onRemove={() => handleChange({ ...state, categoria: defaultCategoria as MarketFilterState["categoria"] })} />
+                )}
+                {state.tipos.map((t) => (
+                  <FilterChip key={t} label={PROPERTY_TYPES.find((p) => p.value === t)?.label ?? t} onRemove={() => handleChange({ ...state, tipos: state.tipos.filter((x) => x !== t) })} />
+                ))}
+                {state.zonas.map((z) => (
+                  <FilterChip key={z} label={ZONES.find((zn) => zn.slug === z)?.name ?? z} onRemove={() => handleChange({ ...state, zonas: state.zonas.filter((x) => x !== z) })} />
+                ))}
+                {(state.precio_min || state.precio_max) && (
+                  <FilterChip label={`Precio: ${formatWithCommas(state.precio_min) || "0"} — ${formatWithCommas(state.precio_max) || "∞"}`} onRemove={() => handleChange({ ...state, precio_min: "", precio_max: "" })} />
+                )}
+                {(state.area_min || state.area_max) && (
+                  <FilterChip label={`Área: ${state.area_min || "0"} — ${state.area_max || "∞"} m²`} onRemove={() => handleChange({ ...state, area_min: "", area_max: "" })} />
+                )}
+                {state.recamaras.map((r) => (
+                  <FilterChip key={r} label={`${r === 4 ? "4+" : r} rec`} onRemove={() => handleChange({ ...state, recamaras: state.recamaras.filter((x) => x !== r) })} />
+                ))}
+              </div>
+              <div className="flex items-center gap-3 shrink-0 ml-3">
+                {hasActiveFilters(state, { listing_type: defaultOperacion, categoria: defaultCategoria }) && (
+                  <button
+                    onClick={handleClear}
+                    className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1"
+                  >
+                    <Icon name="close" className="text-xs" />
+                    Limpiar
+                  </button>
+                )}
                 <button
-                  onClick={handleClear}
-                  className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1 shrink-0 ml-3"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors shadow-sm"
                 >
-                  <Icon name="close" className="text-xs" />
-                  Limpiar todo
+                  <Icon name="check" className="text-sm" />
+                  Aplicar
                 </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
