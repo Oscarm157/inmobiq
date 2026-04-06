@@ -89,13 +89,9 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Material Symbols: subset with only used icons, split in 2 to stay under URL limit */}
+        {/* Material Symbols: full font (subset approach hit URL limits, reverting for now) */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&icon_names=account_balance,account_balance_wallet,account_circle,add,add_photo_alternate,admin_panel_settings,analytics,apartment,arrow_back,arrow_downward,arrow_drop_down,arrow_drop_up,arrow_forward,arrow_forward_ios,arrow_upward,attach_money,auto_awesome,balance,bar_chart_off,bathtub,bed,bolt,bug_report,business,business_center,calendar_month,calendar_today,cancel,chair,check,check_circle,check_circle_outline,chevron_left,chevron_right,close,compare,compare_arrows,construction,currency_exchange,dark_mode,dashboard,delete,devices,diamond,directions_car,domain_disabled,donut_small,edit,edit_note,email,error,error_outline,expand_less,expand_more,explore,explore_off,family_restroom,filter_alt,filter_list,flag,grid_view,group,groups,health_and_safety,help_outline,history,home,home_work,hourglass_empty,hourglass_top&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&icon_names=info,insights,inventory_2,ios_share,key,landscape,light_mode,lightbulb,location_city,location_off,location_on,lock,lock_open,login,logout,mail,map,menu,menu_book,monetization_on,monitoring,more_vert,notifications_off,open_in_new,payments,percent,person,person_add,person_off,phone,photo_camera,picture_as_pdf,pin_drop,price_change,progress_activity,psychology,query_stats,receipt_long,rocket_launch,satellite_alt,save,savings,scatter_plot,schedule,school,search,search_off,sell,share,shield,show_chart,shower,sort_by_alpha,speed,square_foot,star,store,storefront,straighten,table_chart,thumb_up,travel_explore,trending_down,trending_flat,trending_up,tune,update,verified,verified_user,visibility,warning,water_drop,wifi,workspace_premium&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
         {/* Bitcount + Playfair: loaded async via script (not render-blocking) — only used in sidebar */}
