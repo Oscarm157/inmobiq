@@ -479,19 +479,12 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
               accent={heroAccent}
               badges={badges}
               meta={<UpdatedAt date={lastUpdated} />}
-              actions={<ExportButton zoneSlug={slug} />}
             >
               <HeroStat
                 icon="payments"
                 label="Precio / m²"
                 value={formatCurrency(zone.avg_price_per_m2)}
                 color="blue"
-              />
-              <HeroStat
-                icon={zone.price_trend_pct >= 0 ? "trending_up" : "trending_down"}
-                label="Tendencia semanal"
-                value={`${zone.price_trend_pct > 0 ? "+" : ""}${zone.price_trend_pct.toFixed(1)}%`}
-                color={zone.price_trend_pct >= 0 ? "emerald" : "red"}
               />
               <HeroStat
                 icon="compare_arrows"
