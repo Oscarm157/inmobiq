@@ -87,7 +87,7 @@ export function NarrativaPromo() {
         {/* Headline */}
         <p
           className="text-[#1A1A1A] text-[15px] font-bold leading-tight"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           De visitante a<br />
           <span className="text-[#E84D1A]">cliente cerrado</span>
