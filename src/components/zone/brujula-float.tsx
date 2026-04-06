@@ -32,10 +32,10 @@ export function BrujulaFloat({ slug, zoneName }: BrujulaFloatProps) {
         {/* Minimize button */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMinimized(true) }}
-          className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/[0.1] hover:bg-white/[0.2] flex items-center justify-center transition-colors z-10"
+          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/[0.15] hover:bg-white/[0.3] flex items-center justify-center transition-colors z-10"
           title="Minimizar"
         >
-          <Icon name="close" className="text-white/60 text-xs" />
+          <Icon name="close" className="text-white text-sm" />
         </button>
 
         {/* Orbs */}
