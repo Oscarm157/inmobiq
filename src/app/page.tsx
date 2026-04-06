@@ -291,7 +291,7 @@ export default async function HomePage({
 
         return (
           <FadeInUp><section className="space-y-6">
-            <AuthGatedSection title={
+            <AuthGatedSection overlay title={
               <SectionHeading
                 title="Inteligencia de Mercado"
                 subtitle="Datos censales cruzados con métricas inmobiliarias"
