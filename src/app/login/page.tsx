@@ -16,6 +16,8 @@ function LoginForm() {
   const [mode, setMode] = useState<"login" | "register" | "reset">("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [phone, setPhone] = useState("")
+  const [referralSource, setReferralSource] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(urlError)
   const [success, setSuccess] = useState<string | null>(null)
@@ -53,7 +55,10 @@ function LoginForm() {
         router.refresh()
       }
     } else {
-      const { error } = await signUpWithEmail(email, password)
+      const { error } = await signUpWithEmail(email, password, {
+        phone: phone || undefined,
+        referral_source: referralSource || undefined,
+      })
       if (error) {
         setError(error)
       } else {
@@ -212,6 +217,38 @@ function LoginForm() {
                       className="w-full bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400/50 focus:border-cyan-400/30 focus:bg-white/[0.08] transition-all duration-300"
                     />
                   </div>
+                )}
+                {mode === "register" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-200/80 mb-1">
+                        Teléfono <span className="text-white/30 font-normal">(opcional)</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+52 664 123 4567"
+                        className="w-full bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400/50 focus:border-cyan-400/30 focus:bg-white/[0.08] transition-all duration-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-200/80 mb-1">
+                        ¿Cómo nos encontraste?
+                      </label>
+                      <select
+                        value={referralSource}
+                        onChange={(e) => setReferralSource(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400/50 focus:border-cyan-400/30 focus:bg-white/[0.08] transition-all duration-300 [&>option]:bg-slate-900 [&>option]:text-white"
+                      >
+                        <option value="">Selecciona una opción</option>
+                        <option value="google">Google</option>
+                        <option value="redes_sociales">Redes sociales</option>
+                        <option value="recomendacion">Recomendación</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </div>
+                  </>
                 )}
 
                 {error && (

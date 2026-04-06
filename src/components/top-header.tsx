@@ -8,6 +8,7 @@ import { useSidebar } from "@/components/sidebar-provider"
 import { GlobalSearch } from "@/components/global-search"
 import { useTheme } from "@/components/theme-provider"
 import { useAuth } from "@/contexts/auth-context"
+import { openAuthModal } from "@/components/auth-modal"
 import { CurrencySwitcher } from "@/components/currency-switcher"
 import { LogoTyping } from "@/components/sidebar"
 
@@ -127,14 +128,14 @@ export function TopHeader() {
                   )}
                 </button>
               ) : (
-                <Link
-                  href="/login"
+                <button
+                  onClick={() => openAuthModal("login")}
                   className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-full text-xs font-bold hover:bg-slate-700 transition-colors"
                 >
                   <Icon name="login" className="text-sm" />
                   <span className="hidden sm:inline">Iniciar sesión</span>
                   <span className="sm:hidden">Entrar</span>
-                </Link>
+                </button>
               )}
 
               {/* Dropdown menu */}

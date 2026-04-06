@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
+import { COOKIE_OPERACION, COOKIE_CATEGORIA } from "@/lib/preference-cookies"
+import { PERFIL_CONFIGS, type PerfilType } from "@/lib/profiles"
 
 // Routes that require authentication
 const PROTECTED_ROUTES = ["/perfil", "/exportar", "/admin"]
@@ -35,6 +37,43 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // Seed session filter defaults for authenticated users (runs once per session)
+  const hasOpCookie = request.cookies.has(COOKIE_OPERACION)
+  const hasCatCookie = request.cookies.has(COOKIE_CATEGORIA)
+
+  if (user && (!hasOpCookie || !hasCatCookie)) {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("perfil, default_operacion, default_categoria")
+      .eq("id", user.id)
+      .single()
+
+    if (profile) {
+      const perfilConfig = profile.perfil
+        ? PERFIL_CONFIGS[profile.perfil as PerfilType] ?? null
+        : null
+
+      if (!hasOpCookie) {
+        const defaultOp = profile.default_operacion
+          ?? perfilConfig?.defaultOperacion
+          ?? "venta"
+        supabaseResponse.cookies.set(COOKIE_OPERACION, defaultOp, {
+          path: "/",
+          sameSite: "lax",
+        })
+      }
+      if (!hasCatCookie) {
+        const defaultCat = profile.default_categoria
+          ?? perfilConfig?.defaultCategoria
+          ?? "residencial"
+        supabaseResponse.cookies.set(COOKIE_CATEGORIA, defaultCat, {
+          path: "/",
+          sameSite: "lax",
+        })
+      }
+    }
+  }
 
   const { pathname } = request.nextUrl
 

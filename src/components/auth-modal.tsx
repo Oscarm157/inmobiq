@@ -18,6 +18,8 @@ export function AuthModal() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [referralSource, setReferralSource] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -31,6 +33,8 @@ export function AuthModal() {
       setSuccess(null)
       setEmail("")
       setPassword("")
+      setPhone("")
+      setReferralSource("")
     }
     window.addEventListener("inmobiq:auth-modal", handler)
     return () => window.removeEventListener("inmobiq:auth-modal", handler)
@@ -77,7 +81,10 @@ export function AuthModal() {
       if (error) { setError(error); setLoading(false) }
       // success handled by useEffect watching `user`
     } else {
-      const { error } = await signUpWithEmail(email, password)
+      const { error } = await signUpWithEmail(email, password, {
+        phone: phone || undefined,
+        referral_source: referralSource || undefined,
+      })
       if (error) setError(error)
       else setSuccess("Revisa tu correo para confirmar tu cuenta.")
       setLoading(false)
@@ -160,6 +167,28 @@ export function AuthModal() {
                 placeholder="Contraseña (mín. 6 caracteres)"
                 className="w-full bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all"
               />
+            )}
+            {mode === "register" && (
+              <>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Teléfono (opcional)"
+                  className="w-full bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all"
+                />
+                <select
+                  value={referralSource}
+                  onChange={(e) => setReferralSource(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all [&>option]:bg-slate-900 [&>option]:text-white"
+                >
+                  <option value="" className="text-white/30">¿Cómo nos encontraste?</option>
+                  <option value="google">Google</option>
+                  <option value="redes_sociales">Redes sociales</option>
+                  <option value="recomendacion">Recomendación</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </>
             )}
 
             {error && (

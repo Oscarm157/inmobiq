@@ -17,7 +17,7 @@ interface AuthContextValue {
   isAdmin: boolean
   signInWithGoogle: (redirectTo?: string) => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
-  signUpWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
+  signUpWithEmail: (email: string, password: string, metadata?: { phone?: string; referral_source?: string }) => Promise<{ error: string | null }>
   resetPassword: (email: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
@@ -99,13 +99,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
-  const signUpWithEmail = async (email: string, password: string) => {
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    metadata?: { phone?: string; referral_source?: string }
+  ) => {
     if (!supabase) return { error: "Supabase no configurado" }
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          ...(metadata?.phone ? { phone: metadata.phone } : {}),
+          ...(metadata?.referral_source ? { referral_source: metadata.referral_source } : {}),
+        },
       },
     })
     return { error: error?.message ?? null }
