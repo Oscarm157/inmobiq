@@ -79,16 +79,14 @@ export default async function ComparadorPage({
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Comparar" }]} />
-      <AuthGatedSection>
-        <Suspense>
-          <ComparadorClient
-            allZones={allZones}
-            initialSlugs={selectedSlugs}
-            initialListings={listings}
-            filters={filters}
-          />
-        </Suspense>
-      </AuthGatedSection>
+      <Suspense>
+        <ComparadorClient
+          allZones={allZones}
+          initialSlugs={selectedSlugs}
+          initialListings={listings}
+          filters={filters}
+        />
+      </Suspense>
     </div>
   )
 }

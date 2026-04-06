@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { HeroHeader } from "@/components/hero-header"
+import { AuthGateInline } from "@/components/auth-gate"
 import { getZoneComparisonData } from "@/lib/data/comparator"
 import { useCurrency } from "@/contexts/currency-context"
 import { ZoneSelector } from "@/components/comparar/zone-selector"
@@ -121,7 +122,8 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
         }
       />
 
-      {/* Zone selector */}
+      {/* Zone selector + content — gated for anonymous */}
+      <AuthGateInline>
       <ZoneSelector
         allZones={allZones}
         selectedSlugs={selectedSlugs}
@@ -247,6 +249,7 @@ export function ComparadorClient({ allZones, initialSlugs, initialListings, filt
       {selectedSlugs.length === 0 && (
         <EmptyState allZones={allZones} onSelectPreset={selectPreset} />
       )}
+      </AuthGateInline>
     </div>
   )
 }

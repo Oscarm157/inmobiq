@@ -523,7 +523,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       )}
 
       {/* Auth Gate: anonymous sees hero + KPIs, rest gated (titles visible) */}
-      <AuthGatedSection>
+      <AuthGatedSection blur={5}>
 
       {/* [C] Tabbed Content */}
       <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-surface-inset animate-pulse" />}>

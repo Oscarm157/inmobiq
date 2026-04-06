@@ -8,9 +8,11 @@ import type { ReactNode } from "react"
 export async function AuthGatedSection({
   title,
   children,
+  blur = 3,
 }: {
   title?: ReactNode
   children: ReactNode
+  blur?: number
 }) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +29,7 @@ export async function AuthGatedSection({
   return (
     <div data-auth-gated>
       {title}
-      <div className="blur-[3px] select-none pointer-events-none">
+      <div className="select-none pointer-events-none" style={{ filter: `blur(${blur}px)` }}>
         {children}
       </div>
     </div>
