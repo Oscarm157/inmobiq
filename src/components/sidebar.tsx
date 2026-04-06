@@ -94,7 +94,7 @@ export function Sidebar() {
           )
         })}
         {/* Narrativa Promo */}
-        <div className="pt-2 mt-1">
+        <div className="pt-4 mt-2">
           <NarrativaPromo />
         </div>
       </nav>

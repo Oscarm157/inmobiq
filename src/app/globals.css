@@ -272,6 +272,17 @@
   box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
 }
 
+/* Narrativa promo pulse animation */
+@keyframes narrativa-attention {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(232, 77, 26, 0); }
+  25% { transform: scale(1.02); box-shadow: 0 4px 20px rgba(232, 77, 26, 0.25); }
+  50% { transform: scale(1); box-shadow: 0 2px 12px rgba(232, 77, 26, 0.15); }
+  75% { transform: scale(1.01); box-shadow: 0 4px 16px rgba(232, 77, 26, 0.2); }
+}
+.narrativa-pulse {
+  animation: narrativa-attention 1.2s ease-in-out;
+}
+
 /* Mapbox popup styling */
 .inmobiq-popup .mapboxgl-popup-content {
   border-radius: 12px;
