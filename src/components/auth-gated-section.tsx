@@ -29,7 +29,7 @@ export async function AuthGatedSection({
   return (
     <div data-auth-gated>
       {title}
-      <div className="select-none pointer-events-none" style={{ filter: `blur(${blur}px)` }}>
+      <div className="select-none pointer-events-none overflow-visible" style={{ filter: `blur(${blur}px)` }}>
         {children}
       </div>
     </div>

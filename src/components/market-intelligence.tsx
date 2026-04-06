@@ -11,7 +11,7 @@ export function MarketIntelligence({ insights, hideHeader }: MarketIntelligenceP
   if (insights.length === 0) return null
 
   return (
-    <section className={`relative py-8 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/60 to-teal-50/40 dark:from-slate-900 dark:via-blue-950/30 dark:to-teal-950/20 border border-blue-100/60 dark:border-blue-900/30 ${hideHeader ? "px-4 md:px-6" : "-mx-4 md:-mx-6 px-4 md:px-6"}`}>
+    <section className="relative -mx-4 md:-mx-6 px-4 md:px-6 py-8 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/60 to-teal-50/40 dark:from-slate-900 dark:via-blue-950/30 dark:to-teal-950/20 border border-blue-100/60 dark:border-blue-900/30">
       {!hideHeader && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">
