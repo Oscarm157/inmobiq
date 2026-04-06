@@ -172,11 +172,13 @@ export default async function HomePage({
           pricePerM2={city.avg_price_per_m2}
           trendPct={city.price_trend_pct}
         />
-        <KPIInventario
-          medianPrice={analytics.medianPrice}
-          avgPrice={analytics.avgPrice}
-          listingType={filters.listing_type}
-        />
+        <AuthGatedSection>
+          <KPIInventario
+            medianPrice={analytics.medianPrice}
+            avgPrice={analytics.avgPrice}
+            listingType={filters.listing_type}
+          />
+        </AuthGatedSection>
         <KPIComposicion
           composition={analytics.compositionByType}
           totalListings={analytics.totalListings}
