@@ -205,7 +205,7 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
+              <div className={`flex-1 overflow-y-auto px-2 pb-2 space-y-0.5 ${isAnon && sortBy === "precio" ? "blur-[5px] select-none pointer-events-none" : ""}`}>
                 {filtered.map((zone, i) => (
                   <button
                     key={zone.zone_id}
@@ -218,7 +218,7 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
                   >
                     <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 w-4 text-right flex-shrink-0">{i + 1}</span>
                     <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex-1">{zone.zone_name}</span>
-                    <span className={`text-[11px] font-bold text-blue-700 dark:text-blue-400 ${isAnon ? "blur-[4px] select-none" : ""}`}>{formatPrice(zone.avg_price_per_m2)}</span>
+                    <span className={`text-[11px] font-bold text-blue-700 dark:text-blue-400 ${isAnon && sortBy !== "precio" ? "blur-[4px] select-none" : ""}`}>{formatPrice(zone.avg_price_per_m2)}</span>
                   </button>
                 ))}
               </div>
