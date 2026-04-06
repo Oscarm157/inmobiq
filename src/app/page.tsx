@@ -28,7 +28,7 @@ import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
 import { getAllDemographics, getMarketIntelligenceInsights, computeOpportunityScore } from "@/lib/data/demographics"
 import { MarketIntelligence } from "@/components/market-intelligence"
 import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
-import { AuthGateServer } from "@/components/auth-gate-server"
+import { AuthGatedSection } from "@/components/auth-gated-section"
 import { MarketDensityScatter } from "@/components/market-density-scatter"
 import type { DensityBubble } from "@/components/market-density-scatter"
 import { PageHeader } from "@/components/page-header"
@@ -183,55 +183,67 @@ export default async function HomePage({
       {/* ─── 2b. Mini Map ─── */}
       <FadeInUp><MiniMapWrapper zones={zones} /></FadeInUp>
 
-      {/* ─── Auth Gate: anonymous users see up to here, rest is gated ─── */}
-      <AuthGateServer>
+      {/* ─── Auth-gated sections: titles visible, content blurred for anon ─── */}
 
       {/* ─── 3. PRICE TABLE — "Precio del Oro" ─── */}
-      <FadeInUp><div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div></FadeInUp>
+      <FadeInUp><AuthGatedSection>
+        <div id="demo-table"><PriceTable ventaZones={ventaZonesForTable} rentaZones={rentaZonesForTable} riskData={riskData} /></div>
+      </AuthGatedSection></FadeInUp>
 
       {/* ─── 4. Resumen Ejecutivo ─── */}
-      <FadeInUp><NarrativeInsight
-        title="Resumen del mercado"
-        body={topZone && mostActive
-          ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${describeActivity(mostActive.total_listings)}. El mercado de Tijuana monitorea ${publicZoneCount} zonas clave.`
-          : `No se encontraron resultados con los filtros seleccionados. Intenta ajustar los filtros para ver datos del mercado.`
-        }
-        highlight={`${publicZoneCount} zonas monitoreadas · ${getCityActivityLabel(city.total_listings)}`}
-      /></FadeInUp>
+      <FadeInUp><AuthGatedSection>
+        <NarrativeInsight
+          title="Resumen del mercado"
+          body={topZone && mostActive
+            ? `${topZone.zone_name} lidera en precio con ${formatCurrency(topZone.avg_price_per_m2)}/m², mientras que ${mostActive.zone_name} concentra la mayor actividad con ${describeActivity(mostActive.total_listings)}. El mercado de Tijuana monitorea ${publicZoneCount} zonas clave.`
+            : `No se encontraron resultados con los filtros seleccionados. Intenta ajustar los filtros para ver datos del mercado.`
+          }
+          highlight={`${publicZoneCount} zonas monitoreadas · ${getCityActivityLabel(city.total_listings)}`}
+        />
+      </AuthGatedSection></FadeInUp>
 
       {/* ─── 5. Análisis de Precios ─── */}
       <FadeInUp><section id="demo-charts">
-        <SectionHeading
-          title="Análisis de Precios"
-          subtitle="Distribución y comparación de precios por zona"
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
-          <ZonesBarChart data={analytics.pricePerM2ByZone} />
-          <PriceRangeChart data={analytics.priceDistribution} />
-        </div>
-        {hasTrendHistory && <div className="mt-6"><PriceChart data={priceTrend} /></div>}
+        <AuthGatedSection title={
+          <SectionHeading
+            title="Análisis de Precios"
+            subtitle="Distribución y comparación de precios por zona"
+          />
+        }>
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
+            <ZonesBarChart data={analytics.pricePerM2ByZone} />
+            <PriceRangeChart data={analytics.priceDistribution} />
+          </div>
+          {hasTrendHistory && <div className="mt-6"><PriceChart data={priceTrend} /></div>}
+        </AuthGatedSection>
       </section></FadeInUp>
 
       {/* ─── 6. Composición del Mercado ─── */}
       <FadeInUp><section>
-        <SectionHeading
-          title="Composición del Mercado"
-          subtitle="Tipos de propiedad, inventario y concentración de oferta"
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
-          <OfferConcentrationChart data={analytics.offerConcentration} />
-        </div>
-        <div className="mt-6"><InventoryTypeChart zones={inventoryZones} /></div>
+        <AuthGatedSection title={
+          <SectionHeading
+            title="Composición del Mercado"
+            subtitle="Tipos de propiedad, inventario y concentración de oferta"
+          />
+        }>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TypeCompositionChart data={analytics.compositionByType} totalListings={analytics.totalListings} />
+            <OfferConcentrationChart data={analytics.offerConcentration} />
+          </div>
+          <div className="mt-6"><InventoryTypeChart zones={inventoryZones} /></div>
+        </AuthGatedSection>
       </section></FadeInUp>
 
       {/* ─── 7. Zonas Destacadas ─── */}
       <FadeInUp><section id="demo-destacadas">
-        <SectionHeading
-          title="Zonas Destacadas"
-          subtitle="Las zonas más caras y más accesibles de Tijuana"
-        />
-        <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
+        <AuthGatedSection title={
+          <SectionHeading
+            title="Zonas Destacadas"
+            subtitle="Las zonas más caras y más accesibles de Tijuana"
+          />
+        }>
+          <TopZonesHighlight topByPrice={topByPrice} topByAffordable={topByAffordable} />
+        </AuthGatedSection>
       </section></FadeInUp>
 
       {/* ─── 8. Inteligencia de Mercado (Censo × Inmobiliario) ─── */}
@@ -279,31 +291,36 @@ export default async function HomePage({
 
         return (
           <FadeInUp><section className="space-y-6">
-            <SectionHeading
-              title="Inteligencia de Mercado"
-              subtitle="Datos censales cruzados con métricas inmobiliarias"
-            />
-            <MarketIntelligence insights={insights} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <OpportunityIndexChart data={opportunityData} />
-              <MarketDensityScatter data={densityData} />
-            </div>
+            <AuthGatedSection title={
+              <SectionHeading
+                title="Inteligencia de Mercado"
+                subtitle="Datos censales cruzados con métricas inmobiliarias"
+              />
+            }>
+              <MarketIntelligence insights={insights} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <OpportunityIndexChart data={opportunityData} />
+                <MarketDensityScatter data={densityData} />
+              </div>
+            </AuthGatedSection>
           </section></FadeInUp>
         )
       })()}
 
       {/* ─── 9. Zones Grid ─── */}
       <FadeInUp><section id="demo-zonas">
-        <SectionHeading
-          title="Zonas Monitoreadas"
-          subtitle={`${publicZoneCount} zonas · ${getCityActivityLabel(city.total_listings)}`}
-          size="lg"
-          action={
-            <a href="/zonas" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
-              Ver todas <Icon name="arrow_forward" className="text-sm" />
-            </a>
-          }
-        />
+        <AuthGatedSection title={
+          <SectionHeading
+            title="Zonas Monitoreadas"
+            subtitle={`${publicZoneCount} zonas · ${getCityActivityLabel(city.total_listings)}`}
+            size="lg"
+            action={
+              <a href="/zonas" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                Ver todas <Icon name="arrow_forward" className="text-sm" />
+              </a>
+            }
+          />
+        }>
         {(() => {
           const sorted = [...zones].filter((z) => z.zone_slug !== "otros").sort((a, b) => b.total_listings - a.total_listings)
           const maxListings = sorted[0]?.total_listings ?? 1
@@ -337,9 +354,8 @@ export default async function HomePage({
             </>
           )
         })()}
+        </AuthGatedSection>
       </section></FadeInUp>
-
-      </AuthGateServer>
 
       {/* ─── 10. CTA de cierre ─── */}
       <FadeInUp><section className="relative overflow-hidden rounded-2xl p-8 md:p-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-blue-950/80 dark:via-slate-900 dark:to-slate-950">

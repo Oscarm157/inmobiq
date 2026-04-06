@@ -2,22 +2,31 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ReactNode } from "react"
 
 /**
- * Server-side auth check: renders children directly if authenticated,
- * or wraps in a blur div for anonymous users.
- * The client-side AuthBanner handles the CTA.
+ * Server-side section gate: title is always visible, content is blurred for anonymous users.
+ * Use this to wrap individual sections where the heading should remain readable.
  */
-export async function AuthGateServer({
+export async function AuthGatedSection({
+  title,
   children,
 }: {
+  title?: ReactNode
   children: ReactNode
 }) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (user) return <>{children}</>
+  if (user) {
+    return (
+      <>
+        {title}
+        {children}
+      </>
+    )
+  }
 
   return (
-    <div className="relative" data-auth-gated>
+    <div data-auth-gated>
+      {title}
       <div className="blur-[3px] select-none pointer-events-none">
         {children}
       </div>

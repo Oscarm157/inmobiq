@@ -15,7 +15,7 @@ export function AuthGateInline({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative" data-auth-gated>
-      <div className="blur-[5px] select-none pointer-events-none">
+      <div className="blur-[3px] select-none pointer-events-none">
         {children}
       </div>
     </div>
@@ -49,7 +49,7 @@ export function PlanGate({ children, requiredPlan = "pro", userPlan, feature }: 
 
   return (
     <div className="relative" data-auth-gated>
-      <div className="blur-[5px] select-none pointer-events-none opacity-50">
+      <div className="blur-[3px] select-none pointer-events-none opacity-50">
         {children}
       </div>
     </div>

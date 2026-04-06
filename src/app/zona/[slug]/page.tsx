@@ -42,7 +42,7 @@ import { getZoneMetrics, getZoneBySlug, getCityMetrics, getLastSnapshotDate } fr
 import { UpdatedAt } from "@/components/updated-at"
 import { Breadcrumb } from "@/components/breadcrumb"
 import { HeroHeader, HeroStat } from "@/components/hero-header"
-import { AuthGateServer } from "@/components/auth-gate-server"
+import { AuthGatedSection } from "@/components/auth-gated-section"
 import type { HeroHeaderBadge } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 import { getListings, getZoneListingsAnalytics } from "@/lib/data/listings"
@@ -522,8 +522,8 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         </div>
       )}
 
-      {/* Auth Gate: anonymous sees hero + KPIs, rest gated */}
-      <AuthGateServer>
+      {/* Auth Gate: anonymous sees hero + KPIs, rest gated (titles visible) */}
+      <AuthGatedSection>
 
       {/* [C] Tabbed Content */}
       <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-surface-inset animate-pulse" />}>
@@ -709,7 +709,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         />
       </Suspense></FadeInUp>
 
-      </AuthGateServer>
+      </AuthGatedSection>
     </StaggerContainer>
   )
 }

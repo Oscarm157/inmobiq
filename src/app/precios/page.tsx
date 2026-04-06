@@ -163,7 +163,7 @@ export default function PreciosPage() {
           <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4">Preguntas Frecuentes</h3>
           <div className="space-y-4">
             {[
-              { q: "De dónde vienen los datos?", a: "Rastreamos propiedades activas en inmuebles24, lamudi, vivanuncios y mercadolibre. Los datos se actualizan semanalmente y se normalizan con validaciones de precio por zona y tipo." },
+              { q: "De dónde vienen los datos?", a: "Agregamos datos de múltiples fuentes del mercado inmobiliario de Tijuana, incluyendo redes sociales. Los datos se actualizan semanalmente y se normalizan con validaciones de precio por zona y tipo de propiedad." },
               { q: "Puedo cancelar en cualquier momento?", a: "Sí. Sin contratos ni permanencia mínima. Cancela desde tu perfil y mantén acceso hasta el fin del periodo pagado." },
               { q: "Qué zonas cubren?", a: "30 zonas canónicas de Tijuana definidas por AGEBs de INEGI. Desde Playas de Tijuana hasta La Presa Este, cubriendo toda el área metropolitana." },
               { q: "Cómo funciona Brújula?", a: "Sube screenshots de una propiedad o ingresa los datos manualmente. Brújula compara el precio contra el mercado de la zona y genera un dictamen con IA." },

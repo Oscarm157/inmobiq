@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
-import { AuthGateServer } from "@/components/auth-gate-server"
+import { AuthGatedSection } from "@/components/auth-gated-section"
 import { HeroHeader } from "@/components/hero-header"
 import { getZoneMetrics } from "@/lib/data/zones"
 import { MapPageClient } from "./map-page-client"
@@ -63,7 +63,7 @@ export default async function MapaPage({
         )
       })()}
 
-      <AuthGateServer>
+      <AuthGatedSection>
         <Suspense
           fallback={
             <div className="h-[600px] bg-surface-inset rounded-xl flex items-center justify-center">
@@ -73,7 +73,7 @@ export default async function MapaPage({
         >
           <MapPageClient zones={zones as ZoneMetrics[]} />
         </Suspense>
-      </AuthGateServer>
+      </AuthGatedSection>
     </div>
   )
 }

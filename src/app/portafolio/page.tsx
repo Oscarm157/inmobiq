@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
-import { AuthGateServer } from "@/components/auth-gate-server"
+import { AuthGatedSection } from "@/components/auth-gated-section"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { getPortfolioPresets } from "@/lib/data/portfolio"
 import { getZoneMetrics } from "@/lib/data/zones"
@@ -75,7 +75,7 @@ export default async function PortafolioPage({
         </HeroHeader>
       </FadeInUp>
 
-      <AuthGateServer>
+      <AuthGatedSection>
       <FadeInUp><PortafolioClient presets={presets} zones={zones} riskData={riskData} /></FadeInUp>
 
       {/* Propiedades Section */}
@@ -127,7 +127,7 @@ export default async function PortafolioPage({
           </div>
         </div>
       </section></FadeInUp>
-      </AuthGateServer>
+      </AuthGatedSection>
     </StaggerContainer>
   )
 }

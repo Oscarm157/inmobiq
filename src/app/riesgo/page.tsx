@@ -8,7 +8,7 @@ import { HeroHeader, HeroStat } from "@/components/hero-header"
 import { SectionHeading } from "@/components/section-heading"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { getZoneMetrics } from "@/lib/data/zones"
-import { AuthGateServer } from "@/components/auth-gate-server"
+import { AuthGatedSection } from "@/components/auth-gated-section"
 
 export const metadata = {
   title: "Riesgo de Inversión — Inmobiq",
@@ -130,20 +130,19 @@ export default async function RiesgoPage() {
       {/* Risk Matrix */}
       <FadeInUp><RiskMatrix riskData={riskData} zones={zones} /></FadeInUp>
 
-      <AuthGateServer>
-
       {/* Zone Risk Cards */}
       <FadeInUp><section>
-        <SectionHeading title="Perfil de Riesgo por Zona" size="lg" />
+        <AuthGatedSection title={<SectionHeading title="Perfil de Riesgo por Zona" size="lg" />}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {sortedByRisk.map((risk) => (
             <RiskZoneCard key={risk.zone_slug} risk={risk} />
           ))}
         </div>
+        </AuthGatedSection>
       </section></FadeInUp>
 
       {/* Risk Note */}
-      <FadeInUp><div className="bg-surface-muted rounded-xl p-8 border border-border/60">
+      <FadeInUp><AuthGatedSection><div className="bg-surface-muted rounded-xl p-8 border border-border/60">
         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground mb-6">
           Nota Metodológica
         </h3>
@@ -169,9 +168,7 @@ export default async function RiesgoPage() {
             </div>
           </div>
         </div>
-      </div></FadeInUp>
-
-      </AuthGateServer>
+      </div></AuthGatedSection></FadeInUp>
     </StaggerContainer>
   )
 }
