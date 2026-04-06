@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { ZoneCard } from "@/components/zone-card"
+import { useAuth } from "@/contexts/auth-context"
 import { useCurrency } from "@/contexts/currency-context"
 import { getZoneActivityLabel } from "@/lib/activity-labels"
 import type { ZoneMetrics } from "@/types/database"
@@ -33,8 +34,10 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
   const [sortBy, setSortBy] = useState<SortKey>("precio")
   const [view, setView] = useState<ViewMode>("mapa")
   const [selectedZone, setSelectedZone] = useState<ZoneMetrics | null>(null)
+  const { user } = useAuth()
   const { formatPrice } = useCurrency()
   const router = useRouter()
+  const isAnon = !user
 
   const filtered = useMemo(() => {
     let result = zones
@@ -145,7 +148,7 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
                 <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
                   <h3 className="font-black text-base mb-0.5">{selectedZone.zone_name}</h3>
                   <p className="text-[10px] text-slate-400 mb-3 uppercase font-semibold tracking-wide">Zona seleccionada</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className={`grid grid-cols-2 gap-3 ${isAnon ? "blur-[4px] select-none" : ""}`}>
                     <div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Precio/m²</p>
                       <p className="text-sm font-black text-blue-700 dark:text-blue-400">{formatPrice(selectedZone.avg_price_per_m2)}</p>
@@ -215,7 +218,7 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
                   >
                     <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 w-4 text-right flex-shrink-0">{i + 1}</span>
                     <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex-1">{zone.zone_name}</span>
-                    <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">{formatPrice(zone.avg_price_per_m2)}</span>
+                    <span className={`text-[11px] font-bold text-blue-700 dark:text-blue-400 ${isAnon ? "blur-[4px] select-none" : ""}`}>{formatPrice(zone.avg_price_per_m2)}</span>
                   </button>
                 ))}
               </div>
@@ -227,9 +230,9 @@ export function ZonesGridClient({ zones }: ZonesGridClientProps) {
       {/* Grid view */}
       {view === "grid" && (
         filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${isAnon && sortBy === "precio" ? "blur-[5px] select-none pointer-events-none" : ""}`} data-auth-gated={isAnon && sortBy === "precio" ? "" : undefined}>
             {filtered.map((zone, i) => (
-              <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} />
+              <ZoneCard key={zone.zone_id} zone={zone} rank={i + 1} maxListings={maxListings} hidePrice={isAnon && sortBy !== "precio"} />
             ))}
           </div>
         ) : (

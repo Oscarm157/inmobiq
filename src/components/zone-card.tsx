@@ -14,6 +14,8 @@ interface ZoneCardProps {
   rank?: number
   maxListings?: number
   filterParams?: string
+  /** Blur price values for anonymous users */
+  hidePrice?: boolean
 }
 
 const TYPE_LABELS: Record<string, { short: string; icon: string }> = {
@@ -24,7 +26,7 @@ const TYPE_LABELS: Record<string, { short: string; icon: string }> = {
   oficina: { short: "Oficina", icon: "business" },
 }
 
-export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProps) {
+export function ZoneCard({ zone, rank, maxListings, filterParams, hidePrice }: ZoneCardProps) {
   const { formatPrice } = useCurrency()
   const isPositive = zone.price_trend_pct > 0
   const priceColor = getPriceColor(zone.avg_price_per_m2)
@@ -66,7 +68,7 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
 
         {/* Price */}
         <div className="mb-3">
-          <p className="text-xl font-black">
+          <p className={`text-xl font-black ${hidePrice ? "blur-[4px] select-none" : ""}`}>
             {formatPrice(zone.avg_price_per_m2)}
             <span className="text-xs font-medium text-slate-500"> /m²</span>
           </p>
@@ -91,7 +93,7 @@ export function ZoneCard({ zone, rank, maxListings, filterParams }: ZoneCardProp
         )}
 
         {/* Inventory bar + trend */}
-        <div className="flex items-center justify-between text-xs font-bold">
+        <div className={`flex items-center justify-between text-xs font-bold ${hidePrice ? "blur-[4px] select-none" : ""}`}>
           {zone.price_trend_pct === 0 ? (
             <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center gap-0.5"><Icon name="hourglass_empty" className="text-xs" />Acumulando</span>
           ) : (
