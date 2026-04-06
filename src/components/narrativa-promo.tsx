@@ -68,7 +68,7 @@ export function NarrativaPromo() {
         {/* Wordmark + external icon */}
         <div className="flex items-center justify-between">
           <span
-            className="text-[#E84D1A] text-[13px] font-bold italic tracking-wide"
+            className="text-[#E84D1A] text-[17px] font-bold italic tracking-wide"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             Narrativa
@@ -91,20 +91,8 @@ export function NarrativaPromo() {
         >
           De visitante a<br />
           <span className="text-[#E84D1A]">cliente cerrado</span>
+          {" "}con IA
         </p>
-
-        {/* Features */}
-        <div className="flex flex-wrap gap-1.5">
-          {["Landing", "Quiz IA", "Voz IA", "CRM"].map((f) => (
-            <span
-              key={f}
-              className="text-[10px] font-semibold text-[#E84D1A]/70 bg-[#E84D1A]/[0.07] rounded-full px-2.5 py-0.5"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              {f}
-            </span>
-          ))}
-        </div>
 
         {/* CTA */}
         <div
