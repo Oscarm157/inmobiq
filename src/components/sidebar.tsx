@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Icon } from "@/components/icon"
 import { useSidebar } from "@/components/sidebar-provider"
 import { useAuth } from "@/contexts/auth-context"
+import { NarrativaPromo } from "@/components/narrativa-promo"
 
 const navItems = [
   { icon: "monitoring", label: "Precios", href: "/", tourId: "precios" },
@@ -172,18 +173,8 @@ export function Sidebar() {
           <Icon name="sell" />
           {!collapsed && <span>Planes</span>}
         </Link>
-        <a
-          href="https://narrativa360.vercel.app"
-          target="_blank"
-          rel="noopener noreferrer"
-          title={collapsed ? "Narrativa360" : undefined}
-          className={`flex items-center gap-3 py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-blue-400 transition-colors ${
-            collapsed ? "justify-center" : "px-4"
-          }`}
-        >
-          <Icon name="help_outline" />
-          {!collapsed && <span className="flex items-center gap-1.5">Narrativa360 <Icon name="open_in_new" className="text-[10px] opacity-50" /></span>}
-        </a>
+        {/* Narrativa Promo */}
+        <NarrativaPromo />
 
         {/* Auth section */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
