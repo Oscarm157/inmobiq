@@ -1,22 +1,17 @@
 import { Suspense } from "react"
+import dynamic from "next/dynamic"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { DemoScroll } from "@/components/demo-scroll"
 import { DemoVideo } from "@/components/demo-video"
 import { Icon } from "@/components/icon"
 import { ZoneCard } from "@/components/zone-card"
-import { PriceChart } from "@/components/price-chart"
-import { ZonesBarChart } from "@/components/zones-bar-chart"
 import { KPIPrecio } from "@/components/kpi-precio"
 import { KPIInventario } from "@/components/kpi-inventario"
 import { KPIComposicion } from "@/components/kpi-plusvalia"
 import { MiniMapWrapper } from "@/components/map/mini-map-wrapper"
 import { NarrativeInsight } from "@/components/narrative-insight"
-import { InventoryTypeChart } from "@/components/inventory-type-chart"
 import { TopZonesHighlight } from "@/components/top-zones-highlight"
 import { PriceTable } from "@/components/price-table"
-import { PriceRangeChart } from "@/components/price-range-chart"
-import { TypeCompositionChart } from "@/components/type-composition-chart"
-import { OfferConcentrationChart } from "@/components/offer-concentration-chart"
 import { MarketFilters } from "@/components/market-filters"
 import { getZoneMetrics, getCityMetrics, getLastSnapshotDate } from "@/lib/data/zones"
 import { UpdatedAt } from "@/components/updated-at"
@@ -26,13 +21,21 @@ import { getZoneRiskMetrics } from "@/lib/data/risk"
 import { formatCurrency } from "@/lib/utils"
 import { getCityActivityLabel, describeActivity } from "@/lib/activity-labels"
 import { getAllDemographics, getMarketIntelligenceInsights, computeOpportunityScore } from "@/lib/data/demographics"
-import { MarketIntelligence } from "@/components/market-intelligence"
-import { OpportunityIndexChart } from "@/components/opportunity-index-chart"
 import { AuthGatedSection } from "@/components/auth-gated-section"
-import { MarketDensityScatter } from "@/components/market-density-scatter"
 import type { DensityBubble } from "@/components/market-density-scatter"
 import { PageHeader } from "@/components/page-header"
 import { SectionHeading } from "@/components/section-heading"
+
+// Lazy-load heavy chart components (Recharts ~450KB) — they're all inside AuthGatedSections
+const PriceChart = dynamic(() => import("@/components/price-chart").then(m => ({ default: m.PriceChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const ZonesBarChart = dynamic(() => import("@/components/zones-bar-chart").then(m => ({ default: m.ZonesBarChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const PriceRangeChart = dynamic(() => import("@/components/price-range-chart").then(m => ({ default: m.PriceRangeChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const TypeCompositionChart = dynamic(() => import("@/components/type-composition-chart").then(m => ({ default: m.TypeCompositionChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const OfferConcentrationChart = dynamic(() => import("@/components/offer-concentration-chart").then(m => ({ default: m.OfferConcentrationChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const InventoryTypeChart = dynamic(() => import("@/components/inventory-type-chart").then(m => ({ default: m.InventoryTypeChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const MarketIntelligence = dynamic(() => import("@/components/market-intelligence").then(m => ({ default: m.MarketIntelligence })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const OpportunityIndexChart = dynamic(() => import("@/components/opportunity-index-chart").then(m => ({ default: m.OpportunityIndexChart })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
+const MarketDensityScatter = dynamic(() => import("@/components/market-density-scatter").then(m => ({ default: m.MarketDensityScatter })), { loading: () => <div className="h-64 bg-surface rounded-2xl animate-pulse" /> })
 import { cookies } from "next/headers"
 import Link from "next/link"
 import type { PropertyType, ListingType } from "@/types/database"

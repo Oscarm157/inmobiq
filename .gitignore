@@ -39,3 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 docs/*.json
+
+# duplicate/temp assets
+public copy/
+public copy 2/
+public copy 3/
+tmp/
