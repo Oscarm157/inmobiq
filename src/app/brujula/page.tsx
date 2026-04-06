@@ -9,7 +9,7 @@ import { ManualForm, type ManualFormResult } from "@/components/brujula/manual-f
 import { ExtractionReview, type ReviewResult } from "@/components/brujula/extraction-review"
 import { ValuationReport } from "@/components/brujula/valuation-report"
 import { ValuationHistory } from "@/components/brujula/valuation-history"
-import Link from "next/link"
+import { openAuthModal } from "@/components/auth-modal"
 import type { ExtractedPropertyData, ValuationResult, PropertyType, ListingType } from "@/types/database"
 
 type Step = "input" | "review" | "result"
@@ -57,7 +57,6 @@ export default function BrujulaPage() {
   const [result, setResult] = useState<ValuationResult | null>(null)
   const [narrative, setNarrative] = useState("")
   const [property, setProperty] = useState<PropertyData | null>(null)
-  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const handleExtracted = (vId: string, data: Record<string, unknown>) => {
     setValuationId(vId)
@@ -203,53 +202,6 @@ export default function BrujulaPage() {
         </motion.div>
       </div>
 
-      {/* ─── Auth Modal ─── */}
-      <AnimatePresence>
-        {showAuthModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowAuthModal(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="bg-surface rounded-2xl p-8 max-w-sm mx-4 card-shadow text-center space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-14 h-14 rounded-full bg-surface-inset flex items-center justify-center mx-auto">
-                <Icon name="explore" className="text-2xl text-primary" />
-              </div>
-              <h3 className="text-lg font-extrabold text-foreground">
-                Regístrate para usar Brújula
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Crea tu cuenta gratis y obtén 3 valuaciones al mes. Compara cualquier propiedad contra el mercado de su zona.
-              </p>
-              <div className="flex flex-col gap-2 pt-2">
-                <Link
-                  href="/login"
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-foreground text-background rounded-full text-sm font-bold hover:opacity-90 transition-opacity"
-                >
-                  <Icon name="person_add" className="text-base" />
-                  Crear cuenta gratis
-                </Link>
-                <Link
-                  href="/login"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Ya tengo cuenta — Iniciar sesión
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ─── Step Content ─── */}
       <AnimatePresence mode="wait">
         {step === "input" && (
@@ -272,9 +224,9 @@ export default function BrujulaPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 28 }}
                 >
                   {mode === "screenshots" ? (
-                    <ScreenshotUploader onExtracted={handleExtracted} onAuthRequired={() => setShowAuthModal(true)} />
+                    <ScreenshotUploader onExtracted={handleExtracted} onAuthRequired={() => openAuthModal("register")} />
                   ) : (
-                    <ManualForm onResult={handleManualResult} onAuthRequired={() => setShowAuthModal(true)} />
+                    <ManualForm onResult={handleManualResult} onAuthRequired={() => openAuthModal("register")} />
                   )}
                 </motion.div>
               </AnimatePresence>

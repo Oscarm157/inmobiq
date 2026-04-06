@@ -10,6 +10,7 @@ import { GuidedTourWrapper } from "@/components/guided-tour-wrapper"
 import { ToastProvider } from "@/components/toast"
 import { AnalyticsTracker } from "@/components/analytics-tracker"
 import { AuthBanner } from "@/components/auth-banner"
+import { AuthModal } from "@/components/auth-modal"
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -99,6 +100,7 @@ export default function RootLayout({
                 <ToastProvider>
                   <SidebarShell>{children}</SidebarShell>
                   <AuthBanner />
+                  <AuthModal />
                   <GuidedTourWrapper />
                   <AnalyticsTracker />
                 </ToastProvider>

@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon"
 import { useSidebar } from "@/components/sidebar-provider"
 import { useAuth } from "@/contexts/auth-context"
 import { NarrativaPromo } from "@/components/narrativa-promo"
+import { openAuthModal } from "@/components/auth-modal"
 
 const navItems = [
   { icon: "monitoring", label: "Precios", href: "/", tourId: "precios" },
@@ -223,16 +224,16 @@ export function Sidebar() {
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
+            <button
+              onClick={() => openAuthModal("login")}
               title={collapsed ? "Iniciar sesión" : undefined}
               className={`flex items-center gap-3 py-2 text-slate-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors ${
-                collapsed ? "justify-center" : "px-2"
+                collapsed ? "w-full justify-center" : "px-2"
               }`}
             >
               <Icon name="login" className="text-base flex-shrink-0" />
               {!collapsed && <span className="text-sm font-semibold">Iniciar sesión</span>}
-            </Link>
+            </button>
           )}
         </div>
       </div>

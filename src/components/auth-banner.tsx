@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context"
 import { Icon } from "@/components/icon"
-import Link from "next/link"
+import { openAuthModal } from "@/components/auth-modal"
 import { useEffect, useRef, useState } from "react"
 
 /**
@@ -87,19 +87,19 @@ export function AuthBanner() {
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/login"
+            <button
+              onClick={() => openAuthModal("login")}
               className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden sm:block"
             >
               Ya tengo cuenta
-            </Link>
-            <Link
-              href="/login"
+            </button>
+            <button
+              onClick={() => openAuthModal("register")}
               className={`flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-full text-sm font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/25 ${attention ? "scale-105 shadow-blue-500/40" : ""}`}
             >
               <Icon name="person_add" className="text-sm" />
               Crear cuenta
-            </Link>
+            </button>
           </div>
         </div>
       </div>

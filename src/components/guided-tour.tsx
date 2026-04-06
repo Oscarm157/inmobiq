@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Icon } from "@/components/icon"
 import { useAuth } from "@/contexts/auth-context"
+import { openAuthModal } from "@/components/auth-modal"
 import { PERFIL_CONFIGS, PERFIL_KEYS, type PerfilType } from "@/lib/profiles"
 import { setPreferredPerfil, setPreferredOperacion, setPreferredCategoria } from "@/lib/preference-cookies"
 
@@ -459,14 +459,13 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
               Crea tu cuenta gratis para acceder a análisis completos por zona, comparador, riesgo de inversión y la Brújula Inmobiliaria.
             </p>
             <div className="flex flex-col gap-2 pt-2">
-              <Link
-                href="/login"
-                onClick={closeTour}
+              <button
+                onClick={() => { closeTour(); openAuthModal("register") }}
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20"
               >
                 <Icon name="person_add" className="text-base" />
                 Crear cuenta gratis
-              </Link>
+              </button>
               <button
                 onClick={closeTour}
                 className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors py-1"
