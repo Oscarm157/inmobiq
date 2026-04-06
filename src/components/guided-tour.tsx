@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Icon } from "@/components/icon"
+import { useAuth } from "@/contexts/auth-context"
 import { PERFIL_CONFIGS, PERFIL_KEYS, type PerfilType } from "@/lib/profiles"
-import { setPreferredPerfil, setPreferredOperacion, setPreferredCategoria, COOKIE_PERFIL } from "@/lib/preference-cookies"
+import { setPreferredPerfil, setPreferredOperacion, setPreferredCategoria } from "@/lib/preference-cookies"
 
 // ── Tour step definitions ──
 
@@ -16,71 +18,114 @@ interface TourStep {
   preview: React.ReactNode
 }
 
+// Full tour for authenticated users (9 steps)
 const TOUR_STEPS: TourStep[] = [
   {
     targetSelector: null,
     title: "Bienvenido a Inmobiq",
     description: "Inteligencia inmobiliaria para Tijuana",
     position: "center",
-    preview: null, // handled by profile selection UI
+    preview: null,
   },
   {
     targetSelector: '[data-tour="precios"]',
     title: "Precios del Mercado",
-    description: "Cuanto cuesta el m\u00B2 en Tijuana hoy? Aqui ves de un vistazo que zonas estan caras, cuales son mas accesibles, y hacia donde van los precios.",
+    description: "¿Cuánto cuesta el m² en Tijuana hoy? Aquí ves de un vistazo qué zonas están caras, cuáles son más accesibles, y hacia dónde van los precios.",
     position: "right",
     preview: <MiniBarChart />,
   },
   {
     targetSelector: '[data-tour="brujula"]',
-    title: "Brujula Inmobiliaria",
-    description: "Tienes una propiedad y quieres saber cuanto vale? Ingresa la zona y te damos un estimado basado en lo que realmente se esta vendiendo ahi.",
+    title: "Brújula Inmobiliaria",
+    description: "¿Tienes una propiedad y quieres saber cuánto vale? Ingresa la zona y te damos un estimado basado en lo que realmente se está vendiendo ahí.",
     position: "right",
     preview: <MiniValuator />,
   },
   {
     targetSelector: '[data-tour="zonas"]',
-    title: "Analisis por Zona",
-    description: "Ejemplo: quieres comprar en Playas. Aqui ves el precio tipico, cuantas propiedades hay, si los precios suben o bajan, y que tipo de propiedad domina la zona.",
+    title: "Análisis por Zona",
+    description: "Ejemplo: quieres comprar en Playas. Aquí ves el precio típico, cuántas propiedades hay, si los precios suben o bajan, y qué tipo de propiedad domina la zona.",
     position: "right",
     preview: <MiniZoneCards />,
   },
   {
     targetSelector: '[data-tour="comparar"]',
     title: "Comparador de Zonas",
-    description: "Zona Rio o Playas? Ponlas lado a lado y compara precios, oferta, riesgo y perfil de cada una para decidir mejor.",
+    description: "¿Zona Río o Playas? Ponlas lado a lado y compara precios, oferta, riesgo y perfil de cada una para decidir mejor.",
     position: "right",
     preview: <MiniComparison />,
   },
   {
     targetSelector: '[data-tour="riesgo"]',
-    title: "Analisis de Riesgo",
-    description: "Es seguro invertir en esta zona? Aqui ves que tan estables son los precios, que tan rapido se venden las propiedades, y un score general de riesgo.",
+    title: "Análisis de Riesgo",
+    description: "¿Es seguro invertir en esta zona? Aquí ves qué tan estables son los precios, qué tan rápido se venden las propiedades, y un score general de riesgo.",
     position: "right",
     preview: <MiniGauge />,
   },
   {
     targetSelector: '[data-tour="mode-tabs"]',
     title: "Compra-Venta o Renta",
-    description: "Buscas comprar o rentar? Cambia aqui y toda la informacion se ajusta: precios de venta o montos de renta, segun lo que necesites.",
+    description: "¿Buscas comprar o rentar? Cambia aquí y toda la información se ajusta: precios de venta o montos de renta, según lo que necesites.",
     position: "bottom",
     preview: <MiniToggle />,
   },
   {
     targetSelector: "#demo-kpis",
-    title: "Numeros que Importan",
-    description: "Cuanto cuesta el metro cuadrado en promedio, el precio tipico de una propiedad, y como se mueve el mercado esta semana. Todo de un vistazo.",
+    title: "Números que Importan",
+    description: "Cuánto cuesta el metro cuadrado en promedio, el precio típico de una propiedad, y cómo se mueve el mercado esta semana. Todo de un vistazo.",
     position: "bottom",
     preview: <MiniKPIs />,
   },
   {
     targetSelector: null,
-    title: "Estas en la Beta Privada",
+    title: "Estás en la Beta Privada",
     description: "",
     position: "center",
     preview: null,
   },
 ]
+
+// Short tour for anonymous users (4 steps)
+const ANON_TOUR_STEPS: TourStep[] = [
+  {
+    targetSelector: null,
+    title: "Bienvenido a Inmobiq",
+    description: "Inteligencia inmobiliaria para el mercado de Tijuana. Precios, tendencias, análisis por zona y herramientas de valuación — todo en un solo lugar.",
+    position: "center",
+    preview: null,
+  },
+  {
+    targetSelector: '[data-tour="precios"]',
+    title: "Precios del Mercado",
+    description: "¿Cuánto cuesta el m² en Tijuana hoy? Aquí ves de un vistazo qué zonas están caras, cuáles son más accesibles, y hacia dónde van los precios.",
+    position: "right",
+    preview: <MiniBarChart />,
+  },
+  {
+    targetSelector: '[data-tour="brujula"]',
+    title: "Brújula Inmobiliaria",
+    description: "¿Tienes una propiedad y quieres saber cuánto vale? Compárala al instante contra el mercado de su zona.",
+    position: "right",
+    preview: <MiniValuator />,
+  },
+  {
+    targetSelector: '[data-tour="zonas"]',
+    title: "Análisis por Zona",
+    description: "30 zonas de Tijuana con precios, tendencias, composición de oferta y perfil demográfico. Datos reales actualizados cada semana.",
+    position: "right",
+    preview: <MiniZoneCards />,
+  },
+  {
+    targetSelector: null,
+    title: "Accede a toda la inteligencia",
+    description: "",
+    position: "center",
+    preview: null,
+  },
+]
+
+const STORAGE_KEY = "inmobiq_tour_completed"
+const ANON_STORAGE_KEY = "inmobiq_anon_tour_completed"
 
 // ── Spotlight overlay ──
 
@@ -89,8 +134,8 @@ function SpotlightOverlay({ rect }: { rect: DOMRect | null }) {
     return <div className="fixed inset-0 z-[200] bg-black/60 transition-all duration-500" />
   }
 
-  const pad = 8
-  const r = 12
+  const pad = 10
+  const r = 14
   const x = rect.left - pad
   const y = rect.top - pad
   const w = rect.width + pad * 2
@@ -105,13 +150,13 @@ function SpotlightOverlay({ rect }: { rect: DOMRect | null }) {
             <rect x={x} y={y} width={w} height={h} rx={r} ry={r} fill="black" />
           </mask>
         </defs>
-        <rect width="100%" height="100%" fill="rgba(0,0,0,0.6)" mask="url(#spotlight-mask)" />
+        <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#spotlight-mask)" />
       </svg>
     </div>
   )
 }
 
-// ── Tooltip ──
+// ── Premium Tooltip ──
 
 interface TooltipProps {
   step: TourStep
@@ -121,7 +166,7 @@ interface TooltipProps {
   onNext: () => void
   onPrev: () => void
   onSkip: () => void
-  children?: React.ReactNode // for step 0 profile selection
+  children?: React.ReactNode
 }
 
 function TourTooltip({ step, rect, currentStep, totalSteps, onNext, onPrev, onSkip, children }: TooltipProps) {
@@ -132,26 +177,29 @@ function TourTooltip({ step, rect, currentStep, totalSteps, onNext, onPrev, onSk
   if (isFullscreen) {
     return (
       <div className="fixed inset-0 z-[201] flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-lg w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <h2 className="text-2xl font-black tracking-tight text-center mb-2">{step.title}</h2>
+        <div className="relative bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.15)] max-w-lg w-full p-10 animate-in fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
+          {/* Accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-blue-400 to-transparent" />
+
+          <h2 className="text-2xl font-extrabold tracking-tight text-center mb-2">{step.title}</h2>
           {step.description && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">{step.description}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6 leading-relaxed">{step.description}</p>
           )}
           {children}
           {!isFirst && (
-            <div className="flex items-center justify-between mt-6">
-              <button onClick={onPrev} className="text-xs text-slate-400 hover:text-slate-600 font-medium">
+            <div className="flex items-center justify-between mt-8">
+              <button onClick={onPrev} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors">
                 Anterior
               </button>
               {isLast ? (
                 <button
                   onClick={onNext}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors"
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20"
                 >
                   Explorar el mercado
                 </button>
               ) : (
-                <button onClick={onNext} className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-bold">
+                <button onClick={onNext} className="px-5 py-2 bg-slate-800 dark:bg-blue-600 hover:bg-slate-700 dark:hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98]">
                   Siguiente
                 </button>
               )}
@@ -166,57 +214,57 @@ function TourTooltip({ step, rect, currentStep, totalSteps, onNext, onPrev, onSk
   if (!rect) return null
 
   const tooltipStyle: React.CSSProperties = {}
-  let arrowClass = ""
+  let arrowPos = ""
 
   if (step.position === "right") {
     tooltipStyle.top = rect.top
-    tooltipStyle.left = rect.right + 16
-    arrowClass = "before:absolute before:top-6 before:-left-2 before:w-3 before:h-3 before:bg-white dark:before:bg-slate-900 before:rotate-45 before:border-l before:border-b before:border-slate-200 dark:before:border-slate-700"
+    tooltipStyle.left = rect.right + 18
+    arrowPos = "before:absolute before:top-6 before:-left-[6px] before:w-3 before:h-3 before:bg-white dark:before:bg-slate-900 before:rotate-45"
   } else if (step.position === "bottom") {
-    tooltipStyle.top = rect.bottom + 16
+    tooltipStyle.top = rect.bottom + 18
     tooltipStyle.left = rect.left
-    arrowClass = "before:absolute before:-top-2 before:left-8 before:w-3 before:h-3 before:bg-white dark:before:bg-slate-900 before:rotate-45 before:border-l before:border-t before:border-slate-200 dark:before:border-slate-700"
+    arrowPos = "before:absolute before:-top-[6px] before:left-8 before:w-3 before:h-3 before:bg-white dark:before:bg-slate-900 before:rotate-45"
   }
 
   return (
     <div
-      className={`fixed z-[201] w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-5 animate-in fade-in slide-in-from-bottom-2 duration-300 ${arrowClass}`}
+      className={`fixed z-[201] w-80 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-5 animate-in fade-in slide-in-from-bottom-2 duration-300 ${arrowPos}`}
       style={tooltipStyle}
     >
       {/* Preview */}
       {step.preview && (
-        <div className="mb-4 bg-slate-50 dark:bg-slate-800 rounded-xl p-3 flex items-center justify-center">
+        <div className="mb-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 flex items-center justify-center">
           {step.preview}
         </div>
       )}
 
-      <h3 className="text-base font-black tracking-tight mb-1">{step.title}</h3>
-      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">{step.description}</p>
+      <h3 className="text-lg font-extrabold tracking-tight mb-1.5">{step.title}</h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-5">{step.description}</p>
 
       {/* Progress + nav */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                i === currentStep ? "bg-blue-500" : i < currentStep ? "bg-slate-400" : "bg-slate-200 dark:bg-slate-700"
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                i === currentStep ? "bg-blue-500 scale-110" : i < currentStep ? "bg-blue-300 dark:bg-blue-700" : "bg-slate-200 dark:bg-slate-700"
               }`}
             />
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onSkip} className="text-[10px] text-slate-400 hover:text-slate-600 font-medium">
+          <button onClick={onSkip} className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors">
             Saltar
           </button>
           {currentStep > 0 && (
-            <button onClick={onPrev} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+            <button onClick={onPrev} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
               <Icon name="arrow_back" className="text-sm" />
             </button>
           )}
           <button
             onClick={onNext}
-            className="px-4 py-1.5 bg-slate-800 dark:bg-blue-600 hover:bg-slate-700 dark:hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-blue-600/20"
           >
             {isLast ? "Listo" : "Siguiente"}
           </button>
@@ -228,8 +276,6 @@ function TourTooltip({ step, rect, currentStep, totalSteps, onNext, onPrev, onSk
 
 // ── Main tour component ──
 
-const STORAGE_KEY = "inmobiq_tour_completed"
-
 interface GuidedTourProps {
   forceOpen?: boolean
   onClose?: () => void
@@ -237,26 +283,32 @@ interface GuidedTourProps {
 
 export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [active, setActive] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [skipProfileStep, setSkipProfileStep] = useState(false)
   const rafRef = useRef<number>(undefined)
 
+  const isAnon = !user
+  const steps = isAnon ? ANON_TOUR_STEPS : TOUR_STEPS
+  const storageKey = isAnon ? ANON_STORAGE_KEY : STORAGE_KEY
+
   // Auto-launch on first visit
   useEffect(() => {
+    if (authLoading) return
     if (forceOpen) {
       setActive(true)
       setCurrentStep(0)
-      setSkipProfileStep(true) // skip profile when replaying
+      setSkipProfileStep(true)
       return
     }
-    const seen = localStorage.getItem(STORAGE_KEY)
+    const seen = localStorage.getItem(storageKey)
     if (!seen) {
       const timer = setTimeout(() => setActive(true), 600)
       return () => clearTimeout(timer)
     }
-  }, [forceOpen])
+  }, [forceOpen, authLoading, storageKey])
 
   // Track target element position
   useEffect(() => {
@@ -284,11 +336,12 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
   }, [active, currentStep, skipProfileStep])
 
   const getEffectiveStep = () => {
-    if (skipProfileStep && currentStep === 0) return TOUR_STEPS[1]
-    return TOUR_STEPS[skipProfileStep ? currentStep + 1 : currentStep]
+    if (isAnon) return steps[currentStep]
+    if (skipProfileStep && currentStep === 0) return steps[1]
+    return steps[skipProfileStep ? currentStep + 1 : currentStep]
   }
 
-  const effectiveTotal = skipProfileStep ? TOUR_STEPS.length - 1 : TOUR_STEPS.length
+  const effectiveTotal = isAnon ? steps.length : (skipProfileStep ? steps.length - 1 : steps.length)
 
   const handleNext = useCallback(() => {
     if (currentStep >= effectiveTotal - 1) {
@@ -304,10 +357,10 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
 
   const closeTour = useCallback(() => {
     setActive(false)
-    localStorage.setItem(STORAGE_KEY, "true")
+    localStorage.setItem(storageKey, "true")
     onClose?.()
     router.refresh()
-  }, [onClose, router])
+  }, [onClose, router, storageKey])
 
   const handleProfileSelect = useCallback((perfil: PerfilType) => {
     const config = PERFIL_CONFIGS[perfil]
@@ -319,8 +372,6 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ perfil }),
     }).catch(() => {})
-
-    // Move to next step
     setCurrentStep(1)
   }, [])
 
@@ -329,7 +380,9 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
   const step = getEffectiveStep()
   if (!step) return null
 
-  const isProfileStep = !skipProfileStep && currentStep === 0
+  const isProfileStep = !isAnon && !skipProfileStep && currentStep === 0
+  const isAnonCTA = isAnon && currentStep === effectiveTotal - 1
+  const isBetaStep = !isAnon && step.targetSelector === null && currentStep === effectiveTotal - 1
 
   return (
     <>
@@ -343,6 +396,7 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
         onPrev={handlePrev}
         onSkip={closeTour}
       >
+        {/* Step 0: Profile selection (authenticated only) */}
         {isProfileStep && (
           <>
             <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
@@ -355,7 +409,7 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
                   <button
                     key={key}
                     onClick={() => handleProfileSelect(key)}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all text-center"
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 hover:shadow-md transition-all text-center hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
                       <Icon name={config.icon} className="text-xl" />
@@ -367,25 +421,75 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
               })}
             </div>
             <button
-              onClick={() => { handleProfileSelect("broker") }}
-              className="w-full mt-3 py-2 text-[10px] text-slate-400 hover:text-slate-600 font-medium"
+              onClick={() => handleProfileSelect("broker")}
+              className="w-full mt-3 py-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors"
             >
               Explorar libremente
             </button>
           </>
         )}
-        {!isProfileStep && step.targetSelector === null && currentStep === effectiveTotal - 1 && (
+
+        {/* Anonymous welcome (step 0) */}
+        {isAnon && currentStep === 0 && (
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center mb-4">
+              <Icon name="monitoring" className="text-3xl text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <button onClick={closeTour} className="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
+                Saltar
+              </button>
+              <button
+                onClick={handleNext}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20"
+              >
+                Ver qué ofrece
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Anonymous CTA (last step) */}
+        {isAnonCTA && (
+          <div className="text-center space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
+              <Icon name="lock_open" className="text-2xl text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Crea tu cuenta gratis para acceder a análisis completos por zona, comparador, riesgo de inversión y la Brújula Inmobiliaria.
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              <Link
+                href="/login"
+                onClick={closeTour}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20"
+              >
+                <Icon name="person_add" className="text-base" />
+                Crear cuenta gratis
+              </Link>
+              <button
+                onClick={closeTour}
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors py-1"
+              >
+                Seguir explorando
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Beta badge (authenticated, last step) */}
+        {isBetaStep && (
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 rounded-full mb-2">
               <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
               <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Beta Privada</span>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Estas entre los primeros en usar Inmobiq. Estamos invirtiendo en investigacion y desarrollo para robustecer la plataforma con mas datos, mas zonas y mejores herramientas de analisis.
+              Estás entre los primeros en usar Inmobiq. Estamos invirtiendo en investigación y desarrollo para robustecer la plataforma con más datos, más zonas y mejores herramientas de análisis.
             </p>
             <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lanzamiento publico</p>
-              <p className="text-lg font-black text-slate-800 dark:text-slate-100">27 de Abril, 2026</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lanzamiento público</p>
+              <p className="text-lg font-extrabold text-slate-800 dark:text-slate-100">27 de Abril, 2026</p>
             </div>
             <p className="text-xs text-slate-400 dark:text-slate-500">
               Tu feedback es clave para mejorar. Cualquier cosa que notes, nos ayuda a construir una mejor herramienta.

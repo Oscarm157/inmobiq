@@ -171,6 +171,18 @@ export function Sidebar() {
           </Link>
         )}
 
+        {/* Tour replay */}
+        <button
+          onClick={() => window.dispatchEvent(new Event("inmobiq:replay-tour"))}
+          title={collapsed ? "Tour del producto" : undefined}
+          className={`flex items-center gap-3 py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-blue-400 transition-colors ${
+            collapsed ? "w-full justify-center" : "px-4"
+          }`}
+        >
+          <Icon name="school" />
+          {!collapsed && <span>Tour del producto</span>}
+        </button>
+
         {/* Auth section */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
           {user ? (
