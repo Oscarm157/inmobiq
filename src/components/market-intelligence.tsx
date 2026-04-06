@@ -4,24 +4,27 @@ import type { MarketInsight } from "@/lib/data/demographics"
 
 interface MarketIntelligenceProps {
   insights: MarketInsight[]
+  hideHeader?: boolean
 }
 
-export function MarketIntelligence({ insights }: MarketIntelligenceProps) {
+export function MarketIntelligence({ insights, hideHeader }: MarketIntelligenceProps) {
   if (insights.length === 0) return null
 
   return (
     <section className="relative -mx-4 md:-mx-6 px-4 md:px-6 py-8 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/60 to-teal-50/40 dark:from-slate-900 dark:via-blue-950/30 dark:to-teal-950/20 border border-blue-100/60 dark:border-blue-900/30">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-2xl font-black tracking-tight">Inteligencia de Mercado</h3>
-          <span className="px-2 py-0.5 bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-400 text-[10px] font-bold rounded-full tracking-widest uppercase">
-            Cruce Censo × Mercado
-          </span>
+      {!hideHeader && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-2xl font-black tracking-tight">Inteligencia de Mercado</h3>
+            <span className="px-2 py-0.5 bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-400 text-[10px] font-bold rounded-full tracking-widest uppercase">
+              Cruce Censo × Mercado
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            Insights de las zonas con mayor actividad de mercado, cruzando datos del Censo 2020
+          </p>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-          Insights de las zonas con mayor actividad de mercado, cruzando datos del Censo 2020
-        </p>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {insights.map((insight) => (
