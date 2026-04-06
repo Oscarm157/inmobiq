@@ -79,7 +79,7 @@ export default async function ComparadorPage({
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: "Comparar" }]} />
-      <AuthGateServer message="Regístrate gratis para comparar zonas">
+      <AuthGateServer>
         <Suspense>
           <ComparadorClient
             allZones={allZones}

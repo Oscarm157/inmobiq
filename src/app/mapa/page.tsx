@@ -63,7 +63,7 @@ export default async function MapaPage({
         )
       })()}
 
-      <AuthGateServer message="Regístrate gratis para explorar el mapa interactivo">
+      <AuthGateServer>
         <Suspense
           fallback={
             <div className="h-[600px] bg-surface-inset rounded-xl flex items-center justify-center">

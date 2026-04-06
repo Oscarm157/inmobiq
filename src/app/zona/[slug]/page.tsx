@@ -523,7 +523,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       )}
 
       {/* Auth Gate: anonymous sees hero + KPIs, rest gated */}
-      <AuthGateServer message="Regístrate gratis para ver el análisis completo de esta zona">
+      <AuthGateServer>
 
       {/* [C] Tabbed Content */}
       <FadeInUp><Suspense fallback={<div className="h-20 rounded-xl bg-surface-inset animate-pulse" />}>

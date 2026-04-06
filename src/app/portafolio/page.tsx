@@ -75,7 +75,7 @@ export default async function PortafolioPage({
         </HeroHeader>
       </FadeInUp>
 
-      <AuthGateServer message="Regístrate gratis para explorar portafolios de inversión">
+      <AuthGateServer>
       <FadeInUp><PortafolioClient presets={presets} zones={zones} riskData={riskData} /></FadeInUp>
 
       {/* Propiedades Section */}

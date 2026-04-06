@@ -130,7 +130,7 @@ export default async function RiesgoPage() {
       {/* Risk Matrix */}
       <FadeInUp><RiskMatrix riskData={riskData} zones={zones} /></FadeInUp>
 
-      <AuthGateServer message="Regístrate gratis para ver el análisis de riesgo completo">
+      <AuthGateServer>
 
       {/* Zone Risk Cards */}
       <FadeInUp><section>

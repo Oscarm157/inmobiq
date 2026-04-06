@@ -5,13 +5,14 @@ import { Icon } from "@/components/icon"
 
 interface Props {
   onExtracted: (valuationId: string, data: Record<string, unknown>) => void
+  onAuthRequired?: () => void
   disabled?: boolean
 }
 
 const MAX_FILES = 5
 const MAX_SIZE = 5 * 1024 * 1024
 
-export function ScreenshotUploader({ onExtracted, disabled }: Props) {
+export function ScreenshotUploader({ onExtracted, onAuthRequired, disabled }: Props) {
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -78,6 +79,10 @@ export function ScreenshotUploader({ onExtracted, disabled }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
+        if (res.status === 401 && onAuthRequired) {
+          onAuthRequired()
+          return
+        }
         setError(data.error || "Error procesando screenshots")
         return
       }

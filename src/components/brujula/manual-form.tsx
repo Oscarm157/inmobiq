@@ -25,10 +25,11 @@ export interface ManualFormResult {
 
 interface Props {
   onResult: (data: ManualFormResult) => void
+  onAuthRequired?: () => void
   disabled?: boolean
 }
 
-export function ManualForm({ onResult, disabled }: Props) {
+export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
   const [listingType, setListingType] = useState<ListingType>("venta")
   const [propertyType, setPropertyType] = useState<PropertyType>("casa")
   const [priceMxn, setPriceMxn] = useState("")
@@ -88,6 +89,10 @@ export function ManualForm({ onResult, disabled }: Props) {
 
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 401 && onAuthRequired) {
+          onAuthRequired()
+          return
+        }
         setError(data.error || "Error procesando valuación")
         return
       }
