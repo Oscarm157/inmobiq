@@ -272,6 +272,22 @@
   box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
 }
 
+/* Auth banner attention animations */
+@keyframes auth-banner-glow {
+  0%, 100% { box-shadow: 0 -4px 30px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 -4px 40px rgba(59, 130, 246, 0.3), 0 -2px 20px rgba(59, 130, 246, 0.15); }
+}
+@keyframes auth-banner-sweep {
+  0% { transform: translateX(-200%) skewX(-20deg); }
+  100% { transform: translateX(calc(100vw + 200%)) skewX(-20deg); }
+}
+.auth-banner-attention {
+  animation: auth-banner-glow 1.5s ease-in-out;
+}
+.auth-banner-shine {
+  animation: auth-banner-sweep 1s ease-in-out;
+}
+
 /* Narrativa promo pulse animation */
 @keyframes narrativa-attention {
   0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(232, 77, 26, 0); }
