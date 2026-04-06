@@ -291,12 +291,7 @@ export default async function HomePage({
 
         return (
           <FadeInUp><section className="space-y-6">
-            <AuthGatedSection title={
-              <SectionHeading
-                title="Inteligencia de Mercado"
-                subtitle="Datos censales cruzados con métricas inmobiliarias"
-              />
-            }>
+            <AuthGatedSection>
               <MarketIntelligence insights={insights} />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <OpportunityIndexChart data={opportunityData} />
