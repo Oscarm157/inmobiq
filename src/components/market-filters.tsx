@@ -163,7 +163,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
         <div className="absolute left-0 right-0 z-50 mt-3">
-          <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl transition-opacity duration-150 overflow-hidden ${isPending ? "opacity-90" : "opacity-100"}`}>
+          <div className={`bg-white dark:bg-slate-900 border border-blue-500/40 dark:border-blue-500/30 rounded-2xl shadow-xl shadow-blue-500/10 transition-opacity duration-150 overflow-hidden ${isPending ? "opacity-90" : "opacity-100"}`}>
 
             {/* ── Main content: left filters + right zones ── */}
             <div className="flex divide-x divide-slate-100 dark:divide-slate-800">
