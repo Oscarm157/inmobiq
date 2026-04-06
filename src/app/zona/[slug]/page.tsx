@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
 import { DemoScroll } from "@/components/demo-scroll"
 import { Icon } from "@/components/icon"
+import { BrujulaFloat } from "@/components/zone/brujula-float"
 import { ExportButton } from "@/components/export-button"
 import { EditorialCard } from "@/components/editorial-card"
 import { PipelineCard, PIPELINE_PROJECTS } from "@/components/pipeline-card"
@@ -538,33 +539,6 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                   categoria={rawCat as PropertyCategory}
                 />
                 <ZoneComparisonEnhanced zone={zone} city={city} allZones={allZones} />
-                {/* CTA: Valuar propiedad */}
-                <a
-                  href={`/brujula?zone=${slug}`}
-                  className="group block relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 transition-all hover:scale-[1.01] active:scale-[0.99]"
-                >
-                  <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/[0.1] rounded-full blur-2xl" />
-                    <div className="absolute bottom-0 -left-8 w-32 h-32 bg-cyan-500/[0.07] rounded-full blur-2xl" />
-                  </div>
-                  <div className="relative flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-blue-500/[0.15] flex items-center justify-center shrink-0 mt-0.5">
-                      <Icon name="explore" className="text-blue-400 text-xl" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-white font-extrabold text-[15px] leading-tight mb-1">
-                        ¿Cuánto vale una propiedad aquí?
-                      </p>
-                      <p className="text-slate-400 text-xs leading-relaxed mb-3">
-                        Obtén una valuación estimada con datos reales de {zone.zone_name}
-                      </p>
-                      <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors group-hover:shadow-lg group-hover:shadow-blue-600/20">
-                        <Icon name="arrow_forward" className="text-sm" />
-                        Valuar con Brújula
-                      </span>
-                    </div>
-                  </div>
-                </a>
               </div>
             </div>
           }
@@ -722,6 +696,9 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
       </Suspense></FadeInUp>
 
       </AuthGatedSection>
+
+      {/* Floating Brújula CTA */}
+      <BrujulaFloat slug={slug} zoneName={zone.zone_name} />
     </StaggerContainer>
   )
 }
