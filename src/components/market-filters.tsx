@@ -147,7 +147,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
         className={`flex items-center gap-2 px-6 py-3 border rounded-full text-sm font-bold shadow-sm transition-all ${
           open || activeCount > 0
             ? "bg-slate-800 text-white border-blue-700"
-            : "bg-white text-slate-800 border-slate-200 hover:bg-slate-100 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
+            : "bg-white text-slate-800 border-white hover:bg-slate-100 shadow-lg shadow-white/10"
         }`}
       >
         <Icon name="filter_list" className="text-sm" />
@@ -162,7 +162,7 @@ export function MarketFilters({ defaultOperacion = "", defaultCategoria = "" }: 
 
       {/* Full-width panel — positioned absolutely below button */}
       {open && (
-        <div className="absolute left-0 right-0 z-30 mt-3">
+        <div className="absolute left-0 right-0 z-50 mt-3">
           <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl transition-opacity duration-150 overflow-hidden ${isPending ? "opacity-90" : "opacity-100"}`}>
 
             {/* ── Main content: left filters + right zones ── */}

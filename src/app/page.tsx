@@ -150,20 +150,14 @@ export default async function HomePage({
             </>
           }
           actions={
-            <>
-              <Suspense fallback={
-                <button className="flex items-center gap-2 px-6 py-3 bg-white/[0.08] border border-white/[0.1] text-white rounded-full text-sm font-bold">
-                  <Icon name="filter_list" className="text-sm" />
-                  Filtros
-                </button>
-              }>
-                <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
-              </Suspense>
-              <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <Icon name="ios_share" className="text-sm" />
-                Exportar
+            <Suspense fallback={
+              <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-full text-sm font-bold shadow-lg">
+                <Icon name="filter_list" className="text-sm" />
+                Filtros
               </button>
-            </>
+            }>
+              <MarketFilters defaultOperacion={filters.listing_type ?? ""} defaultCategoria={filters.categoria ?? ""} />
+            </Suspense>
           }
         />
       </div>
