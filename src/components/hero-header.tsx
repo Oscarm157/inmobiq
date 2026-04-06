@@ -141,7 +141,7 @@ export function HeroHeader({
   return (
     <div
       className={`relative overflow-visible rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 ${
-        compact ? "p-6 md:p-8" : "p-8 md:p-10 lg:p-12"
+        compact ? "p-6 md:p-8" : "px-8 py-10 md:px-10 md:py-12 lg:px-12 lg:py-14"
       }`}
     >
       {/* ── Atmospheric layer ── */}
