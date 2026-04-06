@@ -293,6 +293,13 @@ export default async function HomePage({
           <FadeInUp><section className="space-y-6">
             <AuthGatedSection>
               <MarketIntelligence insights={insights} />
+            </AuthGatedSection>
+            <AuthGatedSection title={
+              <SectionHeading
+                title="Índice de Oportunidad y Densidad"
+                subtitle="Scoring multi-variable por zona y distribución geográfica"
+              />
+            }>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <OpportunityIndexChart data={opportunityData} />
                 <MarketDensityScatter data={densityData} />
