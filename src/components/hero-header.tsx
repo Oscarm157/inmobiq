@@ -140,12 +140,12 @@ export function HeroHeader({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 ${
+      className={`relative overflow-visible rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 ${
         compact ? "p-6 md:p-8" : "p-8 md:p-10 lg:p-12"
       }`}
     >
       {/* ── Atmospheric layer ── */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" aria-hidden="true">
         {/* Gradient orbs — accent-tinted */}
         <div className={`absolute -top-20 -right-20 w-80 h-80 ${p.orb1} rounded-full blur-3xl`} />
         <div className={`absolute bottom-0 -left-16 w-64 h-64 ${p.orb2} rounded-full blur-3xl`} />
