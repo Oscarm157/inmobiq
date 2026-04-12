@@ -10,12 +10,12 @@ create table if not exists rate_limits (
 -- Index for fast lookups by key + time window
 create index idx_rate_limits_key_created on rate_limits (key, created_at desc);
 
--- Auto-cleanup: delete entries older than 2 hours (runs via pg_cron or manual)
+-- Auto-cleanup: keep enough history for monthly quotas (runs via pg_cron or manual)
 -- For now, a simple function that can be called periodically:
 create or replace function cleanup_rate_limits()
 returns void as $$
 begin
-  delete from rate_limits where created_at < now() - interval '2 hours';
+  delete from rate_limits where created_at < now() - interval '45 days';
 end;
 $$ language plpgsql;
 

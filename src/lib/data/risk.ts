@@ -25,7 +25,7 @@ type SnapshotRow = {
   zone_id: string
   week_start: string
   avg_price_per_m2: number
-  total_listings: number
+  count_active: number
 }
 
 type RentalListingRow = {
@@ -109,7 +109,7 @@ export async function getZoneRiskMetrics(filters?: RiskFilters): Promise<{ data:
     // Build filtered snapshots query
     let snapsQuery = supabase
       .from("snapshots")
-      .select("zone_id, week_start, avg_price_per_m2, total_listings")
+      .select("zone_id, week_start, avg_price_per_m2, count_active")
       .in("week_start", weekStarts)
 
     const effectiveTypes = resolveRiskTypes(filters)
@@ -196,7 +196,7 @@ export async function getZoneRiskMetrics(filters?: RiskFilters): Promise<{ data:
         const capRate = Math.max(3, Math.min(12, 8 - priceTrend * 0.3))
         const liquidityScore = Math.min(
           100,
-          Math.round(latest.total_listings * 0.3 + 30)
+          Math.round(latest.count_active * 0.3 + 30)
         )
 
         const risk_label: ZoneRiskMetrics["risk_label"] =

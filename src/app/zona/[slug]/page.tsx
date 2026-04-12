@@ -6,7 +6,7 @@ import { Icon } from "@/components/icon"
 import { BrujulaFloat } from "@/components/zone/brujula-float"
 import { ExportButton } from "@/components/export-button"
 import { EditorialCard } from "@/components/editorial-card"
-import { PipelineCard, PIPELINE_PROJECTS } from "@/components/pipeline-card"
+import { PipelineCard } from "@/components/pipeline-card"
 import { ZoneMapWrapper } from "@/components/map/zone-map-wrapper"
 import { KPITickerStrip } from "@/components/zone/kpi-ticker-strip"
 import { PropertyCompositionChart } from "@/components/zone/property-composition-chart"
@@ -29,6 +29,7 @@ import { extractRentalAttributesBatch, getZoneCurrencyMix } from "@/lib/data/ren
 import { computeExpenseModel } from "@/lib/data/rental-expenses"
 import { segmentRentalMarket } from "@/lib/data/rental-segmentation"
 import { getZoneRiskMetrics } from "@/lib/data/risk"
+import { getPipelineProjects } from "@/lib/data/pipeline"
 import { BedroomDistributionChart } from "@/components/zone/price-by-bedrooms-chart"
 import { AreaByTypeChart, type AreaByTypeData } from "@/components/zone/area-by-type-chart"
 import { TypeComparison } from "@/components/zone/type-comparison"
@@ -134,7 +135,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     categoria: filters.categoria,
   }
 
-  const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics, lastUpdated] = await Promise.all([
+  const [zone, city, allZones, allZonesFiltered, { listings }, zoneAnalytics, riskMetrics, lastUpdated, pipelineProjects] = await Promise.all([
     getZoneBySlug(slug, filters),
     getCityMetrics(cityFilters),
     getZoneMetrics(),
@@ -143,6 +144,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     getZoneListingsAnalytics(slug, filters),
     getZoneRiskMetrics({ categoria: filters.categoria, listing_type: filters.listing_type }).then(r => r.data),
     getLastSnapshotDate(),
+    getPipelineProjects(),
   ])
   if (!zone) notFound()
 
@@ -451,6 +453,17 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
   // NSE label for investment profile
   const nseLabel = demo?.nse_label ?? null
 
+  const zonePipelineProjects = pipelineProjects.filter((project) => project.zone_slug === slug)
+  const zonePipelineCards = zonePipelineProjects.map((project) => ({
+    img: project.img,
+    name: project.name,
+    badge: project.status_label,
+    badgeColor: project.badge_color,
+    sub: `${project.description} · Entrega ${project.delivery_date}`,
+    investors: Math.min(project.investors, 3),
+    investorLabel: project.investor_label,
+  }))
+
   return (
     <StaggerContainer className="space-y-8">
       <Suspense><DemoScroll /></Suspense>
@@ -684,11 +697,17 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
                     </a>
                   }
                 />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {PIPELINE_PROJECTS.map((p) => (
-                    <PipelineCard key={p.name} project={p} />
-                  ))}
-                </div>
+                {zonePipelineCards.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {zonePipelineCards.map((project) => (
+                      <PipelineCard key={project.name} project={project} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-sm text-muted-foreground">
+                    Aun no hay proyectos activos cargados para esta zona.
+                  </div>
+                )}
               </section>
             </div>
           }

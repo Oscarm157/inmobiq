@@ -1,7 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { rateLimit } from "@/lib/rate-limit"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
 const VALID_EVENT_TYPES = new Set(["pageview", "feature", "export", "brujula", "search"])
+const ANALYTICS_WINDOW_MS = 60_000
+const ANALYTICS_LIMIT = 120
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for")
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() || "unknown"
+  }
+  return request.headers.get("x-real-ip") ?? "unknown"
+}
 
 /**
  * POST /api/analytics — record an analytics event.
@@ -26,6 +37,9 @@ export async function POST(request: NextRequest) {
   // Truncate to avoid abuse
   const sessionId = body.session_id.slice(0, 64)
   const eventName = body.event_name.slice(0, 200)
+  const ip = getClientIp(request)
+  const limited = await rateLimit(`analytics:${ip}`, ANALYTICS_LIMIT, ANALYTICS_WINDOW_MS)
+  if (limited) return limited
 
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()

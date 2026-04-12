@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { effectivePriceMxn } from "@/lib/data/normalize"
 import { MOCK_LISTINGS, TIJUANA_ZONES } from "@/lib/mock-data"
 import { Icon } from "@/components/icon"
 import { Breadcrumb } from "@/components/breadcrumb"
@@ -19,25 +20,72 @@ export function generateMetadata({ searchParams }: { searchParams: Promise<{ q?:
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
-function formatPrice(price: number): string {
-  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(1)}M`
-  if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`
-  return `$${price.toLocaleString("es-MX")}`
+function toNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value
+  if (typeof value === "string") {
+    const normalized = value.replace(/,/g, "").trim()
+    if (!normalized) return null
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
 }
 
-async function getSearchResults(q: string) {
-  const lower = q.toLowerCase()
+function getMockSearchResults(query: string) {
+  const lower = query.toLowerCase()
 
-  if (useMock()) {
-    const zonas = TIJUANA_ZONES.filter(
+  return {
+    zonas: TIJUANA_ZONES.filter(
       (z: ZoneMetrics) =>
         z.zone_name.toLowerCase().includes(lower) ||
         z.zone_slug.includes(lower)
-    )
-    const propiedades = MOCK_LISTINGS.filter((l: Listing) =>
+    ),
+    propiedades: MOCK_LISTINGS.filter((l: Listing) =>
       l.title.toLowerCase().includes(lower)
+    ),
+  }
+}
+
+function mapSearchRowToListing(row: Record<string, unknown>): Listing | null {
+  const price =
+    toNumber(row.price) ??
+    effectivePriceMxn(
+      toNumber(row.price_mxn),
+      toNumber(row.price_usd),
     )
-    return { zonas, propiedades }
+
+  if (!price || price <= 0) return null
+
+  const areaM2 =
+    toNumber(row.area_m2) ??
+    toNumber(row.area_construccion_m2) ??
+    toNumber(row.area_terreno_m2) ??
+    0
+  const pricePerM2 = toNumber(row.price_per_m2) ?? (areaM2 > 0 ? price / areaM2 : 0)
+
+  return {
+    id: String(row.id ?? ""),
+    zone_id: String(row.zone_id ?? ""),
+    title: String(row.title ?? ""),
+    property_type: row.property_type as Listing["property_type"],
+    listing_type: row.listing_type as Listing["listing_type"],
+    price,
+    area_m2: areaM2,
+    area_construccion_m2: toNumber(row.area_construccion_m2),
+    area_terreno_m2: toNumber(row.area_terreno_m2),
+    price_per_m2: pricePerM2,
+    bedrooms: toNumber(row.bedrooms),
+    bathrooms: toNumber(row.bathrooms),
+    source: (row.source ?? row.source_portal ?? "otro") as Listing["source"],
+    source_url: String(row.source_url ?? row.external_url ?? ""),
+    scraped_at: String(row.scraped_at ?? row.created_at ?? ""),
+    created_at: String(row.created_at ?? row.scraped_at ?? ""),
+  }
+}
+
+async function getSearchResults(q: string) {
+  if (useMock()) {
+    return getMockSearchResults(q)
   }
 
   try {
@@ -47,21 +95,31 @@ async function getSearchResults(q: string) {
     const [zonesRes, rpcRes] = await Promise.all([
       supabase
         .from("zones")
-        .select("*")
+        .select("id, name, slug")
         .or(`name.ilike.%${q}%,slug.ilike.%${q}%`)
         .limit(8),
-      (supabase as any).rpc("fn_search_listings", { query: q, limit_count: 20 }),
+      (supabase as any).rpc("fn_search_listings", { p_query: q, p_limit: 20 }),
     ])
 
-    let propiedades: Listing[] = (rpcRes.data as Listing[]) ?? []
+    let propiedades = ((rpcRes.data ?? []) as Array<Record<string, unknown>>)
+      .map(mapSearchRowToListing)
+      .filter((listing): listing is Listing => listing !== null)
 
     if (!propiedades.length || rpcRes.error) {
       const ilike = await supabase
         .from("listings")
-        .select("*")
+        .select(`
+          id, zone_id, title, property_type, listing_type,
+          price_mxn, price_usd, area_m2, area_construccion_m2, area_terreno_m2,
+          bedrooms, bathrooms, source_portal, external_url, scraped_at, created_at
+        `)
+        .eq("is_active", true)
         .ilike("title", `%${q}%`)
+        .order("scraped_at", { ascending: false })
         .limit(20)
-      propiedades = (ilike.data as Listing[]) ?? []
+      propiedades = ((ilike.data ?? []) as Array<Record<string, unknown>>)
+        .map(mapSearchRowToListing)
+        .filter((listing): listing is Listing => listing !== null)
     }
 
     const rawZones = (zonesRes.data ?? []) as Array<{ id: string; name: string; slug: string }>
@@ -77,19 +135,9 @@ async function getSearchResults(q: string) {
       avg_ticket_by_type: {} as ZoneMetrics["avg_ticket_by_type"],
     }))
 
-    if (!zonas.length && !propiedades.length) {
-      return {
-        zonas: TIJUANA_ZONES.filter((z) => z.zone_name.toLowerCase().includes(lower)),
-        propiedades: MOCK_LISTINGS.filter((l) => l.title.toLowerCase().includes(lower)),
-      }
-    }
-
     return { zonas, propiedades }
   } catch {
-    return {
-      zonas: TIJUANA_ZONES.filter((z: ZoneMetrics) => z.zone_name.toLowerCase().includes(lower)),
-      propiedades: MOCK_LISTINGS.filter((l: Listing) => l.title.toLowerCase().includes(lower)),
-    }
+    return getMockSearchResults(q)
   }
 }
 
@@ -165,8 +213,12 @@ async function SearchContent({ q }: { q: string }) {
                   <p className="text-sm font-medium text-foreground leading-snug mb-1">{listing.title}</p>
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <Price value={listing.price} className="font-semibold text-foreground" />
-                    <span>·</span>
-                    <span>{listing.area_m2}m²</span>
+                    {listing.area_m2 > 0 && (
+                      <>
+                        <span>·</span>
+                        <span>{listing.area_m2}m²</span>
+                      </>
+                    )}
                     <span>·</span>
                     <span className="capitalize">{listing.property_type}</span>
                     <span>·</span>

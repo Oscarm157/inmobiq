@@ -12,12 +12,37 @@ import { COOKIE_PERFIL, setPreferredPerfil, setPreferredOperacion, setPreferredC
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 
 interface UserProfile {
+  plan?: "free" | "pro" | "business" | null
   perfil: PerfilType | null
   default_operacion: string | null
   default_categoria: string | null
   phone: string | null
   referral_source: string | null
 }
+
+const PLAN_LABELS = {
+  free: "Gratuito",
+  pro: "Pro",
+  business: "Business",
+} as const
+
+const PLAN_FEATURES = {
+  free: [
+    "Hasta 3 valuaciones Brújula por mes",
+    "Hasta 3 exportaciones por mes",
+    "Portafolio y análisis de riesgo",
+  ],
+  pro: [
+    "Valuaciones Brújula ilimitadas",
+    "Exportaciones ilimitadas",
+    "Portafolio y análisis avanzados",
+  ],
+  business: [
+    "Acceso completo para equipo",
+    "Exportaciones ilimitadas y reportes",
+    "Funciones avanzadas y soporte prioritario",
+  ],
+} as const
 
 export default function PerfilPage() {
   const { user, loading, signOut } = useAuth()
@@ -30,7 +55,7 @@ export default function PerfilPage() {
     const supabase = createSupabaseBrowserClient()
     supabase
       .from("user_profiles")
-      .select("perfil, default_operacion, default_categoria, phone, referral_source")
+      .select("plan, perfil, default_operacion, default_categoria, phone, referral_source")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
@@ -78,10 +103,12 @@ export default function PerfilPage() {
     user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null
 
   const provider = user.app_metadata?.provider ?? "email"
+  const plan = profile?.plan ?? "free"
+  const planLabel = PLAN_LABELS[plan]
 
   const handleSignOut = async () => {
     await signOut()
-    router.push("/login")
+    router.push("/")
   }
 
 
@@ -95,7 +122,7 @@ export default function PerfilPage() {
             badge="Cuenta personal"
             badgeIcon="verified_user"
             title={<>{name}<br /><span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent text-2xl sm:text-3xl">{user.email}</span></>}
-            subtitle={`Miembro desde ${joinDate} · Plan gratuito`}
+            subtitle={`Miembro desde ${joinDate} · Plan ${planLabel.toLowerCase()}`}
             accent="blue"
             compact
             meta={
@@ -139,7 +166,7 @@ export default function PerfilPage() {
             <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
               Plan
             </p>
-            <p className="text-sm text-foreground font-medium">Gratuito</p>
+            <p className="text-sm text-foreground font-medium">{planLabel}</p>
           </div>
           <Icon name="workspace_premium" className="text-muted-foreground/40 text-xl" />
         </div>
@@ -160,13 +187,10 @@ export default function PerfilPage() {
       <div className="bg-kpi-icon-blue rounded-2xl border border-primary/10 p-6">
         <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
           <Icon name="lock_open" className="text-base" />
-          Funciones desbloqueadas
+          Tu plan incluye
         </h3>
         <ul className="space-y-2">
-          {[
-            "Guardar presets de portafolio",
-            "Exportar reportes PDF/Excel",
-          ].map((feat) => (
+          {PLAN_FEATURES[plan].map((feat) => (
             <li key={feat} className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
               <Icon name="check_circle" className="text-green-500 dark:text-green-400 text-base" />
               {feat}
@@ -183,7 +207,7 @@ export default function PerfilPage() {
         // Re-fetch profile after saving defaults
         if (!user) return
         const supabase = createSupabaseBrowserClient()
-        supabase.from("user_profiles").select("perfil, default_operacion, default_categoria, phone, referral_source").eq("id", user.id).single().then(({ data }) => { if (data) setProfile(data as UserProfile) })
+        supabase.from("user_profiles").select("plan, perfil, default_operacion, default_categoria, phone, referral_source").eq("id", user.id).single().then(({ data }) => { if (data) setProfile(data as UserProfile) })
       }} />
 
       {/* Sign out */}

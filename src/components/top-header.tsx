@@ -41,7 +41,7 @@ export function TopHeader() {
   const handleSignOut = async () => {
     setMenuOpen(false)
     await signOut()
-    router.push("/login")
+    router.push("/")
   }
 
   // User display info
