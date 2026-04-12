@@ -35,16 +35,33 @@ interface RiskMatrixProps {
   zones: ZoneMetrics[]
 }
 
+interface RiskMatrixPoint {
+  zone: string
+  risk_score: number
+  return_pct: number
+  risk_label: ZoneRiskMetrics["risk_label"]
+}
+
 export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
-  const data = riskData.map((r) => {
-    const zone = zones.find((z) => z.zone_slug === r.zone_slug)
-    return {
-      zone: r.zone_name,
-      risk_score: r.risk_score,
-      return_pct: zone?.price_trend_pct ?? 0,
-      risk_label: r.risk_label,
-    }
-  })
+  const data = riskData
+    .map((r) => {
+      const zone = zones.find((z) => z.zone_slug === r.zone_slug)
+      const returnPct = Number.isFinite(zone?.price_trend_pct)
+        ? Number(zone?.price_trend_pct)
+        : r.smoothed_trend_pct
+
+      if (!Number.isFinite(r.risk_score) || !Number.isFinite(returnPct)) {
+        return null
+      }
+
+      return {
+        zone: r.zone_name,
+        risk_score: r.risk_score,
+        return_pct: returnPct,
+        risk_label: r.risk_label,
+      } satisfies RiskMatrixPoint
+    })
+    .filter((entry): entry is RiskMatrixPoint => entry !== null)
 
   return (
     <div className="bg-surface rounded-xl p-6 card-shadow">
@@ -52,6 +69,14 @@ export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
       <p className="text-xs text-slate-500 font-medium mb-6">
         Posicionamiento de cada zona según su perfil de riesgo y crecimiento
       </p>
+      {data.length === 0 ? (
+        <div className="h-[350px] rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-center px-6">
+          <div>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No hay datos suficientes para la matriz</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cuando existan métricas válidas de riesgo y retorno por zona, aparecerán aquí.</p>
+          </div>
+        </div>
+      ) : (
       <ChartContainer config={chartConfig} className="h-[350px] w-full">
         <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -84,6 +109,7 @@ export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
           </Scatter>
         </ScatterChart>
       </ChartContainer>
+      )}
       <div className="flex items-center justify-center gap-6 mt-4">
         {Object.entries(riskColors).map(([label, color]) => (
           <div key={label} className="flex items-center gap-2">
