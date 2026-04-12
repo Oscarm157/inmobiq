@@ -6,23 +6,11 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
   Cell,
-  Label,
 } from "recharts"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart"
 import type { ZoneRiskMetrics, ZoneMetrics } from "@/types/database"
-
-const chartConfig = {
-  zone: {
-    label: "Zona",
-    color: "#2563eb",
-  },
-} satisfies ChartConfig
 
 const riskColors: Record<string, string> = {
   Bajo: "#22c55e",
@@ -77,38 +65,54 @@ export function RiskMatrix({ riskData, zones }: RiskMatrixProps) {
           </div>
         </div>
       ) : (
-      <ChartContainer config={chartConfig} className="h-[350px] w-full">
-        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis type="number" dataKey="risk_score" domain={[15, 75]}>
-            <Label value="Risk Score →" offset={-10} position="insideBottomRight" className="text-xs" />
-          </XAxis>
-          <YAxis type="number" dataKey="return_pct" domain={[-3, 9]}>
-            <Label value="Retorno % →" angle={-90} position="insideLeft" className="text-xs" />
-          </YAxis>
-          <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter={(value, name) => {
-                  if (name === "risk_score") return `Riesgo: ${value}`
-                  if (name === "return_pct") return `Retorno: ${value}%`
-                  return `${value}`
+        <div className="h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(100,116,139,0.15)" />
+              <XAxis
+                type="number"
+                dataKey="risk_score"
+                name="Riesgo"
+                domain={["dataMin - 5", "dataMax + 5"]}
+                tick={{ fontSize: 11, fill: "currentColor" }}
+                className="text-slate-500 dark:text-slate-400"
+              />
+              <YAxis
+                type="number"
+                dataKey="return_pct"
+                name="Retorno"
+                domain={["dataMin - 1", "dataMax + 1"]}
+                tickFormatter={(v: number) => `${v.toFixed(1)}%`}
+                tick={{ fontSize: 11, fill: "currentColor" }}
+                className="text-slate-500 dark:text-slate-400"
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null
+                  const point = payload[0]?.payload as RiskMatrixPoint | undefined
+                  if (!point) return null
+                  return (
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-lg text-xs">
+                      <p className="font-bold text-slate-800 dark:text-slate-100">{point.zone}</p>
+                      <p className="text-slate-500 dark:text-slate-400">Riesgo: {point.risk_score}/100</p>
+                      <p className="text-slate-500 dark:text-slate-400">Retorno: {point.return_pct.toFixed(1)}%</p>
+                    </div>
+                  )
                 }}
-                nameKey="zone"
               />
-            }
-          />
-          <Scatter data={data} fill="#2563eb">
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={riskColors[entry.risk_label]}
-                r={8}
-              />
-            ))}
-          </Scatter>
-        </ScatterChart>
-      </ChartContainer>
+              <Scatter data={data} name="Zonas">
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={riskColors[entry.risk_label]}
+                    stroke={riskColors[entry.risk_label]}
+                    fillOpacity={0.8}
+                  />
+                ))}
+              </Scatter>
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
       )}
       <div className="flex items-center justify-center gap-6 mt-4">
         {Object.entries(riskColors).map(([label, color]) => (
