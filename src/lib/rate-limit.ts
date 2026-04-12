@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "./supabase-server"
+import { createSupabaseAdminClient } from "./supabase-admin"
 
 /**
  * Supabase-backed rate limiter that works across Vercel serverless instances.
@@ -17,7 +17,7 @@ export async function rateLimit(
   windowMs: number
 ): Promise<NextResponse | null> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = createSupabaseAdminClient()
     const now = Date.now()
     const windowStart = new Date(now - windowMs).toISOString()
 

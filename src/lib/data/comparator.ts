@@ -50,7 +50,7 @@ export async function getZoneComparisonData(
       zoneIds.map((zoneId) =>
         supabase
           .from("snapshots")
-          .select("week_start, avg_price_per_m2, total_listings")
+          .select("week_start, avg_price_per_m2, count_active")
           .eq("zone_id", zoneId)
           .order("week_start", { ascending: true })
           .limit(12)

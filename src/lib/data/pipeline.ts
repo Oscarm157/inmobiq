@@ -4,7 +4,7 @@ import type { PipelineProject } from "@/types/database"
 
 /**
  * Returns pipeline projects from Supabase.
- * Falls back to mock data if the table doesn't exist yet or query fails.
+ * Mock data is reserved for explicit mock mode only.
  */
 export async function getPipelineProjects(): Promise<PipelineProject[]> {
   if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
@@ -21,7 +21,7 @@ export async function getPipelineProjects(): Promise<PipelineProject[]> {
       .order("created_at", { ascending: false })
 
     if (error || !data || data.length === 0) {
-      return PIPELINE_PROJECTS_EXTENDED
+      return []
     }
 
     return data.map((row: Record<string, unknown>) => ({
@@ -42,6 +42,6 @@ export async function getPipelineProjects(): Promise<PipelineProject[]> {
       investor_label: row.investor_label as string,
     }))
   } catch {
-    return PIPELINE_PROJECTS_EXTENDED
+    return []
   }
 }

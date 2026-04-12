@@ -23,7 +23,7 @@ export default async function PipelinePage() {
 
   const totalUnits = projects.reduce((s, p) => s + p.units_total, 0)
   const totalSold = projects.reduce((s, p) => s + p.units_sold, 0)
-  const avgSoldPct = Math.round((totalSold / totalUnits) * 100)
+  const avgSoldPct = totalUnits > 0 ? Math.round((totalSold / totalUnits) * 100) : 0
 
   const grouped: Record<string, typeof projects> = {
     planificacion: projects.filter((p) => p.status === "planificacion"),
@@ -88,6 +88,21 @@ export default async function PipelinePage() {
         </div>
       </div></FadeInUp>
 
+      {projects.length === 0 && (
+        <FadeInUp>
+          <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-inset">
+              <Icon name="construction" className="text-xl text-muted-foreground" />
+            </div>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">Pipeline sin proyectos activos</h2>
+            <p className="mx-auto max-w-xl text-sm text-muted-foreground">
+              Esta vista ya no mezcla datos demo cuando no hay registros reales. En cuanto se carguen proyectos
+              activos en `pipeline_projects`, apareceran aqui.
+            </p>
+          </div>
+        </FadeInUp>
+      )}
+
       {/* Kanban by status */}
       {Object.entries(grouped).map(([status, statusProjects]) => {
         if (!statusProjects.length) return null
@@ -135,7 +150,7 @@ export default async function PipelinePage() {
                       <div className="h-1.5 bg-surface-inset rounded-full overflow-hidden">
                         <div
                           className="h-full bg-foreground/70 rounded-full"
-                          style={{ width: `${(project.units_sold / project.units_total) * 100}%` }}
+                          style={{ width: `${project.units_total > 0 ? (project.units_sold / project.units_total) * 100 : 0}%` }}
                         />
                       </div>
                       <div className="flex justify-between">

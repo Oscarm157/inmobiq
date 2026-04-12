@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import * as XLSX from "xlsx"
 import { getZoneMetrics } from "@/lib/data/zones"
+import { effectivePriceMxn } from "@/lib/data/normalize"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { rateLimit } from "@/lib/rate-limit"
 import { getUserPlan, PLAN_LIMITS } from "@/lib/user-plan"
@@ -21,18 +22,28 @@ interface ExportBody {
   filters?: ExportFilters
 }
 
+interface ExportListing extends Listing {
+  zone_name: string
+  zone_slug: string
+  zones: {
+    name: string
+    slug: string
+  }
+}
+
 const MAX_ROWS = 5000
 
 async function fetchListingsFromSupabase(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   filters: ExportFilters
-): Promise<Listing[] | null> {
+): Promise<ExportListing[] | null> {
   try {
     let q = supabase.from("listings").select(`
-      id, title, property_type, listing_type, price, area_m2, area_construccion_m2, area_terreno_m2, price_per_m2,
-      bedrooms, bathrooms, source, source_url, scraped_at,
+      id, zone_id, title, property_type, listing_type,
+      price_mxn, price_usd, area_m2, area_construccion_m2, area_terreno_m2,
+      bedrooms, bathrooms, source_portal, external_url, scraped_at, created_at,
       zones!inner(name, slug)
-    `)
+    `).eq("is_active", true)
 
     if (filters.zone_slug) {
       q = q.eq("zones.slug", filters.zone_slug)
@@ -43,15 +54,50 @@ async function fetchListingsFromSupabase(
     if (filters.listing_type) {
       q = q.eq("listing_type", filters.listing_type)
     }
-    if (filters.min_price) {
-      q = q.gte("price", filters.min_price)
-    }
-    if (filters.max_price) {
-      q = q.lte("price", filters.max_price)
-    }
-
     const res = await q.limit(MAX_ROWS).order("scraped_at", { ascending: false })
-    return res.data as Listing[] | null
+    if (res.error || !res.data) return null
+
+    const listings = (res.data as Array<Record<string, unknown>>)
+      .map((row) => {
+        const price = effectivePriceMxn(
+          typeof row.price_mxn === "number" ? row.price_mxn : null,
+          typeof row.price_usd === "number" ? row.price_usd : null,
+        )
+        const areaM2 = typeof row.area_m2 === "number" ? row.area_m2 : 0
+        if (!price || price <= 0) return null
+        if (filters.min_price && price < filters.min_price) return null
+        if (filters.max_price && price > filters.max_price) return null
+
+        const zone = row.zones as { name?: string; slug?: string } | null
+
+        return {
+          id: String(row.id),
+          zone_id: String(row.zone_id),
+          zone_name: zone?.name ?? "",
+          zone_slug: zone?.slug ?? "",
+          zones: {
+            name: zone?.name ?? "",
+            slug: zone?.slug ?? "",
+          },
+          title: String(row.title ?? ""),
+          property_type: row.property_type as Listing["property_type"],
+          listing_type: row.listing_type as Listing["listing_type"],
+          price,
+          area_m2: areaM2,
+          area_construccion_m2: typeof row.area_construccion_m2 === "number" ? row.area_construccion_m2 : null,
+          area_terreno_m2: typeof row.area_terreno_m2 === "number" ? row.area_terreno_m2 : null,
+          price_per_m2: areaM2 > 0 ? price / areaM2 : 0,
+          bedrooms: typeof row.bedrooms === "number" ? row.bedrooms : null,
+          bathrooms: typeof row.bathrooms === "number" ? row.bathrooms : null,
+          source: row.source_portal as Listing["source"],
+          source_url: String(row.external_url ?? ""),
+          scraped_at: String(row.scraped_at ?? row.created_at ?? ""),
+          created_at: String(row.created_at ?? row.scraped_at ?? ""),
+        } satisfies ExportListing
+      })
+      .filter((listing) => listing !== null) as ExportListing[]
+
+    return listings
   } catch {
     return null
   }
@@ -99,7 +145,6 @@ export async function POST(req: NextRequest) {
   if (limited) return limited
 
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
   const body = await req.json().catch(() => ({})) as ExportBody
   const format: ExportFormat = body.format === "csv" ? "csv" : "excel"
