@@ -19,6 +19,14 @@ const maturityLabels = {
   maduro: "Maduro",
 }
 
+function formatCompactMoney(value: number): string {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
 export function RiskZoneCard({ risk }: RiskZoneCardProps) {
   const colors = riskColors[risk.risk_label]
 
@@ -78,7 +86,7 @@ export function RiskZoneCard({ risk }: RiskZoneCardProps) {
           <Icon name="payments" className="text-slate-400 text-sm" />
           <div>
             <p className="text-xs text-slate-500 font-semibold">Renta/m²</p>
-            <p className="text-sm font-black">${risk.avg_rent_per_m2}</p>
+            <p className="text-sm font-black">{formatCompactMoney(Math.round(risk.avg_rent_per_m2))}</p>
           </div>
         </div>
       </div>

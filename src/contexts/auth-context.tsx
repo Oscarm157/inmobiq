@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
   type ReactNode,
 } from "react"
 import type { User, Session } from "@supabase/supabase-js"
@@ -39,49 +40,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hasSupabaseConfig ? createSupabaseBrowserClient() : null
   )
 
+  const refreshAdminStatus = useCallback(async (user: User | null) => {
+    if (!supabase || !user) {
+      setIsAdmin(false)
+      return
+    }
+
+    try {
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+      setIsAdmin((data as { role: string } | null)?.role === "admin")
+    } catch {
+      setIsAdmin(false)
+    }
+  }, [supabase])
+
   useEffect(() => {
     if (!supabase) return
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    let active = true
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active) return
+
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) {
-        try {
-          const { data } = await supabase
-            .from("user_profiles")
-            .select("role")
-            .eq("id", session.user.id)
-            .single()
-          setIsAdmin((data as { role: string } | null)?.role === "admin")
-        } catch {
-          setIsAdmin(false)
-        }
-      } else {
-        setIsAdmin(false)
-      }
       setLoading(false)
+
+      void refreshAdminStatus(session?.user ?? null)
     }).catch(() => {
+      if (!active) return
       setLoading(false)
+      setIsAdmin(false)
     })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) {
-        const { data } = await supabase
-          .from("user_profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single()
-        setIsAdmin((data as { role: string } | null)?.role === "admin")
-      } else {
-        setIsAdmin(false)
-      }
+      setLoading(false)
+      void refreshAdminStatus(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [supabase, refreshAdminStatus])
 
   const signInWithGoogle = async (redirectTo?: string) => {
     if (!supabase) return

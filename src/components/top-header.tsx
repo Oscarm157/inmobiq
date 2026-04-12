@@ -113,59 +113,59 @@ export function TopHeader() {
 
 
           {/* User avatar + dropdown */}
-          {!loading && (
-            <div className="relative" ref={menuRef}>
-              {user ? (
-                <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="h-9 w-9 rounded-full overflow-hidden border-2 border-slate-200 dark:border-blue-900 bg-blue-200 dark:bg-blue-900 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all"
-                  aria-label="Menú de usuario"
-                >
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-xs font-bold text-slate-700 dark:text-blue-300">{initials}</span>
-                  )}
-                </button>
-              ) : (
-                <button
-                  onClick={() => openAuthModal("login")}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-full text-xs font-bold hover:bg-slate-700 transition-colors"
-                >
-                  <Icon name="login" className="text-sm" />
-                  <span className="hidden sm:inline">Iniciar sesión</span>
-                  <span className="sm:hidden">Entrar</span>
-                </button>
-              )}
+          <div className="relative" ref={menuRef}>
+            {loading ? (
+              <div className="h-9 w-9 rounded-full border-2 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 animate-pulse" aria-hidden="true" />
+            ) : user ? (
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="h-9 w-9 rounded-full overflow-hidden border-2 border-slate-200 dark:border-blue-900 bg-blue-200 dark:bg-blue-900 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all"
+                aria-label="Menú de usuario"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-slate-700 dark:text-blue-300">{initials}</span>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={() => openAuthModal("login")}
+                className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-full text-xs font-bold hover:bg-slate-700 transition-colors"
+              >
+                <Icon name="login" className="text-sm" />
+                <span className="hidden sm:inline">Iniciar sesión</span>
+                <span className="sm:hidden">Entrar</span>
+              </button>
+            )}
 
-              {/* Dropdown menu */}
-              {menuOpen && user && (
-                <div className="absolute right-0 top-12 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{userName}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
-                  </div>
-                  <div className="py-1">
-                    <Link
-                      href="/perfil"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <Icon name="person" className="text-base text-slate-400" />
-                      Mi Perfil
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
-                    >
-                      <Icon name="logout" className="text-base" />
-                      Cerrar sesión
-                    </button>
-                  </div>
+            {/* Dropdown menu */}
+            {menuOpen && user && (
+              <div className="absolute right-0 top-12 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{userName}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
                 </div>
-              )}
-            </div>
-          )}
+                <div className="py-1">
+                  <Link
+                    href="/perfil"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <Icon name="person" className="text-base text-slate-400" />
+                    Mi Perfil
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
+                  >
+                    <Icon name="logout" className="text-base" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Mobile overflow menu (⋮) */}
           <div className="relative md:hidden" ref={moreMenuRef}>
