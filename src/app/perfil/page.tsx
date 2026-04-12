@@ -381,6 +381,8 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
 
   const [operacion, setOperacion] = useState<string>("")
   const [categoria, setCategoria] = useState<string>("")
+  const [savedOp, setSavedOp] = useState<string>("")
+  const [savedCat, setSavedCat] = useState<string>("")
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
 
@@ -388,17 +390,17 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
   useEffect(() => {
     setOperacion(defaultOperacion)
     setCategoria(defaultCategoria)
+    setSavedOp(defaultOperacion)
+    setSavedCat(defaultCategoria)
   }, [defaultOperacion, defaultCategoria])
 
-  const savedOp = defaultOperacion
-  const savedCat = defaultCategoria
   const hasChanges = operacion !== savedOp || categoria !== savedCat
 
   const handleSave = useCallback(async () => {
     if (!hasChanges) return
     setSaving(true)
     try {
-      await fetch("/api/perfil", {
+      const res = await fetch("/api/perfil", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -406,6 +408,9 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
           default_categoria: categoria,
         }),
       })
+      if (!res.ok) throw new Error("save_failed")
+      setSavedOp(operacion)
+      setSavedCat(categoria)
     } catch {}
     setSaving(false)
     setJustSaved(true)
