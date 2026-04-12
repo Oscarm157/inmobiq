@@ -71,7 +71,7 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <Breadcrumb items={[{ label: "Perfil" }]} />
         <div className="flex flex-col items-center justify-center min-h-48 gap-3">
           <div className="w-5 h-5 border-2 border-slate-200 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin" />
@@ -83,7 +83,7 @@ export default function PerfilPage() {
 
   if (!user) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <Breadcrumb items={[{ label: "Perfil" }]} />
         <div className="flex flex-col items-center justify-center min-h-48 gap-3">
           <Icon name="login" className="text-3xl text-slate-300 dark:text-slate-600" />
@@ -113,7 +113,7 @@ export default function PerfilPage() {
 
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <Breadcrumb items={[{ label: "Perfil" }]} />
       {(() => {
         const joinDate = new Date(user.created_at).toLocaleDateString("es-MX", { month: "long", year: "numeric" })
@@ -135,89 +135,125 @@ export default function PerfilPage() {
         )
       })()}
 
-      {/* Account details */}
-      <div className="bg-surface rounded-2xl border border-border/50 card-shadow divide-y divide-border">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
-              Correo electrónico
-            </p>
-            <p className="text-sm text-foreground font-medium">{user.email}</p>
-          </div>
-          <Icon name="email" className="text-muted-foreground/40 text-xl" />
-        </div>
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
-              Miembro desde
-            </p>
-            <p className="text-sm text-foreground font-medium">
-              {new Date(user.created_at).toLocaleDateString("es-MX", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-          </div>
-          <Icon name="calendar_today" className="text-muted-foreground/40 text-xl" />
-        </div>
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
-              Plan
-            </p>
-            <p className="text-sm text-foreground font-medium">{planLabel}</p>
-          </div>
-          <Icon name="workspace_premium" className="text-muted-foreground/40 text-xl" />
-        </div>
-        {profile?.phone && (
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
-                Teléfono
+      <div className="grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+        <aside className="space-y-6 xl:sticky xl:top-24">
+          <div className="bg-surface rounded-2xl border border-border/50 card-shadow overflow-hidden">
+            <div className="px-6 py-5 border-b border-border bg-surface/60">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                Cuenta
               </p>
-              <p className="text-sm text-foreground font-medium">{profile.phone}</p>
+              <div className="flex items-start gap-4">
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt={name}
+                    width={52}
+                    height={52}
+                    className="rounded-2xl border border-border/60"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 flex items-center justify-center font-black text-lg">
+                    {name.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-base font-bold text-foreground truncate">{name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                  <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-kpi-icon-blue text-blue-800 dark:text-blue-300 text-[11px] font-bold">
+                    <Icon name="workspace_premium" className="text-sm" />
+                    Plan {planLabel}
+                  </div>
+                </div>
+              </div>
             </div>
-            <Icon name="phone" className="text-muted-foreground/40 text-xl" />
+
+            <div className="divide-y divide-border">
+              <div className="px-6 py-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
+                    Correo electrónico
+                  </p>
+                  <p className="text-sm text-foreground font-medium break-all">{user.email}</p>
+                </div>
+                <Icon name="email" className="text-muted-foreground/40 text-xl flex-shrink-0" />
+              </div>
+              <div className="px-6 py-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
+                    Miembro desde
+                  </p>
+                  <p className="text-sm text-foreground font-medium">
+                    {new Date(user.created_at).toLocaleDateString("es-MX", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+                <Icon name="calendar_today" className="text-muted-foreground/40 text-xl flex-shrink-0" />
+              </div>
+              {profile?.phone && (
+                <div className="px-6 py-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">
+                      Teléfono
+                    </p>
+                    <p className="text-sm text-foreground font-medium">{profile.phone}</p>
+                  </div>
+                  <Icon name="phone" className="text-muted-foreground/40 text-xl flex-shrink-0" />
+                </div>
+              )}
+            </div>
           </div>
-        )}
+
+          <div className="bg-kpi-icon-blue rounded-2xl border border-primary/10 p-6">
+            <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
+              <Icon name="lock_open" className="text-base" />
+              Tu plan incluye
+            </h3>
+            <ul className="space-y-2.5">
+              {PLAN_FEATURES[plan].map((feat) => (
+                <li key={feat} className="flex items-start gap-2 text-sm text-blue-800 dark:text-blue-300">
+                  <Icon name="check_circle" className="text-green-500 dark:text-green-400 text-base mt-0.5 flex-shrink-0" />
+                  <span>{feat}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center justify-center gap-2 border border-destructive/30 text-destructive hover:bg-destructive/10 font-semibold py-3 px-4 rounded-xl transition-colors"
+          >
+            <Icon name="logout" className="text-base" />
+            Cerrar sesión
+          </button>
+        </aside>
+
+        <section className="space-y-6 min-w-0">
+          <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
+            <PerfilSelector />
+            <DefaultFiltersSelector profile={profile} onSaved={() => {
+              // Re-fetch profile after saving defaults
+              if (!user) return
+              const supabase = createSupabaseBrowserClient()
+              supabase.from("user_profiles").select("plan, perfil, default_operacion, default_categoria, phone, referral_source").eq("id", user.id).single().then(({ data }) => { if (data) setProfile(data as UserProfile) })
+            }} />
+          </div>
+
+          <div className="bg-surface rounded-2xl border border-border/50 card-shadow p-6">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                Resumen
+              </p>
+              <h3 className="text-lg font-bold text-foreground">Configuración de experiencia</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                Define tu perfil de mercado y los filtros que Inmobiq debe priorizar al entrar. Estos ajustes mejoran la experiencia inicial, pero siempre puedes cambiar contexto dentro de cada vista.
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
-
-      {/* Features unlocked */}
-      <div className="bg-kpi-icon-blue rounded-2xl border border-primary/10 p-6">
-        <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
-          <Icon name="lock_open" className="text-base" />
-          Tu plan incluye
-        </h3>
-        <ul className="space-y-2">
-          {PLAN_FEATURES[plan].map((feat) => (
-            <li key={feat} className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
-              <Icon name="check_circle" className="text-green-500 dark:text-green-400 text-base" />
-              {feat}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Market profile selector */}
-      <PerfilSelector />
-
-      {/* Default filters */}
-      <DefaultFiltersSelector profile={profile} onSaved={() => {
-        // Re-fetch profile after saving defaults
-        if (!user) return
-        const supabase = createSupabaseBrowserClient()
-        supabase.from("user_profiles").select("plan, perfil, default_operacion, default_categoria, phone, referral_source").eq("id", user.id).single().then(({ data }) => { if (data) setProfile(data as UserProfile) })
-      }} />
-
-      {/* Sign out */}
-      <button
-        onClick={handleSignOut}
-        className="w-full flex items-center justify-center gap-2 border border-destructive/30 text-destructive hover:bg-destructive/10 font-semibold py-3 px-4 rounded-xl transition-colors"
-      >
-        <Icon name="logout" className="text-base" />
-        Cerrar sesión
-      </button>
     </div>
   )
 }
@@ -340,6 +376,8 @@ function PerfilSelector() {
 
 function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | null; onSaved: () => void }) {
   const perfilConfig = profile?.perfil ? PERFIL_CONFIGS[profile.perfil] : null
+  const defaultOperacion = profile?.default_operacion ?? perfilConfig?.defaultOperacion ?? "venta"
+  const defaultCategoria = profile?.default_categoria ?? perfilConfig?.defaultCategoria ?? "residencial"
 
   const [operacion, setOperacion] = useState<string>("")
   const [categoria, setCategoria] = useState<string>("")
@@ -348,13 +386,12 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
 
   // Initialize from profile data
   useEffect(() => {
-    if (!profile) return
-    setOperacion(profile.default_operacion ?? "")
-    setCategoria(profile.default_categoria ?? "")
-  }, [profile])
+    setOperacion(defaultOperacion)
+    setCategoria(defaultCategoria)
+  }, [defaultOperacion, defaultCategoria])
 
-  const savedOp = profile?.default_operacion ?? ""
-  const savedCat = profile?.default_categoria ?? ""
+  const savedOp = defaultOperacion
+  const savedCat = defaultCategoria
   const hasChanges = operacion !== savedOp || categoria !== savedCat
 
   const handleSave = useCallback(async () => {
@@ -365,8 +402,8 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          default_operacion: operacion || null,
-          default_categoria: categoria || null,
+          default_operacion: operacion,
+          default_categoria: categoria,
         }),
       })
     } catch {}
@@ -375,18 +412,6 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
     setTimeout(() => setJustSaved(false), 2000)
     onSaved()
   }, [operacion, categoria, hasChanges, onSaved])
-
-  const opLabel = (v: string) => {
-    if (v === "venta") return "Venta"
-    if (v === "renta") return "Renta"
-    return perfilConfig ? `Del perfil (${perfilConfig.defaultOperacion})` : "Venta"
-  }
-  const catLabel = (v: string) => {
-    if (v === "residencial") return "Residencial"
-    if (v === "comercial") return "Comercial"
-    if (v === "terreno") return "Terreno"
-    return perfilConfig ? `Del perfil (${perfilConfig.defaultCategoria})` : "Residencial"
-  }
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
@@ -404,18 +429,21 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
             Operación
           </label>
           <div className="flex flex-col gap-1.5">
-            {["", "venta", "renta"].map((v) => (
+            {[
+              { value: "venta", label: "Venta" },
+              { value: "renta", label: "Renta" },
+            ].map(({ value, label }) => (
               <button
-                key={v}
-                onClick={() => setOperacion(v)}
+                key={value}
+                onClick={() => setOperacion(value)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
-                  operacion === v
+                  operacion === value
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300"
                     : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400"
                 }`}
               >
-                {operacion === v && <Icon name="check" className="text-sm text-blue-500" />}
-                {opLabel(v)}
+                {operacion === value && <Icon name="check" className="text-sm text-blue-500" />}
+                {label}
               </button>
             ))}
           </div>
@@ -426,18 +454,22 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
             Categoría
           </label>
           <div className="flex flex-col gap-1.5">
-            {["", "residencial", "comercial", "terreno"].map((v) => (
+            {[
+              { value: "residencial", label: "Residencial" },
+              { value: "comercial", label: "Comercial" },
+              { value: "terreno", label: "Terreno" },
+            ].map(({ value, label }) => (
               <button
-                key={v}
-                onClick={() => setCategoria(v)}
+                key={value}
+                onClick={() => setCategoria(value)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
-                  categoria === v
+                  categoria === value
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300"
                     : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400"
                 }`}
               >
-                {categoria === v && <Icon name="check" className="text-sm text-blue-500" />}
-                {catLabel(v)}
+                {categoria === value && <Icon name="check" className="text-sm text-blue-500" />}
+                {label}
               </button>
             ))}
           </div>
