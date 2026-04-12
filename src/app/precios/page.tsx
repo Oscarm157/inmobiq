@@ -1,4 +1,5 @@
 import { Breadcrumb } from "@/components/breadcrumb"
+import Link from "next/link"
 import { HeroHeader, HeroStat } from "@/components/hero-header"
 import { Icon } from "@/components/icon"
 import { StaggerContainer, FadeInUp } from "@/components/motion-wrappers"
@@ -21,6 +22,7 @@ interface Plan {
   accent: string
   features: PlanFeature[]
   cta: string
+  href?: string
   popular?: boolean
 }
 
@@ -32,24 +34,25 @@ const PLANS: Plan[] = [
     description: "Explora el mercado inmobiliario de Tijuana con datos actualizados.",
     accent: "bg-slate-100 dark:bg-slate-800",
     cta: "Empezar gratis",
+    href: "/login",
     features: [
       { text: "Dashboard de mercado completo", included: true },
       { text: "30 zonas con métricas de precio", included: true },
       { text: "Comparador de zonas (hasta 4)", included: true },
       { text: "Mapa interactivo", included: true },
-      { text: "1 valuación Brújula / mes", included: true },
-      { text: "Exportar reportes PDF/Excel", included: false },
-      { text: "Análisis de riesgo", included: false },
-      { text: "Portafolio avanzado", included: false },
+      { text: "3 valuaciones Brújula / mes", included: true },
+      { text: "3 exportaciones PDF/Excel/CSV por mes", included: true },
+      { text: "Análisis de riesgo", included: true },
+      { text: "Portafolio con presets y filtros", included: true },
     ],
   },
   {
-    name: "Inversionista",
+    name: "Pro",
     price: "$499",
     period: "/mes",
-    description: "Para inversionistas que necesitan datos profundos y herramientas de análisis.",
+    description: "Para inversionistas y operadores que necesitan datos profundos y herramientas de análisis recurrente.",
     accent: "bg-blue-50 dark:bg-blue-950/30",
-    cta: "Próximamente",
+    cta: "Disponible 1 de Mayo 2026",
     popular: true,
     features: [
       { text: "Todo lo de Explorador", included: true },
@@ -63,14 +66,14 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    name: "Pro",
+    name: "Empresarial",
     price: "$1,499",
     period: "/mes",
-    description: "Para brokers, desarrolladores y equipos que necesitan acceso completo.",
+    description: "Para inmobiliarias, desarrolladores y equipos que necesitan acceso completo, colaboración y soporte prioritario.",
     accent: "bg-violet-50 dark:bg-violet-950/30",
-    cta: "Próximamente",
+    cta: "Disponible 1 de Mayo 2026",
     features: [
-      { text: "Todo lo de Inversionista", included: true },
+      { text: "Todo lo de Pro", included: true },
       { text: "Pipeline de desarrollos", included: true },
       { text: "Alertas de precio por email", included: true },
       { text: "API de datos (próximamente)", included: true },
@@ -140,18 +143,19 @@ export default function PreciosPage() {
                 ))}
               </ul>
 
-              <button
-                disabled={plan.cta === "Próximamente"}
-                className={`w-full py-2.5 rounded-full text-sm font-bold transition-all ${
+              <Link
+                href={plan.href ?? "/precios"}
+                aria-disabled={plan.cta === "Próximamente"}
+                className={`block w-full py-2.5 rounded-full text-sm font-bold text-center transition-all ${
                   plan.popular
-                    ? "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed"
+                    ? `bg-blue-600 text-white hover:bg-blue-700 ${plan.cta === "Próximamente" ? "bg-blue-600/50 cursor-not-allowed pointer-events-none" : ""}`
                     : plan.price === "Gratis"
                       ? "bg-foreground text-background hover:opacity-90"
-                      : "bg-surface-inset text-foreground hover:bg-border disabled:opacity-50 disabled:cursor-not-allowed"
+                      : `bg-surface-inset text-foreground hover:bg-border ${plan.cta === "Próximamente" ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`
                 }`}
               >
                 {plan.cta}
-              </button>
+              </Link>
             </div>
           ))}
         </div>

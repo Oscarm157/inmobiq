@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Icon } from "@/components/icon"
+import { useAuth } from "@/contexts/auth-context"
 import type { ValuationVerdict, PropertyType } from "@/types/database"
 
 interface HistoryItem {
@@ -41,20 +42,49 @@ function formatMxn(n: number): string {
 }
 
 export function ValuationHistory() {
+  const { user, loading: authLoading } = useAuth()
   const [items, setItems] = useState<HistoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   useEffect(() => {
+    if (authLoading) return
+    if (!user) {
+      setItems([])
+      setError(false)
+      setLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setLoading(true)
+    setError(false)
+
     fetch("/api/brujula/history")
       .then((r) => {
+        if (r.status === 401) {
+          return { valuations: [] }
+        }
         if (!r.ok) throw new Error()
         return r.json()
       })
-      .then((d) => setItems(d.valuations ?? []))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
-  }, [])
+      .then((d) => {
+        if (cancelled) return
+        setItems(d.valuations ?? [])
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError(true)
+      })
+      .finally(() => {
+        if (cancelled) return
+        setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [authLoading, user])
 
   if (loading) {
     return (
@@ -66,9 +96,11 @@ export function ValuationHistory() {
 
   if (error) {
     return (
-      <p className="text-sm text-slate-400 py-4">
-        No se pudo cargar el historial.
-      </p>
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 text-center">
+        <Icon name="history" className="text-3xl text-slate-300 dark:text-slate-600 mb-2" />
+        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">No se pudo cargar el historial</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Puedes seguir valuando propiedades normalmente mientras lo revisamos.</p>
+      </div>
     )
   }
 

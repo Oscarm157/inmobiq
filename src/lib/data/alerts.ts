@@ -15,13 +15,31 @@ export interface CreateAlertInput {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const alertsTable = () => (createSupabaseBrowserClient() as any).from("price_alerts")
 
+function wrapAlertError(error: unknown): Error {
+  const message = error instanceof Error ? error.message : String(error)
+  const lower = message.toLowerCase()
+
+  if (
+    lower.includes("condition_type")
+    || lower.includes("threshold_value")
+    || lower.includes("last_triggered_at")
+    || lower.includes("is_active")
+    || lower.includes("property_type")
+    || lower.includes("listing_type")
+  ) {
+    return new Error("schema_mismatch")
+  }
+
+  return error instanceof Error ? error : new Error(message)
+}
+
 export async function getAlerts(userId: string): Promise<PriceAlert[]> {
   const { data, error } = await alertsTable()
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
 
-  if (error) throw error
+  if (error) throw wrapAlertError(error)
   return (data as PriceAlert[]) ?? []
 }
 
@@ -34,7 +52,7 @@ export async function createAlert(
     .select()
     .single()
 
-  if (error) throw error
+  if (error) throw wrapAlertError(error)
   return data as PriceAlert
 }
 
@@ -43,7 +61,7 @@ export async function toggleAlert(alertId: string, isActive: boolean): Promise<v
     .update({ is_active: isActive })
     .eq("id", alertId)
 
-  if (error) throw error
+  if (error) throw wrapAlertError(error)
 }
 
 export async function deleteAlert(alertId: string): Promise<void> {
@@ -51,7 +69,7 @@ export async function deleteAlert(alertId: string): Promise<void> {
     .delete()
     .eq("id", alertId)
 
-  if (error) throw error
+  if (error) throw wrapAlertError(error)
 }
 
 export async function getActiveAlertCount(userId: string): Promise<number> {

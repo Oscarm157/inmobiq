@@ -20,6 +20,17 @@ export function generateMetadata({ searchParams }: { searchParams: Promise<{ q?:
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
+function toNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value
+  if (typeof value === "string") {
+    const normalized = value.replace(/,/g, "").trim()
+    if (!normalized) return null
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
 function getMockSearchResults(query: string) {
   const lower = query.toLowerCase()
 
@@ -37,16 +48,20 @@ function getMockSearchResults(query: string) {
 
 function mapSearchRowToListing(row: Record<string, unknown>): Listing | null {
   const price =
-    typeof row.price === "number"
-      ? row.price
-      : effectivePriceMxn(
-          typeof row.price_mxn === "number" ? row.price_mxn : null,
-          typeof row.price_usd === "number" ? row.price_usd : null,
-        )
+    toNumber(row.price) ??
+    effectivePriceMxn(
+      toNumber(row.price_mxn),
+      toNumber(row.price_usd),
+    )
 
   if (!price || price <= 0) return null
 
-  const areaM2 = typeof row.area_m2 === "number" ? row.area_m2 : 0
+  const areaM2 =
+    toNumber(row.area_m2) ??
+    toNumber(row.area_construccion_m2) ??
+    toNumber(row.area_terreno_m2) ??
+    0
+  const pricePerM2 = toNumber(row.price_per_m2) ?? (areaM2 > 0 ? price / areaM2 : 0)
 
   return {
     id: String(row.id ?? ""),
@@ -56,11 +71,11 @@ function mapSearchRowToListing(row: Record<string, unknown>): Listing | null {
     listing_type: row.listing_type as Listing["listing_type"],
     price,
     area_m2: areaM2,
-    area_construccion_m2: typeof row.area_construccion_m2 === "number" ? row.area_construccion_m2 : null,
-    area_terreno_m2: typeof row.area_terreno_m2 === "number" ? row.area_terreno_m2 : null,
-    price_per_m2: typeof row.price_per_m2 === "number" ? row.price_per_m2 : areaM2 > 0 ? price / areaM2 : 0,
-    bedrooms: typeof row.bedrooms === "number" ? row.bedrooms : null,
-    bathrooms: typeof row.bathrooms === "number" ? row.bathrooms : null,
+    area_construccion_m2: toNumber(row.area_construccion_m2),
+    area_terreno_m2: toNumber(row.area_terreno_m2),
+    price_per_m2: pricePerM2,
+    bedrooms: toNumber(row.bedrooms),
+    bathrooms: toNumber(row.bathrooms),
     source: (row.source ?? row.source_portal ?? "otro") as Listing["source"],
     source_url: String(row.source_url ?? row.external_url ?? ""),
     scraped_at: String(row.scraped_at ?? row.created_at ?? ""),
@@ -198,8 +213,12 @@ async function SearchContent({ q }: { q: string }) {
                   <p className="text-sm font-medium text-foreground leading-snug mb-1">{listing.title}</p>
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <Price value={listing.price} className="font-semibold text-foreground" />
-                    <span>·</span>
-                    <span>{listing.area_m2}m²</span>
+                    {listing.area_m2 > 0 && (
+                      <>
+                        <span>·</span>
+                        <span>{listing.area_m2}m²</span>
+                      </>
+                    )}
                     <span>·</span>
                     <span className="capitalize">{listing.property_type}</span>
                     <span>·</span>

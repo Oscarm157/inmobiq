@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Icon } from "@/components/icon"
 import { useAuth } from "@/contexts/auth-context"
 import { openAuthModal } from "@/components/auth-modal"
@@ -126,6 +126,8 @@ const ANON_TOUR_STEPS: TourStep[] = [
 
 const STORAGE_KEY = "inmobiq_tour_completed"
 const ANON_STORAGE_KEY = "inmobiq_anon_tour_completed"
+const AUTO_LAUNCH_DISMISSED_KEY = "inmobiq_tour_auto_launch_dismissed"
+const AUTH_EXCLUDED_PATHS = ["/login"]
 
 // ── Spotlight overlay ──
 
@@ -282,7 +284,7 @@ interface GuidedTourProps {
 }
 
 export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
-  const router = useRouter()
+  const pathname = usePathname()
   const { user, loading: authLoading } = useAuth()
   const [active, setActive] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -293,6 +295,7 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
   const isAnon = !user
   const steps = isAnon ? ANON_TOUR_STEPS : TOUR_STEPS
   const storageKey = isAnon ? ANON_STORAGE_KEY : STORAGE_KEY
+  const autoLaunchBlocked = AUTH_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix))
 
   // Auto-launch on first visit
   useEffect(() => {
@@ -303,12 +306,17 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
       setSkipProfileStep(true)
       return
     }
+    if (autoLaunchBlocked) {
+      setActive(false)
+      return
+    }
+    const autoLaunchDismissed = localStorage.getItem(AUTO_LAUNCH_DISMISSED_KEY)
     const seen = localStorage.getItem(storageKey)
-    if (!seen) {
+    if (!seen && !autoLaunchDismissed) {
       const timer = setTimeout(() => setActive(true), 600)
       return () => clearTimeout(timer)
     }
-  }, [forceOpen, authLoading, storageKey])
+  }, [forceOpen, authLoading, storageKey, autoLaunchBlocked])
 
   // Track target element position
   useEffect(() => {
@@ -358,9 +366,9 @@ export function GuidedTour({ forceOpen, onClose }: GuidedTourProps) {
   const closeTour = useCallback(() => {
     setActive(false)
     localStorage.setItem(storageKey, "true")
+    localStorage.setItem(AUTO_LAUNCH_DISMISSED_KEY, "true")
     onClose?.()
-    router.refresh()
-  }, [onClose, router, storageKey])
+  }, [onClose, storageKey])
 
   const handleProfileSelect = useCallback((perfil: PerfilType) => {
     const config = PERFIL_CONFIGS[perfil]

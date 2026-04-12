@@ -71,8 +71,12 @@ export function AlertasClient({ zones }: AlertasClientProps) {
     try {
       const data = await getAlerts(user.id)
       setAlerts(data)
-    } catch {
-      setError("No se pudieron cargar las alertas.")
+    } catch (err) {
+      if (err instanceof Error && err.message === "schema_mismatch") {
+        setError("Alertas necesita la migración nueva de price_alerts en Supabase.")
+      } else {
+        setError("No se pudieron cargar las alertas.")
+      }
     } finally {
       setLoadingAlerts(false)
     }
@@ -88,8 +92,12 @@ export function AlertasClient({ zones }: AlertasClientProps) {
       setAlerts((prev) =>
         prev.map((a) => (a.id === alert.id ? { ...a, is_active: !a.is_active } : a))
       )
-    } catch {
-      setError("No se pudo actualizar la alerta.")
+    } catch (err) {
+      if (err instanceof Error && err.message === "schema_mismatch") {
+        setError("Alertas necesita la migración nueva de price_alerts en Supabase.")
+      } else {
+        setError("No se pudo actualizar la alerta.")
+      }
     }
   }
 
@@ -97,8 +105,12 @@ export function AlertasClient({ zones }: AlertasClientProps) {
     try {
       await deleteAlert(alertId)
       setAlerts((prev) => prev.filter((a) => a.id !== alertId))
-    } catch {
-      setError("No se pudo eliminar la alerta.")
+    } catch (err) {
+      if (err instanceof Error && err.message === "schema_mismatch") {
+        setError("Alertas necesita la migración nueva de price_alerts en Supabase.")
+      } else {
+        setError("No se pudo eliminar la alerta.")
+      }
     }
   }
 
@@ -129,8 +141,12 @@ export function AlertasClient({ zones }: AlertasClientProps) {
         condition_type: "price_below",
         threshold_value: "",
       })
-    } catch {
-      setError("No se pudo crear la alerta.")
+    } catch (err) {
+      if (err instanceof Error && err.message === "schema_mismatch") {
+        setError("Alertas necesita la migración nueva de price_alerts en Supabase.")
+      } else {
+        setError("No se pudo crear la alerta.")
+      }
     } finally {
       setSaving(false)
     }
@@ -150,8 +166,22 @@ export function AlertasClient({ zones }: AlertasClientProps) {
     return `${CONDITION_LABELS[alert.condition_type].replace(` (${unit})`, "")}: ${alert.threshold_value}${unit}`
   }
 
-  if (loading || (!user && !loading)) {
-    return null
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400">
+        <Icon name="progress_activity" className="animate-spin text-3xl" />
+        <p className="text-sm font-medium">Preparando tus alertas…</p>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-500 dark:text-slate-400">
+        <Icon name="login" className="text-4xl" />
+        <p className="text-sm font-medium">Redirigiendo al inicio de sesión…</p>
+      </div>
+    )
   }
 
   return (
@@ -173,7 +203,7 @@ export function AlertasClient({ zones }: AlertasClientProps) {
         </button>
       </div>
 
-      {error && (
+      {error && alerts.length > 0 && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm">
           {error}
         </div>
@@ -287,6 +317,32 @@ export function AlertasClient({ zones }: AlertasClientProps) {
         <div className="flex items-center gap-3 text-slate-400 py-12 justify-center">
           <Icon name="progress_activity" className="animate-spin" />
           <span className="text-sm">Cargando alertas…</span>
+        </div>
+      ) : error && alerts.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 py-20 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400 flex items-center justify-center">
+            <Icon name="error_outline" className="text-3xl" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              No pudimos cargar tus alertas
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
+              {error === "Alertas necesita la migración nueva de price_alerts en Supabase."
+                ? "La app está esperando el esquema nuevo de alertas. Corre la migración 007_alerts.sql o su equivalente en Supabase."
+                : "Intenta de nuevo. Si el problema sigue, probablemente falta configurar la tabla o permisos de alertas en Supabase."}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setError(null)
+              setLoadingAlerts(true)
+              fetchAlerts()
+            }}
+            className="px-5 py-2.5 bg-slate-700 text-white rounded-full text-sm font-bold shadow hover:bg-slate-900 transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       ) : alerts.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20 text-slate-400">
