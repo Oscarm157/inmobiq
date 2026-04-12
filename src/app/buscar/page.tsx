@@ -20,6 +20,21 @@ export function generateMetadata({ searchParams }: { searchParams: Promise<{ q?:
 
 const useMock = () => process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
 
+function getMockSearchResults(query: string) {
+  const lower = query.toLowerCase()
+
+  return {
+    zonas: TIJUANA_ZONES.filter(
+      (z: ZoneMetrics) =>
+        z.zone_name.toLowerCase().includes(lower) ||
+        z.zone_slug.includes(lower)
+    ),
+    propiedades: MOCK_LISTINGS.filter((l: Listing) =>
+      l.title.toLowerCase().includes(lower)
+    ),
+  }
+}
+
 function mapSearchRowToListing(row: Record<string, unknown>): Listing | null {
   const price =
     typeof row.price === "number"
@@ -54,18 +69,8 @@ function mapSearchRowToListing(row: Record<string, unknown>): Listing | null {
 }
 
 async function getSearchResults(q: string) {
-  const lower = q.toLowerCase()
-
   if (useMock()) {
-    const zonas = TIJUANA_ZONES.filter(
-      (z: ZoneMetrics) =>
-        z.zone_name.toLowerCase().includes(lower) ||
-        z.zone_slug.includes(lower)
-    )
-    const propiedades = MOCK_LISTINGS.filter((l: Listing) =>
-      l.title.toLowerCase().includes(lower)
-    )
-    return { zonas, propiedades }
+    return getMockSearchResults(q)
   }
 
   try {
@@ -117,10 +122,7 @@ async function getSearchResults(q: string) {
 
     return { zonas, propiedades }
   } catch {
-    return {
-      zonas: [],
-      propiedades: [],
-    }
+    return getMockSearchResults(q)
   }
 }
 

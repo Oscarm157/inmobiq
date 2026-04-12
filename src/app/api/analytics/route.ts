@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   const sessionId = body.session_id.slice(0, 64)
   const eventName = body.event_name.slice(0, 200)
   const ip = getClientIp(request)
-  const limited = await rateLimit(`analytics:${ip}:${sessionId}`, ANALYTICS_LIMIT, ANALYTICS_WINDOW_MS)
+  const limited = await rateLimit(`analytics:${ip}`, ANALYTICS_LIMIT, ANALYTICS_WINDOW_MS)
   if (limited) return limited
 
   const supabase = await createSupabaseServerClient()
