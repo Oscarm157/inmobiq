@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const limited = await rateLimit(`perfil:${user.id}`, 10, 3_600_000)
+    const limited = await rateLimit(`perfil:${user.id}`, 50, 3_600_000)
     if (limited) return limited
 
     // Build update object with only valid fields
