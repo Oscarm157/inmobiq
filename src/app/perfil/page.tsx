@@ -385,6 +385,7 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
   const [savedCat, setSavedCat] = useState<string>("")
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Initialize from profile data
   useEffect(() => {
@@ -399,6 +400,7 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
   const handleSave = useCallback(async () => {
     if (!hasChanges) return
     setSaving(true)
+    setSaveError(null)
     try {
       const res = await fetch("/api/perfil", {
         method: "PATCH",
@@ -411,11 +413,15 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
       if (!res.ok) throw new Error("save_failed")
       setSavedOp(operacion)
       setSavedCat(categoria)
-    } catch {}
+      setSaving(false)
+      setJustSaved(true)
+      setTimeout(() => setJustSaved(false), 2000)
+      onSaved()
+      return
+    } catch {
+      setSaveError("No se pudieron guardar los filtros.")
+    }
     setSaving(false)
-    setJustSaved(true)
-    setTimeout(() => setJustSaved(false), 2000)
-    onSaved()
   }, [operacion, categoria, hasChanges, onSaved])
 
   return (
@@ -502,6 +508,12 @@ function DefaultFiltersSelector({ profile, onSaved }: { profile: UserProfile | n
           </span>
         )}
       </div>
+      {saveError && (
+        <p className="mt-3 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+          <Icon name="error_outline" className="text-sm" />
+          {saveError}
+        </p>
+      )}
     </div>
   )
 }
