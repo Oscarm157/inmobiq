@@ -1,0 +1,224 @@
+🔍 AUDITORÍA UX/UI COMPLETA — INMOBIQ
+Análisis profesional de todas las vistas de la plataforma
+Fecha: Marzo 2026 | Auditor: Claude (Senior Frontend/UX Designer)
+
+📊 RESUMEN EJECUTIVO
+DimensiónPuntuaciónEstadoArquitectura de información6.5/10⚠️ MejorableConsistencia visual5.5/10🔴 CríticoNavegación y flujos6/10⚠️ MejorableTipografía y legibilidad7/10✅ AceptableAccesibilidad4/10🔴 CríticoJerarquía visual6/10⚠️ MejorableEmpty states & errores3.5/10🔴 CríticoMobile/Responsive5/10🔴 CríticoPerformance percibida6/10⚠️ MejorableSCORE GLOBAL5.5/10⚠️ Necesita trabajo
+
+🏗️ 1. ARQUITECTURA DE INFORMACIÓN & NAVEGACIÓN GLOBAL
+Problemas críticos
+Doble sistema de navegación sin jerarquía clara. La aplicación tiene tres capas de navegación simultáneas: un sidebar izquierdo (desktop), un topbar/header y una bottom navigation bar (mobile). El sidebar incluye rutas que el bottom nav no tiene (/riesgo, /buscar), lo que crea una experiencia fragmentada. Un usuario mobile nunca ve "Riesgo" ni "Buscar" en la barra inferior, aunque son secciones clave.
+El "Mapa" es huérfano de la navegación principal. La ruta /mapa no aparece en ninguno de los tres sistemas de navegación (sidebar, topbar ni bottom nav). Solo se llega a ella desde un link contextual en el homepage. Si un usuario navega a otra sección y quiere volver al mapa, no encuentra cómo.
+"Brújula" tiene función de valuación pero aparece listada genéricamente. El nombre "Brújula" es poético pero ambiguo. Para un usuario nuevo que quiere saber "si una propiedad está bien de precio", no hay conexión inmediata entre el ícono de brújula y esa acción. Debería llamarse "Valuador" o "Análisis de Precio".
+El botón "Compra / Venta" y "Renta" flotan sin contexto. Aparecen como toggle en el header pero su comportamiento no está indicado. No hay un estado activo claramente visible y no se sabe si filtran toda la app o solo la vista actual.
+Recomendaciones
+
+Unificar la navegación: sidebar colapsable + bottom nav con las MISMAS 6 rutas
+Agregar /mapa al nav principal con ícono map
+Renombrar "Brújula" → "Valuador" o "¿Está bien de precio?"
+El toggle Compra/Renta debe tener un estado activo muy explícito (pill de color, sombra) y siempre estar visible sobre el contenido que afecta
+
+
+🏠 2. HOME / DASHBOARD (/)
+Problemas críticos
+Información duplicada y redundante sin propósito narrativo. La página muestra tres veces datos de "Zonas más caras / más económicas" en diferentes componentes (tabla de precio/m², cards de "Zonas Destacadas" y sección "Zonas Monitoreadas"). Esto genera 3 scrolls de contenido repetido que fatiga al usuario sin aportarle valor incremental.
+La tabla de precio/m² es densa pero sin affordance de acción. La tabla con 25 zonas es uno de los componentes más valiosos de la app, pero visualmente parece un Excel embed. Los links en los nombres de zona son el único CTA, y no son obvios — no se diferencian visualmente del texto plano. El color de la columna "Tendencia" con trending_flat en todas las zonas (0.0%) transmite que la app no tiene datos históricos y erosiona la confianza.
+Tarjetas de KPI en el hero no tienen orden de prioridad. El usuario ve "Precio Promedio / m²", "Ticket Venta Mediana" y "Composición" al mismo nivel. En una herramienta de decisión de inversión, el precio/m² y el yield son lo que importa primero. La "Composición" (54.7% casas) es dato secundario que roba espacio prime.
+"Índice de Oportunidad" y "Densidad de Mercado" no tienen título de sección visible previo. Los gráficos aparecen sin encabezado de sección que prepare al usuario. El scatter plot de "Densidad de Mercado" no tiene tooltips visibles en el árbol DOM, por lo que probablemente sea difícil de leer sin hover.
+Exceso de secciones en un solo scroll. El homepage tiene al menos 11 secciones diferentes: KPIs hero, mapa mini, tabla de zonas, resumen IA, gráfico de barras, distribución, composición, concentración de oferta, tendencia de precio, distribución por tipo, índice de oportunidad, densidad, zonas monitoreadas (cards), inteligencia de mercado y CTA. Esto es demasiado para una sola pantalla.
+Recomendaciones
+
+Reducir el homepage a 5 secciones máximo: Hero KPIs → Mapa → Tabla de zonas → Insights IA → CTA
+Eliminar las cards "Zonas Monitoreadas" del homepage (ya existe /zonas para eso)
+Convertir la tabla en un componente interactivo con hover states claros y una columna de acción explícita ("Ver análisis →")
+Mostrar el estado vacío de "Tendencia" con un mensaje honesto: "Datos históricos disponibles en 2 semanas" en lugar de "0.0% / Sin histórico"
+
+
+🧭 3. BRÚJULA (/brujula)
+Problemas positivos
+El formulario de valuación es el punto fuerte de la app. Tiene buena estructura: operación → tipo → datos numéricos → zona → submit. Los botones de tipo de propiedad con íconos son el mejor elemento de UI de toda la plataforma.
+Problemas críticos
+El tab "Screenshots" no tiene feedback de estado. El botón existe pero no hay indicador de si está activo, si la función de OCR está disponible, o qué pasa al hacer clic. Es una función premium sin onboarding.
+El historial de valuaciones no tiene gestión. Se listan 24+ valuaciones sin posibilidad de borrar, filtrar por fecha/zona o marcar favoritas. Si un usuario usa la app con frecuencia, esto se vuelve un dump de datos inutilizable rápidamente.
+El formulario tiene campos opcionales pero no los marca claramente. Solo "Terreno (m²)" tiene el texto "Opcional". Los campos Recámaras, Baños y Estacionamiento parecen obligatorios pero no lo son. La convención estándar es marcar los opcionales o los obligatorios con * de manera consistente — actualmente solo "Precio", "Construcción" y "Zona" tienen *.
+No hay validación inline visible. Si el usuario deja campos vacíos o pone valores imposibles (ej. 0 m²), no hay indicación de qué pasará.
+El botón "Valuar propiedad" no comunica su costo/consecuencia. ¿Consume créditos? ¿Es gratis? ¿Genera un registro permanente? El usuario no lo sabe.
+Recomendaciones
+
+Agregar un estado "empty" al historial con un CTA claro: "Valúa tu primera propiedad"
+Añadir acciones a cada item del historial: eliminar, compartir, comparar
+Agregar validación inline con mensajes de error debajo de cada campo
+Clarificar el tab "Screenshots" con un tooltip o modal explicativo
+
+
+📍 4. PÁGINA DE ZONA (/zona/zona-rio)
+Problemas positivos
+El sistema de tabs (General, Precios, Composición, Inversión, Tendencias, Zona) es una buena decisión de arquitectura de información. El componente "ADN de la Zona" con el tipo dominante es valioso.
+Problemas críticos
+Los tabs no persisten en URL. Si el usuario está en el tab "Inversión" y comparte el link, el destinatario llega al tab "General". Esto rompe la utilidad de compartir análisis específicos.
+El componente "vs Ciudad" compara precio/m² de zona contra el mismo valor de ciudad — son idénticos. En la Zona Río, "Zona: $67,597" y "Cd.: $67,597" son el mismo número. Esto parece un bug de datos que destruye la credibilidad de la sección.
+El análisis de texto IA tiene un typo en el primer párrafo. Empieza con "ona Río mantiene..." — le falta la "Z" inicial. En un producto que vende inteligencia y confianza, un typo así es muy dañino.
+Scatter plot con decenas de imágenes <img> sin alt. La sección "Precio vs Superficie" carga más de 80 imágenes (img [ref_148] a img [ref_224]) sin atributos alt. Esto es crítico para accesibilidad.
+El botón "Exportar datos" tiene un expand_more que implica un dropdown pero no hay label claro de qué se exporta. El usuario no sabe si exporta PDF, CSV o imagen.
+No hay indicador del número de propiedades en que se basa el análisis. Si "Actividad Moderada" se basa en 8 propiedades vs 250, el análisis tiene pesos muy distintos.
+Recomendaciones
+
+Sincronizar el tab activo con la URL: /zona/zona-rio?tab=inversion
+Corregir el bug del comparativo vs Ciudad
+Revisar y corregir los textos generados por IA antes de mostrarlos
+Agregar alt a todos los elementos gráficos
+Mostrar "Basado en N propiedades activas" en cada métrica clave
+
+
+🗺️ 5. ZONAS (/zonas) & MAPA (/mapa)
+Problemas críticos
+Inconsistencia de datos entre /zonas y / (homepage). La página de Zonas muestra Zona Río a $62,188/m², pero el homepage muestra $67,597/m². Santa Fe aparece a $24,490 en Zonas vs $27,490 en el homepage. Esta discrepancia en los datos centrales de la aplicación es el problema de credibilidad más grave de toda la plataforma.
+El toggle "Mapa / Grid" en /zonas solo muestra la vista Mapa. El botón "Grid" existe pero la vista de cuadrícula de zonas no se renderiza o no existe. El usuario espera ver tarjetas de zonas al hacer clic en "Grid" y no pasa nada visible.
+Las zonas en la lista lateral del mapa son botones sin destino claro. Al hacer clic en un botón de zona en la sidebar del mapa, no hay indicación visual de si abre un panel, navega o selecciona en el mapa.
+El filtro de Categoría en /mapa (Residencial, Comercial, Terreno, Todas) no tiene estado activo visible en el DOM. Sin screenshots no puedo confirmar el estado visual, pero la estructura sugiere que puede no haber indicador de qué botón está seleccionado.
+24 vs 25 zonas. El homepage dice "25 zonas monitoreadas" pero /zonas muestra "24 zonas". Otra inconsistencia de datos.
+Recomendaciones
+
+Auditar y unificar la fuente de datos entre todas las vistas — usar una sola query o store global
+Implementar el Grid view de zonas con tarjetas comparables
+Sincronizar el contador de zonas entre todas las páginas
+
+
+⚖️ 6. COMPARADOR (/comparar)
+Problemas positivos
+Las comparaciones sugeridas ("Premium vs Económico", "Alta Plusvalía", "Mayor Inventario") son una excelente idea de UX — reducen la fricción de configuración inicial.
+Problemas críticos
+El selector de zonas es un dump de 25 botones sin organización. Los botones de zonas aparecen en orden aleatorio sin agrupación alfabética, geográfica o por precio. Encontrar "Colinas de California" entre 25 opciones es difícil. Debería ser un combobox con búsqueda o al menos estar ordenado alfabéticamente.
+"0/4 zonas seleccionadas" aparece pero el área de comparación está completamente vacía. No hay empty state que guíe al usuario. La experiencia actual es: llegas a la página → ves una lista de botones de zona → ves el contador → ves una pantalla en blanco. No hay instrucción de cómo proceder.
+No hay feedback de cuáles zonas ya están seleccionadas. Si el usuario selecciona "Zona Río", el botón debería cambiar visualmente (checked state). En el árbol del DOM no hay indicadores de estado activo en los botones de zona.
+El límite de 4 zonas no tiene explicación. ¿Por qué 4 y no 5 o 6? Sin una razón explicada, el usuario puede sentirse arbitrariamente limitado.
+Recomendaciones
+
+Reemplazar los botones planos por un componente de selección múltiple con checkboxes + búsqueda
+Agregar un empty state visual: "Selecciona 2 o más zonas para comenzar la comparación"
+Implementar estado "selected" claro en los botones de zona
+Considerar aumentar el límite a 5 zonas o hacerlo dinámico
+
+
+⚠️ 7. ANÁLISIS DE RIESGO (/riesgo)
+Problemas críticos
+La sección está completamente vacía con un mensaje de error como estado permanente. La página muestra solo: hourglass_empty + "Datos insuficientes" + "Se requieren al menos 4 semanas de datos históricos…". Este es un ejemplo de empty state mal ejecutado. El problema es que /riesgo aparece en la navegación principal como una de las 6 secciones top, lo que genera una expectativa alta que no se cumple.
+El título de la pestaña del browser dice "Investment Risk" en inglés mientras toda la app está en español. Inconsistencia de idioma en metadata.
+No hay indicador de cuándo estará disponible. El mensaje dice "se requieren 4 semanas" pero no dice desde cuándo empezó a contar, ni una fecha estimada de disponibilidad.
+Recomendaciones
+
+Si la sección no tiene datos, quitarla del nav principal y mostrarla con un badge "Próximamente" o "Disponible en X fecha"
+O mejor: mostrar un estado anticipatorio con mockup de lo que verá el usuario cuando los datos estén listos, con un CTA de "Notificarme cuando esté disponible"
+Corregir el title de la página a español
+
+
+🔍 8. BÚSQUEDA (/buscar)
+Problema crítico
+La página de búsqueda no tiene input de búsqueda en su propio cuerpo. El único contenido visible es el título "Buscar zonas" y el texto "Ingresa al menos 3 caracteres para buscar zonas y colonias en Tijuana." — pero no hay un <input> en el <main>. El search bar del topbar parece ser el único punto de entrada, lo que es completamente anti-intuitivo: la página de búsqueda no tiene caja de búsqueda.
+La instrucción "Ingresa al menos 3 caracteres" está descontextualizada. Sin input visible, el mensaje flota en el vacío y confunde.
+Recomendaciones
+
+Agregar un input prominente (grande, centrado, con autofocus) en la página /buscar
+Mostrar debajo sugerencias de búsquedas populares o un listado de todas las zonas como punto de partida
+Esta página tiene el potencial de ser la mejor puerta de entrada a la app
+
+
+📋 9. RESULTADO DE BRÚJULA (/brujula/[id])
+Problemas positivos
+Esta es la página con más valor percibido de toda la app. El veredicto visual ("Muy barato", "Justo", "Caro") es el mejor momento UX del producto.
+Problemas críticos
+El indicador de veredicto no tiene un diseño gauge/slider claro. Se listan los estados ("Muy cara", "Cara", "Justo", "Barata", "Muy barata") pero en el DOM aparecen como texto plano sin indicación visual de cuál está activo o en qué punto del espectro está la propiedad. Debería ser un slider visual de colores (rojo → verde).
+Tipografía inconsistente en textos de análisis. Aparecen frases sin capitalización: "Analisis de Valuacion", "Perfil Socioeconomico", "Poblacion", "Automovil", "Plusvalia", "Demanda" — todas sin tildes. Esto luce como texto de base de datos sin limpiar, lo que daña la percepción de calidad.
+El análisis de texto mezcla nombre de colonia ("Villamar") con zona ("Playas de Tijuana") sin contexto de por qué aparece Villamar en el análisis. El usuario que ingresó la dirección como "Playas de Tijuana" se confundirá.
+No hay CTA de siguiente paso. La página termina con "Superficie Promedio por Tipo" — un dato frío. El usuario que acaba de saber que su propiedad está "43% por debajo del promedio" necesita un siguiente paso obvio: "¿Quieres ver propiedades similares?" o "Comparar con otra zona →".
+La visualización de distribución de precios usa colores de barra sin leyenda inline. El texto dice "la barra es tu rango — azul" como texto plano, cuando debería ser una anotación visual sobre el gráfico.
+Recomendaciones
+
+Implementar un gauge/slider visual con colores semáforo para el veredicto
+Limpiar todos los textos: capitalización, tildes, puntuación
+Agregar CTA al final: "Ver zonas similares", "Comparar en el mapa", "Valuar otra propiedad"
+Crear un sistema de anotaciones en los gráficos en lugar de texto suelto
+
+
+🔐 10. LOGIN (/login)
+Problemas positivos
+Pantalla limpia y enfocada. El separador "o con correo" es correcto.
+Problemas críticos
+"¿Olvidaste tu contraseña?" y "¿No tienes cuenta? Regístrate" son <button> en lugar de <a> o <button type="button"> con navegación. En el árbol del DOM aparecen como botones, lo que puede confundir a los gestores de contraseñas del browser y no permite hacer clic derecho → "Abrir en nueva pestaña".
+No hay feedback de estado de carga en el botón "Iniciar sesión". Si la request tarda, el usuario no sabe si funcionó o no.
+La página de login no tiene el layout de la app (sidebar, header) lo que crea una discontinuidad visual total entre el login y la app. Está bien que no tenga sidebar, pero debería compartir el mismo sistema tipográfico y de colores del resto de la app de forma más notoria.
+
+🚨 11. ALERTAS (/alertas) & PERFIL (/perfil)
+Problema crítico
+/alertas tiene solo un breadcrumb y footer — el contenido está completamente vacío. No hay encabezado, no hay mensaje de empty state, no hay CTA. Es la página más incompleta de toda la aplicación.
+/perfil muestra "Cargando perfil..." de forma permanente. Esto sugiere un bug de estado donde el loading spinner nunca resuelve, o el componente tiene un error no capturado. Una página de perfil eternamente en carga es inaceptable para producción.
+
+🎨 12. CONSISTENCIA VISUAL Y SISTEMA DE DISEÑO
+Hallazgos transversales a toda la app
+Uso inconsistente de iconografía. La app mezcla Material Icons (monitoring, explore, location_on) con nombres genéricos. En el sidebar usan monitoring para "Precios", lo cual es correcto semánticamente, pero explore para "Brújula" es una metáfora débil para una herramienta de valuación.
+Los badges de estado del mercado no tienen definición de escala visible. "Actividad Baja", "Actividad Moderada", "Mercado Muy Activo" — ¿cuáles son los umbrales? Sin conocer la escala, los badges son decorativos, no informativos.
+El botón "Download Report" en el sidebar no tiene contexto de qué descarga. ¿El reporte de la página actual? ¿Un PDF global? ¿Requiere premium? Es un botón con alto potencial de conversión que está completamente sin explicar.
+El link a "Narrativa360" en el sidebar es un producto externo sin distinción visual. Aparece al mismo nivel que las funciones internas de la app, lo que puede confundir sobre los límites del producto.
+Textos en inglés mezclados con español en la UI. Ejemplos encontrados: título de pestaña "Investment Risk", badge "Market Overview", "Live Data", "Risk Analysis". Esto es inconsistente en un producto orientado al mercado mexicano.
+
+♿ 13. ACCESIBILIDAD
+Hallazgos críticos
+
+Más de 80 imágenes <img> en la página de zona sin atributo alt
+Múltiples <generic> en el DOM que son divs sin rol semántico — lectores de pantalla no los anunciarán correctamente
+Los botones de tipo de propiedad (Casa, Depto, etc.) no tienen estado aria-pressed o aria-selected
+Los tabs de zona no parecen implementar el patrón ARIA Tabs correctamente
+Contraste: sin poder ver los colores, el uso de textos secundarios en grises sobre fondo blanco puede no alcanzar WCAG AA (4.5:1)
+El combobox de búsqueda en el topbar no tiene role="combobox" con el patrón ARIA correcto según el árbol del DOM
+
+
+📱 14. MOBILE / RESPONSIVE
+Hallazgos críticos
+La bottom navigation solo tiene 4 ítems (Precios, Brújula, Zonas, Comparar) de los 6 disponibles en el sidebar desktop. Riesgo y Buscar son inaccesibles en mobile desde la navegación primaria.
+La tabla de 25 zonas en el homepage no es responsive por naturaleza. Una tabla con 6 columnas (Zona, Precio/m², Renta/m², Tendencia, Actividad, Yield) en mobile requiere scroll horizontal, lo cual es una experiencia pobre. Debería convertirse en cards en viewports pequeños.
+Los gráficos de barras complejos (Índice de Oportunidad, scatter de Densidad) no tienen versiones simplificadas para mobile.
+
+🔄 15. DATOS Y CONFIANZA
+Este es quizás el problema más fundamental de la plataforma:
+La app muestra "0.0%" de tendencia en TODAS las zonas y "Sin histórico" en múltiples lugares. Para una plataforma que se vende como "Inteligencia Inmobiliaria", tener todos los indicadores de tendencia en cero destruye la propuesta de valor. El usuario se pregunta: ¿por qué pagar/usar esto si no hay histórico?
+Los datos son inconsistentes entre páginas (ya documentado arriba con Zona Río y Santa Fe).
+No hay fecha de última actualización visible en las métricas clave más allá del genérico "hace 3h". ¿3 horas desde cuándo? ¿Los datos se actualizan diariamente, semanalmente?
+
+🎯 PRIORIZACIÓN DE FIXES
+🔴 Crítico — Hacer ahora (impacto en credibilidad del producto)
+
+Corregir inconsistencia de datos entre homepage y /zonas (precios diferentes por zona)
+Corregir bug de "vs Ciudad" en zona (mismos valores para zona y ciudad)
+Corregir typo "ona Río mantiene..." en análisis IA
+Corregir /perfil atrapado en estado "Cargando..."
+Completar /alertas (página completamente vacía)
+Corregir /buscar — agregar input de búsqueda en el cuerpo de la página
+Corregir títulos de página en inglés ("Investment Risk" → "Riesgo de Inversión")
+Limpiar tildes y capitalización en textos de /brujula/[id]
+
+🟠 Alta prioridad — Sprint siguiente
+
+Agregar /mapa a la navegación principal
+Sincronizar bottom nav mobile con sidebar (agregar Riesgo y Buscar)
+Implementar empty state útil en /riesgo (no solo error)
+Agregar estado visual seleccionado en el comparador de zonas
+Unificar la fuente de datos (25 vs 24 zonas, precios discrepantes)
+Agregar alt a todos los <img> del scatter plot
+
+🟡 Media prioridad — Roadmap
+
+Sincronizar tab activo de zona con URL param
+Implementar gestión del historial en Brújula (filtrar, borrar)
+Gauge visual (slider semáforo) para el veredicto de valuación
+Reducir secciones del homepage de 11 a 5
+Mejorar selector de zonas en Comparador (combobox con búsqueda)
+Agregar CTA de siguiente paso al resultado de Brújula
+
+
+💡 RECOMENDACIÓN FINAL
+Inmobiq tiene una propuesta de valor genuinamente diferenciada (inteligencia de mercado local + valuación por IA) y una arquitectura técnica correcta. Los problemas no son de concepto sino de ejecución y pulido. Los tres ejes de mejora prioritarios son:
+1. Confianza en datos — La plataforma muestra datos inconsistentes entre páginas y tendencias en cero. Antes de cualquier mejora visual, hay que auditar y corregir la pipeline de datos.
+2. Empty states — Alertas vacía, Riesgo con error, Búsqueda sin input, Perfil cargando. Casi el 40% de las páginas no tienen contenido funcional. Cada empty state es una oportunidad de conversión perdida.
+3. Coherencia — Español vs inglés, 24 vs 25 zonas, $62k vs $67k por zona. La coherencia interna de los datos y los textos es lo que separa un MVP de un producto en el que confiar dinero.
+
+Auditoría realizada navegando: /, /brujula, /brujula/[id], /zonas, /comparar, /riesgo, /buscar, /mapa, /zona/zona-rio, /alertas, /glosario, /perfil, /login — 13 rutas analizadas
