@@ -547,7 +547,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
                 </motion.div>
               </div>
 
-              <div className="flex text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-2">
+              <div className="flex text-[18px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mt-3">
                 {SCORE_ZONES.map((z, i) => (
                   <span key={i} className="flex-1 text-center">{z.label}</span>
                 ))}
