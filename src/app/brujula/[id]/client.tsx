@@ -262,13 +262,13 @@ function KpiCard({
   question: string
 }) {
   return (
-    <motion.div variants={fadeUp} className="bg-surface rounded-2xl p-6 card-shadow border border-slate-200/80 dark:border-slate-700/50 flex flex-col">
+    <motion.div variants={fadeUp} className="bg-surface rounded-2xl p-6 card-shadow border border-slate-400/35 dark:border-slate-500/30 flex flex-col">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${toneBg(tone)}`}>
             <Icon name={icon} className={`text-base ${toneText(tone)}`} />
           </div>
-          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</p>
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest">{label}</p>
         </div>
       </div>
 
@@ -363,21 +363,42 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
             </div>
 
             {/* Score bar — la barra del slider, integrada en hero */}
-            <div className="relative">
-              <div className="flex h-3 rounded-full overflow-hidden">
-                {SCORE_ZONES.map((z, i) => (
-                  <div key={i} className={`${z.color} flex-1 opacity-80`} />
+            <div>
+              {/* Checkpoints arriba */}
+              <div className="flex justify-between mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">
+                {[0, 20, 40, 60, 80, 100].map((n) => (
+                  <span key={n}>{n}</span>
                 ))}
               </div>
-              <motion.div
-                className="absolute top-0 -translate-x-1/2"
-                initial={{ left: "0%" }}
-                animate={{ left: `${pinPos}%` }}
-                transition={{ type: "spring", stiffness: 130, damping: 20, delay: 0.5 }}
-              >
-                <div className="w-1 h-3 bg-slate-900 dark:bg-white rounded-full" />
-                <div className="w-4 h-4 bg-white dark:bg-slate-900 rounded-full -mt-1 -ml-1.5 border-[3px] border-slate-900 dark:border-white shadow-lg" />
-              </motion.div>
+
+              <div className="relative">
+                <div className="flex h-3 rounded-full overflow-hidden">
+                  {SCORE_ZONES.map((z, i) => (
+                    <div key={i} className={`${z.color} flex-1 opacity-80`} />
+                  ))}
+                </div>
+                <motion.div
+                  className="absolute top-0 -translate-x-1/2"
+                  initial={{ left: "0%" }}
+                  animate={{ left: `${pinPos}%` }}
+                  transition={{ type: "spring", stiffness: 130, damping: 20, delay: 0.5 }}
+                >
+                  {/* Badge con score de la propiedad */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.0, duration: 0.3 }}
+                    className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-md text-[11px] font-black shadow-md whitespace-nowrap"
+                  >
+                    {result.score}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-white rotate-45" />
+                  </motion.div>
+                  {/* Pin */}
+                  <div className="w-1 h-3 bg-slate-900 dark:bg-white rounded-full" />
+                  <div className="w-4 h-4 bg-white dark:bg-slate-900 rounded-full -mt-1 -ml-1.5 border-[3px] border-slate-900 dark:border-white shadow-lg" />
+                </motion.div>
+              </div>
+
               <div className="flex text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-2">
                 {SCORE_ZONES.map((z, i) => (
                   <span key={i} className="flex-1 text-center">{z.label}</span>
@@ -460,7 +481,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
         {/* Narrativa AI */}
         {narrative && (
           <motion.div variants={fadeUp}>
-            <div className="relative h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-200/80 dark:border-slate-700/50">
+            <div className="relative h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-400/35 dark:border-slate-500/30">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center flex-shrink-0">
                   <Icon name="auto_awesome" className="text-lg text-blue-600 dark:text-blue-400" />
@@ -478,7 +499,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
 
         {/* Tu propiedad vs zona */}
         <motion.div variants={fadeUp}>
-          <div className="h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-200/80 dark:border-slate-700/50">
+          <div className="h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-400/35 dark:border-slate-500/30">
             <div className="flex items-baseline justify-between mb-5">
               <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">Tu propiedad vs zona</h2>
               <p className="text-xs text-slate-400 font-medium">{result.zone_name}</p>
@@ -533,7 +554,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
 
       {/* ── 7. CTAs ── */}
       <motion.div variants={fadeUp}>
-        <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/50 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-6 border border-slate-400/35 dark:border-slate-500/30 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={`/zona/${result.zone_slug}`}
             className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
