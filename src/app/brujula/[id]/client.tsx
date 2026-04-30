@@ -211,10 +211,19 @@ function Gauge({ value, max, tone, suffix = "" }: { value: number; max: number; 
     : tone === "warn" ? "stroke-amber-400"
     : tone === "danger" ? "stroke-red-500"
     : "stroke-slate-400"
+  const fillClass = tone === "good" ? "fill-emerald-500"
+    : tone === "warn" ? "fill-amber-400"
+    : tone === "danger" ? "fill-red-500"
+    : "fill-slate-400"
+
+  // Position of marker on the arc at current value
+  const angle = (1 - pct) * Math.PI
+  const markerX = 90 + radius * Math.cos(angle)
+  const markerY = 90 - radius * Math.sin(angle)
 
   return (
-    <div className="relative w-full max-w-[180px] mx-auto" style={{ aspectRatio: "2 / 1.1" }}>
-      <svg viewBox="0 0 180 100" className="w-full h-full overflow-visible">
+    <div className="relative w-full max-w-[180px] mx-auto" style={{ aspectRatio: "2 / 1.25" }}>
+      <svg viewBox="0 0 180 110" className="w-full h-full overflow-visible">
         <path
           d="M 20 90 A 70 70 0 0 1 160 90"
           className="stroke-slate-200 dark:stroke-slate-800"
@@ -233,6 +242,18 @@ function Gauge({ value, max, tone, suffix = "" }: { value: number; max: number; 
           animate={{ strokeDashoffset: dashOffset }}
           transition={{ type: "spring", stiffness: 90, damping: 20, delay: 0.4 }}
         />
+        <motion.circle
+          cx={markerX}
+          cy={markerY}
+          r={7}
+          className={`${fillClass} stroke-white dark:stroke-slate-900`}
+          strokeWidth="2.5"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.9, type: "spring", stiffness: 220, damping: 18 }}
+        />
+        <text x="20" y="105" className="fill-slate-400 text-[10px] font-bold" textAnchor="middle">0{suffix}</text>
+        <text x="160" y="105" className="fill-slate-400 text-[10px] font-bold" textAnchor="middle">{max}{suffix}</text>
       </svg>
     </div>
   )
