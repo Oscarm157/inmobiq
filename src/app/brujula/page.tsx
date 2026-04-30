@@ -94,19 +94,19 @@ export default function BrujulaPage() {
       <Breadcrumb items={[{ label: "Brújula" }]} />
 
       {/* ─── Hero Section ─── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-blue-950/30 dark:to-slate-950 p-8 md:p-10 lg:p-12">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/40 to-white dark:from-slate-950 dark:via-blue-950/30 dark:to-slate-950 p-8 md:p-10 lg:p-12 border border-slate-200/60 dark:border-transparent">
         {/* Atmospheric decorations */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/[0.08] rounded-full blur-3xl" />
-          <div className="absolute bottom-0 -left-12 w-72 h-72 bg-emerald-500/[0.06] rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-violet-500/[0.04] rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          {/* Compass rings — concentric, rotated for dynamism */}
-          <div className="absolute top-1/2 right-8 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-white/[0.06] hidden lg:block" style={{ transform: "translateY(-50%) rotate(15deg)" }} />
-          <div className="absolute top-1/2 right-14 -translate-y-1/2 w-[260px] h-[260px] rounded-full border border-dashed border-white/[0.04] hidden lg:block" style={{ transform: "translateY(-50%) rotate(-10deg)" }} />
-          <div className="absolute top-1/2 right-20 -translate-y-1/2 w-[180px] h-[180px] rounded-full border border-white/[0.03] hidden lg:block" style={{ transform: "translateY(-50%) rotate(5deg)" }} />
-          {/* Subtle grid overlay */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-400/[0.15] dark:bg-blue-500/[0.08] rounded-full blur-3xl" />
+          <div className="absolute bottom-0 -left-12 w-72 h-72 bg-emerald-400/[0.10] dark:bg-emerald-500/[0.06] rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-violet-400/[0.08] dark:bg-violet-500/[0.04] rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          {/* Compass rings */}
+          <div className="absolute top-1/2 right-8 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-slate-300/25 dark:border-white/[0.06] hidden lg:block" style={{ transform: "translateY(-50%) rotate(15deg)" }} />
+          <div className="absolute top-1/2 right-14 -translate-y-1/2 w-[260px] h-[260px] rounded-full border border-dashed border-slate-300/18 dark:border-white/[0.04] hidden lg:block" style={{ transform: "translateY(-50%) rotate(-10deg)" }} />
+          <div className="absolute top-1/2 right-20 -translate-y-1/2 w-[180px] h-[180px] rounded-full border border-slate-300/12 dark:border-white/[0.03] hidden lg:block" style={{ transform: "translateY(-50%) rotate(5deg)" }} />
+          {/* Grid overlay — dark only */}
           <div
-            className="absolute inset-0 opacity-[0.02]"
+            className="absolute inset-0 opacity-0 dark:opacity-[0.02]"
             style={{
               backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
               backgroundSize: "40px 40px",
@@ -124,7 +124,7 @@ export default function BrujulaPage() {
           <div>
             <motion.span
               variants={heroItem}
-              className="inline-flex px-3 py-1.5 bg-white/[0.08] text-blue-300 text-[10px] font-bold rounded-full tracking-widest uppercase mb-5 backdrop-blur-sm border border-white/[0.06]"
+              className="inline-flex items-center px-3 py-1.5 bg-blue-50 dark:bg-white/[0.08] text-blue-600 dark:text-blue-300 text-[10px] font-bold rounded-full tracking-widest uppercase mb-5 border border-blue-200/60 dark:border-white/[0.06]"
             >
               <Icon name="explore" className="text-xs mr-1.5" />
               Brújula Inmobiliaria
@@ -132,30 +132,30 @@ export default function BrujulaPage() {
 
             <motion.h2
               variants={heroItem}
-              className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight text-white mb-3 leading-[1.1]"
+              className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight text-slate-900 dark:text-white mb-3 leading-[1.1]"
             >
               ¿Está a buen
               <br />
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
                 precio?
               </span>
             </motion.h2>
 
             <motion.p
               variants={heroItem}
-              className="text-slate-300 font-medium max-w-md mb-8 leading-relaxed text-[15px]"
+              className="text-slate-600 dark:text-slate-300 font-medium max-w-md mb-8 leading-relaxed text-[15px]"
             >
               Ingresa los datos de una propiedad y compárala al instante con el mercado de su zona.
             </motion.p>
 
             {/* Segmented control */}
-            <motion.div variants={heroItem} className="inline-flex bg-white/[0.06] backdrop-blur-sm rounded-xl p-1 gap-1 border border-white/[0.06]">
+            <motion.div variants={heroItem} className="inline-flex bg-slate-100/80 dark:bg-white/[0.06] rounded-xl p-1 gap-1 border border-slate-200/60 dark:border-white/[0.06]">
               <button
                 onClick={() => setMode("manual")}
                 className={`relative flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                   mode === "manual"
-                    ? "bg-white text-slate-900 shadow-lg shadow-white/10"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white dark:bg-white text-slate-900 shadow-sm dark:shadow-white/10"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
                 }`}
               >
                 <Icon name="edit" className="text-base" />
@@ -165,8 +165,8 @@ export default function BrujulaPage() {
                 onClick={() => setMode("screenshots")}
                 className={`relative flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                   mode === "screenshots"
-                    ? "bg-white text-slate-900 shadow-lg shadow-white/10"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white dark:bg-white text-slate-900 shadow-sm dark:shadow-white/10"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
                 }`}
               >
                 <Icon name="add_photo_alternate" className="text-base" />
@@ -175,7 +175,7 @@ export default function BrujulaPage() {
             </motion.div>
           </div>
 
-          {/* Right — Feature cards with stagger */}
+          {/* Right — Feature cards */}
           <motion.div
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
             initial="hidden"
@@ -187,14 +187,14 @@ export default function BrujulaPage() {
                 key={feat.icon}
                 variants={featureCardVariant}
                 whileHover={{ x: -4, transition: { type: "spring", stiffness: 400, damping: 17 } }}
-                className="flex items-center gap-3.5 bg-white/[0.05] backdrop-blur-sm rounded-xl px-4 py-3.5 border border-white/[0.06] cursor-default"
+                className="flex items-center gap-3.5 bg-white/70 dark:bg-white/[0.05] rounded-xl px-4 py-3.5 border border-slate-200/50 dark:border-white/[0.06] cursor-default shadow-sm dark:shadow-none"
               >
                 <div className={`w-10 h-10 rounded-lg ${feat.bg} flex items-center justify-center shrink-0`}>
                   <Icon name={feat.icon} className={`${feat.color} text-lg`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-white leading-tight">{feat.label}</p>
-                  <p className="text-xs text-slate-400 leading-snug mt-0.5">{feat.desc}</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{feat.label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug mt-0.5">{feat.desc}</p>
                 </div>
               </motion.div>
             ))}
