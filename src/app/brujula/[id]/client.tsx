@@ -23,53 +23,53 @@ const VERDICT_CONFIG: Record<ValuationVerdict, {
 }> = {
   muy_barata: {
     label: "Muy barato", short: "Excelente compra",
-    text: "text-emerald-600 dark:text-emerald-400",
-    heroBg: "from-emerald-50/80 via-white to-white dark:from-emerald-950/40 dark:via-slate-950 dark:to-slate-950",
-    glow: "bg-emerald-400/25 dark:bg-emerald-500/15",
-    glow2: "bg-emerald-300/15 dark:bg-emerald-400/10",
-    chip: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300",
-    scoreColor: "text-emerald-500 dark:text-emerald-400",
-    ring: "ring-emerald-500/20",
+    text: "text-emerald-700 dark:text-emerald-400",
+    heroBg: "from-emerald-200 via-emerald-50 to-white dark:from-emerald-950/60 dark:via-slate-950 dark:to-slate-950",
+    glow: "bg-emerald-500/45 dark:bg-emerald-500/25",
+    glow2: "bg-emerald-400/30 dark:bg-emerald-400/18",
+    chip: "bg-emerald-200 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300",
+    scoreColor: "text-emerald-600 dark:text-emerald-400",
+    ring: "ring-emerald-500/30",
   },
   barata: {
     label: "Barato", short: "Buena compra",
-    text: "text-green-600 dark:text-green-400",
-    heroBg: "from-green-50/80 via-white to-white dark:from-green-950/40 dark:via-slate-950 dark:to-slate-950",
-    glow: "bg-green-400/25 dark:bg-green-500/15",
-    glow2: "bg-green-300/15 dark:bg-green-400/10",
-    chip: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    scoreColor: "text-green-500 dark:text-green-400",
-    ring: "ring-green-500/20",
+    text: "text-green-700 dark:text-green-400",
+    heroBg: "from-green-200 via-green-50 to-white dark:from-green-950/60 dark:via-slate-950 dark:to-slate-950",
+    glow: "bg-green-500/45 dark:bg-green-500/25",
+    glow2: "bg-green-400/30 dark:bg-green-400/18",
+    chip: "bg-green-200 text-green-800 dark:bg-green-900/60 dark:text-green-300",
+    scoreColor: "text-green-600 dark:text-green-400",
+    ring: "ring-green-500/30",
   },
   precio_justo: {
     label: "Precio justo", short: "Precio normal",
-    text: "text-amber-600 dark:text-amber-400",
-    heroBg: "from-amber-50/80 via-white to-white dark:from-amber-950/30 dark:via-slate-950 dark:to-slate-950",
-    glow: "bg-amber-400/25 dark:bg-amber-500/15",
-    glow2: "bg-amber-300/15 dark:bg-amber-400/10",
-    chip: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-    scoreColor: "text-amber-500 dark:text-amber-400",
-    ring: "ring-amber-500/20",
+    text: "text-amber-700 dark:text-amber-400",
+    heroBg: "from-amber-200 via-amber-50 to-white dark:from-amber-950/50 dark:via-slate-950 dark:to-slate-950",
+    glow: "bg-amber-500/45 dark:bg-amber-500/25",
+    glow2: "bg-amber-400/30 dark:bg-amber-400/18",
+    chip: "bg-amber-200 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300",
+    scoreColor: "text-amber-600 dark:text-amber-400",
+    ring: "ring-amber-500/30",
   },
   cara: {
     label: "Caro", short: "Estás pagando de más",
-    text: "text-orange-600 dark:text-orange-400",
-    heroBg: "from-orange-50/80 via-white to-white dark:from-orange-950/30 dark:via-slate-950 dark:to-slate-950",
-    glow: "bg-orange-400/25 dark:bg-orange-500/15",
-    glow2: "bg-orange-300/15 dark:bg-orange-400/10",
-    chip: "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
-    scoreColor: "text-orange-500 dark:text-orange-400",
-    ring: "ring-orange-500/20",
+    text: "text-orange-700 dark:text-orange-400",
+    heroBg: "from-orange-200 via-orange-50 to-white dark:from-orange-950/50 dark:via-slate-950 dark:to-slate-950",
+    glow: "bg-orange-500/45 dark:bg-orange-500/25",
+    glow2: "bg-orange-400/30 dark:bg-orange-400/18",
+    chip: "bg-orange-200 text-orange-800 dark:bg-orange-900/60 dark:text-orange-300",
+    scoreColor: "text-orange-600 dark:text-orange-400",
+    ring: "ring-orange-500/30",
   },
   muy_cara: {
     label: "Muy caro", short: "Negocia o no compres",
-    text: "text-red-600 dark:text-red-400",
-    heroBg: "from-red-50/80 via-white to-white dark:from-red-950/30 dark:via-slate-950 dark:to-slate-950",
-    glow: "bg-red-400/25 dark:bg-red-500/15",
-    glow2: "bg-red-300/15 dark:bg-red-400/10",
-    chip: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-    scoreColor: "text-red-500 dark:text-red-400",
-    ring: "ring-red-500/20",
+    text: "text-red-700 dark:text-red-400",
+    heroBg: "from-red-200 via-red-50 to-white dark:from-red-950/50 dark:via-slate-950 dark:to-slate-950",
+    glow: "bg-red-500/45 dark:bg-red-500/25",
+    glow2: "bg-red-400/30 dark:bg-red-400/18",
+    chip: "bg-red-200 text-red-800 dark:bg-red-900/60 dark:text-red-300",
+    scoreColor: "text-red-600 dark:text-red-400",
+    ring: "ring-red-500/30",
   },
 }
 
@@ -180,10 +180,9 @@ function AnimatedNumber({ value, duration = 1.8, className }: { value: number; d
 function InfoTooltip({ content }: { content: string }) {
   return (
     <span className="relative inline-flex items-center group/tip">
-      <Icon
-        name="info"
-        className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-help transition-colors"
-      />
+      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-black leading-none cursor-help hover:bg-slate-800 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-colors select-none">
+        i
+      </span>
       <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-medium leading-relaxed rounded-lg shadow-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 w-60 normal-case tracking-normal">
         {content}
         <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-slate-900 dark:bg-white rotate-45" />
@@ -575,7 +574,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
               plainExplain={`${formatPlainMxn(Math.abs(overpaidMxn))} ${overpaidMxn >= 0 ? "más" : "menos"} que el promedio`}
               subValue={`${result.price_premium_pct > 0 ? "+" : ""}${result.price_premium_pct.toFixed(1)}% vs promedio de zona`}
               tone={priceTone}
-              tooltip="Cuántos pesos pagas de más (o de menos) que una propiedad típica de la zona. Se calcula multiplicando la diferencia de precio por m² por los m² de tu propiedad."
+              tooltip="(Tu precio/m² − promedio de la zona) × tus m². Negativo = ahorras."
               visual={<OverpaidVisual priceM2={result.price_per_m2} zoneM2={result.zone_avg_price_per_m2} tone={priceTone} />}
             />
           </div>
@@ -593,7 +592,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
                 : result.cap_rate >= 5 ? "Cap rate moderado" : "Cap rate bajo"
             }
             tone={capTone}
-            tooltip="Cap rate = renta anual estimada ÷ precio. Mide cuánto generaría rentando. Sobre 7% es atractivo, 5-7% moderado, menos de 5% bajo. Se calcula con las rentas promedio de la zona."
+            tooltip="Renta anual estimada ÷ precio de la propiedad. Más de 7% atractivo, 5-7% moderado, menos de 5% bajo. Usa rentas promedio de la zona."
             visual={<Gauge value={result.cap_rate ?? 0} max={12} tone={capTone} suffix="%" />}
           />
 
@@ -605,7 +604,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
             bigValue={`${result.risk_score}/100`}
             subValue={result.risk_label || (result.risk_score < 40 ? "Bajo riesgo" : result.risk_score < 65 ? "Riesgo medio" : "Alto riesgo")}
             tone={riskTone}
-            tooltip="Combina volatilidad de precios, antigüedad del inventario, demanda y nivel socioeconómico de la zona. 0 = muy estable, 100 = alto riesgo."
+            tooltip="Mezcla volatilidad de precios, demanda y nivel socioeconómico. 0 = estable, 100 = alto riesgo."
             visual={<div className="w-full px-3"><ScoreBar value={result.risk_score} /></div>}
           />
 
@@ -617,7 +616,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
             bigValue={`${result.liquidity_score}/100`}
             subValue={result.liquidity_score >= 70 ? "Reventa rápida" : result.liquidity_score >= 40 ? "Reventa moderada" : "Reventa lenta"}
             tone={liqTone}
-            tooltip="Qué tan rápido se venden las propiedades en esta zona. Combina tiempo en mercado y volumen de transacciones. 100 = reventa rápida, 0 = reventa lenta."
+            tooltip="Tiempo promedio en mercado y volumen de ventas en la zona. 100 = reventa rápida, 0 = lenta."
             visual={<div className="w-full px-3"><ScoreBar value={result.liquidity_score} inverse /></div>}
           />
         </div>
