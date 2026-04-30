@@ -345,7 +345,7 @@ function KpiHeroCard({
       whileHover={{ y: -3, transition: { type: "spring", stiffness: 400, damping: 20 } }}
       className={`bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-400/35 dark:border-slate-500/30 hover:shadow-xl ${toneShadow(tone)} transition-shadow`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-start h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 items-start h-full">
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${toneBg(tone)}`}>
@@ -357,7 +357,7 @@ function KpiHeroCard({
             </div>
           </div>
           <p className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1 leading-tight">{question}</p>
-          <p className={`font-display text-[2.25rem] sm:text-[2.75rem] md:text-[3.25rem] font-black leading-[0.9] mt-3 whitespace-nowrap ${toneText(tone)}`}>
+          <p className={`font-display text-[2.25rem] sm:text-[2.5rem] lg:text-[2.75rem] font-black leading-[0.9] mt-3 whitespace-nowrap ${toneText(tone)}`}>
             {bigValue}
           </p>
           {plainExplain && (
@@ -366,7 +366,7 @@ function KpiHeroCard({
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{subValue}</p>
         </div>
 
-        <div className="md:w-[260px] flex items-center justify-center">
+        <div className="lg:w-[220px] flex items-center justify-center">
           {visual}
         </div>
       </div>
