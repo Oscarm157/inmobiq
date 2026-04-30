@@ -262,7 +262,7 @@ function KpiCard({
   question: string
 }) {
   return (
-    <motion.div variants={fadeUp} className="bg-surface rounded-2xl p-6 card-shadow flex flex-col">
+    <motion.div variants={fadeUp} className="bg-surface rounded-2xl p-6 card-shadow border border-slate-200/80 dark:border-slate-700/50 flex flex-col">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${toneBg(tone)}`}>
@@ -458,7 +458,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
       {/* ── 3. Narrativa AI ── */}
       {narrative && (
         <motion.div variants={fadeUp}>
-          <div className="relative bg-surface rounded-2xl p-6 md:p-8 card-shadow">
+          <div className="relative bg-surface rounded-2xl p-6 md:p-8 card-shadow border border-slate-200/80 dark:border-slate-700/50">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center flex-shrink-0">
                 <Icon name="auto_awesome" className="text-lg text-blue-600 dark:text-blue-400" />
@@ -476,7 +476,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
 
       {/* ── 4. Tu propiedad vs zona — comparación visual ── */}
       <motion.div variants={fadeUp}>
-        <div className="bg-surface rounded-2xl p-6 md:p-8 card-shadow">
+        <div className="bg-surface rounded-2xl p-6 md:p-8 card-shadow border border-slate-200/80 dark:border-slate-700/50">
           <div className="flex items-baseline justify-between mb-5">
             <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">Tu propiedad vs zona</h2>
             <p className="text-xs text-slate-400 font-medium">{result.zone_name}</p>
@@ -530,7 +530,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
 
       {/* ── 7. CTAs ── */}
       <motion.div variants={fadeUp}>
-        <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/50 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={`/zona/${result.zone_slug}`}
             className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white rounded-full text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
