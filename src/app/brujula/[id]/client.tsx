@@ -234,11 +234,6 @@ function Gauge({ value, max, tone, suffix = "" }: { value: number; max: number; 
           transition={{ type: "spring", stiffness: 90, damping: 20, delay: 0.4 }}
         />
       </svg>
-      <div className="absolute inset-x-0 bottom-1 flex items-end justify-center pb-1">
-        <span className={`font-display text-3xl font-black leading-none ${toneText(tone)}`}>
-          {value.toFixed(value < 10 ? 1 : 0)}{suffix}
-        </span>
-      </div>
     </div>
   )
 }
