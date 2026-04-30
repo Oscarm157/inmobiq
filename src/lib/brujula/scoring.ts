@@ -83,12 +83,12 @@ function getPricePerM2Ranges(listingType: ListingType): PriceRange[] {
     ]
   }
   return [
-    { label: "<$10K", min: 0, max: 10_000 },
-    { label: "$10K-20K", min: 10_000, max: 20_000 },
-    { label: "$20K-30K", min: 20_000, max: 30_000 },
-    { label: "$30K-50K", min: 30_000, max: 50_000 },
-    { label: "$50K-80K", min: 50_000, max: 80_000 },
-    { label: ">$80K", min: 80_000, max: Infinity },
+    { label: "<$30K", min: 0, max: 30_000 },
+    { label: "$30K-40K", min: 30_000, max: 40_000 },
+    { label: "$40K-50K", min: 40_000, max: 50_000 },
+    { label: "$50K-65K", min: 50_000, max: 65_000 },
+    { label: "$65K-85K", min: 65_000, max: 85_000 },
+    { label: ">$85K", min: 85_000, max: Infinity },
   ]
 }
 
