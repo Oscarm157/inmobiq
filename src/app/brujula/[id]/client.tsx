@@ -343,9 +343,9 @@ function KpiHeroCard({
     <motion.div
       variants={fadeUp}
       whileHover={{ y: -3, transition: { type: "spring", stiffness: 400, damping: 20 } }}
-      className={`bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-400/35 dark:border-slate-500/30 hover:shadow-xl ${toneShadow(tone)} transition-shadow`}
+      className={`bg-surface rounded-2xl p-7 md:p-8 card-shadow border border-slate-400/35 dark:border-slate-500/30 hover:shadow-xl ${toneShadow(tone)} transition-shadow h-full`}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 items-start h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 items-stretch h-full">
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${toneBg(tone)}`}>
