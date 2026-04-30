@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import type { ValuationVerdict, PropertyType, ListingType } from "@/types/database"
 import { Icon } from "@/components/icon"
 
@@ -17,6 +18,14 @@ const VERDICT_ACCENT: Record<ValuationVerdict, string> = {
   precio_justo: "text-amber-600 dark:text-amber-400",
   cara: "text-orange-600 dark:text-orange-400",
   muy_cara: "text-red-600 dark:text-red-400",
+}
+
+const VERDICT_CHIP: Record<ValuationVerdict, string> = {
+  muy_barata: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+  barata: "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300",
+  precio_justo: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+  cara: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
+  muy_cara: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300",
 }
 
 const VERDICT_LABEL: Record<ValuationVerdict, string> = {
@@ -60,7 +69,6 @@ interface Props {
 }
 
 export function ScoreSlider({ score, verdict, zoneName, pricePerM2, zoneAvgPerM2, property }: Props) {
-  // Clamp score position to 2-98 so pin doesn't overflow
   const pinPosition = Math.max(2, Math.min(98, score))
 
   const features = [
@@ -73,39 +81,44 @@ export function ScoreSlider({ score, verdict, zoneName, pricePerM2, zoneAvgPerM2
   ]
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 md:p-6 card-shadow border border-slate-100 dark:border-slate-800">
-      {/* Property title + features (ABOVE slider) */}
-      <div className="mb-5">
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">
-              {TYPE_LABELS[property.property_type]} en {property.listing_type}
-            </h2>
-            <p className="text-sm text-slate-400 font-medium">{zoneName}</p>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-              {formatMxn(pricePerM2)}/m²
-            </p>
-            <p className="text-xs text-slate-400">
-              zona: {formatMxn(zoneAvgPerM2)}/m²
-            </p>
-          </div>
+    <div className="bg-surface rounded-2xl p-5 md:p-6 card-shadow">
+      {/* Property header */}
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">
+            {TYPE_LABELS[property.property_type]} en {property.listing_type}
+          </h2>
+          <p className="text-sm text-slate-400 font-medium mt-0.5">{zoneName}</p>
         </div>
-        <div className="flex items-center gap-4">
-          {features.map((f, i) => (
-            <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
-              <Icon name={f.icon} className="text-sm text-slate-400" />
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{f.value}</span>
-            </div>
-          ))}
+        <div className="text-right flex-shrink-0">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            {formatMxn(pricePerM2)}/m²
+          </p>
+          <p className="text-xs text-slate-400">
+            zona: {formatMxn(zoneAvgPerM2)}/m²
+          </p>
         </div>
       </div>
 
+      {/* Feature chips */}
+      <div className="flex items-center gap-2 flex-wrap mb-5">
+        {features.map((f, i) => (
+          <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
+            <Icon name={f.icon} className="text-sm text-slate-400" />
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{f.value}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Score + Verdict */}
-      <div className="flex items-baseline gap-3 mb-3">
-        <span className={`text-4xl font-black ${VERDICT_ACCENT[verdict]}`}>{score}</span>
-        <span className={`text-lg font-bold ${VERDICT_ACCENT[verdict]}`}>{VERDICT_LABEL[verdict]}</span>
+      <div className="flex items-center gap-3 mb-4">
+        <span className={`text-5xl font-black leading-none ${VERDICT_ACCENT[verdict]}`}>{score}</span>
+        <div className="flex flex-col gap-1">
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-bold ${VERDICT_CHIP[verdict]}`}>
+            {VERDICT_LABEL[verdict]}
+          </span>
+          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">de 100 puntos</span>
+        </div>
       </div>
 
       {/* Slider bar */}
@@ -115,13 +128,15 @@ export function ScoreSlider({ score, verdict, zoneName, pricePerM2, zoneAvgPerM2
             <div key={z.key} className={`${z.color} flex-1`} />
           ))}
         </div>
-        <div
+        <motion.div
           className="absolute top-0 -translate-x-1/2"
-          style={{ left: `${pinPosition}%` }}
+          initial={{ left: "0%" }}
+          animate={{ left: `${pinPosition}%` }}
+          transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.2 }}
         >
           <div className="w-1 h-3 bg-slate-900 dark:bg-white rounded-full" />
           <div className="w-3 h-3 bg-slate-900 dark:bg-white rounded-full -mt-1 -ml-1 border-2 border-white dark:border-slate-900" />
-        </div>
+        </motion.div>
       </div>
 
       {/* Labels under track */}

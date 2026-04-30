@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import type { ValuationResult } from "@/types/database"
 import { Icon } from "@/components/icon"
 
@@ -95,7 +96,12 @@ function BarRow({ icon, label, value }: { icon: string; label: string; value: nu
         <span className="text-xs font-black text-slate-800 dark:text-slate-100">{value.toFixed(0)}%</span>
       </div>
       <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+        <motion.div
+          className="h-full bg-blue-500 rounded-full"
+          initial={{ width: "0%" }}
+          animate={{ width: `${pct}%` }}
+          transition={{ type: "spring", stiffness: 180, damping: 24, delay: 0.15 }}
+        />
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "motion/react"
 import { Icon } from "@/components/icon"
 import { ZONES, PROPERTY_TYPES } from "@/lib/filter-utils"
 import type { PropertyType, ListingType, ValuationResult } from "@/types/database"
@@ -29,6 +30,20 @@ interface Props {
   disabled?: boolean
 }
 
+const INPUT_CLASS =
+  "w-full h-12 pl-10 pr-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors placeholder:text-slate-400"
+
+function IconInput({ icon, children }: { icon: string; children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <Icon name={icon} className="text-base text-slate-400" />
+      </div>
+      {children}
+    </div>
+  )
+}
+
 export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
   const [listingType, setListingType] = useState<ListingType>("venta")
   const [propertyType, setPropertyType] = useState<PropertyType>("casa")
@@ -45,7 +60,6 @@ export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
   const showBedrooms = propertyType === "casa" || propertyType === "departamento"
   const showBathrooms = propertyType !== "terreno"
 
-  /** Format a numeric string with commas (e.g. "3500000" → "3,500,000") */
   const formatWithCommas = (val: string) => {
     const digits = val.replace(/\D/g, "")
     return digits ? Number(digits).toLocaleString("en-US") : ""
@@ -123,21 +137,25 @@ export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Operación toggle */}
+      {/* Form header */}
+      <div className="pb-1">
+        <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100">Datos de la propiedad</h3>
+        <p className="text-xs text-slate-400 mt-0.5">Campos marcados con * son obligatorios</p>
+      </div>
+
+      {/* Operación toggle — pill style */}
       <div>
-        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
-          Operación
-        </label>
-        <div className="flex gap-2">
+        <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Operación</p>
+        <div className="inline-flex bg-slate-100 dark:bg-slate-800/60 rounded-xl p-1 gap-1">
           {(["venta", "renta"] as ListingType[]).map((op) => (
             <button
               key={op}
               type="button"
               onClick={() => setListingType(op)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+              className={`relative px-5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
                 listingType === op
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
               {op === "venta" ? "Venta" : "Renta"}
@@ -146,145 +164,168 @@ export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
         </div>
       </div>
 
-      {/* Tipo de propiedad */}
+      {/* Tipo de propiedad — icon cards */}
       <div>
-        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
-          Tipo de propiedad
-        </label>
-        <div className="flex gap-2 flex-wrap">
+        <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de propiedad</p>
+        <div className="grid grid-cols-5 gap-2">
           {PROPERTY_TYPES.map((pt) => (
-            <button
+            <motion.button
               key={pt.value}
               type="button"
               onClick={() => setPropertyType(pt.value)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
+              whileTap={{ scale: 0.95 }}
+              className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-[11px] font-bold transition-all ${
                 propertyType === pt.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                  : "bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <Icon name={pt.icon} className="text-sm" />
+              <Icon name={pt.icon} className="text-xl" />
               {pt.label}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
-      {/* Price + Area */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Precio + Área */}
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+          <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
             Precio (MXN) *
           </label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={formatWithCommas(priceMxn)}
-            onChange={(e) => setPriceMxn(e.target.value.replace(/\D/g, ""))}
-            placeholder={listingType === "venta" ? "3,500,000" : "15,000"}
-            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            required
-          />
+          <IconInput icon="payments">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formatWithCommas(priceMxn)}
+              onChange={(e) => setPriceMxn(e.target.value.replace(/\D/g, ""))}
+              placeholder={listingType === "venta" ? "3,500,000" : "15,000"}
+              className={INPUT_CLASS}
+              required
+            />
+          </IconInput>
         </div>
         <div>
-          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+          <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
             {propertyType === "casa" ? "Construcción (m²) *" : propertyType === "terreno" ? "Terreno (m²) *" : "Superficie (m²) *"}
           </label>
-          <input
-            type="number"
-            value={areaM2}
-            onChange={(e) => setAreaM2(e.target.value)}
-            placeholder={propertyType === "terreno" ? "400" : "120"}
-            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            min={0}
-            required
-          />
+          <IconInput icon="square_foot">
+            <input
+              type="number"
+              value={areaM2}
+              onChange={(e) => setAreaM2(e.target.value)}
+              placeholder={propertyType === "terreno" ? "400" : "120"}
+              className={INPUT_CLASS}
+              min={0}
+              required
+            />
+          </IconInput>
         </div>
       </div>
 
-      {/* Terreno area for casas */}
+      {/* Terreno para casas */}
       {propertyType === "casa" && (
         <div>
-          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+          <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
             Terreno (m²)
           </label>
-          <input
-            type="number"
-            value={areaTerrenoM2}
-            onChange={(e) => setAreaTerrenoM2(e.target.value)}
-            placeholder="200"
-            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            min={0}
-          />
-          <p className="text-[10px] text-slate-400 mt-1">Opcional — superficie del lote/terreno</p>
+          <IconInput icon="landscape">
+            <input
+              type="number"
+              value={areaTerrenoM2}
+              onChange={(e) => setAreaTerrenoM2(e.target.value)}
+              placeholder="200"
+              className={INPUT_CLASS}
+              min={0}
+            />
+          </IconInput>
+          <p className="text-[10px] text-slate-400 mt-1">Opcional: superficie del lote</p>
         </div>
       )}
 
-      {/* Bedrooms + Bathrooms + Parking */}
-      <div className={`grid gap-4 ${showBedrooms && showBathrooms ? "grid-cols-3" : showBathrooms ? "grid-cols-2" : "grid-cols-1"}`}>
+      {/* Recámaras + Baños + Estacionamiento */}
+      <div className={`grid gap-3 ${
+        showBedrooms && showBathrooms ? "grid-cols-3" :
+        (showBedrooms || showBathrooms) ? "grid-cols-2" :
+        "grid-cols-1"
+      }`}>
         {showBedrooms && (
           <div>
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
               Recámaras
             </label>
-            <input
-              type="number"
-              value={bedrooms}
-              onChange={(e) => setBedrooms(e.target.value)}
-              placeholder="3"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              min={0}
-            />
+            <IconInput icon="bed">
+              <input
+                type="number"
+                value={bedrooms}
+                onChange={(e) => setBedrooms(e.target.value)}
+                placeholder="3"
+                className={INPUT_CLASS}
+                min={0}
+              />
+            </IconInput>
           </div>
         )}
         {showBathrooms && (
           <div>
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
               Baños
             </label>
-            <input
-              type="number"
-              value={bathrooms}
-              onChange={(e) => setBathrooms(e.target.value)}
-              placeholder="2"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              min={0}
-            />
+            <IconInput icon="shower">
+              <input
+                type="number"
+                value={bathrooms}
+                onChange={(e) => setBathrooms(e.target.value)}
+                placeholder="2"
+                className={INPUT_CLASS}
+                min={0}
+              />
+            </IconInput>
           </div>
         )}
         <div>
-          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+          <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
             Estacionamiento
           </label>
-          <input
-            type="number"
-            value={parking}
-            onChange={(e) => setParking(e.target.value)}
-            placeholder="2"
-            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            min={0}
-          />
+          <IconInput icon="local_parking">
+            <input
+              type="number"
+              value={parking}
+              onChange={(e) => setParking(e.target.value)}
+              placeholder="2"
+              className={INPUT_CLASS}
+              min={0}
+            />
+          </IconInput>
         </div>
       </div>
 
-      {/* Zone */}
+      {/* Zona */}
       <div>
-        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
           Zona *
         </label>
-        <select
-          value={zoneSlug}
-          onChange={(e) => setZoneSlug(e.target.value)}
-          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          required
-        >
-          <option value="">Selecciona una zona</option>
-          {ZONES.filter((z) => z.slug !== "otros").map((z) => (
-            <option key={z.slug} value={z.slug}>
-              {z.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Icon name="location_on" className="text-base text-slate-400" />
+          </div>
+          <select
+            value={zoneSlug}
+            onChange={(e) => setZoneSlug(e.target.value)}
+            className={INPUT_CLASS + " appearance-none"}
+            required
+          >
+            <option value="">Selecciona una zona</option>
+            {ZONES.filter((z) => z.slug !== "otros").map((z) => (
+              <option key={z.slug} value={z.slug}>
+                {z.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Icon name="expand_more" className="text-base text-slate-400" />
+          </div>
+        </div>
       </div>
 
       {/* Error */}
@@ -293,10 +334,12 @@ export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
       )}
 
       {/* Submit */}
-      <button
+      <motion.button
         type="submit"
         disabled={loading || disabled}
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
+        className="w-full flex items-center justify-center gap-2 h-12 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {loading ? (
           <>
@@ -309,7 +352,7 @@ export function ManualForm({ onResult, onAuthRequired, disabled }: Props) {
             Valuar propiedad
           </>
         )}
-      </button>
+      </motion.button>
     </form>
   )
 }
