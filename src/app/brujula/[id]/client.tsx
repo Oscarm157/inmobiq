@@ -346,7 +346,7 @@ function KpiHeroCard({
       className={`bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-400/35 dark:border-slate-500/30 hover:shadow-xl ${toneShadow(tone)} transition-shadow`}
     >
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-start h-full">
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${toneBg(tone)}`}>
               <Icon name="account_balance_wallet" className={`text-lg ${toneText(tone)}`} />
@@ -357,7 +357,7 @@ function KpiHeroCard({
             </div>
           </div>
           <p className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1 leading-tight">{question}</p>
-          <p className={`font-display text-[3.5rem] md:text-[4.5rem] font-black leading-[0.9] mt-3 ${toneText(tone)}`}>
+          <p className={`font-display text-[2.5rem] sm:text-[3rem] md:text-[3.75rem] font-black leading-[0.9] mt-3 break-words ${toneText(tone)}`}>
             {bigValue}
           </p>
           {plainExplain && (
