@@ -36,6 +36,7 @@ const VERDICT_BG: Record<ValuationVerdict, string> = {
 interface Props {
   result: ValuationResult
   narrative: string
+  showScoreSlider?: boolean
   property: {
     property_type: PropertyType
     listing_type: ListingType
@@ -65,7 +66,7 @@ function renderNarrative(text: string) {
   })
 }
 
-export function ValuationReport({ result, narrative, property }: Props) {
+export function ValuationReport({ result, narrative, property, showScoreSlider = true }: Props) {
   // Determine which area was used for $/m² calculation
   const usedConstruccion = property.property_type !== "terreno" && !!property.area_construccion_m2
   const effectiveArea = usedConstruccion ? property.area_construccion_m2! : property.area_m2
@@ -74,14 +75,16 @@ export function ValuationReport({ result, narrative, property }: Props) {
   return (
     <div className="space-y-5">
       {/* ── 1. Score Slider + Property Summary ── */}
-      <ScoreSlider
-        score={result.score}
-        verdict={result.verdict}
-        zoneName={result.zone_name}
-        pricePerM2={result.price_per_m2}
-        zoneAvgPerM2={result.zone_avg_price_per_m2}
-        property={property}
-      />
+      {showScoreSlider && (
+        <ScoreSlider
+          score={result.score}
+          verdict={result.verdict}
+          zoneName={result.zone_name}
+          pricePerM2={result.price_per_m2}
+          zoneAvgPerM2={result.zone_avg_price_per_m2}
+          property={property}
+        />
+      )}
 
       {/* ── 2. Scorecard Analysis ── */}
       <AnalysisScorecard result={result} narrative={narrative} property={property} />

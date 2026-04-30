@@ -183,65 +183,74 @@ export function ValuationHistory() {
 
           return (
             <motion.div key={item.id} variants={itemVariants}>
-              <Link
-                href={`/brujula/${item.id}`}
-                className="group block bg-surface rounded-xl p-4 card-shadow hover:shadow-md transition-all"
-              >
-                <div className="flex items-center gap-3.5">
-                  {/* Icon */}
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    cfg ? cfg.iconBg : "bg-slate-100 dark:bg-slate-800"
-                  }`}>
-                    <Icon
-                      name={typeIcon}
-                      className={`text-lg ${cfg ? cfg.scoreColor : "text-slate-400"}`}
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
-                        {zone}
-                      </span>
-                      {cfg && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.chipClass}`}>
-                          {cfg.label}
-                        </span>
-                      )}
+              <motion.div whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 20 } }}>
+                <Link
+                  href={`/brujula/${item.id}`}
+                  className="group block bg-surface rounded-2xl p-5 card-shadow hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      cfg ? cfg.iconBg : "bg-slate-100 dark:bg-slate-800"
+                    }`}>
+                      <Icon
+                        name={typeIcon}
+                        className={`text-xl ${cfg ? cfg.scoreColor : "text-slate-400"}`}
+                      />
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {typeLabel} · {item.price_mxn ? formatMxn(item.price_mxn) : "—"} · {item.area_m2 ?? "—"} m²
-                    </p>
-                    {/* Score bar */}
-                    {item.score !== null && cfg && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <motion.div
-                            className={`h-full rounded-full ${cfg.bar}`}
-                            initial={{ width: "0%" }}
-                            animate={{ width: `${item.score}%` }}
-                            transition={{ type: "spring", stiffness: 180, damping: 24, delay: 0.2 }}
-                          />
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div>
+                          <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 leading-tight">
+                            {zone}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {typeLabel} · {item.price_mxn ? formatMxn(item.price_mxn) : "—"} · {item.area_m2 ?? "—"} m²
+                          </p>
                         </div>
-                        <span className={`text-xs font-black flex-shrink-0 ${cfg.scoreColor}`}>
-                          {item.score}
+                        {/* Score */}
+                        {item.score !== null && cfg && (
+                          <span className={`text-2xl font-black flex-shrink-0 leading-none ${cfg.scoreColor}`}>
+                            {item.score}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Score bar */}
+                      {item.score !== null && cfg && (
+                        <div className="mt-3 flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <motion.div
+                              className={`h-full rounded-full ${cfg.bar}`}
+                              initial={{ width: "0%" }}
+                              animate={{ width: `${item.score}%` }}
+                              transition={{ type: "spring", stiffness: 180, damping: 24, delay: 0.2 }}
+                            />
+                          </div>
+                          {cfg && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.chipClass}`}>
+                              {cfg.label}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between mt-3">
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          {formatDate(item.created_at)} · {item.input_mode === "screenshots" ? "Screenshot" : "Manual"}
+                        </p>
+                        <span className="text-[10px] font-bold text-blue-500 group-hover:text-blue-600 transition-colors flex items-center gap-0.5">
+                          Ver reporte
+                          <Icon name="chevron_right" className="text-xs" />
                         </span>
                       </div>
-                    )}
+                    </div>
                   </div>
-
-                  {/* Arrow */}
-                  <Icon
-                    name="chevron_right"
-                    className="text-slate-300 dark:text-slate-600 group-hover:text-blue-400 transition-colors flex-shrink-0"
-                  />
-                </div>
-
-                <p className="text-[10px] text-slate-400 mt-2.5 ml-[3.375rem]">
-                  {formatDate(item.created_at)} · {item.input_mode === "screenshots" ? "Screenshot" : "Manual"}
-                </p>
-              </Link>
+                </Link>
+              </motion.div>
             </motion.div>
           )
         })}
