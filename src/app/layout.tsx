@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Plus_Jakarta_Sans, Fraunces } from "next/font/google"
+import { Plus_Jakarta_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
@@ -18,13 +18,6 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-plus-jakarta",
-})
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display",
-  axes: ["opsz"],
 })
 
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');if(s==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`
@@ -104,7 +97,7 @@ export default function RootLayout({
         {/* Bitcount + Playfair: loaded async via script (not render-blocking) — only used in sidebar */}
       </head>
       <body
-        className={`${plusJakarta.variable} ${fraunces.variable} font-sans bg-background text-foreground min-h-screen antialiased`}
+        className={`${plusJakarta.variable} font-sans bg-background text-foreground min-h-screen antialiased`}
       >
         <ThemeProvider>
           <CurrencyProvider>
