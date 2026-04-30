@@ -455,65 +455,68 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
         </div>
       </div>
 
-      {/* ── 3. Narrativa AI ── */}
-      {narrative && (
+      {/* ── 3. Narrativa AI + Tu propiedad vs zona — 50/50 desktop ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Narrativa AI */}
+        {narrative && (
+          <motion.div variants={fadeUp}>
+            <div className="relative h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-200/80 dark:border-slate-700/50">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center flex-shrink-0">
+                  <Icon name="auto_awesome" className="text-lg text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Análisis IA</p>
+                  <p className="text-sm md:text-[15px] text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                    {renderNarrative(narrative)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Tu propiedad vs zona */}
         <motion.div variants={fadeUp}>
-          <div className="relative bg-surface rounded-2xl p-6 md:p-8 card-shadow border border-slate-200/80 dark:border-slate-700/50">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center flex-shrink-0">
-                <Icon name="auto_awesome" className="text-lg text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Análisis IA</p>
-                <p className="text-base md:text-[17px] text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                  {renderNarrative(narrative)}
-                </p>
-              </div>
+          <div className="h-full bg-surface rounded-2xl p-6 md:p-7 card-shadow border border-slate-200/80 dark:border-slate-700/50">
+            <div className="flex items-baseline justify-between mb-5">
+              <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">Tu propiedad vs zona</h2>
+              <p className="text-xs text-slate-400 font-medium">{result.zone_name}</p>
+            </div>
+
+            <div className="space-y-5">
+              <CompareRow
+                label="Precio por m²"
+                tu={result.price_per_m2}
+                zona={result.zone_avg_price_per_m2}
+                format={formatMxn}
+                diffPct={result.price_premium_pct}
+                diffLabelGood="Bajo el promedio"
+                diffLabelBad="Sobre el promedio"
+              />
+              <CompareRow
+                label="Precio total"
+                tu={property.price_mxn}
+                zona={result.zone_avg_ticket}
+                format={formatMxn}
+                diffPct={result.ticket_premium_pct}
+                diffLabelGood="Más barata"
+                diffLabelBad="Más cara"
+              />
+              <CompareRow
+                label="Superficie"
+                tu={property.area_m2}
+                zona={result.zone_avg_area}
+                format={(n) => `${Math.round(n)} m²`}
+                diffPct={result.area_vs_zone_avg_pct}
+                diffLabelGood="Más grande"
+                diffLabelBad="Más chica"
+                biggerIsBetter
+              />
             </div>
           </div>
         </motion.div>
-      )}
-
-      {/* ── 4. Tu propiedad vs zona — comparación visual ── */}
-      <motion.div variants={fadeUp}>
-        <div className="bg-surface rounded-2xl p-6 md:p-8 card-shadow border border-slate-200/80 dark:border-slate-700/50">
-          <div className="flex items-baseline justify-between mb-5">
-            <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">Tu propiedad vs zona</h2>
-            <p className="text-xs text-slate-400 font-medium">{result.zone_name}</p>
-          </div>
-
-          <div className="space-y-5">
-            <CompareRow
-              label="Precio por m²"
-              tu={result.price_per_m2}
-              zona={result.zone_avg_price_per_m2}
-              format={formatMxn}
-              diffPct={result.price_premium_pct}
-              diffLabelGood="Bajo el promedio"
-              diffLabelBad="Sobre el promedio"
-            />
-            <CompareRow
-              label="Precio total"
-              tu={property.price_mxn}
-              zona={result.zone_avg_ticket}
-              format={formatMxn}
-              diffPct={result.ticket_premium_pct}
-              diffLabelGood="Más barata"
-              diffLabelBad="Más cara"
-            />
-            <CompareRow
-              label="Superficie"
-              tu={property.area_m2}
-              zona={result.zone_avg_area}
-              format={(n) => `${Math.round(n)} m²`}
-              diffPct={result.area_vs_zone_avg_pct}
-              diffLabelGood="Más grande"
-              diffLabelBad="Más chica"
-              biggerIsBetter
-            />
-          </div>
-        </div>
-      </motion.div>
+      </div>
 
       {/* ── 5. Perfil de zona ── */}
       <motion.div variants={fadeUp}>
