@@ -357,7 +357,7 @@ function KpiHeroCard({
             </div>
           </div>
           <p className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1 leading-tight">{question}</p>
-          <p className={`font-display text-[2.5rem] sm:text-[3rem] md:text-[3.75rem] font-black leading-[0.9] mt-3 break-words ${toneText(tone)}`}>
+          <p className={`font-display text-[2.25rem] sm:text-[2.75rem] md:text-[3.25rem] font-black leading-[0.9] mt-3 whitespace-nowrap ${toneText(tone)}`}>
             {bigValue}
           </p>
           {plainExplain && (
