@@ -595,7 +595,7 @@ export function ValuationDetailClient({ result, narrative, property }: Props) {
           <KpiCard
             icon="shield"
             label="Riesgo zona"
-            question="¿Qué tan estable?"
+            question="¿Cuánto riesgo tiene?"
             bigValue={`${result.risk_score}/100`}
             subValue={result.risk_label || (result.risk_score < 40 ? "Bajo riesgo" : result.risk_score < 65 ? "Riesgo medio" : "Alto riesgo")}
             tone={riskTone}
