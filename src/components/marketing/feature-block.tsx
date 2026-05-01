@@ -14,6 +14,7 @@ interface FeatureBlockProps {
   image: { src: string; alt: string }
   reverse?: boolean
   tone?: Tone
+  extraVisual?: ReactNode
 }
 
 export function FeatureBlock({
@@ -24,6 +25,7 @@ export function FeatureBlock({
   image,
   reverse,
   tone = "light",
+  extraVisual,
 }: FeatureBlockProps) {
   const isDark = tone === "dark"
   const bg =
@@ -48,7 +50,7 @@ export function FeatureBlock({
           }}
         />
       )}
-      <div className="relative max-w-[1280px] mx-auto px-5 md:px-8 py-16 md:py-24">
+      <div className="relative max-w-[1280px] mx-auto px-5 md:px-8 py-20 md:py-28">
         <div className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -95,6 +97,7 @@ export function FeatureBlock({
                 ))}
               </ul>
             )}
+            {extraVisual}
           </motion.div>
 
           <motion.div
@@ -105,14 +108,18 @@ export function FeatureBlock({
             className="relative"
           >
             <div
-              className="relative rounded-[20px] overflow-hidden"
+              className="relative overflow-hidden"
               style={{
+                borderRadius: isDark ? "20px" : "28px",
                 border: isDark
                   ? "1px solid rgba(255,255,255,0.08)"
-                  : "1px solid var(--m-gray-4)",
+                  : "1px solid var(--m-gray-3)",
                 background: isDark
                   ? "rgba(255,255,255,0.02)"
                   : "var(--m-canvas)",
+                boxShadow: isDark
+                  ? "none"
+                  : "0 30px 80px -30px rgba(15, 23, 42, 0.18), 0 8px 24px -8px rgba(15, 23, 42, 0.06)",
               }}
             >
               <Image
@@ -124,15 +131,27 @@ export function FeatureBlock({
                 sizes="(max-width: 1024px) 100vw, 600px"
               />
             </div>
-            <div
-              className="absolute -inset-4 -z-10 rounded-[28px] opacity-50 blur-3xl pointer-events-none"
-              style={{
-                background: isDark
-                  ? "rgba(59, 130, 246, 0.18)"
-                  : "rgba(16, 185, 129, 0.12)",
-              }}
-              aria-hidden
-            />
+            {!isDark && (
+              <>
+                <div
+                  className="absolute -inset-6 -z-10 rounded-[40px] blur-3xl pointer-events-none"
+                  style={{ background: "rgba(16, 185, 129, 0.18)", opacity: 0.7 }}
+                  aria-hidden
+                />
+                <div
+                  className="absolute -inset-2 -bottom-8 -left-8 -z-10 w-2/3 h-2/3 rounded-full blur-3xl pointer-events-none"
+                  style={{ background: "rgba(59, 130, 246, 0.14)" }}
+                  aria-hidden
+                />
+              </>
+            )}
+            {isDark && (
+              <div
+                className="absolute -inset-4 -z-10 rounded-[28px] blur-3xl pointer-events-none"
+                style={{ background: "rgba(59, 130, 246, 0.18)", opacity: 0.5 }}
+                aria-hidden
+              />
+            )}
           </motion.div>
         </div>
       </div>

@@ -9,7 +9,7 @@ const items = [
   },
   {
     q: "¿De dónde vienen los precios?",
-    a: "Listings públicos de Inmuebles24, Lamudi, Vivanuncios y Mercado Libre. Cada uno se valida contra rangos por categoría de propiedad y zona; los outliers se filtran con IQR 2.0 antes de entrar a las métricas.",
+    a: "Datos públicos del mercado validados localmente. Cada precio pasa por rangos por categoría y zona; los outliers se filtran con IQR 2.0 antes de entrar a las métricas. La demografía sale del Censo INEGI 2020.",
   },
   {
     q: "¿Qué incluye la demografía INEGI?",

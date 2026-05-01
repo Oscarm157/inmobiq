@@ -141,7 +141,7 @@ function HeroPanel() {
         </div>
       </div>
 
-      <div className="m-glass absolute bottom-3 inset-x-3 sm:bottom-2 sm:left-6 sm:right-0 lg:left-12 p-4 md:p-5">
+      <div className="m-glass absolute bottom-6 inset-x-3 sm:bottom-5 sm:left-6 sm:right-0 lg:left-12 p-5 md:p-5">
         <div className="flex items-center justify-between mb-3">
           <p className="m-eyebrow" style={{ fontSize: "10px" }}>Precio/m² · 12 sem.</p>
           <p className="text-[10px] text-[var(--m-gray-2)] uppercase tracking-wider">Snapshots</p>
@@ -163,7 +163,7 @@ function HeroPanel() {
   )
 }
 
-function Sparkline() {
+export function Sparkline() {
   const points = [42, 40, 44, 43, 47, 46, 50, 48, 52, 55, 53, 58]
   const max = Math.max(...points)
   const min = Math.min(...points)

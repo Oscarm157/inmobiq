@@ -5,8 +5,8 @@ import { motion } from "motion/react"
 const steps = [
   {
     n: "01",
-    title: "Listings de portales públicos",
-    body: "Capturamos precios, áreas y tipos desde Inmuebles24, Lamudi, Vivanuncios y Mercado Libre.",
+    title: "Datos públicos del mercado",
+    body: "Capturamos precios, áreas y tipos desde fuentes públicas para tener visibilidad continua del inventario.",
   },
   {
     n: "02",

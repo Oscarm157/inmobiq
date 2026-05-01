@@ -1,9 +1,8 @@
 const sources = [
   "INEGI Censo 2020",
-  "Inmuebles24",
-  "Lamudi",
-  "Vivanuncios",
-  "Mercado Libre",
+  "SEDATU GeoServer",
+  "Datos públicos de mercado",
+  "Validación local",
 ]
 
 export function SourcesBar() {

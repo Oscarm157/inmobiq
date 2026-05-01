@@ -7,6 +7,7 @@ import { HowItWorks } from "@/components/marketing/how-it-works"
 import { PricingCards } from "@/components/marketing/pricing-cards"
 import { FAQ } from "@/components/marketing/faq"
 import { FinalCTA } from "@/components/marketing/final-cta"
+import { ZoneListMini } from "@/components/marketing/zone-list-mini"
 
 export const metadata = {
   title: "Inmobiq · Inteligencia inmobiliaria por zona en Tijuana",
@@ -63,6 +64,7 @@ export default function LandingPage() {
               "Brújula AI para valuar propiedades específicas",
             ]}
             image={{ src: "/marketing/dashboard-comparator.png", alt: "Comparador de zonas y pipeline" }}
+            extraVisual={<ZoneListMini />}
           />
         </div>
 
