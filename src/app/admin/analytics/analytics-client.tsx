@@ -20,7 +20,8 @@ interface AnalyticsData {
 }
 
 const PAGE_LABELS: Record<string, string> = {
-  "/": "Dashboard (Precios)",
+  "/app": "Dashboard (Precios)",
+  "/": "Landing",
   "/zonas": "Zonas",
   "/comparar": "Comparador",
   "/brujula": "Brújula",
@@ -85,7 +86,7 @@ export function AnalyticsClient() {
 
   useEffect(() => {
     if (!user) return
-    if (!isAdmin) { router.push("/"); return }
+    if (!isAdmin) { router.push("/app"); return }
     fetchData(days)
   }, [user, isAdmin, router, fetchData, days])
 

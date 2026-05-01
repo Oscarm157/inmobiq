@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: ZonePageProps) {
 
 export default async function ZonePage({ params, searchParams }: ZonePageProps) {
   const { slug } = await params
-  if (slug === "otros") redirect("/")
+  if (slug === "otros") redirect("/app")
   const sp = await searchParams
 
   // Read persistent preferences from cookies

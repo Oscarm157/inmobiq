@@ -63,7 +63,7 @@ export function UsuariosClient() {
   useEffect(() => {
     if (!user) return
     if (!isAdmin) {
-      router.push("/")
+      router.push("/app")
       return
     }
     fetchUsers()

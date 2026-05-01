@@ -44,6 +44,7 @@ export function TopHeader() {
     router.push("/")
   }
 
+
   // User display info
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || ""
   const userEmail = user?.email || ""

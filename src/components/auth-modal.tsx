@@ -59,7 +59,7 @@ export function AuthModal() {
   const handleGoogle = async () => {
     setLoading(true)
     setError(null)
-    await signInWithGoogle("/")
+    await signInWithGoogle("/app")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

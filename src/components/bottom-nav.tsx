@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Icon } from "@/components/icon"
 
 const mobileNav = [
-  { icon: "monitoring", label: "Precios", href: "/" },
+  { icon: "monitoring", label: "Precios", href: "/app" },
   { icon: "explore", label: "Brújula", href: "/brujula" },
   { icon: "location_on", label: "Zonas", href: "/zonas" },
   { icon: "compare", label: "Comparar", href: "/comparar" },
@@ -16,7 +16,7 @@ export function BottomNav() {
   const pathname = usePathname()
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/"
+    if (href === "/app") return pathname === "/app"
     if (href === "/zonas") return pathname.startsWith("/zona")
     return pathname.startsWith(href.split("/").slice(0, 2).join("/"))
   }

@@ -103,7 +103,7 @@ export function ScraperClient() {
   // Redirect non-admin
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
-      router.push("/");
+      router.push("/app");
     }
   }, [user, isAdmin, authLoading, router]);
 

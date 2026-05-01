@@ -110,7 +110,7 @@ export async function middleware(request: NextRequest) {
     // Admin-only routes: check role
     if (isAdminRoute && profile?.role !== "admin") {
       const homeUrl = request.nextUrl.clone()
-      homeUrl.pathname = "/"
+      homeUrl.pathname = "/app"
       return NextResponse.redirect(homeUrl)
     }
   }
@@ -118,7 +118,7 @@ export async function middleware(request: NextRequest) {
   // Redirect logged-in users away from /login
   if (pathname === "/login" && user) {
     const homeUrl = request.nextUrl.clone()
-    homeUrl.pathname = "/"
+    homeUrl.pathname = "/app"
     return NextResponse.redirect(homeUrl)
   }
 

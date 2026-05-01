@@ -9,12 +9,17 @@ import { ModeTabs } from "@/components/mode-tabs"
 import { useSidebar } from "@/components/sidebar-provider"
 
 const FULL_SCREEN_ROUTES = ["/login"]
+const MARKETING_ROUTES = ["/"]
 
 export function SidebarShell({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar()
   const pathname = usePathname()
 
   if (FULL_SCREEN_ROUTES.some((r) => pathname.startsWith(r))) {
+    return <>{children}</>
+  }
+
+  if (MARKETING_ROUTES.includes(pathname)) {
     return <>{children}</>
   }
 

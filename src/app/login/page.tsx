@@ -10,7 +10,7 @@ function LoginForm() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectedFrom = searchParams.get("redirectedFrom") ?? "/"
+  const redirectedFrom = searchParams.get("redirectedFrom") ?? "/app"
   const urlError = searchParams.get("error")
 
   const [mode, setMode] = useState<"login" | "register" | "reset">("login")

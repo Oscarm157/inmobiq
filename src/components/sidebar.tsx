@@ -11,7 +11,7 @@ import { NarrativaPromo } from "@/components/narrativa-promo"
 import { openAuthModal } from "@/components/auth-modal"
 
 const navItems = [
-  { icon: "monitoring", label: "Precios", href: "/", tourId: "precios" },
+  { icon: "monitoring", label: "Precios", href: "/app", tourId: "precios" },
   { icon: "explore", label: "Brújula", href: "/brujula", subtitle: "Valuador de propiedades", tourId: "brujula" },
   { icon: "location_on", label: "Zonas", href: "/zonas", tourId: "zonas" },
   { icon: "compare", label: "Comparar", href: "/comparar", tourId: "comparar" },
@@ -30,6 +30,7 @@ export function Sidebar() {
     router.push("/")
   }
 
+
   const userName =
     user?.user_metadata?.full_name ??
     user?.user_metadata?.name ??
@@ -39,7 +40,7 @@ export function Sidebar() {
   const avatar = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/"
+    if (href === "/app") return pathname === "/app"
     if (href === "/zonas") return pathname.startsWith("/zona")
     return pathname.startsWith(href)
   }

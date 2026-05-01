@@ -378,3 +378,248 @@
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ===== Marketing landing tokens (scoped to .m-page) ===== */
+.m-page {
+  --m-canvas: #ffffff;
+  --m-canvas-soft: #f7f7f5;
+  --m-ink: #0a0a0a;
+  --m-ink-soft: #1a1a1a;
+  --m-gray-1: #5b5862;
+  --m-gray-2: #7f7f7f;
+  --m-gray-3: #bdbdbd;
+  --m-gray-4: #dedede;
+  --m-surface-soft: rgba(14, 7, 29, 0.04);
+  --m-accent: #10b981;
+  --m-accent-ink: #047857;
+  --m-accent-soft: rgba(16, 185, 129, 0.10);
+  --m-shadow-nav: 0 12px 60px 0 rgba(0, 0, 0, 0.06);
+
+  background: var(--m-canvas);
+  color: var(--m-ink);
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.011em;
+}
+
+.m-page * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display tracking comprimido tipo Sunday */
+.m-display {
+  font-weight: 400;
+  font-size: clamp(2.5rem, 6vw + 1rem, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+}
+
+.m-h2 {
+  font-weight: 400;
+  font-size: clamp(2rem, 3.5vw + 0.5rem, 3rem);
+  line-height: 0.98;
+  letter-spacing: -0.028em;
+}
+
+.m-h3 {
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.13;
+  letter-spacing: -0.018em;
+}
+
+.m-eyebrow {
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--m-gray-1);
+}
+
+.m-body {
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--m-gray-1);
+}
+
+.m-body-lg {
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--m-gray-1);
+  letter-spacing: -0.005em;
+}
+
+/* Botón pill firma */
+.m-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 999px;
+  background: var(--m-ink);
+  color: var(--m-canvas);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  border: 1px solid var(--m-ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+.m-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px -10px rgba(16, 185, 129, 0.45), 0 2px 8px -2px rgba(0, 0, 0, 0.18);
+}
+.m-btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from var(--angle, 0deg) at 50% 50%,
+    rgba(16, 185, 129, 0) 0%,
+    rgba(16, 185, 129, 0.55) 45%,
+    rgba(16, 185, 129, 0) 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  mix-blend-mode: screen;
+}
+.m-btn-primary:hover::before {
+  opacity: 1;
+  animation: m-angle-rotate 4s linear infinite;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes m-angle-rotate {
+  to { --angle: 360deg; }
+}
+
+.m-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.875rem 0.5rem;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--m-ink);
+  letter-spacing: -0.01em;
+  background: transparent;
+  border: none;
+  position: relative;
+}
+.m-btn-ghost::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.55rem;
+  height: 1px;
+  background: var(--m-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+.m-btn-ghost:hover::after {
+  transform: scaleX(1);
+}
+
+/* Card Sunday-style: bg sutil, sin shadow */
+.m-card {
+  background: var(--m-surface-soft);
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+.m-card-asym {
+  background: var(--m-ink);
+  color: var(--m-canvas);
+  border-radius: 48px 0 0 48px;
+  padding: 3rem;
+}
+
+.m-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 100px;
+  background: var(--m-accent-soft);
+  color: var(--m-accent-ink);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Glass panel del hero */
+.m-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+}
+
+/* Nav sticky con sombra Sunday */
+.m-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.m-nav[data-scrolled="true"] {
+  border-bottom-color: var(--m-gray-4);
+  box-shadow: var(--m-shadow-nav);
+}
+
+/* FAQ */
+.m-faq-item {
+  border-bottom: 1px solid var(--m-gray-4);
+}
+.m-faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 400;
+  font-size: 1.125rem;
+  letter-spacing: -0.015em;
+}
+.m-faq-item summary::-webkit-details-marker { display: none; }
+.m-faq-item summary::after {
+  content: "+";
+  color: var(--m-gray-1);
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.m-faq-item[open] summary::after { content: "−"; }
+.m-faq-item p {
+  padding: 0 0 1.5rem 0;
+  color: var(--m-gray-1);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* Mobile: card asimétrica vuelve simétrica para no romper */
+@media (max-width: 767px) {
+  .m-card-asym {
+    border-radius: 24px;
+    padding: 2rem;
+  }
+  .m-card {
+    padding: 1.5rem;
+  }
+}
