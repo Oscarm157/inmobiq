@@ -21,7 +21,7 @@ export function Hero() {
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 70% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%)",
+            "radial-gradient(ellipse 60% 50% at 75% 0%, rgba(16, 185, 129, 0.09) 0%, transparent 60%), radial-gradient(ellipse 70% 40% at 25% 10%, rgba(59, 130, 246, 0.07) 0%, transparent 65%)",
         }}
       />
       <div className="relative max-w-[1280px] mx-auto px-5 md:px-8 pt-12 md:pt-24 pb-16 md:pb-28">
@@ -106,7 +106,7 @@ function HeroPanel() {
         className="absolute inset-0 rounded-[28px]"
         style={{
           background:
-            "linear-gradient(160deg, rgba(16, 185, 129, 0.10) 0%, rgba(16, 185, 129, 0.02) 35%, transparent 70%)",
+            "linear-gradient(160deg, rgba(16, 185, 129, 0.10) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 80%)",
         }}
       />
 
@@ -152,6 +152,11 @@ function HeroPanel() {
       <div
         className="absolute -bottom-2 -right-2 w-24 h-24 rounded-full opacity-70 blur-2xl pointer-events-none"
         style={{ background: "rgba(16, 185, 129, 0.20)" }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute -top-4 -left-4 w-32 h-32 rounded-full opacity-50 blur-3xl pointer-events-none"
+        style={{ background: "rgba(59, 130, 246, 0.18)" }}
         aria-hidden="true"
       />
     </div>

@@ -19,7 +19,7 @@ export function FinalCTA() {
             aria-hidden
             style={{
               background:
-                "radial-gradient(ellipse 50% 60% at 80% 30%, rgba(16,185,129,0.18) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 10% 90%, rgba(16,185,129,0.10) 0%, transparent 60%)",
+                "radial-gradient(ellipse 50% 60% at 85% 25%, rgba(16,185,129,0.18) 0%, transparent 60%), radial-gradient(ellipse 45% 55% at 5% 85%, rgba(59,130,246,0.16) 0%, transparent 60%), radial-gradient(ellipse 35% 40% at 50% 50%, rgba(99,102,241,0.06) 0%, transparent 65%)",
             }}
           />
           <div className="relative max-w-[28ch]">
@@ -33,7 +33,7 @@ export function FinalCTA() {
                 color: "var(--m-canvas)",
               }}
             >
-              Decide con datos del mercado, no con corazonadas.
+              Mercado inmobiliario de Tijuana, leído por zona.
             </h2>
             <p className="mt-5 text-[var(--m-gray-3)] text-[16px] leading-relaxed max-w-[42ch]">
               Crea cuenta gratis con tres valuaciones al mes. Sin tarjeta.

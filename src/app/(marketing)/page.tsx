@@ -50,7 +50,7 @@ export default function LandingPage() {
             ]}
             image={{ src: "/marketing/dashboard-detail.png", alt: "Riesgo y demografía por zona" }}
             reverse
-            altBg
+            tone="dark"
           />
 
           <FeatureBlock

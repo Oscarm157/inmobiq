@@ -75,19 +75,37 @@ export function PricingCards() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, ease: "easeOut", delay: i * 0.08 }}
-              className={`relative flex flex-col rounded-[20px] p-8 md:p-9 border ${
+              className={`relative flex flex-col rounded-[20px] p-8 md:p-9 border overflow-hidden ${
                 t.highlight
-                  ? "bg-[var(--m-ink)] text-[var(--m-canvas)] border-[var(--m-ink)]"
+                  ? "text-[var(--m-canvas)] border-[var(--m-ink)]"
                   : "bg-[var(--m-canvas)] border-[var(--m-gray-4)]"
               }`}
+              style={
+                t.highlight
+                  ? {
+                      background:
+                        "linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #0b1326 100%)",
+                    }
+                  : undefined
+              }
             >
               {t.highlight && (
-                <span
-                  className="absolute -top-3 left-8 inline-flex px-3 py-1 rounded-full bg-[var(--m-accent)] text-[var(--m-ink)]"
-                  style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}
-                >
-                  Más elegido
-                </span>
+                <>
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    aria-hidden
+                    style={{
+                      background:
+                        "radial-gradient(ellipse 60% 50% at 100% 0%, rgba(16,185,129,0.18) 0%, transparent 55%), radial-gradient(ellipse 50% 50% at 0% 100%, rgba(59,130,246,0.14) 0%, transparent 60%)",
+                    }}
+                  />
+                  <span
+                    className="absolute -top-3 left-8 inline-flex px-3 py-1 rounded-full bg-[var(--m-accent)] text-[var(--m-ink)]"
+                    style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}
+                  >
+                    Más elegido
+                  </span>
+                </>
               )}
 
               <div className="flex items-baseline justify-between">
