@@ -45,3 +45,9 @@ public copy/
 public copy 2/
 public copy 3/
 tmp/
+
+# capturas/artefactos temporales
+Inmobiq*.png
+pincali.png
+EB-*.webp
+vertice-*.mjs
