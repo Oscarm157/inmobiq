@@ -20,6 +20,7 @@ const securityHeaders = [
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://va.vercel-scripts.com https://vercel.live",
       "worker-src 'self' blob:",
+      "frame-src 'self' https://vercel.live",
       "frame-ancestors 'none'",
     ].join("; "),
   },

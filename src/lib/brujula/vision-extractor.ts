@@ -65,7 +65,7 @@ export async function extractFromScreenshots(
   const { default: Anthropic } = await import("@anthropic-ai/sdk")
   const client = new Anthropic({ apiKey })
 
-  const model = "claude-sonnet-4-20250514"
+  const model = "claude-sonnet-5"
 
   const imageContent = screenshots.map((s) => ({
     type: "image" as const,
