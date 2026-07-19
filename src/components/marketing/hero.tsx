@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { motion } from "motion/react"
 
 const fadeUp = {
@@ -17,16 +16,20 @@ const stagger = {
 export function Hero() {
   return (
     <section className="m-band-dark relative min-h-[94svh] flex flex-col overflow-hidden">
-      {/* Media generada full-bleed: visualización 3D de precios por columna */}
-      <Image
-        src="/marketing/hero-prices.jpg"
-        alt="Visualización de precios por zona en Tijuana"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
+      {/* Media generada full-bleed: video de la visualización 3D de precios */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
         style={{ objectPosition: "center 42%" }}
-      />
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/marketing/hero-prices.jpg"
+        aria-hidden="true"
+      >
+        <source src="/marketing/hero-prices.webm" type="video/webm" />
+        <source src="/marketing/hero-prices.mp4" type="video/mp4" />
+      </video>
 
       {/* Scrims para legibilidad */}
       <div
