@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Plus_Jakarta_Sans } from "next/font/google"
+import { Plus_Jakarta_Sans, Geist } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { SidebarShell } from "@/components/sidebar-shell"
@@ -18,6 +18,14 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-plus-jakarta",
+})
+
+// Grotesque geométrica para la landing (scope .m-page). Un solo tipo, estilo Jeton.
+const geist = Geist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-geist",
 })
 
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');if(s==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`
@@ -97,7 +105,7 @@ export default function RootLayout({
         {/* Bitcount + Playfair: loaded async via script (not render-blocking) — only used in sidebar */}
       </head>
       <body
-        className={`${plusJakarta.variable} font-sans bg-background text-foreground min-h-screen antialiased`}
+        className={`${plusJakarta.variable} ${geist.variable} font-sans bg-background text-foreground min-h-screen antialiased`}
       >
         <ThemeProvider>
           <CurrencyProvider>

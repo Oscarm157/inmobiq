@@ -4,7 +4,7 @@ import Link from "next/link"
 import { motion } from "motion/react"
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
 
@@ -21,144 +21,163 @@ export function Hero() {
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 75% 0%, rgba(16, 185, 129, 0.09) 0%, transparent 60%), radial-gradient(ellipse 70% 40% at 25% 10%, rgba(59, 130, 246, 0.07) 0%, transparent 65%)",
+            "radial-gradient(ellipse 55% 45% at 50% -5%, rgba(16, 185, 129, 0.10) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 8%, rgba(59, 130, 246, 0.06) 0%, transparent 65%)",
         }}
       />
-      <div className="relative max-w-[1280px] mx-auto px-5 md:px-8 pt-12 md:pt-24 pb-16 md:pb-28">
+
+      <div className="relative max-w-[1180px] mx-auto px-5 md:px-8 pt-16 md:pt-28 pb-14 md:pb-20">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center"
+          className="flex flex-col items-center text-center"
         >
-          <div>
-            <motion.div variants={fadeUp} transition={{ duration: 0.5, ease: "easeOut" }}>
-              <span className="m-badge">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--m-accent)]" />
-                Tijuana · 30 zonas activas
-              </span>
-            </motion.div>
+          <motion.div variants={fadeUp} transition={{ duration: 0.5, ease: "easeOut" }}>
+            <span className="m-badge">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--m-accent)]" />
+              Tijuana · 30 zonas · datos públicos
+            </span>
+          </motion.div>
 
-            <motion.h1
-              variants={fadeUp}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="m-display mt-6"
-            >
-              Inteligencia
-              <br />
-              inmobiliaria,
-              <br />
-              <span className="text-[var(--m-gray-2)]">por zona.</span>
-            </motion.h1>
+          <motion.h1
+            variants={fadeUp}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="m-display mt-7 max-w-[16ch]"
+          >
+            El mercado inmobiliario de Tijuana,{" "}
+            <span className="text-[var(--m-gray-3)]">por zona.</span>
+          </motion.h1>
 
-            <motion.p
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="m-body-lg mt-6 max-w-[42ch]"
-            >
-              Precios por m², tendencias, riesgo y demografía INEGI cruzados con
-              listings reales de Tijuana. Para brokers, desarrolladores e inversionistas.
-            </motion.p>
-
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="mt-8 flex flex-wrap items-center gap-2"
-            >
-              <Link href="/login?mode=register" className="m-btn-primary">
-                Crear cuenta gratis
-              </Link>
-              <Link href="/app" className="m-btn-ghost">
-                Ver el dashboard
-                <span aria-hidden>→</span>
-              </Link>
-            </motion.div>
-
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="mt-8 flex items-center gap-5 text-[12px] text-[var(--m-gray-2)]"
-              style={{ letterSpacing: "0.02em" }}
-            >
-              <span>3 valuaciones gratis al mes</span>
-              <span className="w-1 h-1 rounded-full bg-[var(--m-gray-3)]" />
-              <span>Sin tarjeta</span>
-            </motion.div>
-          </div>
+          <motion.p
+            variants={fadeUp}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="m-body-lg mt-7 max-w-[54ch]"
+          >
+            Precios por m², tendencias, riesgo y demografía del Censo INEGI en 30 zonas.
+            Información pública del mercado, ordenada para quien compra, renta, invierte o desarrolla.
+          </motion.p>
 
           <motion.div
             variants={fadeUp}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
-            className="relative w-full"
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mt-9 flex flex-wrap items-center justify-center gap-2"
           >
-            <HeroPanel />
+            <Link href="/login?mode=register" className="m-btn-primary">
+              Crear cuenta gratis
+            </Link>
+            <Link href="/app" className="m-btn-ghost">
+              Ver el dashboard
+              <span aria-hidden>→</span>
+            </Link>
           </motion.div>
+
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mt-6 flex items-center gap-4 text-[12px] text-[var(--m-gray-2)]"
+            style={{ letterSpacing: "0.02em" }}
+          >
+            <span>3 valuaciones gratis al mes</span>
+            <span className="w-1 h-1 rounded-full bg-[var(--m-gray-3)]" />
+            <span>Sin tarjeta</span>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.35 }}
+          className="mt-16 md:mt-20"
+        >
+          <HeroShowcase />
         </motion.div>
       </div>
     </section>
   )
 }
 
-function HeroPanel() {
+/* Showcase: panel abstracto minimalista con cards glass flotantes de datos reales */
+function HeroShowcase() {
   return (
-    <div className="relative aspect-[5/4] sm:aspect-[5/5] lg:aspect-[5/6] w-full max-w-[520px] mx-auto lg:mx-0 lg:ml-auto">
+    <div className="relative mx-auto max-w-[980px]">
       <div
-        className="absolute inset-0 rounded-[28px]"
+        className="relative rounded-[28px] overflow-hidden border border-[var(--m-gray-4)]"
         style={{
+          aspectRatio: "16 / 9",
           background:
-            "linear-gradient(160deg, rgba(16, 185, 129, 0.10) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 80%)",
+            "linear-gradient(150deg, rgba(16, 185, 129, 0.14) 0%, rgba(59, 130, 246, 0.10) 45%, rgba(255,255,255,0) 78%), #ffffff",
         }}
-      />
+      >
+        {/* Grid sutil */}
+        <div
+          className="absolute inset-0 opacity-[0.55]"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage: "radial-gradient(ellipse 80% 70% at 50% 45%, #000 30%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 45%, #000 30%, transparent 80%)",
+          }}
+        />
 
-      <div className="m-glass absolute top-3 inset-x-3 sm:top-6 sm:left-0 sm:right-6 lg:right-12 p-5 md:p-6">
-        <p className="m-eyebrow">Zona Centro · Venta · Residencial</p>
-        <div className="flex items-end gap-3 mt-3">
-          <p style={{ fontSize: "clamp(1.85rem, 4vw, 2.25rem)", lineHeight: "1", letterSpacing: "-0.03em" }}>
-            $34,820
-          </p>
-          <p className="text-[14px] text-[var(--m-gray-1)] pb-1">/m²</p>
-        </div>
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
-          <span className="inline-flex items-center gap-1 text-[13px] text-[var(--m-accent-ink)] font-medium">
-            <span aria-hidden>↑</span> 4.2% últimos 90 días
-          </span>
-          <span className="text-[12px] text-[var(--m-gray-2)]">vs. mediana ciudad</span>
+        {/* Formas abstractas suaves */}
+        <div
+          className="absolute -top-10 -left-10 w-64 h-64 rounded-full blur-3xl opacity-70 pointer-events-none"
+          style={{ background: "rgba(16, 185, 129, 0.22)" }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute -bottom-16 right-4 w-72 h-72 rounded-full blur-3xl opacity-60 pointer-events-none"
+          style={{ background: "rgba(59, 130, 246, 0.18)" }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46%] aspect-square rounded-full pointer-events-none"
+          style={{ border: "1px solid rgba(16,185,129,0.25)" }}
+          aria-hidden="true"
+        />
+
+        {/* Card KPI principal */}
+        <div className="m-glass absolute top-[10%] left-[6%] w-[58%] max-w-[380px] p-5 md:p-6">
+          <p className="m-eyebrow" style={{ fontSize: "10px" }}>Zona Centro · Venta · Residencial</p>
+          <div className="flex items-end gap-3 mt-3">
+            <p style={{ fontSize: "clamp(1.9rem, 4vw, 2.5rem)", lineHeight: "1", letterSpacing: "-0.03em", fontWeight: 500 }}>
+              $34,820
+            </p>
+            <p className="text-[14px] text-[var(--m-gray-1)] pb-1">/m²</p>
+          </div>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[13px] text-[var(--m-accent-ink)]" style={{ fontWeight: 500 }}>
+              <span aria-hidden>↑</span> 4.2% últimos 90 días
+            </span>
+            <span className="text-[12px] text-[var(--m-gray-2)]">vs. mediana ciudad</span>
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <Kpi label="Inventario" value="248" />
+            <Kpi label="Mediana" value="$2.8M" />
+            <Kpi label="Riesgo" value="Bajo" accent />
+          </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-3 text-[12px]">
-          <div>
-            <p className="text-[var(--m-gray-2)] uppercase tracking-wider" style={{ fontSize: "10px" }}>Inventario</p>
-            <p className="text-[var(--m-ink)] mt-1" style={{ fontSize: "15px" }}>248</p>
+        {/* Card sparkline flotante */}
+        <div className="m-glass absolute bottom-[9%] right-[6%] w-[52%] max-w-[320px] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="m-eyebrow" style={{ fontSize: "10px" }}>Precio/m² · 12 sem.</p>
+            <p className="text-[10px] text-[var(--m-gray-2)] uppercase tracking-wider">Snapshots</p>
           </div>
-          <div>
-            <p className="text-[var(--m-gray-2)] uppercase tracking-wider" style={{ fontSize: "10px" }}>Mediana</p>
-            <p className="text-[var(--m-ink)] mt-1" style={{ fontSize: "15px" }}>$2.8M</p>
-          </div>
-          <div>
-            <p className="text-[var(--m-gray-2)] uppercase tracking-wider" style={{ fontSize: "10px" }}>Riesgo</p>
-            <p className="text-[var(--m-accent-ink)] mt-1" style={{ fontSize: "15px" }}>Bajo</p>
-          </div>
+          <Sparkline />
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="m-glass absolute bottom-6 inset-x-3 sm:bottom-5 sm:left-6 sm:right-0 lg:left-12 p-5 md:p-5">
-        <div className="flex items-center justify-between mb-3">
-          <p className="m-eyebrow" style={{ fontSize: "10px" }}>Precio/m² · 12 sem.</p>
-          <p className="text-[10px] text-[var(--m-gray-2)] uppercase tracking-wider">Snapshots</p>
-        </div>
-        <Sparkline />
-      </div>
-
-      <div
-        className="absolute -bottom-2 -right-2 w-24 h-24 rounded-full opacity-70 blur-2xl pointer-events-none"
-        style={{ background: "rgba(16, 185, 129, 0.20)" }}
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -top-4 -left-4 w-32 h-32 rounded-full opacity-50 blur-3xl pointer-events-none"
-        style={{ background: "rgba(59, 130, 246, 0.18)" }}
-        aria-hidden="true"
-      />
+function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div>
+      <p className="text-[var(--m-gray-2)] uppercase tracking-wider" style={{ fontSize: "10px" }}>{label}</p>
+      <p className="mt-1" style={{ fontSize: "15px", color: accent ? "var(--m-accent-ink)" : "var(--m-ink)" }}>{value}</p>
     </div>
   )
 }

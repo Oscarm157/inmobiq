@@ -396,10 +396,13 @@
   --m-accent-2: #3b82f6;
   --m-accent-2-soft: rgba(59, 130, 246, 0.10);
   --m-shadow-nav: 0 12px 60px 0 rgba(15, 23, 42, 0.06);
+  /* Sombra invertida estilo Jeton: levanta la card desde abajo */
+  --m-shadow-lift: 0 -4px 16px 0 rgba(15, 23, 42, 0.05), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
 
   background: var(--m-canvas);
   color: var(--m-ink);
-  font-feature-settings: "ss01", "cv11";
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01";
   letter-spacing: -0.011em;
 }
 
@@ -408,26 +411,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Display tracking comprimido tipo Sunday */
+/* Display editorial gigante estilo Jeton: peso 500 incluso a tamaños enormes */
 .m-display {
-  font-weight: 400;
-  font-size: clamp(2.5rem, 6vw + 1rem, 4.5rem);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  font-weight: 500;
+  font-size: clamp(3rem, 8vw + 0.5rem, 8.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
 }
 
 .m-h2 {
-  font-weight: 400;
-  font-size: clamp(2rem, 3.5vw + 0.5rem, 3rem);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 4.5vw + 0.5rem, 4.5rem);
   line-height: 0.98;
   letter-spacing: -0.028em;
 }
 
 .m-h3 {
-  font-weight: 400;
-  font-size: 1.5rem;
-  line-height: 1.13;
-  letter-spacing: -0.018em;
+  font-weight: 500;
+  font-size: 1.625rem;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
 }
 
 .m-eyebrow {
@@ -542,6 +545,35 @@
   color: var(--m-canvas);
   border-radius: 48px 0 0 48px;
   padding: 3rem;
+}
+
+/* Card blanca elevada con sombra invertida (Jeton) */
+.m-card-lift {
+  background: var(--m-canvas);
+  border: 1px solid var(--m-gray-4);
+  border-radius: 16px;
+  box-shadow: var(--m-shadow-lift);
+}
+
+/* Category card con tinte pastel + icono grande (Jeton) */
+.m-card-cat {
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid transparent;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.m-card-cat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--m-shadow-lift);
+}
+.m-card-cat .m-cat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 14px;
+  font-size: 1.6rem;
 }
 
 .m-badge {
