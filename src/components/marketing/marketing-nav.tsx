@@ -18,7 +18,7 @@ export function MarketingNav() {
   const [hovered, setHovered] = useState<string | null>(null)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
+    const onScroll = () => setScrolled(window.scrollY > 24)
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
@@ -29,100 +29,66 @@ export function MarketingNav() {
     return () => { document.body.style.overflow = "" }
   }, [open])
 
+  // Sobre el hero (no scroll) = transparente + texto claro. Al scroll = sólida clara.
+  const solid = scrolled || open
+  const linkColor = solid ? "var(--m-gray-1)" : "rgba(255,255,255,0.82)"
+
   return (
-    <div className="sticky top-0 z-40">
-      {/* Status strip */}
-      <div
-        className="hidden md:block w-full"
+    <div className="fixed top-0 left-0 right-0 z-50">
+      <nav
+        className="transition-all duration-300"
         style={{
-          background: "linear-gradient(90deg, #0b1326 0%, #0f172a 100%)",
+          background: solid ? "rgba(255,255,255,0.86)" : "transparent",
+          backdropFilter: solid ? "blur(12px)" : "none",
+          WebkitBackdropFilter: solid ? "blur(12px)" : "none",
+          borderBottom: solid ? "1px solid var(--m-gray-4)" : "1px solid transparent",
+          boxShadow: solid ? "var(--m-shadow-nav)" : "none",
         }}
       >
-        <div className="max-w-[1280px] mx-auto px-8 h-8 flex items-center justify-between text-[11px]">
-          <div className="flex items-center gap-2.5" style={{ color: "#cbd5e1", letterSpacing: "0.04em" }}>
-            <span className="relative flex w-1.5 h-1.5">
-              <span
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{ background: "rgba(16,185,129,0.6)" }}
-              />
-              <span
-                className="relative inline-flex w-1.5 h-1.5 rounded-full"
-                style={{ background: "#10b981" }}
-              />
-            </span>
-            <span>Datos en vivo · Tijuana, B.C.</span>
-            <span style={{ color: "#475569" }}>·</span>
-            <span style={{ color: "#94a3b8" }}>30 zonas activas · actualización semanal</span>
-          </div>
-          <div className="flex items-center gap-4" style={{ color: "#94a3b8" }}>
-            <a
-              href="mailto:oscar.amayoral@gmail.com"
-              className="hover:text-white transition-colors"
-              style={{ letterSpacing: "0.02em" }}
-            >
-              Contacto
-            </a>
-            <span style={{ color: "#475569" }}>·</span>
-            <Link
-              href="/login"
-              className="hover:text-white transition-colors"
-              style={{ letterSpacing: "0.02em" }}
-            >
-              Iniciar sesión
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Main nav */}
-      <nav className="m-nav" data-scrolled={scrolled}>
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 h-16 md:h-[72px] flex items-center justify-between">
+        <div className="max-w-[1240px] mx-auto px-5 md:px-8 h-16 md:h-[76px] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Inmobiq inicio">
             <Image
               src="/logo-inmobiq.png"
               alt="Inmobiq"
               width={120}
               height={28}
-              className="h-6 md:h-7 w-auto"
+              className="h-6 md:h-7 w-auto transition-all duration-300"
+              style={{ filter: solid ? "none" : "brightness(0) invert(1)" }}
               priority
             />
             <span
-              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+              className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full transition-colors"
               style={{
-                background: "rgba(16, 185, 129, 0.08)",
-                color: "var(--m-accent-ink)",
+                background: solid ? "rgba(16, 185, 129, 0.08)" : "rgba(52,211,153,0.14)",
+                color: solid ? "var(--m-accent-ink)" : "#6ee7b7",
                 fontSize: "10px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 fontWeight: 600,
-                border: "1px solid rgba(16, 185, 129, 0.18)",
+                border: solid ? "1px solid rgba(16, 185, 129, 0.18)" : "1px solid rgba(52,211,153,0.3)",
               }}
             >
               Beta
             </span>
           </Link>
 
-          {/* Center pills */}
-          <div
-            className="hidden md:flex items-center gap-1 relative"
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="hidden md:flex items-center gap-1 relative" onMouseLeave={() => setHovered(null)}>
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onMouseEnter={() => setHovered(l.href)}
                 className="relative px-3.5 py-2 text-[14px] transition-colors z-10"
-                style={{
-                  color: hovered === l.href ? "var(--m-ink)" : "var(--m-gray-1)",
-                  letterSpacing: "-0.005em",
-                }}
+                style={{ color: hovered === l.href ? (solid ? "var(--m-ink)" : "#ffffff") : linkColor, letterSpacing: "-0.005em" }}
               >
                 {hovered === l.href && (
                   <motion.span
                     layoutId="m-nav-pill"
                     className="absolute inset-0 rounded-full -z-10"
-                    style={{ background: "var(--m-canvas-soft)", border: "1px solid var(--m-gray-4)" }}
+                    style={{
+                      background: solid ? "var(--m-canvas-soft)" : "rgba(255,255,255,0.1)",
+                      border: solid ? "1px solid var(--m-gray-4)" : "1px solid rgba(255,255,255,0.14)",
+                    }}
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
@@ -131,21 +97,17 @@ export function MarketingNav() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-3">
             <Link
-              href="/app"
+              href="/login"
               className="text-[13px] transition-colors"
-              style={{
-                color: "var(--m-gray-1)",
-                letterSpacing: "-0.005em",
-              }}
+              style={{ color: linkColor, letterSpacing: "-0.005em" }}
             >
-              Demo
+              Iniciar sesión
             </Link>
-            <span style={{ width: 1, height: 18, background: "var(--m-gray-4)" }} />
             <Link
               href="/login?mode=register"
-              className="m-btn-primary text-[13px] py-2.5 px-5"
+              className={solid ? "m-btn-primary text-[13px] py-2.5 px-5" : "m-btn-light text-[13px] py-2.5 px-5"}
             >
               Crear cuenta
               <span aria-hidden style={{ marginLeft: 2 }}>→</span>
@@ -159,8 +121,8 @@ export function MarketingNav() {
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className={`block h-px w-5 bg-[var(--m-ink)] transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} />
-            <span className={`block h-px w-5 bg-[var(--m-ink)] transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
+            <span className={`block h-px w-5 transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} style={{ background: solid ? "var(--m-ink)" : "#fff" }} />
+            <span className={`block h-px w-5 transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} style={{ background: solid ? "var(--m-ink)" : "#fff" }} />
           </button>
         </div>
 
@@ -174,22 +136,6 @@ export function MarketingNav() {
               className="md:hidden absolute left-0 right-0 top-16 bg-[var(--m-canvas)] border-b border-[var(--m-gray-4)]"
             >
               <div className="px-5 py-4 flex flex-col gap-1">
-                <div
-                  className="flex items-center gap-2 px-1 py-2 mb-2 text-[11px]"
-                  style={{ color: "var(--m-gray-1)", letterSpacing: "0.04em" }}
-                >
-                  <span className="relative flex w-1.5 h-1.5">
-                    <span
-                      className="absolute inset-0 rounded-full animate-ping"
-                      style={{ background: "rgba(16,185,129,0.6)" }}
-                    />
-                    <span
-                      className="relative inline-flex w-1.5 h-1.5 rounded-full"
-                      style={{ background: "#10b981" }}
-                    />
-                  </span>
-                  Datos en vivo · 30 zonas en Tijuana
-                </div>
                 {links.map((l) => (
                   <a
                     key={l.href}
